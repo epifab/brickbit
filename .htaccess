@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteRule ^content/([a-zA-Z_0-9]+).html$ content.php?url=$1
+RewriteRule ^content/image/([1-4])/([a-zA-Z_0-9]+).[a-zA-Z_0-9]+$ image.php?url=$2&n=$1
+RewriteRule ^content/download/([a-zA-Z_0-9]+).[a-zA-Z_0-9]+$ download.php?url=$1
+RewriteRule ^content/audio/([1-4])/([a-zA-Z_0-9]+).[a-zA-Z_0-9]+$ audio.php?url=$1
+RewriteRule ^content/video/([1-4])/([a-zA-Z_0-9]+).[a-zA-Z_0-9]+$ video.php?url=$1
+RewriteRule ^[a-zA-Z_0-9]*\.html$ xmca.php
+RewriteRule ^img/(.+)$ theme/standard/img/$1
+RewriteRule ^css/(.+)$ theme/standard/css/$1
+ErrorDocument 404 /404.php
