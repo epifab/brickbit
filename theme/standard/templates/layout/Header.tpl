@@ -16,7 +16,7 @@
 	<div id="header_sidebar_langs">
 		<{foreach $private.languages as $lang}>
 			<{if $lang != $private.language}>
-			<a class="lang" href="<{$private.self}>?lang=<{$lang}>"><img src="<{$private.siteAddr}>img/lang/40/<{$lang}>.jpg"/></a>
+			<a class="lang" href="Home.html?lang=<{$lang}>"><img src="<{$private.siteAddr}>img/lang/40/<{$lang}>.jpg"/></a>
 			<{/if}>
 		<{/foreach}>
 	</div>

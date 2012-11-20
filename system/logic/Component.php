@@ -188,7 +188,7 @@ abstract class Component {
 	}
 	
 	///<editor-fold defaultstate="collapsed" desc="Metodi standard per inizializzazione di clausole">
-	protected function loadStdFilters(RecordsetBuilderInterface $builder, $prefix="") {
+	protected function loadStdFilters(\system\model\RecordsetBuilderInterface $builder, $prefix="") {
 		$index = $prefix . "filters";
 		
 		$lastLop = null;
@@ -244,7 +244,7 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdSorts(RecordsetBuilderInterface $builder, $prefix="") {
+	protected function loadStdSorts(\system\model\RecordsetBuilderInterface $builder, $prefix="") {
 		$index = $prefix . "sorts";
 
 		$sorts = null;
@@ -275,7 +275,7 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdLimits(RecordsetBuilderInterface $builder, $pageSize=100, $prefix="") {
+	protected function loadStdLimits(\system\model\RecordsetBuilderInterface $builder, $pageSize=100, $prefix="") {
 		$index = $prefix . "paging";
 		
 		if (!\array_key_exists($index, $this->request) || !\is_array($this->request[$index])) {

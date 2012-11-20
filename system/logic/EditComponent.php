@@ -141,9 +141,9 @@ abstract class EditComponent extends Component {
 		$newFilter = null;
 		foreach ($key as $metaType) {
 			$fieldValue = $recordset->getEdit($metaType->getName());
-			$filterClause = new FilterClause($metaType, "=", $fieldValue);
+			$filterClause = new \system\model\FilterClause($metaType, "=", $fieldValue);
 			if (is_null($newFilter)) {
-				$newFilter = new FilterClauseGroup($filterClause);
+				$newFilter = new \system\model\FilterClauseGroup($filterClause);
 			} else {
 				$newFilter->addClauses("AND", $filterClause);
 			}
@@ -154,7 +154,7 @@ abstract class EditComponent extends Component {
 			$primary = $builder->getPrimaryKey();
 			foreach ($primary as $metaType) {
 				$fieldValue = $recordset->getEdit($metaType->getName());
-				$filterClaue = new FilterClause($metaType, "<>", $fieldValue);
+				$filterClaue = new \system\model\FilterClause($metaType, "<>", $fieldValue);
 				$newFilter->addClauses("AND", $filterClaue);
 			}
 		}
@@ -205,9 +205,9 @@ abstract class EditComponent extends Component {
 				}
 
 				$metaType = $relationBuilder->searchMetaType($childFieldName);
-				$filterClause = new FilterClause($metaType, "=", $fieldValue);
+				$filterClause = new \system\model\FilterClause($metaType, "=", $fieldValue);
 				if (\is_null($newFilter)) {
-					$newFilter = new FilterClauseGroup($filterClause);
+					$newFilter = new \system\model\FilterClauseGroup($filterClause);
 				} else {
 					$newFilter->addClauses("AND", $filterClause);
 				}

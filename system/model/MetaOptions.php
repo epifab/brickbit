@@ -3,7 +3,24 @@ namespace system\model;
 
 class MetaOptions extends MetaType {
 	private $options = array();
-	private $keyMetaType = '\system\model\MetaString';
+	private $keyMetaType;
+	
+	public function __construct($name, $builder, $baseMetaType='String') {
+		parent::__construct($name, $builder);
+		switch ($baseMetaType) {
+			case "Date":
+			case "DateTime":
+			case "Integer":
+			case "Real":
+			case "String":
+			case "Time":
+				$this->keyMetaType = __NAMESPACE__ . '\Meta' . $baseMetaType;
+				break;
+			default:
+				$this->keyMetaType = __NAMESPACE__ . '\MetaString';
+				break;
+		}
+	}
 	
 	protected function _stdDb2Prog($x) {
 		return \call_user_func(array($this->keyMetaType, "stdDb2Prog"), $x);

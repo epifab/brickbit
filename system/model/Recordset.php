@@ -216,7 +216,7 @@ class Recordset implements RecordsetInterface {
 	public function create($readMode=null, $editMode=null, $groupId=null) {
 		if ($this->builder->isRecordModed()) {
 
-			$ownerId = Login::getLoggedUserId();
+			$ownerId = \system\Login::getLoggedUserId();
 			
 			if (\is_null($readMode)) {
 				$readMode = XmcaRecordMode::MODE_ANYONE;
@@ -494,7 +494,7 @@ class Recordset implements RecordsetInterface {
 	}
 	
 	private function updateRecordMode($readMode, $editMode, $groupId) {
-		$userId = Login::getLoggedUserId();
+		$userId = \system\Login::getLoggedUserId();
 
 		$recordMode = $this->getRecordMode();
 		

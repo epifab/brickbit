@@ -1,0 +1,23 @@
+Version 1.0-alpha0
+
+TODO
+system
+- Analise and eventually re-design the languages system
+- Integration with languages system
+- Analise and re-disign template plugins
+- Re-disign the RecordsetBuilder class
+ - Allow model classes extension through modules
+ - Get access to all the propertes defined in each model class (using import(*) ecc.)
+ - Allow has one relation class lazy loading       --> treat has one and has many relations in the same way
+ - Allow has many relation class "instant loading" --> treat has one and has many relations in the same way
+ - Decide if to keep or not the "onDelete" and "onUpdate" features on the model layer (relations) 
+    and eventually complete their development (onDelete feature is already working)
+- Define the component loading life - define standard events
+
+module/core
+- Adapt the module to the system changes
+- Admininstration menu
+- Components for managing users
+- Sorting out templates
+- Integration with languages system
+- Redisign contents structure introducing content types instead of content style
