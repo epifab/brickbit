@@ -16,26 +16,26 @@ CONTROLLER
 	- Use configuration files for modules definitions **
 	- Module dependencies
 	- Module informations (description, version, priority)
-	- Design the events that the system should raise including 
+	- Design the events the system should raise, including
 		module events:
 			- utilities
-				install(),
-				uninstall(),
+				install()
+				uninstall()
 			- model events
-				[static] onCreateRecord(Recordset $recordset),
-				[static] onReadRecord(Recordset $recordset),
-				[static] onUpdateRecord(Recordset $recordset),
-				[static] onDeleteRecord(Recordset $recordset),
+				[static] onCreateRecord(Recordset $recordset)
+				[static] onReadRecord(Recordset $recordset)
+				[static] onUpdateRecord(Recordset $recordset)
+				[static] onDeleteRecord(Recordset $recordset)
 			- mode
 				[static] chron()
 				[static] onLoad()
-				[static] _[custom event]()
+				[static] _[custom event]()  (@see \system\controller\Module::raise($event, $args))
 			* when a (static) module event is raised, the static methods implemented 
 				in each module class extension will be called sequentially
 			* the order of the calls should be established by a module attribute (priority)
 		controller events:
-			onAccess(),
-			onProcess(),
+			onAccess()
+			onProcess()
 
 VIEW, CONTROLLER
 	- Analise and re-disign the system API
