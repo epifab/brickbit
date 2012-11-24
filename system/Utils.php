@@ -5,22 +5,23 @@ class Utils {
 	private static $javascript = "";
 	
 	public static function get($name, $default=null) {
-		if (file_exists("temp/php_vars/" . $name . ".var")) {
-			$fp = fopen("temp/php_vars/" . $name . ".var", "r");
+		if (file_exists("config/vars/" . $name . ".var")) {
+			$fp = fopen("config/vars/" . $name . ".var", "r");
 			$content = "";
 			while ($s = fread($fp, 4096)) {
 				$content .= $s;
 			}
 			fclose($fp);
 			return unserialize($content);
+		} else {
+			return $default;
 		}
-		return $default;
 	}
 
 	public static function set($name, $value) {
 		$content = serialize($value);
 
-		$fp = fopen("temp/php_vars/" . $name . ".var", "w");
+		$fp = fopen("config/vars/" . $name . ".var", "w");
 		fwrite($fp, $content);
 		fclose($fp);
 	}

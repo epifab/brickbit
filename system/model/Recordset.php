@@ -214,6 +214,9 @@ class Recordset implements RecordsetInterface {
 	 * @param int $groupId Id del gruppo
 	 */
 	public function create($readMode=null, $editMode=null, $groupId=null) {
+		
+		\system\logic\Module::raise("onCreate", $this);
+		
 		if ($this->builder->isRecordModed()) {
 
 			$ownerId = \system\Login::getLoggedUserId();
@@ -270,6 +273,8 @@ class Recordset implements RecordsetInterface {
 	 */
 	public function update($readMode=null, $editMode=null, $groupId=null) {
 		$q1 = "";
+		
+		\system\logic\Module::raise("onUpdate", $this);
 
 		if (!$this->isStored()) {
 			throw new \system\InternalErrorException("Recordset non presente nel DB");
@@ -373,6 +378,8 @@ class Recordset implements RecordsetInterface {
 		if (!$this->isStored()) {
 			return;
 		}
+		
+		\system\logic\Module::raise("onDelete", $this);
 		
 		$recordMode = $this->getRecordMode();
 		// Controllo i permessi dell'utente per l'eliminazione del record

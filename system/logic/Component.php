@@ -3,6 +3,10 @@ namespace system\logic;
 use system;
 
 abstract class Component {
+	// active components stack
+	private static $activeComponents = array();
+	private static $activeComponentsCount = 0;
+	
 	protected $nested = false;
 	
 	protected $request = null;
@@ -37,6 +41,27 @@ abstract class Component {
 	 * @var mixed[]
 	 */
 	protected $datamodel = array();
+
+	
+	public static function getActiveComponents() {
+		return self::$activeComponents;
+	}
+	
+	public static function getMainActiveComponent() {
+		return (self::$activeComponentsCount > 0) ? self::$activeComponents[0] : null;
+	}
+	
+	public static function getCurrentActiveComponent() {
+		return (self::$activeComponentsCount > 0) ? self::$activeComponents[self::$activeComponentsCount] : null;
+	}
+	
+	private static function pushActiveComponent(Component $component) {
+		self::$activeComponents[self::$activeComponentsCount++] = $component;
+	}
+	
+	private static function popActiveComponent() {
+		return (self::$activeComponentsCount > 0) ? self::$activeComponents[--self::$activeComponentsCount] : null;
+	}
 
 	public static function checkPermission($args) {
 		return true;
@@ -308,57 +333,51 @@ abstract class Component {
 	}
 	///</editor-fold>
 
-	private function processSteps() {
-		// Controllo i permessi per il componente
-//		if (!self::checkComponentPermission($this->getName())) {
-//			throw new AuthorizationException("Utente non autorizzato");
-//		}
-		if (!\call_user_func(array(\get_class($this), "checkPermission"), $_REQUEST)) {
-			throw new AuthorizationException("Utente non autorizzato");
-		}
-		
-		$this->tplManager->setOutlineTemplate($this->getOutline());
-
-		// Lancio l'evento onProcess
-		$responseType = $this->onProcess();
-		
-		switch ($responseType) {
-			case Component::RESPONSE_TYPE_READ:
-			case Component::RESPONSE_TYPE_NOTIFY:
-			case Component::RESPONSE_TYPE_FORM:
-			case Component::RESPONSE_TYPE_ERROR:
-				$this->datamodel["private"]["responseType"] = $responseType;
-				break;
-			case null:
-				break;
-			default:
-				throw new InternalErrorException("Metodo onProcess non valido per il componente " . $this->getName());
-		}
-
-		$this->tplManager->setMainTemplate($this->getTemplate());
-		
-		if (!\is_null($responseType)) {
-			// Processo il template
-			$this->tplManager->process($this->datamodel);
-		}
-	}
-	
 	final public function process() {
+		
+		self::pushActiveComponent($this);
+		
 		$pageOutput = "";
 
 		$mtime_start = \microtime(true);
 			
-//		\ob_start();
+		\ob_start();
 			
 		try {
-			
-			if ($this->nested) {
-				$this->processSteps();
-			} else {
-				$this->processSteps();
-//				$pageOutput = \ob_get_flush();
+
+			// COMPONENT EVENT onAccess
+			if (!\call_user_func(array(\get_class($this), "checkPermission"), $_REQUEST)) {
+				throw new AuthorizationException("Utente non autorizzato");
 			}
-			
+
+			$this->tplManager->setOutlineTemplate($this->getOutline());
+
+			// Lancio l'evento onProcess
+			$responseType = $this->onProcess();
+
+			switch ($responseType) {
+				case Component::RESPONSE_TYPE_READ:
+				case Component::RESPONSE_TYPE_NOTIFY:
+				case Component::RESPONSE_TYPE_FORM:
+				case Component::RESPONSE_TYPE_ERROR:
+					$this->datamodel["private"]["responseType"] = $responseType;
+					break;
+				case null:
+					break;
+				default:
+					throw new InternalErrorException("Metodo onProcess non valido per il componente " . $this->getName());
+			}
+
+			$this->tplManager->setMainTemplate($this->getTemplate());
+
+			if (!\is_null($responseType)) {
+				// Processo il template
+				$this->tplManager->process($this->datamodel);
+			}
+
+			if (!$this->nested) {
+				$pageOutput = \ob_get_flush();
+			}
 		}
 		
 		catch (\Exception $ex) {
@@ -367,9 +386,9 @@ abstract class Component {
 			$mtime_end = \microtime(true);
 
 
-//			while (\ob_get_clean());
+			while (\ob_get_clean());
 
-//			\ob_start();
+			\ob_start();
 
 			$this->datamodel["private"]["responseType"] = Component::RESPONSE_TYPE_ERROR;
 			\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $ex,	\round($mtime_end - $mtime_start, 3));
@@ -391,6 +410,8 @@ abstract class Component {
 				// Eccezione non gestita
 			}
 		}
+		
+		self::popActiveComponent();
 	}
 }
 ?>

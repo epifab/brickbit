@@ -27,7 +27,7 @@ CONTROLLER
 				[static] onUpdateRecord(Recordset $recordset)
 				[static] onDeleteRecord(Recordset $recordset)
 			- mode
-				[static] chron()
+				[static] chron($chronName)
 				[static] onLoad()
 				[static] _[custom event]()  (@see \system\controller\Module::raise($event, $args))
 			* when a (static) module event is raised, the static methods implemented 

@@ -8,13 +8,13 @@ function smarty_block_xmca_restricted_area($args, $content, &$smarty, $repeat) {
 	}
 	
 	if (!$repeat) {
-		$component = \system\logic\Module::getComponent($args["component"]);
-		if (!is_null($component)) {
+		$componentClass = \system\logic\Module::getComponent($args["component"]);
+		if (!is_null($componentClass)) {
 			$auth = true;
 			// Autorizzazione generica componenti
 //			$auth = $auth && \system\logic\Component::checkComponentPermission($module, $args["component"]);
 			// Autorizzazione specifica componente
-			$auth = $auth && call_user_func(array($component["namespace"] . $component["class"], "checkPermission"), $args["args"]);
+			$auth = $auth && call_user_func(array($componentClass, "checkPermission"), $args["args"]);
 
 			return $auth ? $content : '';
 		}

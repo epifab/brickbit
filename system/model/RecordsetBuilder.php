@@ -1,6 +1,5 @@
 <?php
 namespace system\model;
-use config\Config;
 
 abstract class RecordsetBuilder implements RecordsetBuilderInterface {
 	const OPT_USE_KEYS_NONE = 0;
@@ -301,12 +300,14 @@ abstract class RecordsetBuilder implements RecordsetBuilderInterface {
 	 * @return RecordsetInterface
 	 */
 	public function newRecordset($data=null) {
+		$rs = null;
 		if (empty($this->recordsetClass)) {
-			return new Recordset($this, $data);
+			$rs = new Recordset($this, $data);
 		} else {
 			$func = $this->recordsetClass;
-			return new $func($this, $data);
+			$rs =  new $func($this, $data);
 		}
+		\system\logic\Module::raise("onRead", $rs);
 	}
 
 	/**

@@ -1,0 +1,11 @@
+name: core
+class: Core
+priority: 1
+enabled: 1
+componentsNs: controller
+customEvents:
+  - myEvent1
+  - myEvent2
+dependencies:
+  - module1
+  - module2
