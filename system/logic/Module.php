@@ -187,11 +187,12 @@ abstract class Module {
 	
 	public static function run($componentName, $request=null, $prefix="") {
 		$componentClass = self::getComponent($componentName);
-		if (\is_null($componentName)) {
+		if (\is_null($componentClass)) {
 			return false;
 		}
 		$component = new $componentClass($request, $prefix);
 		$component->process();
+		return true;
 	}
 }
 ?>

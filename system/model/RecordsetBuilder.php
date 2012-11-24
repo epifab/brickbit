@@ -308,6 +308,7 @@ abstract class RecordsetBuilder implements RecordsetBuilderInterface {
 			$rs =  new $func($this, $data);
 		}
 		\system\logic\Module::raise("onRead", $rs);
+		return $rs;
 	}
 
 	/**

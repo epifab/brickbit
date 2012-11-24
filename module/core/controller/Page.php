@@ -2,8 +2,6 @@
 namespace module\core\controller;
 
 use system\logic\Component;
-use system\logic\EditComponent;
-use system\InternalErrorException;
 
 class Page extends \system\logic\Component {
 	private static $pages;

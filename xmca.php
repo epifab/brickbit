@@ -15,17 +15,11 @@ else {
 		list(,$componentName,$ext) = $m;
 
 		if ($ext == \config\settings()->COMPONENT_EXTENSION) {
-			\system\logic\Module::run($componentName);
-			
-//			$component = \system\logic\Module::getComponent($name);
-//			if (\system\logic\Module::$component) {
-//				\system\logic\Module::run($name);
-//			} else {
-//				$_REQUEST["url"] = $name;
-//				\system\logic\Module::run("Page");
-//			}
+			if (!\system\logic\Module::run($componentName)) {
+				$_REQUEST["url"] = $componentName;
+				\system\logic\Module::run("Page");
+			}
 		}
 	}
-//	require "404.php";
 }
 ?>
