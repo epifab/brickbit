@@ -1,6 +1,38 @@
 Version 1.0 alpha
 
 
+DONE
+
+
+	CONTROLLER
+		- Use configuration files for modules definitions **
+		- Module dependencies
+		- Module informations (description, version, priority)
+		- Design the events the system should raise, including
+			module events:
+				- utilities
+					install() (unraised)
+					uninstall() (unraised)
+				- model events (raised by \system\model\Recordset)
+					[static] onCreateRecord(Recordset $recordset)
+					[static] onReadRecord(Recordset $recordset)
+					[static] onUpdateRecord(Recordset $recordset)
+					[static] onDeleteRecord(Recordset $recordset)
+				- logic
+					[static] chron($chronName)
+					[static] onLoad() (raised by \system\logic\Component)
+					[static] [custom event]()  (@see \system\controller\Module::raise($event, [arg1, ...))
+				
+				* when a (static) module event is raised, the static methods implemented 
+					in each module class extension will be called sequentially
+				* the order of the calls should be established by a module attribute (priority)
+
+			component events:
+				onProcess()
+
+
+
+
 TODO LIST
 
 
@@ -11,31 +43,6 @@ system
 --- PHASE 1
 
 
-
-CONTROLLER
-	- Use configuration files for modules definitions **
-	- Module dependencies
-	- Module informations (description, version, priority)
-	- Design the events the system should raise, including
-		module events:
-			- utilities
-				install()
-				uninstall()
-			- model events
-				[static] onCreateRecord(Recordset $recordset)
-				[static] onReadRecord(Recordset $recordset)
-				[static] onUpdateRecord(Recordset $recordset)
-				[static] onDeleteRecord(Recordset $recordset)
-			- mode
-				[static] chron($chronName)
-				[static] onLoad()
-				[static] _[custom event]()  (@see \system\controller\Module::raise($event, $args))
-			* when a (static) module event is raised, the static methods implemented 
-				in each module class extension will be called sequentially
-			* the order of the calls should be established by a module attribute (priority)
-		controller events:
-			onAccess()
-			onProcess()
 
 VIEW, CONTROLLER
 	- Analise and re-disign the system API
