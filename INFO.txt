@@ -1,23 +1,83 @@
-Version 1.0-alpha0
+Version 1.0 alpha
 
-TODO
+
+TODO LIST
+
+
 system
-- Analise and eventually re-design the languages system
-- Integration with languages system
-- Analise and re-disign template plugins
-- Re-disign the RecordsetBuilder class
- - Allow model classes extension through modules
- - Get access to all the propertes defined in each model class (using import(*) ecc.)
- - Allow has one relation class lazy loading       --> treat has one and has many relations in the same way
- - Allow has many relation class "instant loading" --> treat has one and has many relations in the same way
- - Decide if to keep or not the "onDelete" and "onUpdate" features on the model layer (relations) 
-    and eventually complete their development (onDelete feature is already working)
-- Define the component loading life - define standard events
+
+
+
+--- PHASE 1
+
+
+
+CONTROLLER
+	- Use configuration files for modules definitions **
+	- Module dependencies
+	- Module informations (description, version, priority)
+	- Design the events that the system should raise including 
+		module events:
+			- utilities
+				install(),
+				uninstall(),
+			- model events
+				[static] onCreateRecord(Recordset $recordset),
+				[static] onReadRecord(Recordset $recordset),
+				[static] onUpdateRecord(Recordset $recordset),
+				[static] onDeleteRecord(Recordset $recordset),
+			- mode
+				[static] chron()
+				[static] onLoad()
+				[static] _[custom event]()
+			* when a (static) module event is raised, the static methods implemented 
+				in each module class extension will be called sequentially
+			* the order of the calls should be established by a module attribute (priority)
+		controller events:
+			onAccess(),
+			onProcess(),
+
+VIEW, CONTROLLER
+	- Analise and re-disign the system API
+	- Re-design template plugins (tpl_plugins folder)
+
+MODEL
+	RecordsetBuilder class
+		- Allow model classes extension?
+		- Get access to all the fields, keys, relations defined on each model class (using import(*) ecc.)
+		- Allow has one relation class lazy loading       --> treat has one and has many relations in the same way
+		- Allow has many relation class "instant loading" --> treat has one and has many relations in the same way
+		- Decide if to keep or not the "onDelete" and "onUpdate" features on the model layer (relations) 
+			and eventually complete their development (onDelete feature is already working)
+		- Analise and eventually re-design the languages system
+		- Integration with languages system
+
+VIEW
+	- Allow theme templates extension using configuration files **
+
+
+** the better solution would be to use .yaml files
+		- pros: user friendly, standard
+		- cons: to find a parser
+
+
+
+
+--- PHASE 2
+
+
+
+
+Develop the Core module
 
 module/core
-- Adapt the module to the system changes
-- Admininstration menu
-- Components for managing users
-- Sorting out templates
-- Integration with languages system
-- Redisign contents structure introducing content types instead of content style
+	- Adapt the module to the system changes
+	- Admininstration menu
+	- Components for managing users
+	- Sorting out templates
+	- Integration with languages system
+	- Redisign contents structure introducing content types instead of content styles
+
+more
+- Name of the system?
+- Design the prototype website
