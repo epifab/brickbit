@@ -1,0 +1,255 @@
+module:
+  fields:
+    name:
+      type: MetaString
+      size: 32
+    enabled:
+      type: MetaBoolean
+  keys:
+    primary:
+      fields: [name]
+  relations:
+    components:
+      table: component
+      type: 1-N
+      clauses: [name: module_name]
+    actions:
+      table: action
+      type: 1-N
+      clauses: [name: module_name]
+component:
+  fields:
+    module_name:
+      type: MetaString
+      size: 32
+    name:
+      type: MetaString
+      size: 32
+  keys:
+    primary:
+      fields: [module_name, name]
+  relations:
+    module:
+      table: module
+      type: N-1
+      clauses: [module_name: name]
+    actions:
+      table: action
+      type: 1-N
+      clauses: [module_name: module_name, name: component_name]
+action:
+  fields:
+    module_name:
+      type: MetaString
+      size: 32
+    component_name:
+      type: MetaString
+      size: 32
+    name:
+      type: MetaString
+      size: 32
+    url:
+      type: MetaString
+      size: 64
+  keys:
+    primary:
+      fields[module_name, component_name, name]
+  relations:
+    module:
+      table: module
+      type: N-1
+      clauses: [module_name: name]
+    component:
+      table: component
+      type: N-1
+      clauses: [module_name: module_name, component_name: name]
+user:
+  fields:
+    id:
+      type: MetaInteger
+    email:
+      type: MetaString
+      size: 128
+    password:
+      type: MetaString
+      size: 32
+      edit2Prog: |
+        function($x) {
+          return \md5($x);
+        }
+    full_name:
+      type: MetaString
+      size: 128
+    last_login:
+      type: MetaDateTime
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    roles:
+      table: user_role
+      type: 1-N
+      clauses: [id: user_id]
+role:
+  fields:
+    id:
+      type: MetaInteger
+    description:
+      type: MetaString
+      size: 128
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    users:
+      table: user_role
+      type: 1-N
+      clauses: [id: user_id]
+user_role:
+  fields:
+    user_id:
+      type: MetaInteger
+    role_id:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [user_id, role_id]
+  relations:
+    user:
+      table: user
+      type: N-1
+      clauses: [user_id: id]
+    role:
+      table: role
+      type: N-1
+      clauses: [role_id: id]
+role_action:
+  fields:
+    role_id:
+      type: MetaInteger
+    module_name:
+      type: MetaString
+      size: 32
+    component_name:
+      type: MetaString
+      size: 32
+    action_name:
+      type: MetaString
+      size: 32
+  relations:
+    role:
+      table: role
+      type: N-1
+      clauses: [role_id: id]
+    action:
+      table: action
+      type: N-1
+      clauses: [module_name: module_name, component_name: component_name, action_name: name]
+record_mode:
+  fields:
+    id:
+      type: MetaInteger
+    owner_id:
+      type: MetaInteger
+    role_id:
+      type: MetaInteger
+    last_modifier_id:
+      type: MetaInteger
+    ins_date_time:
+      type: MetaDateTime
+    last_upd_date_time:
+      type: MetaDateTime
+    read_mode:
+      type: MetaOptions
+      options:
+        0: Nobody
+        1: Superuser only
+        2: Superuser and owner only
+        3: Superuser, owner and roles only
+        4: Anyone
+    edit_mode:
+      type: MetaOptions
+      options:
+        0: Nobody
+        1: Superuser only
+        2: Superuser and owner only
+        3: Superuser, owner and role only
+        4: Anyone
+    delete_mode:
+      type: MetaOptions
+      options:
+        0: Nobody
+        1: Superuser only
+        2: Superuser and owner only
+        3: Superuser, owner and role only
+        4: Anyone
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    logs:
+      table: record_mode_log
+      type: 1-N
+      clauses: [id: record_mode_id]
+    user:
+      table: user
+      type: N-1
+      clauses: [user_id: id]
+    role:
+      table: role
+      type: N-1
+      clauses: [role_id: id]
+record_mode_log:
+  fields:
+    id:
+      type: MetaInteger
+    record_mode_id:
+      type: MetaInteger
+    user_id:
+      type: MetaInteger
+    upd_date_time:
+      type: MetaDateTime
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    record_mode:
+      table: record_mode
+      type: N-1
+      clauses: [record_mode_id: id]
+log:
+  fields:
+    id:
+      type: MetaInteger
+    module:
+      type: MetaString
+      size: 32
+    component:
+      type: MetaString
+      size: 32
+    action:
+      type: MetaString
+      size: 32
+    url:
+      type: MetaString
+      size: 64
+    date_time_request:
+      type: MetaDateTime
+    user_id:
+      type: MetaInteger
+    ip_address:
+      type: MetaString
+      size: 16
+    body:
+      type: MetaString
+    output:
+      type: MetaString
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:

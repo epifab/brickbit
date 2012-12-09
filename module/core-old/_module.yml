@@ -1,0 +1,42 @@
+name: core
+class: Core
+weight: 1
+enabled: 1
+componentsNs: controller
+customEvents:
+  - myEvent1
+  - myEvent2
+dependencies:
+  - module1
+  - module2
+components:
+  - class: Page
+    pages:
+      - url: (@strid)/header
+        action: header
+      - url: (@strid)/footer
+        action: footer
+      - url: page/search
+        action: search
+      - url: (@strid).html
+        action: read
+      - url: page/add
+        action: add
+      - url: page/edit/(@strid)
+        action: edit
+      - url: page/delete/(@strid)
+        action: delete
+  - class: ContentMedia
+    pages:
+      - url: media/@strid
+        action: read
+  - class: Content
+    pages:
+      - url: content/(@strid)\.html
+        action: read
+      - url: content/edit/(@strid)
+        action: edit
+      - url: content/add
+        action: add
+      - url: content/delete/(@strid)
+        action: delete

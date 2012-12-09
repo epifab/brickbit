@@ -38,6 +38,8 @@ class Config {
 		"DB_HOST" => "",
 		"DB_NAME" => "",
 		"DB_TYPE" => "",
+		 
+		"RECORD_MODE_LOGS" => true,
 
 		// languages
 		"LANGUAGES" => array(
@@ -45,10 +47,13 @@ class Config {
 			"it",
 		),
 		"DEFAULT_LANG" => "en",
-		"CURRENT_LANG" => "en",
 		
-		"COMPONENT_EXTENSION" => "html",
-		
+		"THEMES" => array(
+			"classic",
+			"dark"	
+		),
+		"DEFAULT_THEME" => "dark",
+		 
 		// links
 		"DOMAIN" => "",
 		"BASE_DIR" => "",
@@ -57,6 +62,8 @@ class Config {
 		
 		"SITE_TITLE" => "Episoft.it",
 		"SITE_SUBTITLE" => "ETU CMS, the easiest to use",
+		 
+		"DEFAULT_PAGE_TITLE" => "Episoft",
 		
 		"EMAIL_INFO" => "",
 		"EMAIL_WEBMASTER" => "",
@@ -68,8 +75,6 @@ class Config {
 		"TPL_CACHE_DIR" => "temp/tpl_cache",
 		
 		"URLALIAS_CACHE" => true,
-		
-		"DEFAULT_THEME" => "standard",
 	);
 
 	private $dataTest = array(
@@ -79,8 +84,8 @@ class Config {
 		"DB_NAME" => "xmca",
 		"DB_TYPE" => Config::DBMS_MYSQL,
 		 
-		"DOMAIN" => "http://localhost/",
-		"BASE_DIR" => "episoft.it/",
+		"DOMAIN" => "http://localhost",
+		"BASE_DIR" => "/episoft.it/",
 		
 		"SITE_TITLE" => "Episoft.it | DEV",
 		 
@@ -137,6 +142,7 @@ class Config {
 		}
 	}
 	
+	
 	// caricamento automatico di classi del framework xmca
 	public static function autoload($name) {
 		$path = \str_replace('\\', DIRECTORY_SEPARATOR, $name);
@@ -161,6 +167,6 @@ class Config {
 	}
 }
 
-spl_autoload_register(__NAMESPACE__ . '\Config::autoload');
+\spl_autoload_register('\config\Config::autoload');
 
 ?>

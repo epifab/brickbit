@@ -45,7 +45,7 @@ $(document).ready(function() {
 		<td class="input">
 			<div class="xmca_languages_input">
 				<{foreach $private.languages as $lang}>
-				<a href="javascript:EditPageLang('<{$lang}>')" id="lang_control_<{$lang}>" class="lang_control"><img src="img/lang/40/<{$lang}>.jpg"/></a>
+				<a href="javascript:EditPageLang('<{$lang}>')" id="lang_control_<{$lang}>" class="lang_control"><img src="<{theme}>img/lang/40/<{$lang}>.jpg"/></a>
 				<{/foreach}>
 			</div>
 		</td>

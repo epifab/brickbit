@@ -4,10 +4,6 @@ namespace system;
 require "smarty/Smarty.class.php";
 
 class TemplateManager extends \Smarty {
-//	private static $instance;
-	
-	private $theme;
-	
 	private $mainTemplate;
 	private $outlineTemplate;
 	
@@ -27,13 +23,6 @@ class TemplateManager extends \Smarty {
 		$this->mainTemplate = empty($tpl) ? null : \system\File::stripExtension($tpl) . ".tpl";
 	}
 	
-//	public static function getInstance() {
-//		if (\is_null(self::$instance)) {
-//			self::$instance = new self();
-//		}
-//		return self::$instance;
-//	}
-	
 	public function __construct() {
 		parent::__construct();
 		$this->addPluginsDir(array(
@@ -41,21 +30,6 @@ class TemplateManager extends \Smarty {
 			"tpl_plugins"
 		));
 		$this->setCompileDir(\config\settings()->TPL_CACHE_DIR);
-	}
-	
-	public function getTheme() {
-		if (empty($theme)) {
-			return \config\settings()->DEFAULT_THEME;
-		}
-		return $this->theme;
-	}
-	
-	public function setTheme($theme) {
-		$this->theme = $theme;
-	}
-	
-	public function getThemePath($subfolder=null) {
-		return "theme/" . $this->getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
 	}
 	
 	public function process($datamodel) {

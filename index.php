@@ -1,10 +1,5 @@
 <?php
-namespace xmca;
-
 require_once "config/Config.php";
 
-//$componentClassName = "xmca\\controller\\" . \config\settings()->SITE_ADDRESS;
-$_REQUEST["url"] = "Home";
-$controller = new \module\core\controller\Page();
-$controller->process();
+\system\logic\Module::run($_SERVER["REQUEST_URI"]);
 ?>

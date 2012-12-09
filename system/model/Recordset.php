@@ -1,11 +1,9 @@
 <?php
 namespace system\model;
 
-use module\core\model\XmcaRecordMode;
-
 class Recordset implements RecordsetInterface {
 	/**
-	 * @var RecordsetBuilderInterface
+	 * @var RecordsetBuilder
 	 */
 	private $builder;
 	private $fields = array();
@@ -15,7 +13,7 @@ class Recordset implements RecordsetInterface {
 	// flag indicante la presenza del record nel DB
 	private $stored = false;
 	
-	public function __construct(RecordsetBuilderInterface $builder, $data=null) {
+	public function __construct(RecordsetBuilder $builder, $data=null) {
 
 		$this->builder = $builder;
 
@@ -147,7 +145,7 @@ class Recordset implements RecordsetInterface {
 			}
 			$this->fields[$name] = $value;
 		} else {
-			throw new \system\InternalErrorException("Campo o relazione $name non importato nel recordset (" . $this->getBuilder()->getAbsolutePath() . ":" . $this->getBuilder()->getTableName() . ")");
+			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> does not exist or is not used.', array('@name' => $name)));
 		}
 	}
 	
@@ -157,7 +155,11 @@ class Recordset implements RecordsetInterface {
 		} else if (\array_key_exists($name, $this->fields)) {
 			return $this->fields[$name];
 		} else {
-			throw new \system\InternalErrorException("Campo o relazione $name non importato nel recordset (" . $this->getBuilder()->getAbsolutePath() . ":" . $this->getBuilder()->getTableName() . ")");
+			$mt = $this->builder->searchMetaType($name);
+			if ($mt && $mt instanceof MetaVirtual) {
+				return \call_user_func($mt->getHandler(), $this);
+			}
+			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> not found.', array("@name" => $name)));
 		}
 	}
 	
@@ -177,9 +179,12 @@ class Recordset implements RecordsetInterface {
 	public function setEdit($name, $value) {
 		if (\array_key_exists($name, $this->fields)) {
 			$metaType = $this->builder->searchMetaType($name);
+			if ($metaType instanceof MetaVirtual) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@name</em> value (virtual field).', array("@name" => $name)));
+			}
 			$this->modifiedFields[$name] = $metaType->edit2Prog($value);
 		} else {
-			throw new \system\InternalErrorException("Campo o relazione $name non importato nel recordset");
+			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> not found.', array("@name" => $name)));
 		}
 	}
 	
@@ -195,11 +200,11 @@ class Recordset implements RecordsetInterface {
 		return $metaType->prog2Read($progValue);
 	}
 	
-	public function save($readMode=null, $editMode=null, $groupId=null) {
+	public function save($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
 		if (!$this->isStored()) {
-			return $this->create($readMode, $editMode, $groupId);
+			return $this->create($readMode, $editMode, $deleteMode, $roleId);
 		} else {
-			return $this->update($readMode, $editMode, $groupId);
+			return $this->update($readMode, $editMode, $deleteMode, $roleId);
 		}
 	}
 	
@@ -209,29 +214,17 @@ class Recordset implements RecordsetInterface {
 	 * ne recupera contestualmente il valore.
 	 * Nel caso la tabella sfrutti i record modes, ne inserisce contestualmente le informazioni.
 	 * NB: NON INSERISCE AUTOMATICAMENTE RECORD RELATIVI A RELAZIONI HAS MANY O HAS ONE.
-	 * @param int $readMode Read Mode (vedi module\core\model\XmcaRecordMode)
-	 * @param int $editMode Edit Mode (vedi module\core\model\XmcaRecordMode)
-	 * @param int $groupId Id del gruppo
+	 * @param int $readMode Read Mode (vedi \system\model\RecordMode)
+	 * @param int $editMode Edit Mode (vedi \system\model\RecordMode)
+	 * @param int $deleteMode Delete Mode (vedi \system\model\RecordMode)
+	 * @param int $roleId Id del ruolo utente
 	 */
-	public function create($readMode=null, $editMode=null, $groupId=null) {
+	public function create($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
 		
 		\system\logic\Module::raise("onCreate", $this);
 		
 		if ($this->builder->isRecordModed()) {
-
-			$ownerId = \system\Login::getLoggedUserId();
-			
-			if (\is_null($readMode)) {
-				$readMode = XmcaRecordMode::MODE_ANYONE;
-			}
-			if (\is_null($editMode)) {
-				$editMode = !\is_null($groupId) ? XmcaRecordMode::MODE_SU_OWNER_GROUP : XmcaRecordMode::MODE_SU_OWNER;
-			}
-			if (\is_null($groupId)) {
-				$groupId = 0;
-			}
-			
-			$this->createRecordMode($readMode, $editMode, $ownerId, $groupId);
+			$this->createRecordMode($readMode, $editMode, $deleteMode, $roleId);
 		}
 		
 		$q1 = "";
@@ -245,7 +238,7 @@ class Recordset implements RecordsetInterface {
 		}
 		
 		if ($q1 === "") {
-			throw new \system\InternalErrorException("Non e' stato valorizzato nessun campo per l'inserimento del recordset.");
+			throw new \system\InternalErrorException(\system\Lang::translate('Cannot create a record with no field values.'));
 		}
 
 		$query = "INSERT INTO " . $this->builder->getTableName() . " (" . $q1 . ") VALUES (" . $q2 . ")";
@@ -271,18 +264,18 @@ class Recordset implements RecordsetInterface {
 	 * Controlla contestualmente i permessi dell'utente.
 	 * NB: NON AGGIORNA AUTOMATICAMENTE LE RELAZIONI HAS ONE ED HAS MANY!
 	 */
-	public function update($readMode=null, $editMode=null, $groupId=null) {
+	public function update($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
 		$q1 = "";
 		
 		\system\logic\Module::raise("onUpdate", $this);
 
 		if (!$this->isStored()) {
-			throw new \system\InternalErrorException("Recordset non presente nel DB");
+			throw new \system\InternalErrorException(\system\Lang::translate('Recordset does not exist.'));
 		}
 		
 		// Controllo i permessi dell'utente per l'aggiornamento del record
 		if ($this->builder->isRecordModed()) {
-			$this->updateRecordMode($readMode, $editMode, $groupId);
+			$this->updateRecordMode($readMode, $editMode, $deleteMode, $roleId);
 		}
 
 		foreach ($this->modifiedFields as $name => $value) {
@@ -370,9 +363,6 @@ class Recordset implements RecordsetInterface {
 
 	/**
 	 * Cancella il record.
-	 * Controlla contestualmente i permessi dell'utente.
-	 * Cancella automaticamente l'eventuale record_mode associato al record.
-	 * NB: NON CANCELLA AUTOMATICAMENTE LE RELAZIONI HAS ONE ED HAS MANY!
 	 */
 	public function delete() {
 		if (!$this->isStored()) {
@@ -381,16 +371,6 @@ class Recordset implements RecordsetInterface {
 		
 		\system\logic\Module::raise("onDelete", $this);
 		
-		$recordMode = $this->getRecordMode();
-		// Controllo i permessi dell'utente per l'eliminazione del record
-		if (!\is_null($recordMode)) {
-			// Cancello i log (se esistono)
-			if ($this->builder->isRecordModeLogged()) {
-				$query = "DELETE FROM xmca_record_mode_log WHERE record_mode_id = " . $recordMode->getDb("id");
-				DataLayerCore::getInstance()->executeUpdate($query, __FILE__, __LINE__);
-			}
-		}
-
 		$query = "DELETE FROM " . $this->builder->getTableName() . " WHERE ";
 		$first = true;
 		foreach ($this->builder->getPrimaryKey() as $metaType) {
@@ -402,116 +382,115 @@ class Recordset implements RecordsetInterface {
 
 		$this->stored = false;
 
-		foreach ($this->builder->getHasManyRelationBuilderList() as $name => $builder) {
-			if ($builder->getOnDelete() == "CASCADE") {
-				// forzo il caricamento di tutte le relazioni has many
-				$recordsets = $this->__get($name);
-
-				if (count($recordsets) == 0) {
-					continue;
-				}
-
-				foreach ($recordsets as $recordset) {
-					// Le cancello tutte una ad una
-					$recordset->delete();
-				}
-			}
-		}
-
-		foreach ($this->builder->getHasOneRelationBuilderList() as $name => $builder) {
-			if ($builder->getOnDelete() == "CASCADE") {
-				$this->__get($name)->delete();
-			}
-		}
+//		foreach ($this->builder->getHasManyRelationBuilderList() as $name => $builder) {
+//			if ($builder->getOnDelete() == "CASCADE") {
+//				// forzo il caricamento di tutte le relazioni has many
+//				$recordsets = $this->__get($name);
+//
+//				if (count($recordsets) == 0) {
+//					continue;
+//				}
+//
+//				foreach ($recordsets as $recordset) {
+//					// Le cancello tutte una ad una
+//					$recordset->delete();
+//				}
+//			}
+//		}
+//
+//		foreach ($this->builder->getHasOneRelationBuilderList() as $name => $builder) {
+//			if ($builder->getOnDelete() == "CASCADE") {
+//				$this->__get($name)->delete();
+//			}
+//		}
 
 	}
 
 	/**
 	 *	Aggiunge informazioni sui permessi di lettura e scrittura sul record.
 	 * Setta la chiave esterna per il record_mode_idR
-	 * @param int $readMode Read Mode (vedi module\core\model\XmcaRecordMode)
-	 * @param int $editMode Edit Mode (vedi module\core\model\XmcaRecordMode)
-	 * @param int $ownerId Id utente
-	 * @param int $groupId Id gruppo
+	 * @param int $readMode Read Mode (vedi \system\model\RecordMode)
+	 * @param int $editMode Edit Mode (vedi \system\model\RecordMode)
+	 * @param int $deleteMode Delete Mode (vedi \system\model\RecordMode)
+	 * @param int $roleId Id ruolo utente
 	 */
-	private function createRecordMode($readMode, $editMode, $ownerId, $groupId) {
-		$recordModeKeyName = $this->builder->getRecordModeKeyName();
-		if (\is_null($recordModeKeyName)) {
-			throw new \system\InternalErrorException("Impossibile aggiungere un Record Mode per un record della tabella " . $this->builder->getTableName());
-		}
-		
-		$recordModeBuilder = new XmcaRecordMode();
-		$recordModeBuilder->usePrimaryKey();
-		$recordModeBuilder->using(
-			"owner_id",
-			"group_id",
-			"read_mode",
-			"edit_mode",
-			"ins_date_time",
-			"last_upd_date_time",
-			"last_modifier_id"
-		);
-		
-		$recordMode = $recordModeBuilder->newRecordset();
+	private function createRecordMode($readMode, $editMode, $deleteMode, $roleId) {
+		$recordMode = $this->record_mode;
 		
 		switch ($readMode) {
-			case \module\core\model\XmcaRecordMode::MODE_NOBODY:
-			case \module\core\model\XmcaRecordMode::MODE_SU:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER_GROUP:
-			case \module\core\model\XmcaRecordMode::MODE_ANYONE:
-				$recordMode->setProg("read_mode", $readMode);
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->read_mode = $readMode;
 				break;
 			
 			default:
-				$recordMode->setProg("read_mode", XmcaRecordMode::MODE_ANYONE);
+				$recordMode->read_mode = \system\model\RecordMode::MODE_ANYONE;
 				break;
 		}
 		
 		switch ($editMode) {
-			case \module\core\model\XmcaRecordMode::MODE_NOBODY:
-			case \module\core\model\XmcaRecordMode::MODE_SU:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER_GROUP:
-			case \module\core\model\XmcaRecordMode::MODE_ANYONE:
-				$recordMode->setProg("edit_mode", $editMode);
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->edit_mode = $editMode;
 				break;
 			
 			default:
-				$recordMode->setProg("edit_mode", XmcaRecordMode::MODE_SU_OWNER_GROUP);
+				$recordMode->edit_mode = \system\model\RecordMode::MODE_SU_OWNER_ROLE;
 				break;
 		}
 		
-		if (!\is_null($groupId)) {
-			$recordMode->setProg("group_id", (int)$groupId);
+		switch ($deleteMode) {
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->delete_mode = $deleteMode;
+				break;
+			
+			default:
+				$recordMode->delete_mode = \system\model\RecordMode::MODE_SU_OWNER_ROLE;
+				break;
 		}
 		
-		$recordMode->setProg("owner_id", $ownerId);
-		$recordMode->setProg("ins_date_time", \time());
-		$recordMode->setProg("last_upd_date_time", \time());
-		$recordMode->setProg("last_modifier_id", $ownerId);
+		if (!\is_null($roleId)) {
+			$recordMode->roleId = (int)$roleId;
+		}
+		
+		$recordMode->owner_id = \system\Login::getLoggedUserId();
+		$recordMode->ins_date_time = \time();
+		$recordMode->last_upd_date_time = \time();
+		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
 		
 		$recordMode->create();
 		
-		if ($this->builder->isRecordModeLogged()) {
+		if (\config\settings()->RECORD_MODE_LOGS) {
 			$this->createRecordModeLog($recordMode);
 		}
 		
-		$this->setProg($recordModeKeyName, $recordMode->getProg("id"));
+		$this->setProg($this->builder->getRecordModeField(), $recordMode->id);
 	}
 	
-	private function updateRecordMode($readMode, $editMode, $groupId) {
-		$userId = \system\Login::getLoggedUserId();
-
-		$recordMode = $this->getRecordMode();
+	private function updateRecordMode($readMode, $editMode, $deleteMode, $roleId) {
+		$recordMode = $this->record_mode;
+		
+		if (\is_null($recordMode)) {
+			return null;
+		}
 		
 		switch ($readMode) {
-			case \module\core\model\XmcaRecordMode::MODE_NOBODY:
-			case \module\core\model\XmcaRecordMode::MODE_SU:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER_GROUP:
-			case \module\core\model\XmcaRecordMode::MODE_ANYONE:
-				$recordMode->setProg("read_mode", $readMode);
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->read_mode = $readMode;
 				break;
 			
 			default:
@@ -520,12 +499,26 @@ class Recordset implements RecordsetInterface {
 		}
 		
 		switch ($editMode) {
-			case \module\core\model\XmcaRecordMode::MODE_NOBODY:
-			case \module\core\model\XmcaRecordMode::MODE_SU:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER:
-			case \module\core\model\XmcaRecordMode::MODE_SU_OWNER_GROUP:
-			case \module\core\model\XmcaRecordMode::MODE_ANYONE:
-				$recordMode->setProg("edit_mode", $editMode);
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->edit_mode = $editMode;
+				break;
+			
+			default:
+				// Lascio inalterato il valore
+				break;
+		}
+		
+		switch ($deleteMode) {
+			case \system\model\RecordMode::MODE_NOBODY:
+			case \system\model\RecordMode::MODE_SU:
+			case \system\model\RecordMode::MODE_SU_OWNER:
+			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_ANYONE:
+				$recordMode->delete_mode = $deleteMode;
 				break;
 			
 			default:
@@ -533,59 +526,31 @@ class Recordset implements RecordsetInterface {
 				break;
 		}
 
-		if (!\is_null($groupId)) {
+		if (!\is_null($roleId)) {
 			// Cambio il gruppo solo se non nullo
-			$recordMode->setProg("group_id", (int)$groupId);
+			$recordMode->role_id = (int)$roleId;
 		}
 		
-		$recordMode->setProg("last_modifier_id", $userId);
-		$recordMode->setProg("last_upd_date_time", \time());
+		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
+		$recordMode->last_upd_date_time = \time();
 		$recordMode->update();
 		
-		if ($this->builder->isRecordModeLogged()) {
+		if (\config\settings()->RECORD_MODE_LOGS) {
 			$this->createRecordModeLog($recordMode);
 		}
 	}
 	
 	private function createRecordModeLog($recordMode) {
-		$recordModeLog = new \module\core\model\XmcaRecordModeLog();
-		$recordModeLog->using(
-			"record_mode_id",
-			"modifier_id",
-			"upd_date_time"
-		);
+		$recordModeLog = new RecordsetBuilder("record_mode_log");
+		$recordModeLog->using("*");
+
 		$rs = $recordModeLog->newRecordset();
 
-		$rs->setProg("record_mode_id", $recordMode->getProg("id"));
-		$rs->setProg("modifier_id", $recordMode->getProg("last_modifier_id"));
-		$rs->setProg("upd_date_time", $recordMode->getProg("last_upd_date_time"));
-		$rs->create();
-	}
-	
-	/**
-	 * Restituisce (se esiste) il record_mode associato al record
-	 * @return Recordset
-	 */
-	public function getRecordMode() {
-		if (!$this->builder->isRecordModed()) {
-			return null;
-		}
+		$rs->record_mode_id = $recordMode->id;
+		$rs->modifier_id = $recordMode->last_modifier_id;
+		$rs->upd_date_time = $recordMode->last_upd_date_time;
 		
-		$recordModeBuilder = new XmcaRecordMode();
-		$recordModeBuilder->usePrimaryKey();
-		$recordModeBuilder->using(
-			"owner_id",
-			"group_id",
-			"read_mode",
-			"edit_mode",
-			"ins_date_time",
-			"last_upd_date_time",
-			"last_modifier_id"
-		);
-		$recordModeBuilder->setFilter(
-			new FilterClause($recordModeBuilder->searchMetaType("id"), "=", $this->getProg($this->builder->getRecordModeKeyName()))
-		);
-		return $recordModeBuilder->selectFirst();
+		$rs->create();
 	}
 }
 ?>

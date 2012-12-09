@@ -1,11 +1,151 @@
-name: core
 class: Core
-priority: 1
+weight: 1
 enabled: 1
-componentsNs: controller
-customEvents:
-  - myEvent1
-  - myEvent2
-dependencies:
-  - module1
-  - module2
+componentsNs: components
+components:
+  - class: Page
+    pages:
+      - url: (@strid)/header
+        action: Header
+      - url: (@strid)/footer
+        action: Footer
+      - url: page/search
+        action: Search
+      - url: (@strid).html
+        action: Read
+      - url: page/add
+        action: Add
+      - url: page/edit/(@strid)
+        action: Edit
+      - url: page/delete/(@strid)
+        action: Delete
+  - class: ContentMedia
+    pages:
+      - url: media/@strid.@strid
+        action: read
+  - class: Content
+    pages:
+      - url: content/(@strid).html
+        action: read
+      - url: content/edit/(@strid)
+        action: edit
+      - url: content/add
+        action: add
+      - url: content/delete/(@strid)
+        action: delete
+#model:
+#  - table: comment
+#    class: Comment
+#    fields:
+#      - name: id
+#        type: MetaInteger
+#      - name: content_id
+#        type: MetaInteger
+#      - name: comment_id
+#        type: MetaInteger
+#      - name: title
+#        type: MetaString
+#        size: 80
+#      - name: approved
+#        type: MetaBoolean
+#    relations:
+#      - name: content
+#        table: content
+#        type: N-1
+#        clauses: [content_id: id]
+#        join: LEFT
+#      - name: comment
+#        table: comment
+#        type: N-1
+#        clauses: [comment_id: id]
+#        join: LEFT
+#  - table: content
+#    class: Content
+#    fields:
+#      - name: id
+#        type: MetaInteger
+#      - name: page_id
+#        type: MetaInteger
+#      - name: ldel
+#        type: MetaInteger
+#      - name: rdel
+#        type: MetaInteger
+#      - name: parent_id
+#        type: MetaInteger
+#      - name: type
+#        type: MetaString
+#        size: 32
+#      - name: sort_index
+#        type: MetaInteger
+#      - name: image_id
+#        type: MetaInteger
+#      - name: video_file_id
+#        type: MetaInteger
+#      - name: audio_file_id
+#        type: MetaInteger
+#      - name: download_file_id
+#        type: MetaInteger
+#      - name: expandable
+#        type: MetaBoolean
+#      - name: comments
+#        type: MetaBoolean
+#      - name: download_file_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/download/' . $recordset->url . '.' . $recordset->download_file->extension;
+#          }
+#      - name: video_file_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/video/' . $recordset->url . '.' . $recordset->video_file->extension;
+#          }
+#      - name: audio_file_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/audio/' . $recordset->url . '.' . $recordset->audio_file->extension;
+#          }
+#      - name: image1_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/image/1/' . $recordset->url . '.' . $recordset->image->file1->extension;
+#          }
+#      - name: image2_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/image/2/' . $recordset->url . '.' . $recordset->image->file2->extension;
+#          }
+#      - name: image3_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/image/3/' . $recordset->url . '.' . $recordset->image->file3->extension;
+#          }
+#      - name: image4_url
+#        type: MetaVirtual
+#        handle: |
+#          function($recordset) {
+#            return \config\settings()->BASE_DIR . 'content/image/4/' . $recordset->url . '.' . $recordset->image->file4->extension;
+#          }
+#    keys:
+#      - name: primary_key
+#        fields: [id]
+#      - name: url_kry
+#        fields: [url]
+#    relations:
+#      - name: contents
+#        table: content
+#        type: 1-N
+#        clauses: [id: supercontent_id]
+#        join: INNER
+#
+#      - name: parent
+#        table: content
+#        type: N1
+#        clauses: [supercontent_id: id]
+#        join: INNER
+#        lazy: true

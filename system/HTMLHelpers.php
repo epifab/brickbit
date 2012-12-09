@@ -143,7 +143,7 @@ class HTMLHelpers {
 			
 			default:
 				$title = "Errore interno dello script";
-				$msg .= \module\core\model\XmcaLog::get();
+				$msg .= \system\Log::get();
 				break;
 		}
 		

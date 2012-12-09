@@ -5,7 +5,7 @@ class GroupingMetaType extends MetaType {
 	private $sqlName;
 	private $sqlFunction;
 	
-	public function __construct($vname, $sqlName, $sqlFunction, $type, RecordsetBuilderInterface $builder) {
+	public function __construct($vname, $sqlName, $sqlFunction, $type, RecordsetBuilder $builder) {
 		parent::__construct($vname, $type, $builder);
 		
 		$this->sqlName = $sqlName;

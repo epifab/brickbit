@@ -33,7 +33,7 @@ abstract class MetaType {
 		}
 	}
 	
-	public function __construct($name, RecordsetBuilderInterface $builder) {
+	public function __construct($name, RecordsetBuilder $builder) {
 		$this->name = $name;
 		$this->builder = $builder;
 		

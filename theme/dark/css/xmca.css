@@ -90,7 +90,7 @@ ul.xmca_paging li {
 	background-image: url('../img/layout/alert.png');
 	background-position: center left;
 	background-repeat: no-repeat;
-	background-color: #FFE;
+	/*background-color: #FFE;*/
 	font-weight: bold;
 }
 .info {
@@ -98,7 +98,8 @@ ul.xmca_paging li {
 	background-image: url('../img/layout/info.png');
 	background-position: center left;
 	background-repeat: no-repeat;
-	background-color: #FFE;
+	/*background-color: #FFE;*/
+	color: #2b2b2b;
 	font-weight: bold;
 }
 /********************
@@ -173,4 +174,20 @@ ul.xmca_paging li {
 
 .ui-dialog-content {
 	max-height: 450px;
+}
+
+.ui-dialog {
+	background: #FFF!important;
+	color: #333;
+}
+.ui-dialog-titlebar,
+.ui-dialog-buttonpane {
+	background: #FFE!important;
+	color: #FFF;
+	border: 0px;
+}
+.ui-dialog-buttonpane .ui-button {
+	padding: 10px;
+	font-size: 11pt;
+	background-color: #FFF!important;
 }

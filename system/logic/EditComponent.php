@@ -6,7 +6,7 @@ abstract class EditComponent extends Component {
 	abstract protected function getTemplateNotify();
 	
 	final protected function getTemplate() {
-		if (!is_null(@$this->datamodel["private"]["responseType"]) && $this->datamodel["private"]["responseType"] == Component::RESPONSE_TYPE_NOTIFY) {
+		if (!is_null(@$this->datamodel["private"]["responseType"]) && $this->datamodel["private"]["responseType"] == \system\logic\Component::RESPONSE_TYPE_NOTIFY) {
 			return $this->getTemplateNotify();
 		} else {
 			return $this->getTemplateForm();

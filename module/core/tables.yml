@@ -1,0 +1,119 @@
+comment:
+  fields:
+    id:
+      type: MetaInteger
+    content_id:
+      type: MetaInteger
+    comment_id:
+      type: MetaInteger
+    title:
+      type: MetaString
+      size: 80
+    approved:
+      type: MetaBoolean
+  keys:
+    primary:
+      fields: [id]
+      autoincrement: 1
+  relations:
+    content:
+      table: content
+      type: N-1
+      clauses: [content_id: id]
+      join: LEFT
+    comment:
+      table: comment
+      type: N-1
+      clauses: [comment_id: id]
+      join: LEFT
+content:
+  class: Content
+  fields:
+    id:
+      type: MetaInteger
+    page_id:
+      type: MetaInteger
+    ldel:
+      type: MetaInteger
+    rdel:
+      type: MetaInteger
+    parent_id:
+      type: MetaInteger
+    type:
+      type: MetaString
+      size: 32
+    sort_index:
+      type: MetaInteger
+    image_id:
+      type: MetaInteger
+    video_file_id:
+      type: MetaInteger
+    audio_file_id:
+      type: MetaInteger
+    download_file_id:
+      type: MetaInteger
+    expandable:
+      type: MetaBoolean
+    comments:
+      type: MetaBoolean
+    # virtual fields
+    download_file_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/download/' . $recordset->url . '.' . $recordset->download_file->extension;
+        }
+    video_file_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/video/' . $recordset->url . '.' . $recordset->video_file->extension;
+        }
+    audio_file_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/audio/' . $recordset->url . '.' . $recordset->audio_file->extension;
+        }
+    image1_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/image/1/' . $recordset->url . '.' . $recordset->image->file1->extension;
+        }
+    image2_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/image/2/' . $recordset->url . '.' . $recordset->image->file2->extension;
+        }
+    image3_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/image/3/' . $recordset->url . '.' . $recordset->image->file3->extension;
+        }
+    image4_url:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'content/image/4/' . $recordset->url . '.' . $recordset->image->file4->extension;
+        }
+  keys:
+    primary_key:
+      fields: [id]
+    url_kry:
+      fields: [url]
+  relations:
+    contents:
+      table: content
+      type: 1-N
+      clauses: [id: supercontent_id]
+      join: INNER
+      onDelete: CASCADE
+    parent:
+      table: content
+      type: N1
+      clauses: [supercontent_id: id]
+      join: INNER
+      lazy: true

@@ -1,14 +1,38 @@
-Version 1.0 alpha
+RELEASE 1.0
 
+  PHASE 1 90% (estimated 1 week)
+  - module system
+    - module, controller, action + new url rewriting system based on modules definition
+    - module/*/module.yml
+  - model system
+    - system/model/tables.yml
+    - module/*/tables.yml
+  - templates system
+    - templates overriding order:
+      (modules order is defined by weight property in module.yml)
+      > theme/*/templates/*
+      > module/my_module1/templates/*
+      > module/my_module2/templates/*
+    - re-design system template API
+  - language system + localization
+    - \system\Lang
+  - use method Lang::translate everywhere in the system
 
-DONE
+  PHASE 2 [not started] (estimated 2 week)
+  - write tecnichal documentation
+    release 1.0 beta 1
+
+  PHASE 3 (not started) (estimated 1 month)
+  - re-design core module + testing + bug fixing
+  - building cider website + writing user documentation
+  - release 1.0
 
 
 	CONTROLLER
 		- Use configuration files for modules definitions **
 		- Module dependencies
 		- Module informations (description, version, priority)
-		- Design the events the system should raise, including
+		- Design the events that the system should raise, including
 			module events:
 				- utilities
 					install() (unraised)
@@ -19,43 +43,38 @@ DONE
 					[static] onUpdateRecord(Recordset $recordset)
 					[static] onDeleteRecord(Recordset $recordset)
 				- logic
-					[static] chron($chronName)
+					[static] chron($chronName) (unraised)
 					[static] onLoad() (raised by \system\logic\Component)
 					[static] [custom event]()  (@see \system\controller\Module::raise($event, [arg1, ...))
 				
 				* when a (static) module event is raised, the static methods implemented 
 					in each module class extension will be called sequentially
-				* the order of the calls should be established by a module attribute (priority)
+				* the order of the calls is established by a module attribute (weight)
 
 			component events:
-				onProcess()
+            static:
+              > access($actions, $urlArgs, $request)
+              > accessMyAction($urlArgs, $request)
+            dynamic:
+              - onInit()
+				  - onProcess()
 
 
 
-
-TODO LIST
-
-
-system
-
-
-
---- PHASE 1
-
-
-
+-- requirements phase 1 --
 VIEW, CONTROLLER
 	- Analise and re-disign the system API
 	- Re-design template plugins (tpl_plugins folder)
 
 MODEL
-	RecordsetBuilder class
-		- Allow model classes extension?
+		- Allow model classes extension (?)
 		- Get access to all the fields, keys, relations defined on each model class (using import(*) ecc.)
 		- Allow has one relation class lazy loading       --> treat has one and has many relations in the same way
 		- Allow has many relation class "instant loading" --> treat has one and has many relations in the same way
 		- Decide if to keep or not the "onDelete" and "onUpdate" features on the model layer (relations) 
 			and eventually complete their development (onDelete feature is already working)
+
+MISC
 		- Analise and eventually re-design the languages system
 		- Integration with languages system
 

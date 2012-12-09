@@ -1,6 +1,7 @@
 <{xmca_read_form}><{/xmca_read_form}>
 <{xmca_read_content}>
-<h1 id="header_title"><a href="<{$private.siteAddr}>Home.html"><img src="<{$private.siteAddr}>img/header_title.jpg" alt="<{$private.siteName}>"/></a></h1>
+
+<h1 id="header_title"><a href="<{$private.siteAddr}>Home.html"><img src="<{theme}>img/logo.gif" alt="<{$private.siteName}>"/></a></h1>
 <h2 id="header_subtitle"><span><{$private.siteDesc}></span></h2>
 <div id="header_sidebar">
 <!--	<div class="search">
@@ -8,15 +9,15 @@
 	</div>-->
 	<div id="header_sidebar_login">
 		<{if $private.login->isAnonymous()}>
-			<a href="javascript:<{xmca_control_action component="Login" okButtonLabel="Login" width=300 showResponse=false}>"><img src="<{$private.siteAddr}>img/lock.jpg" alt="Login"/></a></li>
+			<a href="javascript:<{xmca_control_action component="Login" okButtonLabel="Login" width=300 showResponse=false}>"><img src="<{theme}>img/lock.jpg" alt="Login"/></a></li>
 		<{else}>
-			<a href="javascript:<{xmca_control_action component="Login" args=['logout'=>1] showResponse=false}>"><img src="<{$private.siteAddr}>img/unlock.jpg" alt="Logout"/></a></li>
+			<a href="javascript:<{xmca_control_action component="Login" args=['logout'=>1] showResponse=false}>"><img src="<{theme}>img/unlock.jpg" alt="Logout"/></a></li>
 		<{/if}>
 	</div>
 	<div id="header_sidebar_langs">
 		<{foreach $private.languages as $lang}>
 			<{if $lang != $private.language}>
-			<a class="lang" href="Home.html?lang=<{$lang}>"><img src="<{$private.siteAddr}>img/lang/40/<{$lang}>.jpg"/></a>
+			<a class="lang" href="Home.html?lang=<{$lang}>"><img src="<{theme}>img/lang/40/<{$lang}>.jpg"/></a>
 			<{/if}>
 		<{/foreach}>
 	</div>

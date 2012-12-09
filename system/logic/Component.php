@@ -1,20 +1,28 @@
 <?php
 namespace system\logic;
-use system;
 
 abstract class Component {
-	// active components stack
-	private static $activeComponents = array();
-	private static $activeComponentsCount = 0;
+	//  components stack
+	private static $components = array();
+	private static $componentsCount = 0;
 	
+	protected $alias = null;
+	protected $action = null;
+	protected $url = null;
+	protected $urlArgs = null;
+	protected $request = null;
 	protected $nested = false;
 	
-	protected $request = null;
-	protected $prefix = null;
+	protected $microTime = null;
 	
-	protected $tplFolder = "view/";
-	
-	protected $id = 0;
+	/**
+	 * @var \system\TemplateManager
+	 */
+	protected $tplManager;
+	/**
+	 * @var mixed[]
+	 */
+	protected $datamodel = array();
 	
 	/**
 	 * Invio di una form per inserimento o modifica
@@ -33,67 +41,108 @@ abstract class Component {
 	 */
 	const RESPONSE_TYPE_ERROR = "ERROR";
 		
+	public function getRequestTime() {
+		return \round($this->microTime, 0);
+	}
+	
+	public function getExecutionTime() {
+		return \round(\microtime(true) - $this->microTime, 3);
+	}
+	
 	/**
-	 * @var TemplateManager
+	 * @return Component[]
 	 */
-	protected $tplManager;
+	public static function getComponents() {
+		return self::$components;
+	}
 	/**
-	 * @var mixed[]
+	 * @return Component
 	 */
-	protected $datamodel = array();
-
-	
-	public static function getActiveComponents() {
-		return self::$activeComponents;
+	public static function getMainComponent() {
+		return (self::$componentsCount > 0) ? self::$components[0] : null;
 	}
-	
-	public static function getMainActiveComponent() {
-		return (self::$activeComponentsCount > 0) ? self::$activeComponents[0] : null;
-	}
-	
-	public static function getCurrentActiveComponent() {
-		return (self::$activeComponentsCount > 0) ? self::$activeComponents[self::$activeComponentsCount] : null;
-	}
-	
-	private static function pushActiveComponent(Component $component) {
-		self::$activeComponents[self::$activeComponentsCount++] = $component;
-	}
-	
-	private static function popActiveComponent() {
-		return (self::$activeComponentsCount > 0) ? self::$activeComponents[--self::$activeComponentsCount] : null;
+	/**
+	 * @return Component
+	 */
+	public static function getCurrentComponent() {
+		return (self::$componentsCount > 0) ? self::$components[self::$componentsCount] : null;
 	}
 
-	public static function checkPermission($args) {
+	private static function pushComponent(Component $component) {
+		self::$components[self::$componentsCount++] = $component;
+	}
+	/**
+	 * @return Component
+	 */
+	private static function popComponent() {
+		return (self::$componentsCount > 0) ? self::$components[--self::$componentsCount] : null;
+	}
+
+	/**
+	 * Check user access for component/action(args)
+	 * Can be overriden by component extending classes declaring
+	 *   accessYourAction($urlArgs, $userId)
+	 *   access($action, $urlArgs, $userId)
+	 * @param string $action action
+	 * @param string $urlArgs url arguments
+	 * @return boolean true if 
+	 */
+	public static function access($component, $action, $urlArgs, $userId=null) {
+		if (\is_null($userId)) { 
+			$userId = \system\Login::getLoggedUserId();
+		}
+		if (\method_exists($component, "access" . $action)) {
+			return (bool)\call_user_func(array($component, "access" . $action), $urlArgs, $userId);
+		} 
+		else if (\method_exists($component, "access")) {
+			return (bool)\call_user_func(array($component, "access"), $action, $urlArgs, $userId);
+		} 
 		return true;
 	}
 	
-	abstract protected function getName();
-
-	abstract protected function getTemplate();
-	
-	abstract protected function onProcess();
-	
-	public function __construct($request=null, $prefix="") {
-
-		if (\is_null($request)) {
-			$this->nested = false;
-			$this->request = $_REQUEST;
-			$this->prefix = "";
-		} else {
-			$this->nested = true;
-			$this->request = $request;
-			$this->prefix = $prefix;
-		}
-		
-		$this->initView();
+	protected function onLoad() {
 	}
 	
-	protected function getId() {
-		if ($this->id == 0) {
-			$query = "SELECT id FROM xmca_component WHERE name = " . MetaString::stdProg2Db($this->getName());
-			$this->id = DataLayerCore::getInstance()->executeScalar($query, __FILE__, __LINE__);
+	protected function onError($exception) {
+		$this->setResponseType(self::RESPONSE_TYPE_ERROR);
+		
+		\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
+
+//			if ($this->nested) {
+//				$pageOutput = \ob_get_clean();
+//			} else {
+//				$pageOutput = \ob_get_flush();
+//			}
+
+//		try {
+//			$id = \module\core\model\XmcaLog::saveLog($this->getName(), $pageOutput);
+//		} catch (\Exception $ex) {
+//			echo "<h1>" . $ex->getMessage() . "</h1>";
+//			if ($ex instanceof DataLayerException) {
+//				echo $ex->getHtmlMessage();
+//			}
+//		}
+	}
+	
+	/**
+	 * Can be overriden by
+	 *   onProcessMyAction
+	 *   onProcess 
+	 */
+	protected function onProcess() {
+		return self::RESPONSE_TYPE_READ;
+	}
+	
+	public function __construct($action, $url, $urlArgs, $request=null) {
+		$this->action = $action;
+		$this->url = $url;
+		$this->urlArgs = $urlArgs;
+		$this->request = \is_null($request) ? $_REQUEST : (array)$request;
+		$this->nested = \is_null(self::getCurrentComponent());
+		$this->alias = $this->getName();
+		if (!\is_null(self::getMainComponent())) {
+			'__' . $this->alias .= self::getMainComponent()->alias;
 		}
-		return $this->id;
 	}
 	
 	public function getModule() {
@@ -131,89 +180,104 @@ abstract class Component {
 		}
 	}
 	
+	private function getComponentInfo() {
+		static $info = null;
+		if (\is_null($info)) {
+			$info = array(
+				'name' => $this->getName(),
+				'module' => $this->getModule(),
+				'action' => $this->action,
+				'url' => $this->url,
+				'urlArgs' => $this->urlArgs,
+				'request' => $this->request,
+				'requestId' => $this->getRequestId(),
+				'nested' => $this->nested,
+			);
+		}
+		return $info;
+	}
+	
+	private static function getGeneralInfo() {
+		static $settings = null;
+		if (\is_null($settings)) {
+			$settings = array(
+				'website' => array(
+					'title' => \config\settings()->SITE_TITLE,
+					'subtitle' => \config\settings()->SITE_SUBTITLE,
+					'domain' => \config\settings()->DOMAIN,
+					'base' => \config\settings()->SITE_ADDRESS,
+				),
+				'lang' => \system\Lang::getLang(),
+				'langs' => \config\settings()->LANGUAGES,
+				'theme' => \system\Theme::getTheme(),
+				'themes' => \config\settings()->THEMES,
+				'ip' => \system\HTMLHelpers::getIpAddress(),
+				'ajax' => \system\HTMLHelpers::isAjaxRequest()
+			);
+		}
+	}
+	
 	private function initView() {
-		$this->tplManager = new \system\TemplateManager();
-//		die(Module::getPath($this->getModule(), "templates"));
+		$this->tplManager = Module::getTemplateManager();
 		
-		$this->tplManager->setTemplateDir (array(
-//			Module::getPath($this->getModule(), "templates"),
-			$this->tplManager->getThemePath("templates")
-		));
-		
-		$this->datamodel = array();
-		$this->datamodel["private"] = array();
-		$this->datamodel["private"]["requestTime"] = \time();
-		$this->datamodel["private"]["componentName"] = $this->getName();
-		$this->datamodel["private"]["componentExt"] = \config\settings()->COMPONENT_EXTENSION;
-		$this->datamodel["private"]["componentAddr"] = $this->getName() . "." . \config\settings()->COMPONENT_EXTENSION;
-		$this->datamodel["private"]["requestId"] = $this->getRequestId();
-		$this->datamodel["private"]["formId"] = "xmca_" . $this->datamodel["private"]["requestId"] . "_form";
-		$this->datamodel["private"]["contId"] = "xmca_" . $this->datamodel["private"]["requestId"] . "_cont";
-		$this->datamodel["private"]["homeAddr"] = \config\settings()->SITE_ADDRESS . "." . \config\settings()->COMPONENT_EXTENSION;
-		$this->datamodel["private"]["siteName"] = \config\settings()->SITE_TITLE;
-		$this->datamodel["private"]["siteAddr"] = \config\settings()->SITE_ADDRESS;
-		$this->datamodel["private"]["siteDesc"] = \config\settings()->SITE_TITLE;
-		$this->datamodel["private"]["themePath"] = $this->tplManager->getThemePath();
-		$this->datamodel["private"]["pageTitle"] = \config\settings()->SITE_TITLE;
-		$this->datamodel["private"]["self"] = strpos($_SERVER["REQUEST_URI"], "?") ? substr($_SERVER["REQUEST_URI"], 0, strpos($_SERVER["REQUEST_URI"], "?")) : $_SERVER["REQUEST_URI"];
-		$this->datamodel["private"]["request"] = $this->request;
-		$this->datamodel["private"]["isAjaxRequest"] = \system\HTMLHelpers::isAjaxRequest();
-		$this->datamodel["private"]["component"] = $this;
-		$this->datamodel["private"]["login"] = \system\Login::getInstance();
-		$this->datamodel["private"]["baseHref"] = "/www/";
-		$this->datamodel["private"]["defaultLang"] = \config\settings()->DEFAULT_LANG;
-		$this->datamodel["private"]["languages"] = \config\settings()->LANGUAGES;
-		$this->datamodel["private"]["language"] = \system\Lang::getInstance()->getLangId();
+		$this->datamodel = array(
+			'system' => array(
+				'component' => $this->getComponentInfo(),
+				'mainComponent' => self::getMainComponent()->getComponentInfo(),
+				'info' => self::getGeneralInfo(),
+				'mainTemplate' => null,
+				'templates' => array(),
+				// default response type
+				'responseType' => self::RESPONSE_TYPE_READ,
+			),
+			'page' => array(
+				'title' => '',
+				'url' => self::getMainComponent()->url,
+				'metatag' => array(),
+				'js' => array(),
+				'css' => array(),
+			)
+		);
+	}
+	
+	private function setResponseType($responseType) {
+		$this->datamodel['system']['responseType'] = $responseType;
+	}
+	
+	private function setMainTemplate($template) {
+		$this->datamodel['system']['mainTemplate'] = $template;
+	}
+	
+	protected function addTemplate($key, $template) {
+		$this->datamodel['system']['templates'][$key] = $template;
 	}
 	
 	protected function setPageTitle($pageTitle, $adding=false) {
-		$this->datamodel["private"]["pageTitle"] = ($adding ? $this->datamodel["private"]["pageTitle"] . " | " : "") . $pageTitle;
+		$this->datamodel['page']['title'] = ($adding && !empty($this->datamodel['page']['title']) ? $this->datamodel['system']['title'] . ' | ' : '') . $pageTitle;
 	}
 	
-//	public static function checkComponentPermission($moduleName, $componentName) {
-//		$dl = \system\model\DataLayerCore::getInstance();
-//		
-//		$userId = \system\Login::getLoggedUserId();
-//		
-//		$query =
-//			"SELECT COUNT(*)"
-//			. " FROM xmca_component c"
-//			. " INNER JOIN xmca_module m"
-//			. " WHERE c.name = " . MetaString::stdProg2Db($componentName)
-//			. " AND m.name = " . MetaString::stdProg2Db($moduleName);
-//		if ($dl->executeScalar($query, __FILE__, __LINE__) == 0) {
-//			// Nessun componente trovato nel DB: componente pubblico
-//			return true;
-//		}
-//		
-//		else if (empty($userId)) {
-//			// Componente trovato nel DB ma utente anonimo: accesso negato
-//			return false;
-//		}
-//		
-//		else {
-//			// Componente trovato nel DB e utente loggato.
-//			// Controllo la corrispondenza con almeno uno dei gruppi di appartenenza dell'utente
-//			$query = 
-//				"SELECT"
-//				. " COUNT(*) AS allowed"
-//				. " FROM xmca_user_group xug"
-//				. " LEFT JOIN xmca_group_component xgc ON xgc.group_id = xug.group_id"
-//				. " LEFT JOIN xmca_component xc ON xc.id = xgc.component_id"
-//				. " WHERE"
-//				. " xug.user_id = " . MetaInteger::stdProg2Db($userId)
-//				. " AND xc.name = " . MetaString::stdProg2Db($componentName);
-//			return $dl->executeScalar($query, __FILE__, __LINE__) > 0;
-//		}
-//	}
+	public function getName() {
+		return \get_class($this);
+	}
+
+	public function getAction() {
+		return $this->action;
+	}
+	
+	public function getUrl() {
+		return $this->url;
+	}
 	
 	// outlines di default
 	protected function getOutline() {
-		return $this->nested ? null : (\system\HTMLHelpers::isAjaxRequest() ? "layout/OutlineAjax" : "layout/Outline");
+		return null;
+//		return $this->nested ? null : (\system\HTMLHelpers::isAjaxRequest() ? "layout/outline-ajax" : "layout/outline");
 	}
 	
+	abstract function getTemplate();
+
 	///<editor-fold defaultstate="collapsed" desc="Metodi standard per inizializzazione di clausole">
-	protected function loadStdFilters(\system\model\RecordsetBuilderInterface $builder, $prefix="") {
+	protected function loadStdFilters(\system\model\RecordsetBuilder $builder, $prefix="") {
 		$index = $prefix . "filters";
 		
 		$lastLop = null;
@@ -269,7 +333,7 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdSorts(\system\model\RecordsetBuilderInterface $builder, $prefix="") {
+	protected function loadStdSorts(\system\model\RecordsetBuilder $builder, $prefix="") {
 		$index = $prefix . "sorts";
 
 		$sorts = null;
@@ -300,7 +364,7 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdLimits(\system\model\RecordsetBuilderInterface $builder, $pageSize=100, $prefix="") {
+	protected function loadStdLimits(\system\model\RecordsetBuilder $builder, $pageSize=100, $prefix="") {
 		$index = $prefix . "paging";
 		
 		if (!\array_key_exists($index, $this->request) || !\is_array($this->request[$index])) {
@@ -335,83 +399,74 @@ abstract class Component {
 
 	final public function process() {
 		
-		self::pushActiveComponent($this);
+		// adding the component to the stack
+		self::pushComponent($this);
 		
-		$pageOutput = "";
+		// initializing request time
+		$this->microTime = \microtime(true);
 
-		$mtime_start = \microtime(true);
-			
+		// initializing the output buffer
 		\ob_start();
 			
-		try {
+		$pageOutput = "";
 
-			// COMPONENT EVENT onAccess
-			if (!\call_user_func(array(\get_class($this), "checkPermission"), $_REQUEST)) {
-				throw new AuthorizationException("Utente non autorizzato");
+		try {
+			$this->initView();
+			
+			$this->tplManager->setOutlineTemplate($this->getOutline());
+			
+			// checking permission
+			if (!self::access($this->getName(), $this->action, $this->urlArgs)) {
+				throw new \system\AuthorizationException("Utente non autorizzato");
+			}
+			
+			// onLoad event
+			$this->onLoad();
+			
+			// onProcess event
+			if (\method_exists($this, "onProcess" . $this->action)) {
+				$responseType = \call_user_func("onProcess" . $this->action);
+			} else {
+				$responseType = $this->onProcess();
 			}
 
-			$this->tplManager->setOutlineTemplate($this->getOutline());
-
-			// Lancio l'evento onProcess
-			$responseType = $this->onProcess();
-
 			switch ($responseType) {
-				case Component::RESPONSE_TYPE_READ:
-				case Component::RESPONSE_TYPE_NOTIFY:
-				case Component::RESPONSE_TYPE_FORM:
-				case Component::RESPONSE_TYPE_ERROR:
-					$this->datamodel["private"]["responseType"] = $responseType;
+				case self::RESPONSE_TYPE_READ:
+				case self::RESPONSE_TYPE_NOTIFY:
+				case self::RESPONSE_TYPE_FORM:
+				case self::RESPONSE_TYPE_ERROR:
+					$this->setResponseType($responseType);
 					break;
 				case null:
 					break;
 				default:
-					throw new InternalErrorException("Metodo onProcess non valido per il componente " . $this->getName());
+					throw new \system\InternalErrorException("Metodo onProcess non valido per il componente " . $this->getName());
 			}
 
-			$this->tplManager->setMainTemplate($this->getTemplate());
-
 			if (!\is_null($responseType)) {
-				// Processo il template
+				// Loading temapltes
+				$this->tplManager->setMainTemplate($this->getTemplate());
+				// Adding the output to the buffer
 				$this->tplManager->process($this->datamodel);
 			}
 
 			if (!$this->nested) {
+				// Displays the output
 				$pageOutput = \ob_get_flush();
 			}
 		}
 		
 		catch (\Exception $ex) {
-			// Eccezione non gestita
+			// Uncaught exception
+			
+			// Cleaning the buffer
+//			while (\ob_get_clean());
 
-			$mtime_end = \microtime(true);
-
-
-			while (\ob_get_clean());
-
-			\ob_start();
-
-			$this->datamodel["private"]["responseType"] = Component::RESPONSE_TYPE_ERROR;
-			\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $ex,	\round($mtime_end - $mtime_start, 3));
-
-//			if ($this->nested) {
-//				$pageOutput = \ob_get_clean();
-//			} else {
-//				$pageOutput = \ob_get_flush();
-//			}
-
-
-			try {
-				$id = \module\core\model\XmcaLog::saveLog($this->getName(), $pageOutput);
-			} catch (\Exception $ex) {
-				echo "<h1>" . $ex->getMessage() . "</h1>";
-				if ($ex instanceof DataLayerException) {
-					echo $ex->getHtmlMessage();
-				}
-				// Eccezione non gestita
-			}
+			// onError event
+			$this->onError($ex);
 		}
 		
-		self::popActiveComponent();
+		self::popComponent();
 	}
 }
 ?>

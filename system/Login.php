@@ -1,8 +1,6 @@
 <?php
 namespace system;
 
-use module\core\model\XmcaUser;
-
 define("LOGIN_COOKIE_TIME", (time()+(3600*24*5))); // 5 giorni
 
 
@@ -52,13 +50,13 @@ class Login {
 	public function getUser() {
 		if (!$this->isAnonymous()) {
 			if (\is_null($this->user)) {
-				$userBuilder = new XmcaUser();
+				$userBuilder = new RecordsetBuilder("user");
 				$userBuilder->using(
 					"id",
 					"full_name",
 					"last_login"
 				);
-				$userBuilder->setFilter(new FilterClause($userBuilder->searchMetaType("id"), "EQ", $this->getId()));
+				$userBuilder->setFilter(new \system\model\FilterClause($userBuilder->searchMetaType("id"), "EQ", $this->getId()));
 				$this->user = $userBuilder->selectFirst();
 			}
 			
