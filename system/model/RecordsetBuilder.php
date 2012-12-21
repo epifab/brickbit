@@ -128,6 +128,8 @@ class RecordsetBuilder {
 	 * @var MetaType[][]
 	 */
 	private $keyList = array();
+	
+	private $primaryKey = null;
 	/**
 	 * Lista di associazioni nome relazione => RecordsetBuilder relazione appartenenti al nodo
 	 * @var RecordsetBuilder[]
@@ -180,7 +182,15 @@ class RecordsetBuilder {
 	}
 	
 	public function isAutoIncrement() {
-		return $this->autoIncrement;
+		return $this->getPrimaryKey()
+			? $this->primaryKey()->isAutoIncrement()
+			: false;
+	}
+	
+	public function getAIMetaType() {
+		return $this->isAutoIncrement()
+			? \current($this->primaryKey()->fields())
+			: null;
 	}
 	
 	private function loadMetaType($name) {
@@ -188,20 +198,35 @@ class RecordsetBuilder {
 			foreach ($this->tableInfo["fields"] as $name => $info) {
 				$this->loadMetaType($name);
 			}
+			return $this->getMetaTypeList();
 		} else if (\array_key_exists($name, $this->tableInfo["fields"])) {
-			$metaType = $this->tableInfo["fields"][$name]["type"]();
+			$metaTypeClass = "\\system\\model\\" . $this->tableInfo["fields"][$name]["type"];
+			$metaType = new $metaTypeClass($name, $this);
+			$this->metaTypeList[$name] = $metaType;
 			return $metaType;
 		}
 	}
 	
+	/**
+	 * @param RecordsetBuilder $name
+	 * @return \system\model\self 
+	 */
 	private function loadRelationBuilder($name) {
+		if (\array_key_exists($name, $this->relationBuilderList)) {
+			return $this->relationBuilderList[$name];
+		}
+		
 		if (\array_key_exists($name, $this->tableInfo["relations"])) {
 			$info = $this->tableInfo["relations"][$name];
-			$builder = new self($name);
+			$builder = new self($info["table"]);
 			$builder->setParent($this, $name, $info["clauses"], $info["type"]);
 			$builder->setOnUpdate(\array_key_exists("onUpdate", $info) ? $info["onUpdate"] : "NO_ACTION");
 			$builder->setOnDelete(\array_key_exists("onDelete", $info) ? $info["onDelete"] : "NO_ACTION");
 			$builder->setJoinType(\array_key_exists("join", $info) ? $info["join"] : "LEFT");
+			$this->relationBuilderList[$name] = $builder;
+			$builder->hasMany()
+				? $this->hasOneRelationBuilderList[$name] = $builder
+				: $this->hasManyRelationBuilderList[$name] = $builder;
 			return $builder;
 		}
 	}
@@ -222,22 +247,29 @@ class RecordsetBuilder {
 			}
 		}
 		
-		$key = array();
-		foreach ($keyInfo as $fieldName) {
-			$this->using($fieldName);
-			$key[] = $this->searchMetaType($fieldName);
+		$key = new Key($name, $this);
+		\reset($this->tableInfo["keys"]);
+		$key->setPrimary($keyInfo == \current($this->tableInfo["keys"]));
+		if ($key->isPrimary()) {
+			$this->primaryKey = $key;
+			$key->setAutoIncrement(\system\Utils::getParam($keyInfo, 'autoIncrement', array('default' => false)));
 		}
+		if (\array_key_exists('desc', $keyInfo)) {
+			$key->setDesc($keyInfo['desc']);
+		}
+		foreach ($keyInfo['fields'] as $fieldName) {
+			$this->using($fieldName);
+			$key->addMetaType($this->searchMetaType($fieldName));
+		}
+		
+		$this->keyList[$name] = $key;
+		
 		return $key;
 	}
 	
 	public function __construct($tableName) {
 		$this->tableName = $tableName;
 		$this->tableInfo = \system\logic\Module::getTable($tableName);
-		if (\count($this->tableInfo["keys"]) > 0) {
-			\reset($this->tableInfo["keys"]);
-			$k = \current($this->tableInfo["keys"]);
-			$this->autoIncrement = \array_key_exists("autoIncrement", $k) ? (bool)$k["autoIncrement"] : false;
-		}
 		// Automatically importing record mode
 		if ($this->isRecordModed()) {
 			$this->using("record_mode.*");
@@ -288,9 +320,9 @@ class RecordsetBuilder {
 		}
 		
 		// Importa automaticamente i campi che fanno parte della JOIN
-		foreach ($this->clauses as $parentField => $childField) {
-			$this->parentBuilder->using($parentField);
-			$this->using($childField);
+		foreach ($this->clauses as $clause) {
+			$this->parentBuilder->using(key($clause));
+			$this->using(current($clause));
 		}
 		
 		if ($parentBuilder->importKeys == self::KEYS_PRIMARY_RECURSIVE) {
@@ -303,7 +335,7 @@ class RecordsetBuilder {
 	private function useAllKeys() {
 		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
 			foreach ($this->tableInfo["keys"] as $name => $key) {
-				$this->keyList[$name] = $this->loadKey($name);
+				$this->loadKey($name);
 			}
 		}
 		$this->importKeys = self::KEYS_ALL;
@@ -321,7 +353,7 @@ class RecordsetBuilder {
 	private function usePrimaryKey() {
 		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
 			foreach ($this->tableInfo["keys"] as $name => $key) {
-				$this->keyList[$name] = $this->loadKey($name);
+				$this->loadKey($name);
 				break; // only the first key
 			}
 		}
@@ -387,6 +419,8 @@ class RecordsetBuilder {
 	public function getHasManyRelationBuilderList() {
 		return $this->hasManyRelationBuilderList;
 	}
+	
+	
 	/**
 	 * Restituisce la lista degli oggetti RecordsetBuilder associati alle relazioni *-1
 	 * direttamente figlie del nodo corrente
@@ -414,6 +448,21 @@ class RecordsetBuilder {
 		return $this->metaTypeList;
 	}
 	
+	public function searchKey($path, $required=false) {
+		$res = $this->searchProperty($path);
+		if ($res == null) {
+			if ($required) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Key @path not found.', array('@path' => $path)));
+			} else {
+				return null;
+			}
+		} else if (\is_array($res)) {
+			return $res;
+		} else {
+			throw new \system\InternalErrorException(\system\Lang::translate('Key @path not found.', array('@path' => $path)));
+		}
+	}
+	
 	/**
 	 * Cerca un oggetto MetaType associato ad una relazione esplorando l'albero del recordset
 	 * a partire dal nodo corrente e prendendo in considerazione soltanto relazioni del tipo <strong>HAS ONE</strong>
@@ -421,15 +470,21 @@ class RecordsetBuilder {
 	 * @return MetaType Il metodo restituisce null se il path non corrisponde a nessuna proprieta'
 	 * @throws \system\InternalErrorException Se il path non corrisponde ad un campo ma bensi' ad una relazione
 	 */
-	public function searchMetaType($path) {
+	public function searchMetaType($path, $required=false) {
 		$res = $this->searchProperty($path);
-		if ($res == null || $res instanceof MetaType) {
+		if ($res == null) {
+			if ($required) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Field <em>@path</em> not found.', array('@path' => $path)));
+			} else {
+				return null;
+			}
+		} else if ($res instanceof MetaType) {
 			return $res;
 		} else {
-			throw new \system\InternalErrorException("Il path $path non corrisponde ad un campo");
+			throw new \system\InternalErrorException(\system\Lang::translate('Field <em>@path</em> not found.', array('@path' => $path)));
 		}
 	}
-
+	
 	/**
 	 * Cerca un oggetto RecordsetBuilder associato ad una relazione esplorando l'albero del recordset
 	 * a partire dal nodo corrente e prendendo in considerazione soltanto relazioni del tipo <strong>HAS ONE</strong>
@@ -437,13 +492,41 @@ class RecordsetBuilder {
 	 * @return RecordsetBuilder Il metodo restituisce null se il path non corrisponde a nessuna proprieta'
 	 * @throws \system\InternalErrorException Se il path non corrisponde ad un campo ma bensi' ad una relazione
 	 */
-	public function searchRelationBuilder($path) {
+	public function searchRelationBuilder($path, $required=false) {
 		$res = $this->searchProperty($path);
-		if ($res == null || $res instanceof RecordsetBuilder) {
+		if ($res == null) {
+			if ($required) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Relation @path not found.', array('@path' => $path)));
+			} else {
+				return null;
+			}
+		} else if ($res instanceof RecordsetBuilder) {
 			return $res;
 		} else {
-			throw new \system\InternalErrorException("Il path $path non corrisponde a nessun campo importato");
+			throw new \system\InternalErrorException(\system\Lang::translate('Relation @path not found.', array('@path' => $path)));
 		}
+	}
+	
+	public function searchHasOneRelationBuilder($path, $required=false) {
+		$rel = $this->searchRelationBuilder($path, $required);
+		if (\is_null($rel)) {
+			return null;
+		}
+		if ($rel->hasMany()) {
+			throw new \system\InternalErrorException(\system\Lang::translate('Has-one relation @path not found.', array('@path' => $path)));
+		}
+		return $rel;
+	}
+	
+	public function searchHasManyRelationBuilder($path, $required=false) {
+		$rel = $this->searchRelationBuilder($path, $required);
+		if (\is_null($rel)) {
+			return null;
+		}
+		if (!$rel->hasMany()) {
+			throw new \system\InternalErrorException(\system\Lang::translate('Has-many Relation @path not found.', array('@path' => $path)));
+		}
+		return $rel;
 	}
 	
 	/**
@@ -462,6 +545,8 @@ class RecordsetBuilder {
 					$this->paths[$path] = $this->metaTypeList[$path];
 				} else if (\array_key_exists($path, $this->relationBuilderList)) {
 					$this->paths[$path] = $this->relationBuilderList[$path];
+				} else if (\array_key_exists($path, $this->keyList)) {
+					$this->paths[$path] = $this->keyList[$path];
 				} else {
 					$this->paths[$path] = null;
 				}
@@ -513,7 +598,7 @@ class RecordsetBuilder {
 		return $this->relationName;
 	}
 	
-	public function hasMary() {
+	public function hasMany() {
 		return \is_null($this->parentBuilder) || $this->relationType != "1-1";
 	}
 	
@@ -630,11 +715,7 @@ class RecordsetBuilder {
 	 * @return string[]
 	 */
 	public function getPrimaryKey() {
-		if (count($this->keyList > 0)) {
-			return reset($this->keyList);
-		} else {
-			return null;
-		}
+		return $this->primaryKey;
 	}
 	
 	/**
@@ -645,6 +726,10 @@ class RecordsetBuilder {
 		return $this->keyList;
 	}
 	
+	/**
+	 * @param string $name
+	 * @return Key
+	 */
 	public function getKey($name) {
 		if (!\array_key_exists($name, $this->keyList)) {
 			return null;
@@ -657,9 +742,7 @@ class RecordsetBuilder {
 	private function evalSelectExpression($expression) {
 		// Analizzo l'espressione selezionando tutti i percorsi dei campi 
 		// specificati attraverso la sintassi @[PATH]
-//		if ($this->getAbsolutePath()== "title_image")
-//		throw new \Exception($this->getAbsolutePath() . " " . $this->getTableName() . " " . $this->getTableAlias());
-		
+
 		$matches = array();
 		\preg_match_all("/\@\[[a-zA-Z\.0-9_]+\]/", $expression, $matches, PREG_OFFSET_CAPTURE);
 
@@ -700,7 +783,42 @@ class RecordsetBuilder {
 		return $fullExpression;
 	}
 	
+	public function usingAll() {
+		$ti = $this->getTableInfo();
+		foreach ($ti["relations"] as $relationName => $relationInfo) {
+			if (!$this->parentBuilder || \count(\array_diff($relationInfo["clauses"], $this->getClauses())) > 0) {
+				// it just prevent short endless loops:
+				//  if the loop involves more than two relations it won't be catched by the if statement above
+				//  (it catches A->B->A but not A->B->C->A)
+				if ($relationInfo["type"] != "1-N") {
+					$this->using($relationName . ".*");
+					$this->searchRelationBuilder($relationName)->usingAll();
+				}
+			}
+		}
+	}
 	
+	public function setRelation($path, RecordsetBuilder $relation) {
+		$dotPosition = strpos($path, ".");
+
+		if ($dotPosition === false) {
+			if (\array_key_exists($path, $this->tableInfo['relations'])) {
+				$this->relationBuilderList[$path] = $relation;
+			} else {
+				throw new \system\InternalErrorException(\system\Lang::translate('Relation <em>@path</em> not found.', array('@path' => $path)));
+			}
+		}
+		else {
+			$current = substr($path, 0, $dotPosition);
+			$rest = substr($path, $dotPosition+1);
+			$builder = $this->loadRelationBuilder($current);
+			if (\is_null($builder)) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Relation <em>@path</em> not found.', array('@path' => $path)));
+			}
+			$builder->setRelation($rest, $relation);
+		}
+	}
+
 	/**
 	 * Metodo per importare nuovi campi e relazioni HAS ONE all'interno dell'albero del recordset builder.<br/>
 	 * Prende in input un numero di parametri opzionale corrispondente ai vari path che si desidera importare
@@ -708,7 +826,7 @@ class RecordsetBuilder {
 	public function using() {
 		
 		foreach (\func_get_args() as $path) {
-			$dotPosition = strpos($path, ".");
+			$dotPosition = \strpos($path, ".");
 
 			if ($dotPosition === false) {
 				$current = $path;
@@ -720,57 +838,27 @@ class RecordsetBuilder {
 			}
 
 			if (\is_null($rest)) {
-				// Potrebbe essere una relazione o un campo
-
-				// Controllo se la proprieta' non e' stata gia' importata
-				if (!\array_key_exists($current, $this->metaTypeList) && !\array_key_exists($current, $this->relationBuilderList)) {
-
-					$relation = null;
-					// Cerco la proprieta' tra i campi da importare
-					$field = $this->loadMetaType($current);
-
-					if (!\is_null($field)) {
-						// La proprieta' e' un campo: lo importo
-						$this->metaTypeList[$current] = $field;
-					} else {
-						// La proprieta' non e' un campo...
-						// La cerco tra le has one relations
-						$relation = $this->loadRelationBuilder($current);
-						if (!\is_null($relation)) {
-							// La proprieta' e' una relazione: la importo
-							$this->relationBuilderList[$current] = $relation;
-							$relation->hasMany() 
-								? $this->hasManyRelationBuilderList[$current] = $relation
-								: $this->hasOneRelationBuilderList[$current] = $relation;
-						} else {
-							// La proprieta' non e' ne' un campo ne' una relazione.. ERRORE
-							throw new \system\InternalErrorException("Path $path non valido");
-						}
+				$found = !\is_null($this->loadMetaType($current));
+				if (!$found) {
+					$found = !\is_null($this->loadRelationBuilder($current));
+					if (!$found) {
+						$found = !\is_null($this->loadKey($current));
 					}
+				}
+				if (!$found) {
+					// The property is neither a field nor a key nor a relation
+					throw new \system\InternalErrorException(\system\Lang::translate('Field, key or relation <em>@path</em> not found.', array('@path' => $path)));
 				}
 			}
 			else {
 				// Deve trattarsi di una relazione
-
-				// Controllo se la relazione non e' stata gia' importata
-				if (\array_key_exists($current, $this->relationBuilderList)) {
-					$relation = $this->relationBuilderList[$current];
+				$relation = $this->loadRelationBuilder($current);
+				
+				if (\is_null($relation)) {
+					// The property is neither a field nor a key nor a relation
+					throw new \system\InternalErrorException(\system\Lang::translate('Relation <em>@path</em> not found.', array('@path' => $path)));
 				}
-				else {
-					// Cerco la relazione tra le has one relation
-					$relation = $this->loadRelationBuilder($current);
-					if (!\is_null($relation)) {
-						// La proprieta' e' una relazione: la importo
-						$this->relationBuilderList[$current] = $relation;
-						$relation->hasMany() 
-							? $this->hasManyRelationBuilderList[$current] = $relation
-							: $this->hasOneRelationBuilderList[$current] = $relation;
-					} else {
-						// La proprieta' non e' una relazione.. ERRORE
-						throw new \system\InternalErrorException("Path $path non corrisponde a nessuna relazione valida");
-					}
-				}
-
+				
 				$relation->using($rest);
 			}
 		}
@@ -880,20 +968,20 @@ class RecordsetBuilder {
 	}
 	
 	public function addReadModeFilters() {
-		$this->addRecordModeFilters(true);
+		$this->addRecordModeFilters("read");
 	}
 	
 	public function addEditModeFilters() {
-		$this->addRecordModeFilters(false);
+		$this->addRecordModeFilters("edit");
 	}
 	
-	private function addRecordModeFilters($read=true) {
+	public function addDeleteModeFilters() {
+		$this->addRecordModeFilters("delete");
+	}
+	
+	private function addRecordModeFilters($mode_type) {
 		if ($this->isRecordModed()) {
-			if ($read) {
-				$mode = "read_mode";
-			} else {
-				$mode = "edit_mode";
-			}
+			$mode = $mode_type . "_mode";
 
 			// CONDIZIONE 1: record mode > NOBODY
 			$rmFilter = new FilterClauseGroup(
@@ -901,7 +989,7 @@ class RecordsetBuilder {
 			);
 
 			// Tolta la condizione 1, se l'utente è un superutente, non c'è nient'altro da verificare
-			if (!\module\core\model\XmcaUser::isSuperuser(\system\Login::getLoggedUserId())) {
+			if (!\system\Login::getLoggedUserId || !\system\Login::getLoggedUser()->superuser) {
 				// SOLTANTO SE l'utente NON e' un un SUPERUSER
 				// l'accesso si restringe a queste condizioni:
 				// modalità = ANYONE
@@ -914,7 +1002,7 @@ class RecordsetBuilder {
 					$roleFilter = new FilterClauseGroup(
 						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ROLE),
 						"AND",
-						new CustomClause($this->record_mode->getTableAlias() . "." . $this->record_mode->role_id->getName() . " IN (SELECT role_id FROM xmca_user_role WHERE user_id = " .	\system\Login::getLoggedUserId() . ")")
+						new CustomClause($this->record_mode->getTableAlias() . "." . $this->record_mode->role_id->getName() . " IN (SELECT role_id FROM user_role WHERE user_id = " .	\system\Login::getLoggedUserId() . ")")
 					);
 
 					$ownerFilter = new FilterClauseGroup(
@@ -955,7 +1043,7 @@ class RecordsetBuilder {
 	 * @return RecordsetInterface
 	 */
 	public function selectFirstBy($fieldPath, $value) {
-		$newFilter = new FilterClause($this->searchMetaType($fieldPath), (\is_null($value) ? "IS_NULL" : "="), $value);
+		$newFilter = new FilterClause($this->searchMetaType($fieldPath, true), (\is_null($value) ? "IS_NULL" : "="), $value);
 		
 		if (\is_null($this->filterClauses)) {
 			$oldFilter = null;

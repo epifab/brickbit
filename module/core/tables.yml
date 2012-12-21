@@ -1,3 +1,102 @@
+dir:
+  fields:
+    id:
+      type: MetaInteger
+    path:
+      type: MetaString
+      size: 32
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    files:
+      table: file
+      clauses: [id: dir_id]
+      type: 1-N
+      onDelete: CASCADE
+file:
+  fields:
+    id:
+      type: MetaInteger
+    dir_id:
+      type: MetaInteger
+    name:
+      type: MetaString
+      size: 32
+    path:
+      type: MetaVirtual
+      dependencies: [dir.path]
+      handle: |
+        function($file) {
+          return $file->dir->path . $file->name;
+        }
+    extension:
+      type: MetaVirtual
+      dependencies: [name]
+      handle: |
+        function($file) {
+          return \system\File::getExtension($file->name);
+        }
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    files:
+      table: file
+      clauses: [id: dir_id]
+      type: 1-N
+      onDelete: CASCADE
+image:
+  fields:
+    id:
+      type: MetaInteger
+    file1_id:
+      type: MetaInteger
+    width1:
+      type: MetaInteger
+    height1:
+      type: MetaInteger
+    file2_id:
+      type: MetaInteger
+    width2:
+      type: MetaInteger
+    height2:
+      type: MetaInteger
+    file3_id:
+      type: MetaInteger
+    width3:
+      type: MetaInteger
+    height3:
+      type: MetaInteger
+    file4_id:
+      type: MetaInteger
+    width4:
+      type: MetaInteger
+    height4:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    file1:
+      table: file
+      clauses: [file1_id: id]
+      type: N-1
+    file2:
+      table: file
+      clauses: [file2_id: id]
+      type: N-1
+    file3:
+      table: file
+      clauses: [file3_id: id]
+      type: N-1
+    file4:
+      table: file
+      clauses: [file4_id: id]
+      type: N-1
 comment:
   fields:
     id:
@@ -26,12 +125,42 @@ comment:
       type: N-1
       clauses: [comment_id: id]
       join: LEFT
-content:
-  class: Content
+
+node_text:
+  fields:
+    node_id:
+      type: MetaInteger
+    lang:
+      type: MetaString
+      size: 2
+    title:
+      type: MetaString
+      size: 64
+    subtitle:
+      type: MetaString
+      size: 128
+    preview:
+      type: MetaString
+      size: 256
+    body:
+      type: MetaString
+  keys:
+    primary_key:
+      fields: [node_id, lang]
+  relations:
+    node:
+      type: N-1
+      table: node
+      clauses: [node_id: id]
+
+node:
   fields:
     id:
       type: MetaInteger
-    page_id:
+    urn:
+      type: MetaString
+      size: 32
+    record_mode_id:
       type: MetaInteger
     ldel:
       type: MetaInteger
@@ -41,79 +170,139 @@ content:
       type: MetaInteger
     type:
       type: MetaString
-      size: 32
+      size: 16
+    subtype:
+      type: MetaString
+      size: 16
     sort_index:
       type: MetaInteger
     image_id:
       type: MetaInteger
-    video_file_id:
+    file_id:
       type: MetaInteger
-    audio_file_id:
-      type: MetaInteger
-    download_file_id:
-      type: MetaInteger
-    expandable:
-      type: MetaBoolean
-    comments:
-      type: MetaBoolean
-    # virtual fields
-    download_file_url:
-      type: MetaVirtual
-      handle: |
-        function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/download/' . $recordset->url . '.' . $recordset->download_file->extension;
-        }
-    video_file_url:
-      type: MetaVirtual
-      handle: |
-        function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/video/' . $recordset->url . '.' . $recordset->video_file->extension;
-        }
-    audio_file_url:
-      type: MetaVirtual
-      handle: |
-        function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/audio/' . $recordset->url . '.' . $recordset->audio_file->extension;
-        }
     image1_url:
       type: MetaVirtual
+      dependencies: [urn, image.file1.extension]
       handle: |
         function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/image/1/' . $recordset->url . '.' . $recordset->image->file1->extension;
+          return \config\settings()->BASE_DIR . 'node/image/1/' . $recordset->urn . '.' . $recordset->image->file1->extension;
         }
     image2_url:
       type: MetaVirtual
+      dependencies: [urn, image.file2.extension]
       handle: |
         function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/image/2/' . $recordset->url . '.' . $recordset->image->file2->extension;
+          return \config\settings()->BASE_DIR . 'node/image/2/' . $recordset->urn . '.' . $recordset->image->file2->extension;
         }
     image3_url:
       type: MetaVirtual
+      dependencies: [urn, image.file3.extension]
       handle: |
         function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/image/3/' . $recordset->url . '.' . $recordset->image->file3->extension;
+          return \config\settings()->BASE_DIR . 'node/image/3/' . $recordset->urn . '.' . $recordset->image->file3->extension;
         }
     image4_url:
       type: MetaVirtual
+      dependencies: [urn, image.file4.extension]
       handle: |
         function($recordset) {
-          return \config\settings()->BASE_DIR . 'content/image/4/' . $recordset->url . '.' . $recordset->image->file4->extension;
+          return \config\settings()->BASE_DIR . 'node/image/4/' . $recordset->urn . '.' . $recordset->image->file4->extension;
         }
+    file_url:
+      type: MetaVirtual
+      dependencies: [urn, file.extension]
+      handle: |
+        function($recordset) {
+          return \config\settings()->BASE_DIR . 'node/file/' . $recordset->urn . '.' . $recordset->file->extension;
+        }
+    url:
+      type: MetaVirtual
+      dependencies: [urn, type]
+      handle: |
+        function($recordset) {
+          switch ($recordset->type) {
+            case 'page':
+              return \config\settings()->BASE_DIR . $recordset->urn . '.html';
+              break;
+            default:
+              return \config\settings()->BASE_DIR . $recordset->type . '/' . $recordset->urn . '.html';
+          }
+        }
+
   keys:
     primary_key:
       fields: [id]
-    url_kry:
+    urn_key:
       fields: [url]
+
   relations:
-    contents:
-      table: content
+    children:
+      table: node
       type: 1-N
-      clauses: [id: supercontent_id]
-      join: INNER
+      clauses: [id: parent_id]
       onDelete: CASCADE
+    texts:
+      table: node_text
+      type: 1-N
+      clauses: [id: node_id]
+      onDelete: CASCADE
+    text_en:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filters: [lang: 'en']
+    text_it:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filters: [lang: 'it']
+    file:
+      table: file
+      type: 1-1
+      clauses: [file_id: id]
+      onDelete: CASCADE
+    image:
+      table: image
+      type: 1-1
+      clauses: [image_id: id]
+      onDelete: CASCADE
+    page_header:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: page-header]
+    page_footer:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: page-footer]
+    page_banners:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: page-banner]
+    page_articles:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: article]
+    article_attachements:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: article-attachement]
+    article_mp3s:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: article-mp3]
+    article_videos:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filters: [type: article-video]
     parent:
-      table: content
-      type: N1
-      clauses: [supercontent_id: id]
+      table: node
+      type: N-1
+      clauses: [parent_id: id]
       join: INNER
-      lazy: true

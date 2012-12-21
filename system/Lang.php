@@ -58,7 +58,9 @@ class Lang {
 			}
 		}
 		if (!\is_null($args)) {
-			$sentence = \preg_replace(\array_keys($args), \array_values($args), $sentence);
+			foreach ($args as $key => $value) {
+				$sentence = \str_replace($key, $value, $sentence);
+			}
 		}
 		return $sentence;
 	}

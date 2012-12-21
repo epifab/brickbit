@@ -45,7 +45,6 @@ function smarty_block_xmca_autocomplete($args, $content, Smarty_Internal_Data &$
 		}
 		$label = $args["label"];
 
-		$component = \array_key_exists("component", $args) ? $args["component"] : "Autocomplete";
 		$class = @$args["class"];
 		$name = @$args["name"];
 		$defaultValue = @$args["defaultValue"];

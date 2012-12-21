@@ -94,8 +94,8 @@ abstract class Module {
 								$moduleInfo["events"][$eventName] = \method_exists($moduleInfo["class"], $eventName);
 							}
 							$componentsInfo = array();
-							foreach ($components as $component) {
-								$componentClass = $componentsNs . @$component["class"];
+							foreach ($components as $componentName => $component) {
+								$componentClass = $componentsNs . \system\Utils::getParam($component, 'class', array('required'));
 								$componentsInfo[$componentClass] = array();
 								foreach (@$component["pages"] as $page) {
 									$action = (string)@$page["action"];
@@ -111,6 +111,8 @@ abstract class Module {
 									}
 
 									$componentsInfo[$componentClass][$regexp] = array(
+										"module" => $moduleName,
+										"name" => $componentName,
 										"class" => $componentClass,
 										"action" => $action
 									);
@@ -190,15 +192,15 @@ abstract class Module {
 		return '\module\\' . $module . '\\' . (is_null($subnamespace) ? '' : $subnamespace . '\\');
 	}
 	
-	public static function checkAccess($url, $urlArgs) {
-		$component = $this->getComponent($url);
+	public static function checkAccess($url, $request) {
+		$component = self::getComponent($url);
 		if (!\is_null($component)) {
-			\system\logic\Component::access($component["class"], $component["action"], $urlArgs);
+			\system\logic\Component::access($component["class"], $component["action"], $component["urlArgs"], $request);
 		}
 	}
 	
 	public static function getTable($name) {
-		$configuration = $this->getConfiguration();
+		$configuration = self::getConfiguration();
 		if (\array_key_exists($name, $configuration["model"])) {
 			return $configuration["model"][$name];
 		} else {
@@ -208,11 +210,18 @@ abstract class Module {
 	
 	public static function getTemplateManager() {
 		$tpl = new \system\TemplateManager();
-		$tpl->addTemplateDir(\system\Theme::getThemePath("templates"));
+		$themeTplPath = \system\Theme::getThemePath('templates');
+		
+		if (!\is_null($themeTplPath)) {
+			$tpl->addTemplateDir($themeTplPath);
+		}
 		
 		$conf = self::getConfiguration();
 		foreach ($conf["modules"] as $name => $class) {
-			$tpl->addTemplateDir(self::getNamespace($name, "templates"));
+			$moduleTplPath = self::getPath($name, 'templates');
+			if ($moduleTplPath) {
+				$tpl->addTemplateDir($moduleTplPath);
+			}
 		}
 		return $tpl;
 	}
@@ -244,9 +253,11 @@ abstract class Module {
 				if (\preg_match('@^' . $regexp . '$@', $url, $m)) {
 					\array_shift($m);
 					$urls[$url] = array(
+						"name" => $component["name"],
+						"module" => $component["module"],
 						"class" => $component["class"],
 						"action" => $component["action"],
-						"args" => $m
+						"urlArgs" => $m
 					);
 					break;
 //					\system\Utils::set("system-urls", $urls);
@@ -277,12 +288,14 @@ abstract class Module {
 		print_r($component);
 		if (!$component) {
 			$component = array(
-				 "class" => Module::getNamespace('core', 'components') . "Page",
-				 "action" => "Read",
-				 "args" => array("home")
+				"name" => "page",
+				"module" => "core",
+				"class" => Module::getNamespace('core', 'components') . "Page",
+				"action" => "Read",
+				"urlArgs" => array("home")
 			);
 		}
-		$obj = new $component["class"]($component["action"], $url, $component["args"], $request);
+		$obj = new $component["class"]($component["name"], $component["module"], $component["action"], $url, $component["urlArgs"], $request);
 		$obj->process();
 		
 		

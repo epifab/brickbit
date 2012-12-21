@@ -43,6 +43,10 @@ class Login {
 		return Login::getInstance()->id;
 	}
 	
+	public static function getLoggedUser() {
+		return self::getInstance()->user;
+	}
+	
 	public function isAnonymous() {
 		return $this->id == 0;
 	}
@@ -51,11 +55,7 @@ class Login {
 		if (!$this->isAnonymous()) {
 			if (\is_null($this->user)) {
 				$userBuilder = new RecordsetBuilder("user");
-				$userBuilder->using(
-					"id",
-					"full_name",
-					"last_login"
-				);
+				$userBuilder->using("*");
 				$userBuilder->setFilter(new \system\model\FilterClause($userBuilder->searchMetaType("id"), "EQ", $this->getId()));
 				$this->user = $userBuilder->selectFirst();
 			}

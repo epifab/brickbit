@@ -27,7 +27,7 @@ class TemplateManager extends \Smarty {
 		parent::__construct();
 		$this->addPluginsDir(array(
 			"plugins",
-			"tpl_plugins"
+			"system/tpl-api"
 		));
 		$this->setCompileDir(\config\settings()->TPL_CACHE_DIR);
 	}

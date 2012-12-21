@@ -18,6 +18,9 @@ RELEASE 1.0
     - \system\Lang
   - use method Lang::translate everywhere in the system
 
+  PHASE 1-2
+  - super simple application to test all the functionality implemented
+
   PHASE 2 [not started] (estimated 2 week)
   - write tecnichal documentation
     release 1.0 beta 1
@@ -107,3 +110,8 @@ module/core
 more
 - Name of the system?
 - Design the prototype website
+
+
+
+
+<{link url="home.html" target="dialog" class="" args=[]}>Hello!<{/link}>

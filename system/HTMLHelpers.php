@@ -153,7 +153,7 @@ class HTMLHelpers {
 
 		try {
 			
-			$templateManager->setMainTemplate("layout/Error");
+			$templateManager->setMainTemplate("error");
 			
 			$templateManager->process($datamodel);
 			

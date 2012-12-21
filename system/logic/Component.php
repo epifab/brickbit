@@ -1,24 +1,51 @@
 <?php
 namespace system\logic;
 
+use system\model\RecordsetBuilder;
+use system\model\Recordset;
+use system\model\RecordsetInterface;
+
+use system\model\MetaBoolean;
+use system\model\MetaDate;
+use system\model\MetaDateTime;
+use system\model\MetaInteger;
+use system\model\MetaOptions;
+use system\model\MetaReal;
+use system\model\MetaString;
+use system\model\MetaTime;
+use system\model\MetaVirtual;
+
+use system\HTMLHelpers;
+use system\Lang;
+use system\Login;
+use system\Theme;
+use system\TemplateManager;
+use system\Utils;
+
+use system\AuthorizationException;
+use system\ConversionException;
+use system\InternalErrorException;
+use system\ValidationException;
+
 abstract class Component {
 	//  components stack
 	private static $components = array();
 	private static $componentsCount = 0;
 	
-	protected $alias = null;
-	protected $action = null;
-	protected $url = null;
-	protected $urlArgs = null;
-	protected $request = null;
-	protected $nested = false;
+	private $name = null;
+	private $alias = null;
+	private $action = null;
+	private $url = null;
+	private $urlArgs = null;
+	private $requestData = null;
+	private $nested = false;
 	
 	protected $microTime = null;
 	
 	/**
-	 * @var \system\TemplateManager
+	 * @var TemplateManager
 	 */
-	protected $tplManager;
+	private $tplManager;
 	/**
 	 * @var mixed[]
 	 */
@@ -87,26 +114,26 @@ abstract class Component {
 	 * @param string $urlArgs url arguments
 	 * @return boolean true if 
 	 */
-	public static function access($component, $action, $urlArgs, $userId=null) {
+	public static function access($component, $action, $urlArgs, $request, $userId=null) {
 		if (\is_null($userId)) { 
-			$userId = \system\Login::getLoggedUserId();
+			$userId = Login::getLoggedUserId();
 		}
 		if (\method_exists($component, "access" . $action)) {
-			return (bool)\call_user_func(array($component, "access" . $action), $urlArgs, $userId);
+			return (bool)\call_user_func(array($component, "access" . $action), $urlArgs, $request, $userId);
 		} 
 		else if (\method_exists($component, "access")) {
-			return (bool)\call_user_func(array($component, "access"), $action, $urlArgs, $userId);
+			return (bool)\call_user_func(array($component, "access"), $action, $urlArgs, $request, $userId);
 		} 
 		return true;
 	}
 	
-	protected function onLoad() {
+	protected function init() {
 	}
 	
 	protected function onError($exception) {
 		$this->setResponseType(self::RESPONSE_TYPE_ERROR);
 		
-		\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
+		HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
 
 //			if ($this->nested) {
 //				$pageOutput = \ob_get_clean();
@@ -115,7 +142,7 @@ abstract class Component {
 //			}
 
 //		try {
-//			$id = \module\core\model\XmcaLog::saveLog($this->getName(), $pageOutput);
+//			$id = \module\core\model\XmcaLog::saveLog($this->name, $pageOutput);
 //		} catch (\Exception $ex) {
 //			echo "<h1>" . $ex->getMessage() . "</h1>";
 //			if ($ex instanceof DataLayerException) {
@@ -133,50 +160,47 @@ abstract class Component {
 		return self::RESPONSE_TYPE_READ;
 	}
 	
-	public function __construct($action, $url, $urlArgs, $request=null) {
+	public function __construct($name, $module, $action, $url, $urlArgs, $request=null) {
+		$this->name = $name;
+		$this->module = $module;
 		$this->action = $action;
 		$this->url = $url;
 		$this->urlArgs = $urlArgs;
-		$this->request = \is_null($request) ? $_REQUEST : (array)$request;
+		$this->requestData = \is_null($request) ? $_REQUEST : (array)$request;
 		$this->nested = \is_null(self::getCurrentComponent());
-		$this->alias = $this->getName();
+		$this->alias = $this->name;
 		if (!\is_null(self::getMainComponent())) {
 			'__' . $this->alias .= self::getMainComponent()->alias;
 		}
 	}
 	
-	public function getModule() {
-		list(,$module) = explode("\\",\get_class($this));
-		return $module;
-	}
-	
-	protected function generateNewRequestId() {
-		if (!\array_key_exists("xmca", $_SESSION)) {
-			$_SESSION["xmca"] = array();
-			$_SESSION["xmca"]["requestIds"] = array();
-		} else if (!\array_key_exists("requestIds", $_SESSION["xmca"])) {
-			$_SESSION["xmca"]["requestIds"] = array();
+	private function generateNewRequestId() {
+		if (!\array_key_exists('system', $_SESSION)) {
+			$_SESSION['system'] = array();
+			$_SESSION['system']['requestIds'] = array();
+		} else if (!\array_key_exists('requestIds', $_SESSION['system'])) {
+			$_SESSION['system']['requestIds'] = array();
 		}
-		if (!\array_key_exists($this->getName(), $_SESSION["xmca"]["requestIds"])) {
-			$_SESSION["xmca"]["requestIds"][$this->getName()] = 1;
+		if (!\array_key_exists($this->name, $_SESSION['system']['requestIds'])) {
+			$_SESSION['system']['requestIds'][$this->name] = 1;
 		} else {
-			$_SESSION["xmca"]["requestIds"][$this->getName()]++;
+			$_SESSION['system']['requestIds'][$this->name]++;
 		}
 	}
 	
 	protected function getCurrentRequestId() {
-		if (!\array_key_exists("xmca", $_SESSION) || !\array_key_exists("requestIds", $_SESSION["xmca"]) || !\array_key_exists($this->getName(), $_SESSION["xmca"]["requestIds"])) {
+		if (!\array_key_exists('system', $_SESSION) || !\array_key_exists('requestIds', $_SESSION['system']) || !\array_key_exists($this->name, $_SESSION['system']['requestIds'])) {
 			$this->generateRequestId();
 		}
-		return $this->getName() . $_SESSION["xmca"]["requestIds"][$this->getName()];
+		return $this->name . $_SESSION['system']['requestIds'][$this->name];
 	}
 	
 	protected function getRequestId() {
-		if (!\array_key_exists("xmca_request_id", $this->request)) {
+		if (!\array_key_exists("xmca_request_id", $this->requestData)) {
 			$this->generateNewRequestId();
 			return $this->getCurrentRequestId();
 		} else {
-			return $this->request["xmca_request_id"];
+			return $this->requestData["xmca_request_id"];
 		}
 	}
 	
@@ -184,37 +208,31 @@ abstract class Component {
 		static $info = null;
 		if (\is_null($info)) {
 			$info = array(
-				'name' => $this->getName(),
+				'name' => $this->name,
 				'module' => $this->getModule(),
 				'action' => $this->action,
 				'url' => $this->url,
 				'urlArgs' => $this->urlArgs,
-				'request' => $this->request,
+				'requestData' => $this->requestData,
 				'requestId' => $this->getRequestId(),
 				'nested' => $this->nested,
+				'alias' => $this->alias
 			);
 		}
 		return $info;
 	}
 	
-	private static function getGeneralInfo() {
+	private static function getWebsiteInfo() {
 		static $settings = null;
 		if (\is_null($settings)) {
 			$settings = array(
-				'website' => array(
-					'title' => \config\settings()->SITE_TITLE,
-					'subtitle' => \config\settings()->SITE_SUBTITLE,
-					'domain' => \config\settings()->DOMAIN,
-					'base' => \config\settings()->SITE_ADDRESS,
-				),
-				'lang' => \system\Lang::getLang(),
-				'langs' => \config\settings()->LANGUAGES,
-				'theme' => \system\Theme::getTheme(),
-				'themes' => \config\settings()->THEMES,
-				'ip' => \system\HTMLHelpers::getIpAddress(),
-				'ajax' => \system\HTMLHelpers::isAjaxRequest()
+				'title' => \config\settings()->SITE_TITLE,
+				'subtitle' => \config\settings()->SITE_SUBTITLE,
+				'domain' => \config\settings()->DOMAIN,
+				'base' => \config\settings()->SITE_ADDRESS,
 			);
 		}
+		return $settings;
 	}
 	
 	private function initView() {
@@ -224,28 +242,55 @@ abstract class Component {
 			'system' => array(
 				'component' => $this->getComponentInfo(),
 				'mainComponent' => self::getMainComponent()->getComponentInfo(),
-				'info' => self::getGeneralInfo(),
 				'mainTemplate' => null,
 				'templates' => array(),
 				// default response type
 				'responseType' => self::RESPONSE_TYPE_READ,
+				'ajax' => HTMLHelpers::isAjaxRequest(),
+				'ipAddress' => HTMLHelpers::getIpAddress(),
+				'lang' => Lang::getLang(),
+				'langs' => \config\settings()->LANGUAGES,
+				'theme' => Theme::getTheme(),
+				'themes' => \config\settings()->THEMES
 			),
+			'user' => Login::getLoggedUser(),
+			'website' => $this->getWebsiteInfo(),
 			'page' => array(
 				'title' => '',
 				'url' => self::getMainComponent()->url,
-				'metatag' => array(),
+				'meta' => array(),
 				'js' => array(),
 				'css' => array(),
 			)
 		);
 	}
 	
-	private function setResponseType($responseType) {
-		$this->datamodel['system']['responseType'] = $responseType;
+	protected function addJs($js) {
+		if (!\in_array($js, $this->datamodel['page']['js'])) {
+			$this->datamodel['page']['js'][] = $js;
+		}
 	}
 	
-	private function setMainTemplate($template) {
+	protected function addCss($css) {
+		if (!\in_array($css, $this->datamodel['page']['css'])) {
+			$this->datamodel['page']['css'][] = $css;
+		}
+	}
+	
+	protected function addMeta($meta) {
+		$this->datamodel['page']['meta'][] = $meta;
+	}
+	
+	protected function setMainTemplate($template) {
 		$this->datamodel['system']['mainTemplate'] = $template;
+	}
+	
+	protected function setOutlineTemplate($template) {
+		$this->tplManager->setOutlineTemplate($template);
+	}
+	
+	private function setResponseType($responseType) {
+		$this->datamodel['system']['responseType'] = $responseType;
 	}
 	
 	protected function addTemplate($key, $template) {
@@ -256,36 +301,48 @@ abstract class Component {
 		$this->datamodel['page']['title'] = ($adding && !empty($this->datamodel['page']['title']) ? $this->datamodel['system']['title'] . ' | ' : '') . $pageTitle;
 	}
 	
-	public function getName() {
-		return \get_class($this);
+	final public function getModule() {
+		return $this->module;
+	}
+	
+	final public function getName() {
+		return $this->name;
+	}
+	
+	final public function getAlias() {
+		return $this->alias;
 	}
 
-	public function getAction() {
+	final public function getAction() {
 		return $this->action;
 	}
 	
-	public function getUrl() {
+	final public function getUrl() {
 		return $this->url;
 	}
 	
-	// outlines di default
-	protected function getOutline() {
-		return null;
-//		return $this->nested ? null : (\system\HTMLHelpers::isAjaxRequest() ? "layout/outline-ajax" : "layout/outline");
+	final public function getUrlArgs() {
+		return $this->urlArgs;
 	}
 	
-	abstract function getTemplate();
+	final public function getRequestData() {
+		return $this->requestData;
+	}
+	
+	final public function isNested() {
+		return $this->nested;
+	}
 
 	///<editor-fold defaultstate="collapsed" desc="Metodi standard per inizializzazione di clausole">
-	protected function loadStdFilters(\system\model\RecordsetBuilder $builder, $prefix="") {
+	protected function loadStdFilters(RecordsetBuilder $builder, $prefix="") {
 		$index = $prefix . "filters";
 		
 		$lastLop = null;
 
-		if (\array_key_exists($index, $this->request) && \is_array($this->request[$index])) {
+		if (\array_key_exists($index, $this->requestData) && \is_array($this->requestData[$index])) {
 			$filterGroup = null;
 			
-			foreach ($this->request[$index] as $filter) {
+			foreach ($this->requestData[$index] as $filter) {
 
 				if (empty($filter) || !\is_array($filter) || !\array_key_exists("path", $filter) || empty($filter["path"])) {
 					continue;
@@ -333,12 +390,12 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdSorts(\system\model\RecordsetBuilder $builder, $prefix="") {
+	protected function loadStdSorts(RecordsetBuilder $builder, $prefix="") {
 		$index = $prefix . "sorts";
 
 		$sorts = null;
-		if (\array_key_exists($index, $this->request) && \is_array($this->request[$index])) {
-			foreach ($this->request[$index] as $sort) {
+		if (\array_key_exists($index, $this->requestData) && \is_array($this->requestData[$index])) {
+			foreach ($this->requestData[$index] as $sort) {
 				
 				if (empty($sort)) {
 					continue;
@@ -364,34 +421,34 @@ abstract class Component {
 		}
 	}
 	
-	protected function loadStdLimits(\system\model\RecordsetBuilder $builder, $pageSize=100, $prefix="") {
+	protected function loadStdLimits(RecordsetBuilder $builder, $pageSize=100, $prefix="") {
 		$index = $prefix . "paging";
 		
-		if (!\array_key_exists($index, $this->request) || !\is_array($this->request[$index])) {
-			$this->request[$index] = array();
-			$this->request[$index]["size"] = $pageSize;
-			$this->request[$index]["page"] = 0;
+		if (!\array_key_exists($index, $this->requestData) || !\is_array($this->requestData[$index])) {
+			$this->requestData[$index] = array();
+			$this->requestData[$index]["size"] = $pageSize;
+			$this->requestData[$index]["page"] = 0;
 		} else {
-			if (!\array_key_exists("size", $this->request[$index])) {
-				$this->request[$index]["size"] = $pageSize;
+			if (!\array_key_exists("size", $this->requestData[$index])) {
+				$this->requestData[$index]["size"] = $pageSize;
 			}
-			if (!\array_key_exists("page", $this->request[$index])) {
-				$this->request[$index]["page"] = 0;
+			if (!\array_key_exists("page", $this->requestData[$index])) {
+				$this->requestData[$index]["page"] = 0;
 			}
 		}
 		
-		if (!\is_numeric($this->request[$index]["page"]) || ((int)$this->request[$index]["page"]) < 0) {
+		if (!\is_numeric($this->requestData[$index]["page"]) || ((int)$this->requestData[$index]["page"]) < 0) {
 			throw new InternalErrorException("Parametro per la paginazione non valido");
 		}
-		if (!\is_numeric($this->request[$index]["size"]) || ((int)$this->request[$index]["size"]) < 0) {
+		if (!\is_numeric($this->requestData[$index]["size"]) || ((int)$this->requestData[$index]["size"]) < 0) {
 			throw new InternalErrorException("Parametro per la paginazione non valido");
 		}
 		
-		if ($this->request[$index]["size"] == 0) {
+		if ($this->requestData[$index]["size"] == 0) {
 			return;
 		} else {
-			$page = intval($this->request[$index]["page"]);
-			$size = intval($this->request[$index]["size"]);
+			$page = intval($this->requestData[$index]["page"]);
+			$size = intval($this->requestData[$index]["size"]);
 			$builder->setLimit(new LimitClause($size, $page*$size));
 		}
 	}
@@ -413,19 +470,17 @@ abstract class Component {
 		try {
 			$this->initView();
 			
-			$this->tplManager->setOutlineTemplate($this->getOutline());
-			
 			// checking permission
-			if (!self::access($this->getName(), $this->action, $this->urlArgs)) {
-				throw new \system\AuthorizationException("Utente non autorizzato");
+			if (!self::access($this->name, $this->action, $this->urlArgs, $this->requestData)) {
+				throw new AuthorizationException("Utente non autorizzato");
 			}
 			
-			// onLoad event
-			$this->onLoad();
+			// init event
+			$this->init();
 			
 			// onProcess event
-			if (\method_exists($this, "onProcess" . $this->action)) {
-				$responseType = \call_user_func("onProcess" . $this->action);
+			if (\method_exists($this, "on" . $this->action)) {
+				$responseType = \call_user_func(array($this, "on" . $this->action));
 			} else {
 				$responseType = $this->onProcess();
 			}
@@ -440,12 +495,10 @@ abstract class Component {
 				case null:
 					break;
 				default:
-					throw new \system\InternalErrorException("Metodo onProcess non valido per il componente " . $this->getName());
+					throw new InternalErrorException("Metodo onProcess non valido per il componente " . $this->name);
 			}
 
 			if (!\is_null($responseType)) {
-				// Loading temapltes
-				$this->tplManager->setMainTemplate($this->getTemplate());
 				// Adding the output to the buffer
 				$this->tplManager->process($this->datamodel);
 			}

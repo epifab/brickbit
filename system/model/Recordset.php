@@ -62,6 +62,13 @@ class Recordset implements RecordsetInterface {
 	}
 	
 	public function __get($name) {
+		
+		// HAS MANY RELATION COMPLETE AUTO IMPORT
+		if ($this->builder->hasManyRelationExists($name) && !$this->builder->searchRelationBuilder($name)) {
+			$this->builder->using($name . ".*");
+			$this->builder->searchRelationBuilder($name)->usingAll();
+		}
+		
 		if (\array_key_exists($name, $this->hasOneRelations)) {
 
 			// Has One Relation
@@ -159,7 +166,7 @@ class Recordset implements RecordsetInterface {
 			if ($mt && $mt instanceof MetaVirtual) {
 				return \call_user_func($mt->getHandler(), $this);
 			}
-			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> not found.', array("@name" => $name)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Field <em>@name</em> not found.', array("@name" => $name)));
 		}
 	}
 	
@@ -294,73 +301,6 @@ class Recordset implements RecordsetInterface {
 		$dataAccess->executeUpdate($query, __FILE__, __LINE__);
 	}
 
-//	private function deleteRelations() {
-//		foreach ($this->builder->getHasManyRelationBuilderList() as $name => $builder) {
-//			// forzo il caricamento di tutte le relazioni has many
-//			$recordsets = $this->__get($name);
-//
-//			if (count($recordsets) == 0) {
-//				continue;
-//			}
-//			
-//			// le cancello
-//			$query = "DELETE FROM " . $builder->getTableName();
-//			$where = "";
-//			foreach($builder->getClauses() as $parentField => $childField) {
-//				$where .= empty($where) ? " WHERE " : " AND ";
-//
-//				// recupero le informazioni sul campo della tabella madre
-//				$parentMetaType = $this->builder->searchMetaType($parentField);
-//				// imposto la clausola
-//				$where .= $childField . " = " . $parentMetaType->prog2Db($this->fields[$parentField]);
-//			}
-//			
-//			$query .= $where;
-//			
-//			// Cancello tutte le righe della relazione
-//			DataLayerCore::getInstance()->executeUpdate($query, __FILE__, __LINE__);
-//
-//			// Controllo che la chiave primaria della tabella
-//			// della has many relation associata
-//			// sia composta da un unico campo di tipo intero
-//			$deleteRecordModes = $builder->isRecordMode();
-//			
-//			foreach($recordsets as $recordset) {
-//				if ($deleteRecordModes) {
-//					// Cancello il record_mode associato al record della has many relation (se esiste)
-//					$recordset->deleteRecordMode();
-//				}
-//				$recordset->deleteRelations();
-//			}
-//		}
-//
-//		foreach ($this->builder->getHasOneRelationBuilderList() as $name => $builder) {
-//			
-//			$query = "DELETE FROM " . $builder->getTableName() . " WHERE ";
-//			$first = true;
-//			foreach($builder->getClauses() as $parentField => $childField) {
-//				$first ? $first = false : $query .= " AND ";
-//
-//				// recupero le informazioni sul campo della tabella madre
-//				$parentMetaType = $this->builder->searchMetaType($parentField);
-//				// imposto la clausola
-//				$query .= $childField . " = " . $parentMetaType->prog2Db($this->fields[$parentField]);
-//			}
-//			// Cancello tutte le righe della relazione
-//			DataLayerCore::getInstance()->executeUpdate($query, __FILE__, __LINE__);
-//
-//			$recordset = $this->__get($name);
-//			// Controllo che la chiave primaria della tabella
-//			// della has many relation associata
-//			// sia composta da un unico campo di tipo intero
-//			if ($builder->isRecordMode()) {
-//				// Cancello il record_mode associato alla has one relation (se esiste)
-//				$recordset->deleteRecordMode();
-//			}
-//			$recordset->deleteRelations();
-//		}
-//	}
-
 	/**
 	 * Cancella il record.
 	 */
@@ -381,29 +321,6 @@ class Recordset implements RecordsetInterface {
 		$dataAccess->executeUpdate($query, __FILE__, __LINE__);
 
 		$this->stored = false;
-
-//		foreach ($this->builder->getHasManyRelationBuilderList() as $name => $builder) {
-//			if ($builder->getOnDelete() == "CASCADE") {
-//				// forzo il caricamento di tutte le relazioni has many
-//				$recordsets = $this->__get($name);
-//
-//				if (count($recordsets) == 0) {
-//					continue;
-//				}
-//
-//				foreach ($recordsets as $recordset) {
-//					// Le cancello tutte una ad una
-//					$recordset->delete();
-//				}
-//			}
-//		}
-//
-//		foreach ($this->builder->getHasOneRelationBuilderList() as $name => $builder) {
-//			if ($builder->getOnDelete() == "CASCADE") {
-//				$this->__get($name)->delete();
-//			}
-//		}
-
 	}
 
 	/**
@@ -551,6 +468,107 @@ class Recordset implements RecordsetInterface {
 		$rs->upd_date_time = $recordMode->last_upd_date_time;
 		
 		$rs->create();
+	}
+	
+	
+	public static function checkKey($keyName, &$errors) {
+		$key = $this->builder->searchKey($keyName, true);
+		if (is_null($key)) {
+			throw new InternalErrorException("Chiave $keyName non trovata");
+		}
+		
+		$newFilter = null;
+		foreach ($key->getMetaTypes() as $metaType) {
+			$fieldValue = $this->getEdit($metaType->getName());
+			$filterClause = new FilterClause($metaType, "=", $fieldValue);
+			if (is_null($newFilter)) {
+				$newFilter = new FilterClauseGroup($filterClause);
+			} else {
+				$newFilter->addClauses("AND", $filterClause);
+			}
+		}
+		
+		if ($this->isStored()) {
+			// taglio il record corrispondente a quello che sto modificando
+			$primary = $this->builder->getPrimaryKey();
+			foreach ($primary as $metaType) {
+				$fieldValue = $this->getEdit($metaType->getName());
+				$filterClaue = new FilterClause($metaType, "<>", $fieldValue);
+				$newFilter->addClauses("AND", $filterClaue);
+			}
+		}
+		
+		$oldFilter = $this->builder->getFilter();
+		$this->builder->setFilter($newFilter);
+		$numRecords = $this->builder->countRecords(true);
+		$this->builder->setFilter($oldFilter);
+		
+		if ($numRecords == 0) {
+			return true;
+		} else {
+			foreach ($key as $metaType) {
+				$errors[$metaType->getAbsolutePath()] = "Chiave duplicata";
+			}
+			return false;
+		}
+	}
+	
+	public function checkHasOneRelation($relationName, &$errors, $required=true) {
+		$relationBuilder = $this->builder->searchHasOneRelationBuilder($relationName, true);
+		
+		$newFilter = null;
+		$nullRelation = false;
+		try {
+			foreach ($relationBuilder->getClauses() as $parentFieldName => $childFieldName) {
+				$fieldValue = $this->getEdit($parentFieldName);
+
+				if (\is_null($fieldValue)) {
+					if ($required || !\is_null($newFilter)) {
+						// due possibilita':
+						// 1 la relazione e' obbligatoria
+						// 2 ci sono campi del join che sono stati specificati mentre questo e' nullo
+						throw new \system\ValidationException("Alcuni campi della relazione $relationName sono nulli");
+					} else {
+						// relazione non obbligatoria e campo (fin'ora) tutti nulli
+						$nullRelation = true;
+					}
+				} else {
+					if ($nullRelation) {
+						// i campi fin'ora erano tutti nulli
+						throw new \system\ValidationException("Alcuni campi della relazione $relationName sono nulli");
+					}
+				}
+
+				$metaType = $relationBuilder->getMetaType($childFieldName);
+				$filterClause = new FilterClause($metaType, "=", $fieldValue);
+				if (\is_null($newFilter)) {
+					$newFilter = new FilterClauseGroup($filterClause);
+				} else {
+					$newFilter->addClauses("AND", $filterClause);
+				}
+			}
+			
+			if (\is_null($newFilter)) {
+				return true;
+			}
+		
+			$oldFilter = $relationBuilder->getFilter();
+			$relationBuilder->setFilter($newFilter);
+			$numRecords = $relationBuilder->countRecords(true);
+			$relationBuilder->setFilter($oldFilter);
+
+			if ($numRecords == 0) {
+				throw new ValidationException("I campi non identificano alcuna relazione");
+			}
+			
+			return true;
+			
+		} catch (\system\ValidationException $ex) {
+			foreach ($relationBuilder->getClauses() as $parentField => $childField) {
+				$errors[$this->builder->getMetaType($parentField)->getAbsolutePath()] = $ex->getMessage();
+			}
+			return false;
+		}
 	}
 }
 ?>

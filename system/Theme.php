@@ -14,11 +14,13 @@ class Theme {
 	public static function setTheme($theme) {
 		if (\in_array($theme, \config\settings()->THEMES)) {
 			self::$theme = $theme;
+		} else {
+			throw new \system\InternalErrorException(\system\Lang::translate('Theme <em>@name</em> not found.', array('@name' => $theme)));
 		}
 	}
 	
 	public static function getThemePath($subfolder=null) {
-		return "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
+		return \config\settings()->BASE_DIR . "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
 	}
 }
 ?>
