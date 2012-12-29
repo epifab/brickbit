@@ -43,11 +43,10 @@ file:
       fields: [id]
       autoIncrement: 1
   relations:
-    files:
-      table: file
-      clauses: [id: dir_id]
-      type: 1-N
-      onDelete: CASCADE
+    dir:
+      table: dir
+      clauses: [dir_id: id]
+      type: N-1
 image:
   fields:
     id:
@@ -152,7 +151,6 @@ node_text:
       type: N-1
       table: node
       clauses: [node_id: id]
-
 node:
   fields:
     id:

@@ -20,7 +20,7 @@ class DataLayerException extends \Exception {
 	private $htmlMessage = "";
 
 	public function __construct($file, $line, $query, $sqlError=null, $action=DataLayerException::ACTION_STANDARD) {
-		parent::__construct("Errore di accesso ai dati", 0, null);
+		parent::__construct(\system\Lang::translate("Data access error."), 0, null);
 		if (!empty($file)) {
 			$this->file = $file;
 		}
@@ -30,6 +30,7 @@ class DataLayerException extends \Exception {
 		$this->query = $query;
 		$this->sqlError = $sqlError;
 		$this->action = $action;
+		$this->message = $this->getTxtMessage();
 	}
 	
 	public function getAction() {
@@ -39,27 +40,27 @@ class DataLayerException extends \Exception {
 	public function getTxtMessage() {
 		if (empty($this->message)) {
 			$this->message =
-				"Errore di accesso ai dati.\r\n" .
+				\system\Lang::translate("Data access error.") . "\r\n" .
 				"\r\nFile ". (!empty($this->file) ? $this->file : "?") .", Line ". (!empty($this->line) ? $this->line : "?") .".\r\n\r\n";
 
 			switch ($this->action) {
 				case DataLayerException::ACTION_CONNECTION:
-					$this->message .= "Impossibile connettersi con il DBMS.\r\n";
+					$this->message .= \system\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
 					break;
 				case DataLayerException::ACTION_DB_SELECTION:
-					$this->message .= "Impossibile connettersi al database.\r\n";
+					$this->message .= \system\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
 					break;
 				case DataLayerException::ACTION_RETRIEVE_ID:
-					$this->message .= "Impossibile recuperare l'ID dell'ultimo record inserito.\r\n";
+					$this->message .= \system\Lang::translate("Unable to retrieve the last inserted id.") . "\r\n";
 					break;
 				default:
 					break;
 			}
 			if (!empty($this->sqlError)) {
-				$this->message .= "Dettagli errore: " . $this->sqlError . "\r\n\r\n";
+				$this->message .= \system\Lang::translate("Sql error details: @details", array('@details' => $this->sqlError)) . "\r\n\r\n";
 			}
 			if (!empty($this->query)) {
-				$this->message .= "Dettagli della query che ha generato l'errore:\r\n" . $query . "\r\n";
+				$this->message .= \system\Lang::translate("Sql query: @query", array('@query' => $this->query)) . "\r\n\r\n";
 			}
 		}
 		return $this->message;
@@ -67,28 +68,28 @@ class DataLayerException extends \Exception {
 
 	public function getHtmlMessage() {
 		if (empty($this->htmlMessage)) {
-			$this->htmlMessage = 
-				"<h3>Errore di accesso ai dati.</h3>\r\n\r\n" .
-				"<p>File ". (!empty($this->file) ? $this->file : "Sconosciuta") .", Line: ". (!empty($this->line) ? $this->line : "Sconosciuto") .".</p>\r\n\r\n";
+			$this->htmlMessage =
+				"<h3>" . \system\Lang::translate("Data access error.") . "</h3>" .
+				"<p>File ". (!empty($this->file) ? $this->file : "?") .", line ". (!empty($this->line) ? $this->line : "?") .".</p>";
 
 			switch ($this->action) {
 				case DataLayerException::ACTION_CONNECTION:
-					$this->htmlMessage .= "<p>Impossibile connettersi con il DBMS.</p>\r\n";
+					$this->htmlMessage .= "<p>" . \system\Lang::translate("Unable to connect to the DBMS.") . "</p>";
 					break;
 				case DataLayerException::ACTION_DB_SELECTION:
-					$this->htmlMessage .= "<p>Impossibile connettersi al database.</p>\r\n";
+					$this->htmlMessage .= "<p>" . \system\Lang::translate("Unable to connect to the DBMS.") . "</p>";
 					break;
 				case DataLayerException::ACTION_RETRIEVE_ID:
-					$this->htmlMessage .= "<p>Impossibile recuperare l'ID dell'ultimo record inserito.</p>\r\n";
+					$this->htmlMessage .= "<p>" . \system\Lang::translate("Unable to retrieve the last inserted id.") . "</p>";
 					break;
 				default:
 					break;
 			}
 			if (!empty($this->sqlError)) {
-				$this->htmlMessage .= "<p><strong>Dettagli errore:</strong><br/>" . $this->sqlError . "</p>";
+				$this->htmlMessage .= "<p>" . \system\Lang::translate("Sql error details: @details", array('@details' => $this->sqlError)) . "</p>";
 			}
 			if (!empty($this->query)) {
-				$this->htmlMessage .= "<p><strong>Dettagli della query che ha generato l'errore:</strong><br/><textarea rows=\"6\" cols=\"80\">" . \htmlentities($this->query, ENT_NOQUOTES, "UTF-8") . "</textarea></p>";
+				$this->htmlMessage .= "<p>" . \system\Lang::translate("Sql query: @query", array('@query' => $this->query)) . "</p>";
 			}
 		}
 		return $this->htmlMessage;

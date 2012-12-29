@@ -1,68 +1,78 @@
 module:
   fields:
+    id:
+      type: MetaInteger
     name:
       type: MetaString
       size: 32
+    class:
+      type: MetaString
+      size: 32
+    weight:
+      type: MetaInteger
     enabled:
       type: MetaBoolean
   keys:
     primary:
+      fields: [id]
+      autoIncrement: 1
+    name_key:
       fields: [name]
   relations:
     components:
       table: component
       type: 1-N
-      clauses: [name: module_name]
-    actions:
-      table: action
-      type: 1-N
-      clauses: [name: module_name]
+      clauses: [id: module_id]
+      onDelete: CASCADE
 component:
   fields:
-    module_name:
-      type: MetaString
-      size: 32
+    id:
+      type: MetaInteger
+    module_id:
+      type: MetaInteger
     name:
       type: MetaString
       size: 32
   keys:
     primary:
-      fields: [module_name, name]
+      fields: [id]
+    name_key:
+      fields: [module_id, name]
   relations:
     module:
       table: module
       type: N-1
-      clauses: [module_name: name]
+      clauses: [module_id: id]
     actions:
       table: action
       type: 1-N
-      clauses: [module_name: module_name, name: component_name]
+      clauses: [id: component_id]
+      onDelete: CASCADE
 action:
   fields:
-    module_name:
+    id:
+      type: MetaInteger
+    name:
       type: MetaString
       size: 32
-    component_name:
-      type: MetaString
-      size: 32
+    component_id:
+      type: MetaInteger
     name:
       type: MetaString
       size: 32
     url:
       type: MetaString
-      size: 64
+      size: 128
   keys:
     primary:
-      fields[module_name, component_name, name]
+      fields: [id]
+    name_key:
+      fields: [component_id, name]
   relations:
-    module:
-      table: module
-      type: N-1
-      clauses: [module_name: name]
     component:
       table: component
       type: N-1
-      clauses: [module_name: module_name, component_name: name]
+      clauses: [component_id: id]
 user:
   fields:
     id:
@@ -82,15 +92,22 @@ user:
       size: 128
     last_login:
       type: MetaDateTime
+    ins_date_time:
+      type: MetaDateTime
+    last_upd_date_time:
+      type: MetaDateTime
   keys:
     primary:
       fields: [id]
       autoIncrement: 1
+    email_key:
+      fields: [email]
   relations:
     roles:
       table: user_role
       type: 1-N
       clauses: [id: user_id]
+      onDelete: CASCADE
 role:
   fields:
     id:
@@ -107,6 +124,17 @@ role:
       table: user_role
       type: 1-N
       clauses: [id: user_id]
+      onDelete: CASCADE
+#    components:
+#      table: role_component
+#      type: 1-N
+#      clauses: [id: role_id]
+#      onDelete: CASCADE
+    actions:
+      table: role_action
+      type: 1-N
+      clauses: [id: role_id]
+      onDelete: CASCADE
 user_role:
   fields:
     user_id:
@@ -125,28 +153,42 @@ user_role:
       table: role
       type: N-1
       clauses: [role_id: id]
+#role_component:
+#  fields:
+#    role_id:
+#      type: MetaInteger
+#    component_id:
+#      type: MetaInteger
+#  keys:
+#    primary:
+#      fields: [role_id, component_id]
+#  relations:
+#    component:
+#      table: component
+#      type: N-1
+#      clauses: [component_id: id]
+#    role:
+#      table: role
+#      type: N-1
+#      clauses: [role_id: id]
 role_action:
   fields:
     role_id:
       type: MetaInteger
-    module_name:
-      type: MetaString
-      size: 32
-    component_name:
-      type: MetaString
-      size: 32
-    action_name:
-      type: MetaString
-      size: 32
+    action_id:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [role_id, action_id]
   relations:
+    action:
+      table: action
+      type: N-1
+      clauses: [action_id: id]
     role:
       table: role
       type: N-1
       clauses: [role_id: id]
-    action:
-      table: action
-      type: N-1
-      clauses: [module_name: module_name, component_name: component_name, action_name: name]
 record_mode:
   fields:
     id:

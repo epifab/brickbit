@@ -1,7 +1,7 @@
 <?php
 /**
  * Link
- * @param array $args
+ * @param array $params
  * 	string 'url': url,
  * 	string 'class': 'a' element class,
  *		boolean 'dialog': true
@@ -35,22 +35,28 @@
 function smarty_block_link($params, $content, &$smarty, $repeat) {
 	
 	if (!$repeat) {
-		$url = system\Utils::getParam($params, 'url', array('required' => true, 'prefix' => \config\settings()->BASE_DIR));
-		$ajax = system\Utils::getParam($params, 'ajax', array('default' => true, 'options' => array(false, true)));
-		$class = system\Utils::getParam($params, 'class', array('default' => 'link'));
-		$args = \system\Utils::getParam($params, 'args', array('default' => array()));
+		$params['url'] = system\Utils::getParam('url', $params, array('required' => true, 'prefix' => \config\settings()->BASE_DIR));
+
+		$url = $params['url'];
+		$ajax = system\Utils::getParam('ajax', $params, array('default' => true, 'options' => array(false, true)));
+		$class = system\Utils::getParam('class', $params, array('default' => 'link'));
+		$params['system'] = array(
+			'requestType' => 'MAIN',
+//			'requestId' => null
+		);
+		$jsArgs = system\Utils::php2Js($params); //array_merge(array('url' => $url), \system\Utils::getParam('args', $params, array('default' => array()))));
 
 		if ($ajax) {
-			$confirm = system\Utils::getParam($args, 'confirm', array('default' => false, 'options' => array(false, true)));
+			$confirm = system\Utils::getParam('confirm', $params, array('default' => false, 'options' => array(false, true)));
 			if ($confirm) {
-				$confirmTitle = str_replace("'", "\\'", system\Utils::getParam($args, 'confirmTitle', array('default' => '')));
-				$confirmQuest = str_replace("'", "\\'", system\Utils::getParam($args, 'confirmQuest', array('default' => '')));
-				$action = "xmca.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . system\Utils::php2Js($args) . "); return false;";
+				$confirmTitle = str_replace("'", "\\'", system\Utils::getParam('confirmTitle', $params, array('default' => '')));
+				$confirmQuest = str_replace("'", "\\'", system\Utils::getParam('confirmQuest', $params, array('default' => '')));
+				$action = "xmca.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
 			} else {
-				$action = "xmca.request(" . system\Utils::php2Js($args) . "); return false;";
+				$action = "xmca.request(" . $jsArgs . "); return false;";
 			}
 		}
-		return '<a href="' . system\Utils::addUrlArgs($url, $args) . '"' 
+		return '<a href="' . $url . '"' 
 			. (empty($class) ? '' : ' class="' . $class . '"')
 			. (empty($action) ? '' : ' onclick="' . $action . '"') . '>' 
 			. $content 

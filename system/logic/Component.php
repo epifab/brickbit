@@ -33,11 +33,14 @@ abstract class Component {
 	private static $componentsCount = 0;
 	
 	private $name = null;
+	private $module = null;
 	private $alias = null;
 	private $action = null;
 	private $url = null;
 	private $urlArgs = null;
 	private $requestData = null;
+	private $requestId = null;
+	private $requestType = null;
 	private $nested = false;
 	
 	protected $microTime = null;
@@ -114,26 +117,25 @@ abstract class Component {
 	 * @param string $urlArgs url arguments
 	 * @return boolean true if 
 	 */
-	public static function access($component, $action, $urlArgs, $request, $userId=null) {
+	public static function access($class, $action, $urlArgs, $request, $userId=null) {
 		if (\is_null($userId)) { 
 			$userId = Login::getLoggedUserId();
 		}
-		if (\method_exists($component, "access" . $action)) {
-			return (bool)\call_user_func(array($component, "access" . $action), $urlArgs, $request, $userId);
+		if (\method_exists($class, "access" . $action)) {
+			return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $userId);
 		} 
-		else if (\method_exists($component, "access")) {
-			return (bool)\call_user_func(array($component, "access"), $action, $urlArgs, $request, $userId);
-		} 
+		else if (\method_exists($class, "access")) {
+			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $userId);
+		}
 		return true;
 	}
 	
-	protected function init() {
+	protected function onInit() {
 	}
 	
 	protected function onError($exception) {
-		$this->setResponseType(self::RESPONSE_TYPE_ERROR);
-		
-		HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
+
+		\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
 
 //			if ($this->nested) {
 //				$pageOutput = \ob_get_clean();
@@ -167,40 +169,63 @@ abstract class Component {
 		$this->url = $url;
 		$this->urlArgs = $urlArgs;
 		$this->requestData = \is_null($request) ? $_REQUEST : (array)$request;
+		$this->loadRequestId();
+		$this->loadRequestType();
 		$this->nested = \is_null(self::getCurrentComponent());
 		$this->alias = $this->name;
-		if (!\is_null(self::getMainComponent())) {
-			'__' . $this->alias .= self::getMainComponent()->alias;
+		if (!\is_null(self::getCurrentComponent())) {
+			$this->alias = self::getCurrentComponent()->alias . '__' . $this->alias;
 		}
 	}
 	
-	private function generateNewRequestId() {
-		if (!\array_key_exists('system', $_SESSION)) {
-			$_SESSION['system'] = array();
-			$_SESSION['system']['requestIds'] = array();
-		} else if (!\array_key_exists('requestIds', $_SESSION['system'])) {
-			$_SESSION['system']['requestIds'] = array();
-		}
-		if (!\array_key_exists($this->name, $_SESSION['system']['requestIds'])) {
-			$_SESSION['system']['requestIds'][$this->name] = 1;
+	public function getRequestId() {
+		return $this->requestId;
+	}
+	
+	public function getRequestType() {
+		return $this->requestType;
+	}
+	
+	private function loadRequestId() {
+		if (!\array_key_exists('system', $this->requestData) 
+			 || !\array_key_exists('requestId', $this->requestData['system'])
+			 || !\preg_match('/^[a-zA-Z0-9_-]+$/', $this->requestData['system']['requestId'])) {
+			
+			if (!\array_key_exists('system', $_SESSION)) {
+				$_SESSION['system'] = array();
+			}
+			if (!\array_key_exists('requestIds', $_SESSION['system'])) {
+				$_SESSION['system']['requestIds'] = array();
+			}
+			$_SESSION['system']['requestIds'][$this->name] =
+				(\array_key_exists($this->name, $_SESSION['system']['requestIds']))
+					? $_SESSION['system']['requestIds'][$this->name] + 1
+					: 1;
+			
+			$this->requestId = $this->name . $_SESSION['system']['requestIds'][$this->name];
 		} else {
-			$_SESSION['system']['requestIds'][$this->name]++;
+			$this->requestId = $this->requestData['system']['requestId'];
 		}
 	}
 	
-	protected function getCurrentRequestId() {
-		if (!\array_key_exists('system', $_SESSION) || !\array_key_exists('requestIds', $_SESSION['system']) || !\array_key_exists($this->name, $_SESSION['system']['requestIds'])) {
-			$this->generateRequestId();
+	private function loadRequestType() {
+		if (\array_key_exists('system', $this->requestData)) {
+			if (\array_key_exists('requestType', $this->requestData['system'])) {
+				switch ((string)$this->requestData['system']['requestType']) {
+					case 'PAGE':
+					case 'MAIN':
+					case 'PAGE-PANELS':
+					case 'MAIN-PANELS':
+						$this->requestType = $this->requestData['system']['requestType'];
+						break;
+				}
+			}
 		}
-		return $this->name . $_SESSION['system']['requestIds'][$this->name];
-	}
-	
-	protected function getRequestId() {
-		if (!\array_key_exists("xmca_request_id", $this->requestData)) {
-			$this->generateNewRequestId();
-			return $this->getCurrentRequestId();
-		} else {
-			return $this->requestData["xmca_request_id"];
+		if (!$this->requestType) {
+			$this->requestType = 
+				HTMLHelpers::isAjaxRequest()
+					? 'MAIN'
+					: 'PAGE';
 		}
 	}
 	
@@ -213,8 +238,9 @@ abstract class Component {
 				'action' => $this->action,
 				'url' => $this->url,
 				'urlArgs' => $this->urlArgs,
+				'requestId' => $this->requestId,
+				'requestType' => $this->requestType,
 				'requestData' => $this->requestData,
-				'requestId' => $this->getRequestId(),
 				'nested' => $this->nested,
 				'alias' => $this->alias
 			);
@@ -242,8 +268,6 @@ abstract class Component {
 			'system' => array(
 				'component' => $this->getComponentInfo(),
 				'mainComponent' => self::getMainComponent()->getComponentInfo(),
-				'mainTemplate' => null,
-				'templates' => array(),
 				// default response type
 				'responseType' => self::RESPONSE_TYPE_READ,
 				'ajax' => HTMLHelpers::isAjaxRequest(),
@@ -251,7 +275,9 @@ abstract class Component {
 				'lang' => Lang::getLang(),
 				'langs' => \config\settings()->LANGUAGES,
 				'theme' => Theme::getTheme(),
-				'themes' => \config\settings()->THEMES
+				'themes' => \config\settings()->THEMES,
+//				'panelName' => \system\Utils::getParam('system_panel_name', $this->requestData, array('default' => 'main')),
+//				'panelClass' => \system\Utils::getParam('system_panel_class', $this->requestData, array('default' => null)),
 			),
 			'user' => Login::getLoggedUser(),
 			'website' => $this->getWebsiteInfo(),
@@ -262,6 +288,11 @@ abstract class Component {
 				'js' => array(),
 				'css' => array(),
 			)
+		);
+		
+		\system\view\Panels::getInstance(
+			\system\Utils::getParam('system_panel_name', $this->requestData, array('default' => 'main')),
+			\system\Utils::getParam('system_panel_class', $this->requestData, array('default' => null))
 		);
 	}
 	
@@ -282,19 +313,23 @@ abstract class Component {
 	}
 	
 	protected function setMainTemplate($template) {
-		$this->datamodel['system']['mainTemplate'] = $template;
+		$this->tplManager->setMainTemplate($template);
 	}
 	
 	protected function setOutlineTemplate($template) {
 		$this->tplManager->setOutlineTemplate($template);
 	}
 	
-	private function setResponseType($responseType) {
-		$this->datamodel['system']['responseType'] = $responseType;
+	protected function addTemplate($template, $region, $weight=0) {
+		$this->tplManager->addTemplate($template, $region, $weight);
 	}
 	
-	protected function addTemplate($key, $template) {
-		$this->datamodel['system']['templates'][$key] = $template;
+	protected function setOutlineTemplateWrapper($template) {
+		$this->tplManager->setOutlineTemplateWrapper($template);
+	}
+	
+	private function setResponseType($responseType) {
+		$this->datamodel['system']['responseType'] = $responseType;
 	}
 	
 	protected function setPageTitle($pageTitle, $adding=false) {
@@ -470,17 +505,17 @@ abstract class Component {
 		try {
 			$this->initView();
 			
+			// init event
+			$this->onInit();
+			
 			// checking permission
-			if (!self::access($this->name, $this->action, $this->urlArgs, $this->requestData)) {
+			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData)) {
 				throw new AuthorizationException("Utente non autorizzato");
 			}
 			
-			// init event
-			$this->init();
-			
 			// onProcess event
-			if (\method_exists($this, "on" . $this->action)) {
-				$responseType = \call_user_func(array($this, "on" . $this->action));
+			if (\method_exists($this, "run" . $this->action)) {
+				$responseType = \call_user_func(array($this, "run" . $this->action));
 			} else {
 				$responseType = $this->onProcess();
 			}
@@ -495,7 +530,7 @@ abstract class Component {
 				case null:
 					break;
 				default:
-					throw new InternalErrorException("Metodo onProcess non valido per il componente " . $this->name);
+					throw new InternalErrorException(Lang::translate("Invalid action <em>@action</em> response in module <em>@module</em> component <em>@component</em>.", array('@action' => $this->action, '@component' => $this->name, '@module' => $this->module)));
 			}
 
 			if (!\is_null($responseType)) {

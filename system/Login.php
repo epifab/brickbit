@@ -11,85 +11,56 @@ class Login {
 	 */
 	private static $login;
 	
-	private $id;
-	private $username;
-	private $userpass;
-	
 	private $user;
 
-	private function __construct($id) {
-		$this->id = $id;
-	}
+	private function __construct() {	}
 	
 	/**
 	 * @return Login
 	 */
-	public static function getInstance() {
-		
-		if (\is_null(Login::$login)) {
-			Login::$login = Login::getLogin();
+	private static function getInstance() {
+		if (\is_null(self::$login)) {
+			self::$login = new self();
 			
-			if (\is_null(Login::$login)) {
-				// Anonymous user
-				Login::$login = new Login(0);
-				Login::$login->username = '';
-				Login::$login->userpass = '';
+			self::$login->user = self::getLoginSession();
+
+			if (!\is_null(self::$login->user)) { // login propagato da sessione
+				// istruzioni per login da sessione
+				self::$login->setLoginSession(); // salvo i dati di login nella sessione
+			} else {
+				self::$login->user = self::getLoginCookie();
+				if (!\is_null(self::$login->user)) { // login propagato da cookie
+					// istruzioni per login da cookie
+					self::$login->user->last_login = \time();
+					self::$login->user->update();
+					self::$login->setLoginSession(); // salvo i dati di login nella sessione
+					self::$login->setLoginCookie(); // refresh del cookie di login
+				}
 			}
 		}
-		return Login::$login;
+		return self::$login;
+	}
+	
+	public static function isAnonymous() {
+		return !self::getLoggedUserId();
+	}
+	
+	public static function isLogged() {
+		return !self::isAnonymous();
+	}
+	
+	public static function isSuperuser() {
+		return self::getLoggedUserId() == 1;
 	}
 	
 	public static function getLoggedUserId() {
-		return Login::getInstance()->id;
+		return self::getInstance()->user ? self::getInstance()->user->id : 0;
 	}
 	
 	public static function getLoggedUser() {
 		return self::getInstance()->user;
 	}
 	
-	public function isAnonymous() {
-		return $this->id == 0;
-	}
-	
-	public function getUser() {
-		if (!$this->isAnonymous()) {
-			if (\is_null($this->user)) {
-				$userBuilder = new RecordsetBuilder("user");
-				$userBuilder->using("*");
-				$userBuilder->setFilter(new \system\model\FilterClause($userBuilder->searchMetaType("id"), "EQ", $this->getId()));
-				$this->user = $userBuilder->selectFirst();
-			}
-			
-			return $this->user;
-		}
-		return null;
-	}
-	
-//	public static function checkEditPermission($componentName, $tableName, $recordId) {
-//		return XmcaRecordMode::checkEditPermission(Login::getLoggedUserId(), $tableName, $recordId);
-//	}
-//
-//	public static function checkReadPermission($componentName, $tableName, $recordId) {
-//		$login = Login::getInstance();
-//		if (\is_null($login)) {
-//			return null;
-//		}
-//		return XmcaUser::checkReadPermission($login->id, $componentName, $tableName, $recordId);
-//	}
-
-	public function getId() {
-		return $this->id;
-	}
-
-//	public static function saveLogin($id, $cryptedEmail, $cryptedPassword) {
-//		$login = new Login();
-//		$login->id = $id;
-//		$login->username = $cryptedEmail;
-//		$login->userpass = $cryptedPassword;
-//		$login->setLoginSession();
-//		return $login;
-//	}
-
 	/**
 	 * Controlla che esista un utente corrispondente all'username e la userpass (criptate) passate al metodo
 	 * e restituisce l'oggetto di tipo Login corrispondente all'utente selezionato / null in caso i dati siano errati
@@ -97,21 +68,17 @@ class Login {
 	 * @param String $cryptedPassword userpass criptata
 	 * @return Login oggetto di tipo login inizializzato / null se i dati non sono validi
 	 */
-	private static function getLoginByLoginData($cryptedEmail, $cryptedPassword) {
+	private static function getUserByLoginData($cryptedEmail, $cryptedPassword) {
+		$rsb = new model\RecordsetBuilder('user');
+		$rsb->usingAll();
 		
-		$id = XmcaUser::getIdByLoginData($cryptedEmail, $cryptedPassword);
+		$rsb->setFilter(new model\FilterClauseGroup(
+			new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
+			"AND",
+			new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\model\MetaString::stdProg2Db($cryptedEmail))
+		));
 		
-		if (\is_null($id)) {
-			return null;
-		}
-		else {
-			$login = new Login($id);
-			
-			$login->username = $cryptedEmail;
-			$login->userpass = $cryptedPassword;
-			
-			return $login;
-		}
+		return $rsb->selectFirst();
 	}
 
 	/* ---------------------------------------- *
@@ -122,19 +89,20 @@ class Login {
 	 * Scrive i dati dell'utente loggato nella sessione
 	 */
 	private function setLoginSession() {
-		$_SESSION["login"] = array();
-		$_SESSION["login"]["id"] = $this->id;
-		$_SESSION["login"]["username"] = $this->username;
-		$_SESSION["login"]["userpass"] = $this->userpass;
-		$_SESSION["login"]["ip"] = HTMLHelpers::getIpAddress();
+		$_SESSION["login"] = array(
+			'id' => $this->user->id,
+			'username' => \md5($this->user->email),
+			'userpass' => $this->user->password, // already crypted
+			'ip' => \system\HTMLHelpers::getIpAddress()
+		);
 	}
 
 	/**
 	 * Invia un cookie verso il client con i dati dell'utente loggato
 	 */
 	private function setLoginCookie() {
-		$contents = $this->username . "%%" . $this->userpass;
-		\setcookie("login", $contents, LOGIN_COOKIE_TIME);
+		$contents = \md5($this->user->email) . "%%" . $this->user->password;
+		\setcookie("login", $contents, LOGIN_COOKIE_TIME, "/");
 	}
 
 	/**
@@ -148,7 +116,7 @@ class Login {
 	 * Elimina il cookie riguardante i dati di login
 	 */
 	private static function unsetLoginCookie() {
-		\setcookie("login", "", time()-3600);
+		\setcookie("login", "", time()-3600, "/");
 	}
 
 	/* ---------------------------------------- *
@@ -164,11 +132,10 @@ class Login {
 		//  in tal caso, l'oggetto conterra' tutti i valori dei campi sql dell'utente loggato
 
 		if (\array_key_exists("login", $_SESSION)) {
-
 			if (@$_SESSION["login"]["ip"] != HTMLHelpers::getIpAddress()) {
-				throw new LoginException("Al momento risulti connesso con un altro indirizzo IP. Sei pregato di rieffettuare il login.");
+				throw new LoginException(\system\Lang::translate('You seem to be logged in from an other ip address. Please try to log in again later.'));
 			} else {
-				return Login::getLoginByLoginData(@$_SESSION["login"]["username"], @$_SESSION["login"]["userpass"]);
+				return self::getUserByLoginData(@$_SESSION["login"]["username"], @$_SESSION["login"]["userpass"]);
 			}
 		}
 		return null;
@@ -183,7 +150,7 @@ class Login {
 			$cryptedEmail = \strtok($_COOKIE["login"], "%%"); // username criptata
 			$cryptedPassword = \strtok("%%"); // userpass criptata
 			if ($cryptedEmail != "" && $cryptedPassword != "") {
-				return Login::getLoginByLoginData($cryptedEmail, $cryptedPassword);
+				return self::getUserByLoginData($cryptedEmail, $cryptedPassword);
 			}
 		}
 		return null;
@@ -191,83 +158,58 @@ class Login {
 
 	/**
 	 * Valida il login utilizzando (se esistono) i dati postati dal form di login
-	 * @return Login restituisce l'oggetto login corrispondente ai dati del form / null se i dati non esistono o non sono validi
+	 * @return User
 	 */
-	public static function getPostedLogin() {
+	public static function login() {
 		// restituisce true se sono stati propagati correttamente i dati di login dal form
 		//  in tal caso, l'oggetto conterr� tutti i valori dei campi sql dell'utente loggato
 		//  se richiesto i dati di login vengono salvati attraverso SetLoginCookie
 		//  inoltre l'array $this->services conterr� l'id di tutti i servizi ai quali � associato l'utente
-
-		if (!isset($_COOKIE['PHPSESSID'])) { // Per il login i cookie devono essere abilitati.
-			throw new LoginException("Il tuo browser non supporta i cookie. Abilita i cookie per effettuare il login.");
-			return false;
+		
+		if (!self::isAnonymous()) {
+			return self::getInstance()->user;
+//			throw new LoginException(\system\Lang::translate('You are already logged in.'));
+		}
+		else if (!isset($_COOKIE['PHPSESSID'])) { // Per il login i cookie devono essere abilitati.
+			throw new LoginException(\system\Lang::translate('Your browser does not support cookies. Please enable cookies in order to log in.'));
 		}
 		else if (!\array_key_exists("username", $_POST) || $_POST["username"] == "") {
-			throw new LoginException("Email non trasmessa");
-			return false;
+			throw new LoginException(\system\Lang::translate("Email not sent."));
 		}
 		else if (!\array_key_exists("userpass", $_POST) || $_POST["userpass"] == "") {
-			throw new LoginException("Password non trasmessa");
-			return false;
+			throw new LoginException(\system\Lang::translate("Password not sent."));
 		}
 		
 		else {
-			$login = Login::getLoginByLoginData(\md5(\strtolower($_POST["username"])), \md5($_POST["userpass"]));
+			self::getInstance()->user = self::getUserByLoginData(\md5(\strtolower($_POST["username"])), \md5($_POST["userpass"]));
 			
-			if (!\is_null($login)) {
-				// Username e userpass corretti.
-				XmcaUser::updateLastLogin($login->id); // aggiorno data ultimo login
+			if (!\is_null(self::getInstance()->user)) {
+				self::getInstance()->user->last_login = \time();
+				self::getInstance()->user->update();
 				
-				$login->setLoginSession(); // salvo i dati di login nella sessione
+				self::getInstance()->setLoginSession(); // salvo i dati di login nella sessione
 				if (!\array_key_exists("remember", $_POST)) { // salvo i dati di login nei cookie (se richiesto dall'utente)
-					$login->setLoginCookie();
+					self::getInstance()->setLoginCookie();
 				}
-				
-				self::$login = $login;
-				
-				return $login;
+				return self::getInstance()->user;
 			}
 			else {
-				throw new LoginException("Indirizzo email o password non validi");
+				throw new LoginException(\system\Lang::translate('Wrong username or password.'));
 			}
 		}
 	}
 
-	/**
-	 * Recupera i dati dell'utente loggato (se esiste)
-	 * @return Login oggetto login / null se l'utente non è loggato
-	 */
-	private static function getLogin() {
-		$login = Login::getLoginSession();
-		if (!\is_null($login)) { // login propagato da sessione
-			// istruzioni per login da sessione
-			$login->setLoginSession(); // salvo i dati di login nella sessione
-		} else {
-			$login = Login::getLoginCookie();
-			if (!\is_null($login)) { // login propagato da cookie
-				// istruzioni per login da cookie
-				XmcaUser::updateLastLogin($login->getId()); // aggiorno data ultimo login
-				$login->setLoginSession(); // salvo i dati di login nella sessione
-				$login->setLoginCookie(); // refresh del cookie di login
-			}
+	public static function logout() {
+		if (!self::isAnonymous()) {
+			self::getInstance()->unsetLoginCookie();
+			self::getInstance()->unsetLoginSession();
+			self::getInstance()->user = null;
 		}
-
-		return $login;
 	}
 
-	public function logout() {
-		$this->unsetLoginCookie();
-		$this->unsetLoginSession();
-		
-		$this->id = 0;
-		$this->username = '';
-		$this->userpass = '';
-	}
-
-	public static function genPassword() {
-		return substr(md5(date("st")),0,8); // userpass generata in maniera casuale
-	}
+//	public static function genPassword() {
+//		return \substr(\md5(\date("st")),0,8); // userpass generata in maniera casuale
+//	}
 
 //	private function sendNewPassword($userpass, $usernameAddress) {
 //		$username = new Email();

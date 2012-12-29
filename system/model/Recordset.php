@@ -292,7 +292,7 @@ class Recordset implements RecordsetInterface {
 
 		$query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE ";
 		$first = true;
-		foreach ($this->builder->getPrimaryKey() as $metaType) {
+		foreach ($this->builder->getPrimaryKey()->getMetaTypes() as $metaType) {
 			$first ? $first = false : $query .= " AND ";
 			$query .= $metaType->getName() . " = " . $metaType->prog2Db($this->fields[$metaType->getName()]);
 		}

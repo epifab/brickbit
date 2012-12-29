@@ -3,6 +3,10 @@ namespace module\core;
 
 class Core extends \system\logic\Module {
 	
+	public static function onRun(\system\logic\Component $component) {
+		die("ciao");
+	}
+	
 	public static function loadRSFormData(Recordset $recordset, &$errors, $formInfo) {
 		
 		$numErrors = 0;
@@ -12,7 +16,7 @@ class Core extends \system\logic\Module {
 			
 			foreach ($formInfo as $fieldInfo) {
 				if (\is_array($fieldInfo)) {
-					$path = Utils::getParam($fieldInfo, 'path', array('required' => true));
+					$path = Utils::getParam('path', $fieldInfo, array('required' => true));
 				} else {
 					$path = $fieldInfo;
 				}
@@ -20,7 +24,7 @@ class Core extends \system\logic\Module {
 				$metaType = $builder->searchMetaType($path, true);
 				$metaType instanceof MetaType;
 
-				$value = Utils::getParam($_REQUEST["recordset"], $path, array('default' => null));
+				$value = Utils::getParam($path, $_REQUEST["recordset"], array('default' => null));
 				
 				try {
 					if ($metaType instanceof MetaBoolean) {

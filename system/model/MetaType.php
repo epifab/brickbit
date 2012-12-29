@@ -53,17 +53,17 @@ abstract class MetaType {
 	 * Permette di specificare un'espressione SQL per la selezione dei dati
 	 * @param string $selectExpression 
 	 */
-	public function setVirtual($selectExpression) {
+	public function setSelectExpression($selectExpression) {
 		$this->selectExpression = $selectExpression;
 	}
 	
-	/**
-	 * True se il MetaType è virtuale
-	 * @return boolean
-	 */
-	public function isVirtual() {
-		return !empty($this->selectExpression);
-	}
+//	/**
+//	 * True se il MetaType è virtuale
+//	 * @return boolean
+//	 */
+//	public function isVirtual() {
+//		return !empty($this->selectExpression) || $this instanceof MetaVirtual;
+//	}
 	
 	/**
 	 * Restituisce l'espressione SQL per la selezione del campo
@@ -99,6 +99,9 @@ abstract class MetaType {
 	}
 	public function isBoolean() {
 		return $this instanceof MetaBoolean;
+	}
+	public function isVirtual() {
+		return $this instanceof MetaVirtual;
 	}
 
 	

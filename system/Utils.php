@@ -93,7 +93,7 @@ class Utils {
 		}
 	}
 	
-	public static function getParam($haystack, $needle, $options) {
+	public static function getParam($needle, $haystack, $options) {
 		if (!\array_key_exists($needle, $haystack)) {
 			if (\array_key_exists('required', $options) && (bool)$options['required']) {
 				throw new InternalErrorException(Lang::translate('Required arg @name.', array('@name' => $needle)));
@@ -105,14 +105,18 @@ class Utils {
 		} 
 		else {
 			if (\array_key_exists('options', $options) && \is_array($options['options'])) {
-				if (!\in_array($haystack[$needle], $options)) {
+				if (!\in_array($haystack[$needle], $options['options'])) {
 					throw new InternalErrorException(Lang::translate('Invalid param @name', array('@name' => $needle)));
 				}
 			}
-			return
-				(\array_key_exists('prefix', $options) ? $options['prefix'] : '')
-				. $haystack[$needle]
-				. (\array_key_exists('suffix', $options) ? $options['suffix'] : '');
+			if (\is_string($haystack[$needle])) {
+				return
+					(\array_key_exists('prefix', $options) ? $options['prefix'] : '')
+					. $haystack[$needle]
+					. (\array_key_exists('suffix', $options) ? $options['suffix'] : '');
+			} else {
+				return $haystack[$needle];
+			}
 		}
 	}
 	

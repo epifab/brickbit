@@ -19,7 +19,7 @@ class Page extends Component {
 		
 		list($pageUrn) = $urlArgs;
 		
-		$rsb = new RecordsetBuilder('content');
+		$rsb = new RecordsetBuilder('node');
 		$rsb->using('urn', 'type');
 		$rsb->setFilter(new FilterClauseGroup(
 			new FilterClause($rsb->urn, '=', $pageUrn),
@@ -44,31 +44,53 @@ class Page extends Component {
 		return true;
 	}
 	
-	public static function accessCreate($action, $urlArgs, $args, $userId) {
-		
+	public static function accessAdd($urlArgs, $args, $userId) {
+		return true;
 	}
 	
-	protected function init() {
+	protected function onInit() {
+		switch ($this->getRequestType()) {
+			case "MAIN-PANELS":
+				$this->setOutlineTemplateWrapper('outline-wrapper-main-panels');
+				break;
+			case "MAIN":
+				$this->setOutlineTemplateWrapper('outline-wrapper-main');
+				break;
+			case "PAGE-PANELS":
+				$this->setOutlineTemplateWrapper('outline-wrapper-page-panels');
+				break;
+			case "PAGE":
+			default:
+				$this->setOutlineTemplateWrapper(null);
+				break;
+		}
+		$this->setOutlineTemplate('outline');
+		$this->addTemplate('header', 'header');
+		$this->addTemplate('footer', 'footer');
+		$this->addTemplate('sidebar', 'sidebar');
 		$this->datamodel['page']['mainMenu'] = array();
 	}
 
-	public function onRead() {
-		$this->setOutlineTemplate('content-page');
-		
+	public function runRead() {
 		list($pageUrn) = $this->getUrlArgs();
 
 		$rsb = new RecordsetBuilder('node');
 		$rsb->usingAll();
 		$this->datamodel['node'] = $rsb->selectFirstBy('urn', $pageUrn);
 		
+		$this->setMainTemplate('content-page');
+		
 		return Component::RESPONSE_TYPE_READ;
 	}
 	
-	public function onCreate() {
+	public function runAdd() {
 		$rsb = new RecordsetBuilder('node');
 		$rsb->usingAll();
-		$recordset = $rsb->selectFirstBy($pageUrn);
+		$recordset = $rsb->newRecordset();
+		
+		$this->datamodel['recordset'] = $recordset;
 
+		$this->setMainTemplate('edit-content-page');
 		return Component::RESPONSE_TYPE_FORM;
 
 		if (\array_key_exists("recordset", $this->getRequestData())) {
@@ -116,10 +138,10 @@ class Page extends Component {
 				try {
 					// Salvo il record mode
 					$recordset->create(
-						\system\Utils::getParam($_REQUEST["recordset"], "record_mode.read_mode", array('default' => null)),
-						\system\Utils::getParam($_REQUEST["recordset"], "record_mode.edit_mode", array('default' => null)),
-						\system\Utils::getParam($_REQUEST["recordset"], "record_mode.delete_mode", array('default' => null)),
-						\system\Utils::getParam($_REQUEST["recordset"], "record_mode.role_id", array('default' => null))
+						\system\Utils::getParam("record_mode.read_mode", $_REQUEST["recordset"], array('default' => null)),
+						\system\Utils::getParam("record_mode.edit_mode", $_REQUEST["recordset"], array('default' => null)),
+						\system\Utils::getParam("record_mode.delete_mode", $_REQUEST["recordset"], array('default' => null)),
+						\system\Utils::getParam("record_mode.role_id", $_REQUEST["recordset"], array('default' => null))
 					);
 					
 					foreach (\config\settings()->LANGUAGES as $lang) {
@@ -143,7 +165,7 @@ class Page extends Component {
 		}
 	}
 	
-	public function onEdit() {
+	public function runEdit() {
 		list($pageUrn) = $this->getUrlArgs();
 		
 		$rsb = new RecordsetBuilder('node');
@@ -199,10 +221,10 @@ class Page extends Component {
 					if ($recordset->record_mode->owner_id == \system\Login::getLoggedUserId()) {
 						// Permetto la modifica del record mode soltanto all'owner della pagina
 						$recordset->update(
-							\system\Utils::getParam($_REQUEST["recordset"], "record_mode.read_mode", array('default' => null)),
-							\system\Utils::getParam($_REQUEST["recordset"], "record_mode.edit_mode", array('default' => null)),
-							\system\Utils::getParam($_REQUEST["recordset"], "record_mode.delete_mode", array('default' => null)),
-							\system\Utils::getParam($_REQUEST["recordset"], "record_mode.role_id", array('default' => null))
+							\system\Utils::getParam("record_mode.read_mode", $_REQUEST["recordset"], array('default' => null)),
+							\system\Utils::getParam("record_mode.edit_mode", $_REQUEST["recordset"], array('default' => null)),
+							\system\Utils::getParam("record_mode.delete_mode", $_REQUEST["recordset"], array('default' => null)),
+							\system\Utils::getParam("record_mode.role_id", $_REQUEST["recordset"], array('default' => null))
 						);
 					} else {
 						$recordset->update();

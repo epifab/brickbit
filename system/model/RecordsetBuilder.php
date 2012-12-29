@@ -8,27 +8,27 @@ class RecordsetBuilder {
 	const KEYS_ALL = 3;
 	const KEYS_ALL_RECURSIVE = 4;
 	
-//	private static function getUniqueAlias($tableName="xmca") {
-//		static $tableIds = array();
-//		if (!\array_key_exists($tableName, $tableIds)) {
-//			$tableIds[$tableName] = 1;
-//		} else {
-//			$tableIds[$tableName]++;
-//		}
-//		return $tableName . $tableIds[$tableName];
-//	}
+	private static function getUniqueAlias($tableName) {
+		static $tableIds = array();
+		if (!\array_key_exists($tableName, $tableIds)) {
+			$tableIds[$tableName] = 1;
+		} else {
+			$tableIds[$tableName]++;
+		}
+		return $tableName . $tableIds[$tableName];
+	}
 	
-//	public function printMetaTypes() {
-//		$result = "";
-//		foreach ($this->metaTypeList as $mt) {
-//			$mt instanceof MetaType;
-//			$result .= "<p>" . $mt->getAbsolutePath() . "</p>";
-//		}
-//		foreach ($this->hasOneRelationBuilderList as $hor) {
-//			$result .= $hor->printMetaTypes();
-//		}
-//		return $result;
-//	}
+	public function printMetaTypes() {
+		$result = "";
+		foreach ($this->metaTypeList as $mt) {
+			$mt instanceof MetaType;
+			$result .= "<p>" . $mt->getAbsolutePath() . "</p>";
+		}
+		foreach ($this->hasOneRelationBuilderList as $hor) {
+			$result .= $hor->printMetaTypes();
+		}
+		return $result;
+	}
 	
 	private $paths = array();
 	
@@ -151,8 +151,6 @@ class RecordsetBuilder {
 	 */
 	private $limitClause = null;
 	
-	private $autoIncrement = false;
-	
 	public function getTableInfo() {
 		return $this->tableInfo;
 	}
@@ -202,6 +200,15 @@ class RecordsetBuilder {
 		} else if (\array_key_exists($name, $this->tableInfo["fields"])) {
 			$metaTypeClass = "\\system\\model\\" . $this->tableInfo["fields"][$name]["type"];
 			$metaType = new $metaTypeClass($name, $this);
+			$metaType instanceof MetaType;
+			if ($metaType->isVirtual()) {
+				$dependencies = \system\Utils::getParam('dependencies', $this->tableInfo["fields"][$name], array('default' => array()));
+				foreach ($dependencies as $d) {
+					$this->using($d);
+				}
+				$handle = \system\Utils::getParam('handle', $this->tableInfo["fields"][$name], array('required' => true));
+				$metaType->setHandler($handle);
+			}
 			$this->metaTypeList[$name] = $metaType;
 			return $metaType;
 		}
@@ -252,7 +259,7 @@ class RecordsetBuilder {
 		$key->setPrimary($keyInfo == \current($this->tableInfo["keys"]));
 		if ($key->isPrimary()) {
 			$this->primaryKey = $key;
-			$key->setAutoIncrement(\system\Utils::getParam($keyInfo, 'autoIncrement', array('default' => false)));
+			$key->setAutoIncrement(\system\Utils::getParam('autoIncrement', $keyInfo, array('default' => false)));
 		}
 		if (\array_key_exists('desc', $keyInfo)) {
 			$key->setDesc($keyInfo['desc']);
@@ -270,6 +277,7 @@ class RecordsetBuilder {
 	public function __construct($tableName) {
 		$this->tableName = $tableName;
 		$this->tableInfo = \system\logic\Module::getTable($tableName);
+		$this->tableAlias = self::getUniqueAlias($tableName);
 		// Automatically importing record mode
 		if ($this->isRecordModed()) {
 			$this->using("record_mode.*");
@@ -277,6 +285,7 @@ class RecordsetBuilder {
 				$this->using("record_mode.logs.*");
 			}
 		}
+		$this->useAllKeysRecursive();
 	}
 	
 	public function isRecordModed() {
@@ -712,7 +721,7 @@ class RecordsetBuilder {
 	
 	/**
 	 * Lista di nomi di campi appartenenti al nodo corrente e costituenti la chiave primaria
-	 * @return string[]
+	 * @return \system\model\Key
 	 */
 	public function getPrimaryKey() {
 		return $this->primaryKey;
@@ -720,7 +729,7 @@ class RecordsetBuilder {
 	
 	/**
 	 * Lista di chiave appartenenti al nodo corrente restituite come array di array di nomi di campi
-	 * @return string[][]
+	 * @return \system\model\Key[]
 	 */
 	public function getKeys() {
 		return $this->keyList;
@@ -785,21 +794,25 @@ class RecordsetBuilder {
 	
 	public function usingAll() {
 		$ti = $this->getTableInfo();
+		$this->using("*");
 		foreach ($ti["relations"] as $relationName => $relationInfo) {
 			if (!$this->parentBuilder || \count(\array_diff($relationInfo["clauses"], $this->getClauses())) > 0) {
 				// it just prevent short endless loops:
 				//  if the loop involves more than two relations it won't be catched by the if statement above
 				//  (it catches A->B->A but not A->B->C->A)
 				if ($relationInfo["type"] != "1-N") {
-					$this->using($relationName . ".*");
-					$this->searchRelationBuilder($relationName)->usingAll();
+					$this->loadRelationBuilder($relationName)->usingAll();
 				}
 			}
 		}
 	}
 	
 	public function setRelation($path, RecordsetBuilder $relation) {
-		$dotPosition = strpos($path, ".");
+		if (!$relation->hasMany()) {
+			throw new \system\InternalErrorException(\system\Lang::translate('Only has many relation can be added.', array()));
+		}
+		
+		$dotPosition = \strpos($path, ".");
 
 		if ($dotPosition === false) {
 			if (\array_key_exists($path, $this->tableInfo['relations'])) {
@@ -954,9 +967,10 @@ class RecordsetBuilder {
 			$q2 .= " " . $builder->joinType . " JOIN " . $builder->getSelectExpression() . " " . $builder->tableAlias . " ON ";
 			
 			$first = true;
-			foreach ($builder->clauses as $parentField => $childField) {
+			foreach ($builder->clauses as $clause) {
+				\reset($clause);
 				$first ? $first = false : $q2 .= " AND ";
-				$q2 .= $builder->tableAlias . "." . $childField . " = " . $this->tableAlias . "." . $parentField;
+				$q2 .= $builder->tableAlias . "." . \key($clause) . " = " . $this->tableAlias . "." . \current($clause);
 			}
 			
 			if (!\is_null($builder->filterClauses)) {

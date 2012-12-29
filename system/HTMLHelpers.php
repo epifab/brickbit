@@ -41,11 +41,11 @@ class HTMLHelpers {
 	}
 
 	public static function makeLoginErrorPage($templateManager, $datamodel, $message=null) {
-		HTMLHelpers::makeErrorPage($templateManager, $datamodel, $message);
+		self::makeErrorPage($templateManager, $datamodel, $message);
 	}
 
 	public static function isAjaxRequest() {
-		return \array_key_exists("xmca_ajax_request", $_REQUEST) ||
+		return @$_REQUEST["system"]["ajax"] ||
 				 (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) && (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'));
 	}
 
@@ -90,7 +90,7 @@ class HTMLHelpers {
 				else {
 					$msg .=
 						'<h3>' . $exception->getMessage() . '</h3>'
-						. '<h4>Dettagli eccezione</h4>'
+						. '<h4>' . \system\Lang::translate('Exception details') . '</h4>'
 						. '<p>' . $exception->getFile() . ' ' . $exception->getLine() . '</p>';
 
 					$trace = $exception->getTrace();
@@ -126,34 +126,36 @@ class HTMLHelpers {
 				$exception = $exception->getPrevious();
 			}
 			if ($executionTime > 0) {
-				$msg .= '<p>Tempo di esecuzione: ';
-				if ($executionTime < 1) {
-					$msg .= round($executionTime * 1000, 0) . ' ms.</p>';
-				} else {
-					$msg .= $executionTime . ' sec.</p>';
-				}
+				$msg .= '<p>' . Lang::translate('Execution time: @time', array(
+					'@time' => ($executionTime < 1)
+						? (round($executionTime * 1000, 0) . ' ms.')
+						: ($executionTime . ' sec.')
+				)) . '</p>';
 			}
 		}
 		
 		switch ($mainException->getCode()) {
 			case ErrorCodes::AUTHORIZATION:
-				$title = "Permessi non sufficienti";
-				$msg = "&Egrave; necessario effettuare il login prima di accedere a questo contenuto";
+				$title = \system\Lang::translate("Forbidden.");
+				$msg = \system\Lang::translate("You must login to access this resource.");
 				break;
 			
 			default:
-				$title = "Errore interno dello script";
+				$title = \system\Lang::translate("Fatal error.");
 				$msg .= \system\Log::get();
 				break;
 		}
 		
-		$datamodel["errorTitle"] = $title;
-		$datamodel["errorMessage"] = $msg;
-		$datamodel["url"] = "Error";
+		$datamodel['page']['title'] = $title;
+		$datamodel['message'] = array(
+			'title' => $title,
+			'body' => $msg
+		);
+		$datamodel['system']['responseType'] = 'ERROR';
 
 		try {
 			
-			$templateManager->setMainTemplate("error");
+			$templateManager->setMainTemplate("notify");
 			
 			$templateManager->process($datamodel);
 			

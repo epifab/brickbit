@@ -32,7 +32,7 @@ abstract class Module {
 			$modulesConf = $rebuild ? null : \system\Utils::get("system-modules", null);
 			if (\is_null($modulesConf)) {
 				$modulesConf = self::initConfiguration();
-//				\system\Utils::set("system-modules", $modulesConf);
+				\system\Utils::set("system-modules", $modulesConf);
 			}
 		}
 		return $modulesConf;
@@ -67,21 +67,22 @@ abstract class Module {
 					try {
 						
 						$moduleInfo = \system\yaml\Yaml::parse($moduleDir . "module.yml");
+						
+						if (!\is_array($moduleInfo)) {
+							throw new \system\InternalErrorException(\system\Lang::translate('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName)));
+						}
+						
 						$moduleInfo["events"] = array();
 						
-						$enabled = \array_key_exists("enabled", $moduleInfo) ? (bool)$moduleInfo["enabled"] : true;
-						$priority = -\array_key_exists("weight", $moduleInfo) ? (int)$moduleInfo["weight"] : 0;
-						$componentsNs = self::getNamespace($moduleName, \array_key_exists("componentsNs", $moduleInfo) ? (string)$moduleInfo["componentsNs"] : "components");
-						$customEvents = \array_key_exists("customEvents", $moduleInfo) ? (array)$moduleInfo["customEvents"] : array();
-						$components = \array_key_exists("components", $moduleInfo) ? (array)$moduleInfo["components"] : array();
+						$enabled = \system\Utils::getParam("enabled", $moduleInfo, array('default' => true));
+						$priority = -\system\Utils::getParam("weight", $moduleInfo, array('default' => 0));
+						$componentsNs = self::getNamespace($moduleName, \system\Utils::getParam("componentNs", $moduleInfo, array('default' => 'components')));
+						$customEvents = \system\Utils::getParam("customEvents", $moduleInfo, array('default' => array()));
+						$components = \system\Utils::getParam("components", $moduleInfo, array('default' => array()));
 
 						if ($enabled) {
-							if (!\array_key_exists("class", $moduleInfo)) {
-								throw new \system\InternalErrorException("Bad module config file: class is missing");
-							}
-
 							$moduleInfo["namespace"] = $moduleNs;
-							$moduleInfo["class"] = $moduleInfo["namespace"] . $moduleInfo["class"];
+							$moduleInfo["class"] = $moduleInfo["namespace"] . \system\Utils::getParam('class', $moduleInfo, array('required' => true));
 
 							if (!\class_exists($moduleInfo["class"], true)) {
 								throw new \system\InternalErrorException("Module class not found");
@@ -95,7 +96,7 @@ abstract class Module {
 							}
 							$componentsInfo = array();
 							foreach ($components as $componentName => $component) {
-								$componentClass = $componentsNs . \system\Utils::getParam($component, 'class', array('required'));
+								$componentClass = $componentsNs . \system\Utils::getParam('class', $component, array('required'));
 								$componentsInfo[$componentClass] = array();
 								foreach (@$component["pages"] as $page) {
 									$action = (string)@$page["action"];
@@ -260,7 +261,7 @@ abstract class Module {
 						"urlArgs" => $m
 					);
 					break;
-//					\system\Utils::set("system-urls", $urls);
+					\system\Utils::set("system-urls", $urls);
 				}
 			}
 		}
@@ -285,7 +286,6 @@ abstract class Module {
 	
 	public static function run($url, $request=null) {
 		$component = self::getComponent($url);
-		print_r($component);
 		if (!$component) {
 			$component = array(
 				"name" => "page",
@@ -296,6 +296,10 @@ abstract class Module {
 			);
 		}
 		$obj = new $component["class"]($component["name"], $component["module"], $component["action"], $url, $component["urlArgs"], $request);
+		
+		// Raise event onRun
+//		self::raise("onRun", $obj);
+		
 		$obj->process();
 		
 		

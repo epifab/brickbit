@@ -1,8 +1,6 @@
 <?php
 namespace system\model;
 
-use module\core\model\XmcaLog;
-
 /**
  * Classe per l'accesso ai dati.
  * E' possibile utilizzarla per interfacciarsi in maniera totalmente trasparente con mysql o sqlserver
@@ -46,9 +44,9 @@ class DataLayerCore {
 		$this->connection = $this->sqlConnect($dbHost, $dbUser, $dbPass);
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			if (ini_set('mssql.charset', 'utf-8') === false) {
-				XmcaLog::add("<p>Impossibile settare mssql.charset nel php.ini</p>");
+				\system\Log::add(\system\Lang::translate("Unable to set mssql.charset in php ini configuration file."));
 			} else {
-				XmcaLog::add("<p>Variabile mssql.charset settata su " . ini_get('mssql.charset') . " in php.ini</p>");
+				\system\Log::add(\system\Lang::translate("mssql.charset has been set to @value", array('@value' => \ini_get('mssql.charset'))));
 			}
 		}
 		if (!$this->connection) {
@@ -71,28 +69,32 @@ class DataLayerCore {
 	private function sqlConnect($dbHost, $dbUser, $dbPass) {
 		$this->dbHost = $dbHost;
 
-		XmcaLog::add("<p><strong>Tentativo di connessione DBMS " . ($this->dbmsType == \config\Config::DBMS_MYSQL ? "MySql" : "SqlServer") . ": HOST " . $dbHost . " - USER " . $dbUser . "</strong></p>");
+		\system\Log::add(\system\Lang::translate("Connection to @dbms server at @host. User: @user.", array(
+			'@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
+			'@host' => $dbHost,
+			'@user' => $dbUser
+		)));
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_connect($dbHost, $dbUser, $dbPass) : \mssql_connect($dbHost, $dbUser, $dbPass));
 		if ($res) {
-			XmcaLog::add("<p>Connessione stabilita correttamente</p>");
+			\system\Log::add("<p>Connessione stabilita correttamente</p>");
 		}
 		return $res;
 	}
 	private function sqlClose() {
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_close($this->connection) : \mssql_close($this->connection));
 		if ($res) {
-			XmcaLog::add("<p>Connessione con il DBMS chiusa correttamente</p>");
+			\system\Log::add("<p>Connessione con il DBMS chiusa correttamente</p>");
 		}
 		return $res;
 	}
 	private function sqlSelectDb($dbName) {
 		$this->dbName = $dbName;
-		XmcaLog::add("<p><strong>Tentativo di connessione a DB " . $dbName . "</strong></p>");
+		\system\Log::add("<p><strong>Tentativo di connessione a DB " . $dbName . "</strong></p>");
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
 		if ($res) {
-			XmcaLog::add("<p>Database <strong>" . $dbName . "</strong> selezionato</p>");
+			\system\Log::add("<p>Database <strong>" . $dbName . "</strong> selezionato</p>");
 		}
 		return $res;
 	}
@@ -109,7 +111,7 @@ class DataLayerCore {
 	 * sqlQuery will also fail and return false if the user does not have permission to access the table(s) referenced by the query.
 	 */
 	protected function sqlQuery($query) {
-		XmcaLog::add('<div><p><strong>Esecuzione Query SQL DB ' . $this->dbName . ' (' . $this->dbHost . ')</strong></p><textarea rows="10" cols="80">' . \htmlentities($query,ENT_NOQUOTES,'UTF-8') . '</textarea></div>');
+		\system\Log::add('<div><p><strong>Esecuzione Query SQL DB ' . $this->dbName . ' (' . $this->dbHost . ')</strong></p><textarea rows="10" cols="80">' . \htmlentities($query,ENT_NOQUOTES,'UTF-8') . '</textarea></div>');
 
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			return \mssql_query($query, $this->connection);
@@ -222,14 +224,13 @@ class DataLayerCore {
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr || empty($arr[0])) {
-			XmcaLog::add("<b>Scalar result: NO RESULT</b>");
+			\system\Log::add(\system\Lang::translate("No results for the previous query.") . "<br/>");
 			return null;
 		}
 		$x = $arr[0];
 		$this->sqlFreeResult($res);
-		
-		XmcaLog::add("<b>Scalar result: " . $x . "</b><br/>");
-		
+		\system\Log::add(\system\Lang::translate("Query result: <em>@value</em>.", array('@value' => $x)) . "<br/>");
+	
 		return $x;
 	}
 

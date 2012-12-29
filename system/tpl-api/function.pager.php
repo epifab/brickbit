@@ -1,6 +1,6 @@
 <?php
-function smarty_function_pager($args, &$smarty) {
-	$source = system\Utils::getParam($args, 'source', array('required' => true));
+function smarty_function_pager($params, &$smarty) {
+	$source = system\Utils::getParam('source', $params, array('required' => true));
 
 	if (!($source instanceof \system\model\RecordsetBuilderInterface)) {
 		if (is_array($source)) {
@@ -22,24 +22,22 @@ function smarty_function_pager($args, &$smarty) {
 	$size = $source->getLimit()->getLimit();
 	$page = $source->getLimit()->getOffset() / $size;
 
-	$vars = $smarty->getTemplateVars();
-	
-	list($formId, , $output) = smarty_block_block_form();
+	list($formId, $formName, $output) = system\view\Panels::getForm();
 
 	$numPages = $source->countPages($size);
 	if ($numPages == 1) {
 		return '';
 	}
-	$r = '<ul class="system-pager">';
+	$output .= '<ul class="system-pager">';
 	for ($i = 0; $i < $numPages; $i++) {
 		if ($i == $page) {
 //			$r .= '<li><button>' . ($i+1) . '</button></li>';
 //			$r .= '<li>' . ($i+1) . '</li>';
 		} else {
-			$r .= '<li><button onclick="xmca.paging(\'' . $formId . '\', ' . $i . ')">' . ($i+1) . '</button></li>';
+			$output .= '<li><button onclick="xmca.paging(\'' . $formId . '\', ' . $i . ')">' . ($i+1) . '</button></li>';
 		}
 	}
-	$r .= '</ul>';
-	return $r;
+	$output .= '</ul>';
+	return $output;
 }
 ?>

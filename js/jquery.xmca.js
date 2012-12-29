@@ -3,10 +3,10 @@ var xmca = {
 		return sentence;
 	},
 	
-	"behaviours": new Array(),
+	"behaviors": new Array(),
 	
 	"addBehaviour": function(k,f) {
-		xmca.behaviours[k] = f;
+		xmca.behaviors[k] = f;
 	},
 	
 	"init": function(javascript) {
@@ -14,12 +14,13 @@ var xmca = {
 			var node = $(document);
 			xmca.waitDialogInit();
 
-			$('.system-block-form', node).each(function() {
+			$('.system-panel-form', node).each(function() {
 				formId = $(this).attr("id");
-				xmca.addBlockForm(formId);
+				formName = $(this).attr("name");
+				xmca.addComponentForm(formId, formName);
 			});
 			
-			for (x in xmca.behaviours) {
+			for (x in xmca.behaviors) {
 				x();
 			}
 
@@ -168,14 +169,14 @@ var xmca = {
 	},
 
 	"getResponseObject": function(componentResponse) {
-		var responseCustomArgs = new Array();
-		$('customargs customarg', componentResponse).each(function() {
-			if ($(this).attr("value") != undefined) {
-				responseCustomArgs[$(this).attr("name")] = $(this).attr("value");
-			} else {
-				responseCustomArgs[$(this).attr["name"]] = $(this).contents();
-			}
-		});
+//		var responseCustomArgs = new Array();
+//		$('customargs customarg', componentResponse).each(function() {
+//			if ($(this).attr("value") != undefined) {
+//				responseCustomArgs[$(this).attr("name")] = $(this).attr("value");
+//			} else {
+//				responseCustomArgs[$(this).attr["name"]] = $(this).contents();
+//			}
+//		});
 
 		var xmcaResponse = {
 			// Contenuto della risposta AJAX
@@ -184,22 +185,19 @@ var xmca = {
 			// Tipo di risposta: FORM, NOTIFY, ERROR, READ
 			'type': $(componentResponse).attr("type"),
 
-			// Nome del componente
-			'name': $(componentResponse).attr("name"),
 			// Identificativo univoco della risposta
 			'id': $(componentResponse).attr("id"),
-
-			// Identificativo univico del form del componente
-			'formId': $(componentResponse).attr("formId"),
-			// Identificativo univoco del livello principale del componente
-			'contId': $(componentResponse).attr("contId"),
+			
+			'editFormId': $(componentResponse).attr("editFormId"),
+			'panelFormId': $(componentResponse).attr("panelFormId"),
+			'panelFormName': $(componentResponse).attr("panelFormName"),
 
 			// Indirizzo del componente
-			'address': $(componentResponse).attr("address"),
+			'url': $(componentResponse).attr("url"),
 			// Titolo
 			'title': $(componentResponse).attr("title"),
 			// Argomento di ritorno
-			'customArgs': responseCustomArgs,
+//			'customArgs': responseCustomArgs,
 			// Codice javascript da eseguire al caricamento
 			'javascript': $('javascript', $(componentResponse)).text()
 		};
@@ -207,13 +205,17 @@ var xmca = {
 		return xmcaResponse;
 	},
 	
-	"waitDialog": $('<div><h4>' + xmca.translate('Please wait...') + '</h4></div>'),
+//	"waitDialog": function() {
+//		return $('<div><h4>' + xmca.translate('Please wait') + '</h4></div>');
+//	},
 
+	"waitDialog": $('<div><h4>Please wait</h4></div>'),
+	
 	"waitDialogInit": function() {
 		xmca.waitDialog.dialog({
 			'dialogClass': 'system-dialog system-wait-dialog',
 			'position': 'center',
-			'title': 'Please wait',
+			'title': xmca.translate('Please wait'),
 			'resizable': false,
 			'draggable': false,
 			'stack': true,
@@ -237,13 +239,22 @@ var xmca = {
 		width = 400;
 		
 		if (question == undefined || question == '') {
-			question = "Continuare?";
+			question = xmca.translate("Are you sure?");
 		}
 		
 		target = $("<div><h2>" + title + "</h2><p class=\"alert\">" + question + "</p></div>");
 
 		okLabel = xmca.translate('Ok');
 		cancelLabel = xmca.translate('Cancel');
+
+		buttons = {};
+		buttons[xmca.translate('Ok')] = function() {
+			target.dialog("close");
+			xmca.request(options);
+		}
+		buttons[xmca.translate('Cancel')] = function() {
+			target.dialog("close");
+		}
 
 		target.dialog({
 			'dialogClass': 'system-dialog untitled',
@@ -258,15 +269,7 @@ var xmca = {
 					onclose();
 				}
 			},
-			'buttons': {
-				okLabel: function() {
-					target.dialog("close");
-					xmca.request(options);
-				},
-				cancelLabel: function() {
-					target.dialog("close");
-				}
-			}
+			'buttons': buttons
 		});
 		
 		target.dialog("open");
@@ -282,7 +285,11 @@ var xmca = {
 			cl = 'system-dialog';
 		}
 		
-		okLabel = xmca.translate('Ok');
+
+		buttons = {};
+		buttons[xmca.translate('Ok')] = function() {
+			target.dialog("close");
+		}
 		
 		target.dialog({
 			'dialogClass': cl,
@@ -298,20 +305,15 @@ var xmca = {
 					onclose();
 				}
 			},
-			'buttons': {
-				okLabel: function() {
-					target.dialog("close");
-				}
-			}
+			'buttons': buttons
 		});
 		
 		target.dialog("open");
 	},
 	
-	"addBlockForm": function(formId, formName) {
+	"addComponentForm": function(formId, formName) {
 		$("#" + formId).ajaxForm({
 			success: function(data) {
-				
 				xmcaResponse = xmca.getResponseObject(data);
 				
 				if (xmcaResponse.type == undefined) {
@@ -322,14 +324,16 @@ var xmca = {
 				else if (xmcaResponse.type == "ERROR") {
 					dialog = $("<div></div>");
 					dialog.append(xmcaResponse.content);
-					xmca.dialogNotify(dialog, xmcaResponse.title);
+					xmca.dialogNotify(dialog, xmcaResponse.title, 400);
 				}
 				else {
-					// Reload all the blocks
-					$('div.system-block.' + formName).each(function() {
+					// Reload every panel
+					$('div.system-panel.' + formName).each(function() {
 						var id = $(this).attr('id');
 						$(this).children().remove();
-						$(this).append($(id), $(data).children());
+						$(this).append(
+							$(id, $(data)).children()
+						);
 					});
 					xmca.init(xmcaResponse.javascript);
 				}
@@ -338,7 +342,7 @@ var xmca = {
 	},
 
 	"reloadComponents": function() {
-		$(".xmca_reload_form").each(function() {
+		$("form.system-panel-form").each(function() {
 			$(this).submit();
 		});
 	},
@@ -418,7 +422,6 @@ var xmca = {
 	},
 	
 	"stdHandler": function(componentResponse, defaults) {
-
 		// prima cosa: svuoto il contenuto del target
 		defaults.target.children().remove();
 		if (defaults.popup) {
@@ -459,8 +462,8 @@ var xmca = {
 					if (defaults.waitMessages) {
 						xmca.waitDialogShow();
 					}
-					$("#" + xmcaResponse.formId).ajaxSubmit({
-						url: xmcaResponse.address,
+					$("#" + xmcaResponse.editFormId).ajaxSubmit({
+						url: xmcaResponse.url,
 						beforeSubmit: function() {
 							sent++;
 							if (sent > 1) {
@@ -564,7 +567,7 @@ var xmca = {
 			
 			dialog = $("<div></div>");
 			dialog.append(xmcaResponse.content);
-			xmca.dialogNotify(dialog, xmcaResponse.title);
+			xmca.dialogNotify(dialog, xmcaResponse.title, 400);
 
 			defaults.onError(xmcaResponse);
 		}
@@ -572,7 +575,7 @@ var xmca = {
 
 	"request": function(options) {
 		var defaults = {
-			'component': undefined,
+			'url': undefined,
 			'args': null,
 			'width': 600,
 			'height': 'auto',
@@ -605,7 +608,7 @@ var xmca = {
 
 		$.extend(defaults, options);
 
-		if (defaults.component == undefined) {
+		if (defaults.url == undefined) {
 			return;
 		}
 		if (defaults.target == null) {
@@ -617,7 +620,7 @@ var xmca = {
 		
 		$.ajax({
 			'dataType': "html",
-			'url': defaults.component + ".html",
+			'url': defaults.url,
 			'data': defaults.args,
 			success: function(componentResponse) {
 				xmca.stdHandler(componentResponse, defaults);

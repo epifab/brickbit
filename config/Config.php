@@ -60,10 +60,10 @@ class Config {
 		
 		"IP_ADDRESS" => "",
 		
-		"SITE_TITLE" => "Episoft.it",
-		"SITE_SUBTITLE" => "ETU CMS, the easiest to use",
+		"SITE_TITLE" => "Cydersoft.it",
+		"SITE_SUBTITLE" => "Cydersoft | OO MVC PHP Framework",
 		 
-		"DEFAULT_PAGE_TITLE" => "Episoft",
+		"DEFAULT_PAGE_TITLE" => "Cydersoft",
 		
 		"EMAIL_INFO" => "",
 		"EMAIL_WEBMASTER" => "",
@@ -81,7 +81,7 @@ class Config {
 		"DB_HOST" => "localhost",
 		"DB_USER" => "root",
 		"DB_PASS" => "",
-		"DB_NAME" => "xmca",
+		"DB_NAME" => "cider",
 		"DB_TYPE" => Config::DBMS_MYSQL,
 		 
 		"DOMAIN" => "http://localhost",

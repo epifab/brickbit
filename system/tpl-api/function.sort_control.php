@@ -1,22 +1,22 @@
 <?php
-function smarty_function_sort_control($args, &$smarty) {
+function smarty_function_sort_control($params, &$smarty) {
 	static $count = array();
 	
 	$vars = $smarty->getTemplateVars();
 	
-	$type = system\Utils::getParam($args, 'type', array(
+	$type = system\Utils::getParam('type', $params, array(
 		'default' => 'ASC', 
 		'options' => array('ASC', 'DESC'))
 	);
-	$path = system\Utils::getParam($args, 'path', array('required' => true));
-	$prefix = system\Utils::getParam($args, 'prefix', array('default' => '', 'suffix' => '_'));
+	$path = system\Utils::getParam('path', $params, array('required' => true));
+	$prefix = system\Utils::getParam('prefix', $params, array('default' => '', 'suffix' => '_'));
 	
 	$count[$vars['system']['requestId']] = 
 		(!\array_key_exists($vars['system']['requestId'], $count))
 		? $count[$vars["private"]["requestId"]] + 1
 		: 1;
 
-	list($formId, $formName, $output) = smarty_block_block_form($smarty);
+	list($formId, $formName, $output) = system\view\Panels::getForm($smarty);
 	
 	$id = 'system-' . $vars['system']['requestId'] . '-sort-control-' . $count[$vars['system']['requestId']];
 	$class = 'system-sort-control system-sort-' . $type;
