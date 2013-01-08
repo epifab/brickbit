@@ -260,8 +260,8 @@ abstract class Module {
 						"action" => $component["action"],
 						"urlArgs" => $m
 					);
-					break;
 					\system\Utils::set("system-urls", $urls);
+					break;
 				}
 			}
 		}

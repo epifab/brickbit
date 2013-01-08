@@ -62,5 +62,29 @@ class User extends Page {
 		);
 		return Component::RESPONSE_TYPE_NOTIFY;
 	}
+	
+	public function runRegister() {
+		
+	}
+	
+	public function runList() {
+		
+	}
+	
+	public function runCreate() {
+		
+	}
+	
+	public function runRead() {
+		
+	}
+	
+	public function runUpdate() {
+		
+	}
+	
+	public function runDelete() {
+		
+	}
 }
 ?>

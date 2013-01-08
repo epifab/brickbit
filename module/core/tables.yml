@@ -28,14 +28,14 @@ file:
       type: MetaVirtual
       dependencies: [dir.path]
       handle: |
-        function($file) {
+        function(\system\model\Recordset $file) {
           return $file->dir->path . $file->name;
         }
     extension:
       type: MetaVirtual
       dependencies: [name]
       handle: |
-        function($file) {
+        function(\system\model\Recordset $file) {
           return \system\File::getExtension($file->name);
         }
   keys:
@@ -124,7 +124,66 @@ comment:
       type: N-1
       clauses: [comment_id: id]
       join: LEFT
-
+term:
+  fields:
+    id:
+      type: MetaInteger
+    parent_id:
+      type: MetaInteger
+    ldel:
+      type: MetaInteger
+    rdel:
+      type: MetaInteger
+    value:
+      type: MetaString
+      size: 64
+  keys:
+    primary:
+      fields: [id]
+      autoIncrement: 1
+  relations:
+    parent:
+      table: term
+      type: N-1
+      clauses: [parent_id: id]
+    children:
+      table: term
+      type: 1-N
+      clauses: [id: parent_id]
+      onDelete: CASCADE
+    ancestors:
+      table: term
+      clauses: []
+      type: 1-N
+      filterHandle: \module\core\model\Callbacks::termAncestors
+    descendants:
+      table: term
+      clauses: []
+      type: 1-N
+      filterHandle: \module\core\model\Callbacks::termDescendants
+    nodes:
+      table: node_term
+      type: 1-N
+      clauses: [id: term_id]
+      onDelete: CASCADE
+node_term:
+  fields:
+    node_id:
+      type: MetaInteger
+    term_id:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [node_id, term_id]
+  relations:
+    node:
+      table: node
+      type: N-1
+      clauses: [node_id: id]
+    term:
+      table: term
+      type: N-1
+      clauses: [term_id: id]
 node_text:
   fields:
     node_id:
@@ -182,42 +241,42 @@ node:
       type: MetaVirtual
       dependencies: [urn, image.file1.extension]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           return \config\settings()->BASE_DIR . 'node/image/1/' . $recordset->urn . '.' . $recordset->image->file1->extension;
         }
     image2_url:
       type: MetaVirtual
       dependencies: [urn, image.file2.extension]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           return \config\settings()->BASE_DIR . 'node/image/2/' . $recordset->urn . '.' . $recordset->image->file2->extension;
         }
     image3_url:
       type: MetaVirtual
       dependencies: [urn, image.file3.extension]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           return \config\settings()->BASE_DIR . 'node/image/3/' . $recordset->urn . '.' . $recordset->image->file3->extension;
         }
     image4_url:
       type: MetaVirtual
       dependencies: [urn, image.file4.extension]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           return \config\settings()->BASE_DIR . 'node/image/4/' . $recordset->urn . '.' . $recordset->image->file4->extension;
         }
     file_url:
       type: MetaVirtual
       dependencies: [urn, file.extension]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           return \config\settings()->BASE_DIR . 'node/file/' . $recordset->urn . '.' . $recordset->file->extension;
         }
     url:
       type: MetaVirtual
       dependencies: [urn, type]
       handle: |
-        function($recordset) {
+        function(\system\model\Recordset $recordset) {
           switch ($recordset->type) {
             case 'page':
               return \config\settings()->BASE_DIR . $recordset->urn . '.html';
@@ -226,34 +285,85 @@ node:
               return \config\settings()->BASE_DIR . $recordset->type . '/' . $recordset->urn . '.html';
           }
         }
-
+#    edit_url:
+#      type: MetaVirtual
+#      dependencies: [urn, type]
+#      handle: |
+#        function(\system\model\Recordset $recordset) {
+#          switch ($recordset->type) {
+#            default:
+#              return \config\settings()->BASE_DIR . $recordset->type . '/edit/' . $recordset->urn;
+#          }
+#        }
+#    delete_url:
+#      type: MetaVirtual
+#      dependencies: [urn, type]
+#      handle: |
+#        function(\system\model\Recordset $recordset) {
+#          switch ($recordset->type) {
+#            default:
+#              return \config\settings()->BASE_DIR . $recordset->type . '/delete/' . $recordset->urn;
+#          }
+#        }
   keys:
     primary_key:
       fields: [id]
     urn_key:
-      fields: [url]
-
+      fields: [urn]
   relations:
+    record_mode:
+      table: record_mode
+      type: 1-1
+      clauses: [record_mode_id: id]
+    parent:
+      table: node
+      type: N-1
+      clauses: [parent_id: id]
     children:
       table: node
       type: 1-N
       clauses: [id: parent_id]
+      onDelete: CASCADE
+    ancestors:
+      table: node
+      clauses: []
+      type: 1-N
+      filterHandle: \module\core\model\Callbacks::termAncestors
+    descendants:
+      table: node
+      clauses: []
+      type: 1-N
+      filterHandle: \module\core\model\Callbacks::termDescendants
+    terms:
+      table: node_term
+      type: 1-N
+      clauses: [id: node_id]
       onDelete: CASCADE
     texts:
       table: node_text
       type: 1-N
       clauses: [id: node_id]
       onDelete: CASCADE
-    text_en:
+    text_default:
       table: node_text
       type: 1-1
       clauses: [id: node_id]
-      filters: [lang: 'en']
-    text_it:
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, '=', \config\settings()->DEFAULT_LANG
+          ));
+        }
+    text:
       table: node_text
       type: 1-1
       clauses: [id: node_id]
-      filters: [lang: 'it']
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, '=', \system\Lang::getLang()
+          ));
+        }
     file:
       table: file
       type: 1-1
@@ -264,43 +374,74 @@ node:
       type: 1-1
       clauses: [image_id: id]
       onDelete: CASCADE
+
     page_header:
       table: node
-      type: 1-N
+      type: 1-1
       clauses: [id: parent_id]
-      filters: [type: page-header]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'page-header'
+          ));
+        }
     page_footer:
       table: node
-      type: 1-N
+      type: 1-1
       clauses: [id: parent_id]
-      filters: [type: page-footer]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'page-footer'
+          ));
+        }
     page_banners:
       table: node
       type: 1-N
       clauses: [id: parent_id]
-      filters: [type: page-banner]
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'page-banner'
+          ));
+        }
     page_articles:
       table: node
       type: 1-N
       clauses: [id: parent_id]
-      filters: [type: article]
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'article'
+          ));
+        }
     article_attachements:
       table: node
       type: 1-N
       clauses: [id: parent_id]
-      filters: [type: article-attachement]
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'article-attachement'
+          ));
+        }
     article_mp3s:
       table: node
       type: 1-N
       clauses: [id: parent_id]
-      filters: [type: article-mp3]
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'article-mp3'
+          ));
+        }
     article_videos:
       table: node
       type: 1-N
       clauses: [id: parent_id]
-      filters: [type: article-video]
-    parent:
-      table: node
-      type: N-1
-      clauses: [parent_id: id]
-      join: INNER
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'article-video'
+          ));
+        }

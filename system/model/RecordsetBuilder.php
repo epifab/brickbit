@@ -73,6 +73,8 @@ class RecordsetBuilder {
 	 * @var string[]
 	 */
 	private $clauses = null;
+	
+	private $filterHandle = null;
 	/**
 	 * Tipo di relazione
 	 * @var string
@@ -226,14 +228,18 @@ class RecordsetBuilder {
 		if (\array_key_exists($name, $this->tableInfo["relations"])) {
 			$info = $this->tableInfo["relations"][$name];
 			$builder = new self($info["table"]);
-			$builder->setParent($this, $name, $info["clauses"], $info["type"]);
+			$builder->setParent($this, $name, 
+				\array_key_exists('clauses', $info) ? $info["clauses"] : array(),
+				\array_key_exists('type', $info) ? $info["type"] : '1-N',
+				\array_key_exists('filterHandle', $info) ? $info["filterHandle"] : null
+			);
 			$builder->setOnUpdate(\array_key_exists("onUpdate", $info) ? $info["onUpdate"] : "NO_ACTION");
 			$builder->setOnDelete(\array_key_exists("onDelete", $info) ? $info["onDelete"] : "NO_ACTION");
 			$builder->setJoinType(\array_key_exists("join", $info) ? $info["join"] : "LEFT");
 			$this->relationBuilderList[$name] = $builder;
 			$builder->hasMany()
-				? $this->hasOneRelationBuilderList[$name] = $builder
-				: $this->hasManyRelationBuilderList[$name] = $builder;
+				? $this->hasManyRelationBuilderList[$name] = $builder
+				: $this->hasOneRelationBuilderList[$name] = $builder;
 			return $builder;
 		}
 	}
@@ -313,7 +319,7 @@ class RecordsetBuilder {
 		}
 	}
 
-	private function setParent(RecordsetBuilder $parentBuilder, $relationName, $clauses, $relationType) {
+	private function setParent(RecordsetBuilder $parentBuilder, $relationName, $clauses, $relationType, $filterHandle) {
 		$this->absolutePath = $parentBuilder->getAbsolutePath() != "" ? $parentBuilder->getAbsolutePath() . "." . $relationName : $relationName;
 		$this->parentBuilder = $parentBuilder;
 		$this->clauses = $clauses;
@@ -339,6 +345,8 @@ class RecordsetBuilder {
 		} else if ($parentBuilder->importKeys == self::KEYS_ALL_RECURSIVE) {
 			$this->useAllKeysRecursive();
 		}
+		
+		$this->filterHandle = $filterHandle;
 	}
 	
 	private function useAllKeys() {
@@ -587,6 +595,10 @@ class RecordsetBuilder {
 	 */
 	public function getParentBuilder() {
 		return $this->parentBuilder;
+	}
+	
+	public function getFilterHandle() {
+		return $this->filterHandle;
 	}
 	
 	/**
@@ -965,18 +977,30 @@ class RecordsetBuilder {
 		// Aggiungo tutte le has one relations
 		foreach ($this->hasOneRelationBuilderList as $builder) {
 			$q2 .= " " . $builder->joinType . " JOIN " . $builder->getSelectExpression() . " " . $builder->tableAlias . " ON ";
-			
+
 			$first = true;
 			foreach ($builder->clauses as $clause) {
 				\reset($clause);
 				$first ? $first = false : $q2 .= " AND ";
-				$q2 .= $builder->tableAlias . "." . \key($clause) . " = " . $this->tableAlias . "." . \current($clause);
+				$q2 .= $builder->tableAlias . "." . \current($clause) . " = " . $this->tableAlias . "." . \key($clause);
+			}
+			$builder instanceof self;
+			
+			$oldFilter = $builder->getFilter();
+			
+			// Initialize custom filters
+			if (!\is_null($builder->filterHandle)) {
+				eval('$func = ' . $builder->filterHandle . ';');
+				\call_user_func($func, $this, $builder);
 			}
 			
 			if (!\is_null($builder->filterClauses)) {
-				$q2 .= " AND (" . $builder->filterClauses->getQuery() . ")";
+				$first ? $first = false : $q2 .= " AND ";
+				$q2 .= " (" . $builder->filterClauses->getQuery() . ")";
 			}
 
+			$builder->setFilter($oldFilter);
+			
 			$builder->selectQuery($q1, $q2);
 		}
 	}
@@ -1007,16 +1031,20 @@ class RecordsetBuilder {
 				// SOLTANTO SE l'utente NON e' un un SUPERUSER
 				// l'accesso si restringe a queste condizioni:
 				// modalità = ANYONE
-				// OPPURE modalità >= GRUPPO e utente nel gruppo del record
+				// OPPURE modalità >= ADMINS e utente nel gruppo del record
 				// OPPURE modalità >= OWNER e utente owner
 
 				$anyoneFilter = new FilterClause($this->record_mode->$mode, "=", \system\model\RecordMode::MODE_ANYONE);
 
 				if (!\system\Login::getInstance()->isAnonymous()) {
-					$roleFilter = new FilterClauseGroup(
-						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ROLE),
+					$adminsFilter = new FilterClauseGroup(
+						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ADMINS),
 						"AND",
-						new CustomClause($this->record_mode->getTableAlias() . "." . $this->record_mode->role_id->getName() . " IN (SELECT role_id FROM user_role WHERE user_id = " .	\system\Login::getLoggedUserId() . ")")
+						new FilterClauseGroup(
+							new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT user_id FROM record_mode_user WHERE record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName()),
+							"OR",
+							new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT ur.user_id FROM record_mode_role rmr INNER JOIN user_role ur ON ur.role_id = rmr.role_id WHERE rmr.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName())
+						)
 					);
 
 					$ownerFilter = new FilterClauseGroup(
@@ -1031,7 +1059,7 @@ class RecordsetBuilder {
 						"OR",
 						$ownerFilter,
 						"OR",
-						$roleFilter
+						$adminsFilter
 					));
 				} else {
 					$rmFilter->addClauses("AND", $anyoneFilter);

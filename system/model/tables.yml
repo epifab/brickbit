@@ -195,8 +195,6 @@ record_mode:
       type: MetaInteger
     owner_id:
       type: MetaInteger
-    role_id:
-      type: MetaInteger
     last_modifier_id:
       type: MetaInteger
     ins_date_time:
@@ -206,26 +204,26 @@ record_mode:
     read_mode:
       type: MetaOptions
       options:
-        0: Nobody
-        1: Superuser only
-        2: Superuser and owner only
-        3: Superuser, owner and roles only
+#        0: Nobody
+#        1: Superuser
+        2: Owner only
+        3: Admins
         4: Anyone
     edit_mode:
       type: MetaOptions
       options:
-        0: Nobody
-        1: Superuser only
-        2: Superuser and owner only
-        3: Superuser, owner and role only
+#        0: Nobody
+        1: Superuser
+        2: Owner
+        3: Admins
         4: Anyone
     delete_mode:
       type: MetaOptions
       options:
-        0: Nobody
-        1: Superuser only
-        2: Superuser and owner only
-        3: Superuser, owner and role only
+#        0: Nobody
+        1: Superuser
+        2: Owner
+        3: Admins
         4: Anyone
   keys:
     primary:
@@ -240,10 +238,6 @@ record_mode:
       table: user
       type: N-1
       clauses: [user_id: id]
-    role:
-      table: role
-      type: N-1
-      clauses: [role_id: id]
 record_mode_log:
   fields:
     id:
@@ -259,7 +253,43 @@ record_mode_log:
       fields: [id]
       autoIncrement: 1
   relations:
-    record_mode:
+    rm:
+      table: record_mode
+      type: N-1
+      clauses: [record_mode_id: id]
+record_mode_role:
+  fields:
+    record_mode_id:
+      type: MetaInteger
+    role_id:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [record_mode_id, role_id]
+  relations:
+    role:
+      table: role
+      type: N-1
+      clauses: [role_id: id]
+    rm:
+      table: record_mode
+      type: N-1
+      clauses: [record_mode_id: id]
+record_mode_user:
+  fields:
+    record_mode_id:
+      type: MetaInteger
+    user_id:
+      type: MetaInteger
+  keys:
+    primary:
+      fields: [record_mode_id, user_id]
+  relations:
+    user:
+      table: user
+      type: N-1
+      clauses: [user_id: id]
+    rm:
       table: record_mode
       type: N-1
       clauses: [record_mode_id: id]

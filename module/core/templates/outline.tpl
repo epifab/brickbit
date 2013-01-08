@@ -21,18 +21,22 @@
 	</head>
 	
 	<body>
-		<div id="main">
+		<div id="container">
 			<{region name="header"}>
 
-			<div id="container">
-				<{include file=$system.templates.main}>
-	
-				<{region name="sidebar"}>
-			</div>
-			
-			<{region name="footer"}>
-		</div>
+			<div id="main-wrapper">
+				<div id="main">
+					<{include file=$system.templates.main}>
 
+					<{region name="sidebar"}>
+				</div>
+			</div>
+
+			<div id="footer-wrapper">
+				<{region name="footer"}>
+			</div>
+
+		</div>
 		<script type="text/javascript"><{javascript}></script>
 	</body>
 </html>

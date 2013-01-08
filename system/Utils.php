@@ -88,7 +88,7 @@ class Utils {
 			$results[$prefix] = $value;
 		} else {
 			foreach ($value as $k => $v) {
-				arg2Input($results, $prefix . "[" . $k . "]", $v);
+				self::arg2Input($results, $prefix . "[" . $k . "]", $v);
 			}
 		}
 	}

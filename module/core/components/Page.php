@@ -80,7 +80,7 @@ class Page extends Component {
 		
 		$this->setMainTemplate('content-page');
 		
-		return Component::RESPONSE_TYPE_READ;
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runAdd() {
@@ -91,6 +91,7 @@ class Page extends Component {
 		$this->datamodel['recordset'] = $recordset;
 
 		$this->setMainTemplate('edit-content-page');
+		$this->datamodel['errors'] = array();
 		return Component::RESPONSE_TYPE_FORM;
 
 		if (\array_key_exists("recordset", $this->getRequestData())) {

@@ -1,4 +1,4 @@
-<?php /* Smarty version Smarty-3.1.12, created on 2012-12-29 16:44:59
+<?php /* Smarty version Smarty-3.1.12, created on 2013-01-07 23:36:26
          compiled from "module\core\templates\outline.tpl" */ ?>
 <?php /*%%SmartyHeaderCode:331750df1e0b0c3104-76317245%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
@@ -7,7 +7,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
     'a67066ae7d218ebdd668e33f30ce3f3d5a38f566' => 
     array (
       0 => 'module\\core\\templates\\outline.tpl',
-      1 => 1356795542,
+      1 => 1357601785,
       2 => 'file',
     ),
   ),
@@ -15,6 +15,8 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   'function' => 
   array (
   ),
+  'version' => 'Smarty-3.1.12',
+  'unifunc' => 'content_50df1e0b1bd829_53664509',
   'variables' => 
   array (
     'page' => 0,
@@ -23,8 +25,6 @@ $_valid = $_smarty_tpl->decodeProperties(array (
     'system' => 0,
   ),
   'has_nocache_code' => false,
-  'version' => 'Smarty-3.1.12',
-  'unifunc' => 'content_50df1e0b1bd829_53664509',
 ),false); /*/%%SmartyHeaderCode%%*/?>
 <?php if ($_valid && !is_callable('content_50df1e0b1bd829_53664509')) {function content_50df1e0b1bd829_53664509($_smarty_tpl) {?><?php if (!is_callable('smarty_function_path')) include 'system/tpl-api\\function.path.php';
 if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
@@ -70,22 +70,26 @@ $_smarty_tpl->tpl_vars["css"]->_loop = true;
 	</head>
 	
 	<body>
-		<div id="main">
+		<div id="container">
 			<?php echo smarty_function_region(array('name'=>"header"),$_smarty_tpl);?>
 
 
-			<div id="container">
-				<?php echo $_smarty_tpl->getSubTemplate ($_smarty_tpl->tpl_vars['system']->value['templates']['main'], $_smarty_tpl->cache_id, $_smarty_tpl->compile_id, null, null, array(), 0);?>
+			<div id="main-wrapper">
+				<div id="main">
+					<?php echo $_smarty_tpl->getSubTemplate ($_smarty_tpl->tpl_vars['system']->value['templates']['main'], $_smarty_tpl->cache_id, $_smarty_tpl->compile_id, null, null, array(), 0);?>
 
-	
-				<?php echo smarty_function_region(array('name'=>"sidebar"),$_smarty_tpl);?>
+
+					<?php echo smarty_function_region(array('name'=>"sidebar"),$_smarty_tpl);?>
+
+				</div>
+			</div>
+
+			<div id="footer-wrapper">
+				<?php echo smarty_function_region(array('name'=>"footer"),$_smarty_tpl);?>
 
 			</div>
-			
-			<?php echo smarty_function_region(array('name'=>"footer"),$_smarty_tpl);?>
 
 		</div>
-
 		<script type="text/javascript"><?php echo smarty_function_javascript(array(),$_smarty_tpl);?>
 </script>
 	</body>

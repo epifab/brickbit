@@ -89,10 +89,18 @@ class Recordset implements RecordsetInterface {
 			// salvo il filtro originale
 			$oldFilter = $builder->getFilter();
 
+			if ($builder->getFilterHandle()) {
+				$handle = $builder->getFilterHandle();
+				// handle should set filters and other stu
+				$handle($this, $builder);
+			}
+
 			// costruisco un nuovo filtro con le clausole della relazione in AND con il filtro originale
 			$newFilter = null;
-			
-			foreach ($builder->getClauses() as $parentField => $childField) {
+
+			foreach ($builder->getClauses() as $clause) {
+				$parentField = \key($clause);
+				$childField = \current($clause);
 				$metaType = $builder->searchMetaType($childField);
 				$filter = new FilterClause($metaType, "=", $this->fields[$parentField]);
 				if (\is_null($newFilter)) {
@@ -104,7 +112,6 @@ class Recordset implements RecordsetInterface {
 			if (!\is_null($oldFilter)) {
 				$newFilter->addClauses("AND", $oldFilter);
 			}
-
 			// setto il nuovo filtro nel builder
 			$builder->setFilter($newFilter);
 
@@ -166,7 +173,7 @@ class Recordset implements RecordsetInterface {
 			if ($mt && $mt instanceof MetaVirtual) {
 				return \call_user_func($mt->getHandler(), $this);
 			}
-			throw new \system\InternalErrorException(\system\Lang::translate('Field <em>@name</em> not found.', array("@name" => $name)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Field, relation or key <em>@name</em> not found.', array("@name" => $name)));
 		}
 	}
 	
@@ -207,11 +214,11 @@ class Recordset implements RecordsetInterface {
 		return $metaType->prog2Read($progValue);
 	}
 	
-	public function save($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
+	public function save($readMode=null, $editMode=null, $deleteMode=null) {
 		if (!$this->isStored()) {
-			return $this->create($readMode, $editMode, $deleteMode, $roleId);
+			return $this->create($readMode, $editMode, $deleteMode);
 		} else {
-			return $this->update($readMode, $editMode, $deleteMode, $roleId);
+			return $this->update($readMode, $editMode, $deleteMode);
 		}
 	}
 	
@@ -224,14 +231,13 @@ class Recordset implements RecordsetInterface {
 	 * @param int $readMode Read Mode (vedi \system\model\RecordMode)
 	 * @param int $editMode Edit Mode (vedi \system\model\RecordMode)
 	 * @param int $deleteMode Delete Mode (vedi \system\model\RecordMode)
-	 * @param int $roleId Id del ruolo utente
 	 */
-	public function create($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
+	public function create($readMode=null, $editMode=null, $deleteMode=null) {
 		
 		\system\logic\Module::raise("onCreate", $this);
 		
 		if ($this->builder->isRecordModed()) {
-			$this->createRecordMode($readMode, $editMode, $deleteMode, $roleId);
+			$this->createRecordMode($readMode, $editMode, $deleteMode);
 		}
 		
 		$q1 = "";
@@ -271,7 +277,7 @@ class Recordset implements RecordsetInterface {
 	 * Controlla contestualmente i permessi dell'utente.
 	 * NB: NON AGGIORNA AUTOMATICAMENTE LE RELAZIONI HAS ONE ED HAS MANY!
 	 */
-	public function update($readMode=null, $editMode=null, $deleteMode=null, $roleId=null) {
+	public function update($readMode=null, $editMode=null, $deleteMode=null) {
 		$q1 = "";
 		
 		\system\logic\Module::raise("onUpdate", $this);
@@ -282,7 +288,7 @@ class Recordset implements RecordsetInterface {
 		
 		// Controllo i permessi dell'utente per l'aggiornamento del record
 		if ($this->builder->isRecordModed()) {
-			$this->updateRecordMode($readMode, $editMode, $deleteMode, $roleId);
+			$this->updateRecordMode($readMode, $editMode, $deleteMode);
 		}
 
 		foreach ($this->modifiedFields as $name => $value) {
@@ -329,16 +335,15 @@ class Recordset implements RecordsetInterface {
 	 * @param int $readMode Read Mode (vedi \system\model\RecordMode)
 	 * @param int $editMode Edit Mode (vedi \system\model\RecordMode)
 	 * @param int $deleteMode Delete Mode (vedi \system\model\RecordMode)
-	 * @param int $roleId Id ruolo utente
 	 */
-	private function createRecordMode($readMode, $editMode, $deleteMode, $roleId) {
+	private function createRecordMode($readMode, $editMode, $deleteMode) {
 		$recordMode = $this->record_mode;
 		
 		switch ($readMode) {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->read_mode = $readMode;
 				break;
@@ -352,13 +357,13 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->edit_mode = $editMode;
 				break;
 			
 			default:
-				$recordMode->edit_mode = \system\model\RecordMode::MODE_SU_OWNER_ROLE;
+				$recordMode->edit_mode = \system\model\RecordMode::MODE_SU_OWNER_ADMINS;
 				break;
 		}
 		
@@ -366,18 +371,14 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->delete_mode = $deleteMode;
 				break;
 			
 			default:
-				$recordMode->delete_mode = \system\model\RecordMode::MODE_SU_OWNER_ROLE;
+				$recordMode->delete_mode = \system\model\RecordMode::MODE_SU_OWNER_ADMINS;
 				break;
-		}
-		
-		if (!\is_null($roleId)) {
-			$recordMode->roleId = (int)$roleId;
 		}
 		
 		$recordMode->owner_id = \system\Login::getLoggedUserId();
@@ -394,7 +395,7 @@ class Recordset implements RecordsetInterface {
 		$this->setProg($this->builder->getRecordModeField(), $recordMode->id);
 	}
 	
-	private function updateRecordMode($readMode, $editMode, $deleteMode, $roleId) {
+	private function updateRecordMode($readMode, $editMode, $deleteMode) {
 		$recordMode = $this->record_mode;
 		
 		if (\is_null($recordMode)) {
@@ -405,7 +406,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->read_mode = $readMode;
 				break;
@@ -419,7 +420,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->edit_mode = $editMode;
 				break;
@@ -433,7 +434,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_NOBODY:
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ROLE:
+			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->delete_mode = $deleteMode;
 				break;
@@ -443,11 +444,6 @@ class Recordset implements RecordsetInterface {
 				break;
 		}
 
-		if (!\is_null($roleId)) {
-			// Cambio il gruppo solo se non nullo
-			$recordMode->role_id = (int)$roleId;
-		}
-		
 		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
 		$recordMode->last_upd_date_time = \time();
 		$recordMode->update();

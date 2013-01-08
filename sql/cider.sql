@@ -100,7 +100,6 @@ CREATE TABLE user_role (
 CREATE TABLE record_mode (
 	id INT AUTO_INCREMENT,
 	owner_id INT,
-	role_id INT,
 	read_mode INT,
 	edit_mode INT,
 	delete_mode INT,
@@ -108,6 +107,18 @@ CREATE TABLE record_mode (
 	last_modifier_id INT,
 	last_upd_date_time DATETIME,
 	PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE record_mode_user (
+	record_mode_id INT,
+	user_id INT,
+	PRIMARY KEY (record_mode_id, user_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE record_mode_role (
+	record_mode_id INT,
+	role_id INT,
+	PRIMARY KEY (record_mode_id, role_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE record_mode_log (
@@ -185,7 +196,7 @@ CREATE TABLE node (
 
 CREATE TABLE node_text (
 	node_id INT,
-	lang_id CHAR(2),
+	lang CHAR(2),
 	title VARCHAR(128),
 	subtitle VARCHAR(256),
 	preview TEXT,
@@ -203,14 +214,17 @@ CREATE TABLE comment (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE tag (
+CREATE TABLE term (
 	id INT AUTO_INCREMENT,
+	parent_id INT,
+	ldel INT,
+	rdel INT,
 	value VARCHAR(64),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE node_tag (
+CREATE TABLE node_term (
 	node_id INT,
-	tag_id INT,
-	PRIMARY KEY (node_id, tag_id)
+	term_id INT,
+	PRIMARY KEY (node_id, term_id)
 ) ENGINE=InnoDB;

@@ -1,0 +1,13 @@
+node:
+  relations:
+    item:
+      table: item
+      clauses: [id: node_id]
+      type: 1-1
+      onDelete: CASCADE
+item:
+  fields:
+    node_id:
+      type: MetaInteger
+    price:
+      type: MetaDouble

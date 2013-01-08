@@ -4,7 +4,7 @@ namespace module\core;
 class Core extends \system\logic\Module {
 	
 	public static function onRun(\system\logic\Component $component) {
-		die("ciao");
+
 	}
 	
 	public static function loadRSFormData(Recordset $recordset, &$errors, $formInfo) {

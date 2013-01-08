@@ -3,34 +3,95 @@ weight: 1
 enabled: 1
 componentsNs: components
 components:
-  page:
-    class: Page
-    pages:
-#      - url: page/search
-#        action: Search
-      - url: (@strid).html
-        action: Read
-      - url: page/add
-        action: Add
-      - url: page/edit/(@strid)
-        action: Edit
-      - url: page/delete/(@strid)
-        action: Delete
   user:
     class: User
     pages:
+      - url: user/register
+        action: Register
       - url: user/login
         action: Login
       - url: user/logout
         action: Logout
-#  article:
-#    class: Article
+      - url: user/list
+        action: List
+      - url: user/add
+        action: Create
+      - url: user/([0-9]+)
+        action: Read
+      - url: user/edit/([0-9]+)
+        action: Update
+      - url: user/delete/([0-9]+)
+        action: Delete
+  page_node:
+    class: Page
+    pages:
+      - url: (@strid).html
+        action: Read
+  node:
+    class: Node
+    pages:
+      # article/search
+      - url: (@strid)/search
+        action: Search
+      # article/add
+      - url: (@strid)/add
+        action: Create
+      # article/about-me.html
+      - url: (@strid)/(@strid).html
+        action: Read
+      # article/about-me/edit
+      - url: (@strid)/(@strid)/edit
+        action: Update
+      # article/about-me/delete
+      - url: (@strid)/(@strid)/delete
+        action: Delete
+  node_image:
+    class: NodeImage
+    pages:
+      # article/img/about-me/add
+      - url: (@strid)/img/(@strid)/add
+        action: Create
+      # article/img/1/about-me.jpg
+      - url: (@strid)/img/([1-4])/(@strid).(@strid)
+        action: Read
+      # article/img/about-me/edit
+      - url: (@strid)/img/(@strid)/edit
+        action: Update
+      # article/img/about-me/delete
+      - url: (@strid)/img/(@strid)/delete
+        action: Delete
+  node_file:
+    class: NodeFile
+    pages:
+      # article/file/about-me/add
+      - url: (@strid)/file/(@strid)/add
+        action: Create
+      # article/file/about-me.pdf
+      - url: (@strid)/file/(@strid).(@strid)
+        action: Read
+      # article/file/about-me/edit
+      - url: (@strid)/file/(@strid)/edit
+        action: Update
+      # article/file/about-me/delete
+      - url: (@strid)/file/(@strid)/delete
+        action: Delete
+  comment:
+    class: Comment
+    pages:
+      # comment/add/about-me
+      - url: comment/add/(@strid)
+        action: Create
+      # comment/123.html
+      - url: comment/([0-9]+).html
+        action: Read
+      # comment/123/edit
+      - url: comment/([0-9]+)/edit
+        action: Update
+      # comment/123/delete
+      - url: comment/([0-9]+)/delete
+        action: Delete
+#  term:
+#    class: Term
 #    pages:
-#      - url: article/(@strid).html
-#        action: Read
-#      - url: article/edit/(@strid)
-#        action: Edit
-#      - url: article/add
-#        action: Add
-#      - url: article/delete/(@strid)
-#        action: Delete
+#      - url: term/search
+#        action: Search
