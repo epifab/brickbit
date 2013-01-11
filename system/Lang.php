@@ -26,12 +26,21 @@ class Lang {
 			$langId = \array_key_exists("lang", $_SESSION) ? $_SESSION["lang"] : \config\settings()->DEFAULT_LANG;
 		}
 		self::$lang = $langId;
-		$function = '\\lang\\' . $langId;
-		self::$vocabulary = function_exists($function) ? $function() : array();
+		$callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
+		if (\is_callable($callback)) {
+			self::$vocabulary = \call_user_func($callback);
+		}
+		if (!\is_array(self::$vocabulary)) {
+			self::$vocabulary = array();
+		}
+	}
+	
+	public static function langLink($langId) {
+		return $langId . substr(\config\settings()->DOMAIN, \strpos($_SERVER["HTTP_HOST"], ".")) . $_SERVER["REQUEST_URI"];
 	}
 	
 	public static function setLang($langId) {
-		if (\array_key_exists($langId, \config\settings()->LANGS)) {
+		if (\in_array($langId, \config\settings()->LANGUAGES)) {
 			$_SESSION["lang"] = $langId;
 			self::initLang();
 		}
@@ -51,7 +60,7 @@ class Lang {
 		if (\array_key_exists($sentence, self::$vocabulary)) {
 			if (\is_callable(self::$vocabulary[$sentence])) {
 				// The vocabulary may contain function for dynamic sentence translations
-				$sentence = self::$vocabulary[$sentence]($args);
+				$sentence = \call_user_func(self::$vocabulary[$sentence], $args);
 			} else {
 				// Simple translation
 				$sentence = self::$vocabulary[$sentence];

@@ -7,12 +7,12 @@ class Core extends \system\logic\Module {
 
 	}
 	
-	public static function loadRSFormData(Recordset $recordset, &$errors, $formInfo) {
+	public static function loadRSFormData(\system\model\Recordset $recordset, &$errors, $formInfo) {
 		
 		$numErrors = 0;
 		$builder = $recordset->getBuilder();
 
-		if (\array_key_exists("recordset", $_REQUEST) && \is_array($_REQUEST["recordset"])) {
+		if (\array_key_exists("node", $_REQUEST) && \is_array($_REQUEST["node"])) {
 			
 			foreach ($formInfo as $fieldInfo) {
 				if (\is_array($fieldInfo)) {
@@ -20,18 +20,20 @@ class Core extends \system\logic\Module {
 				} else {
 					$path = $fieldInfo;
 				}
-				
+
 				$metaType = $builder->searchMetaType($path, true);
 				$metaType instanceof MetaType;
 
-				$value = Utils::getParam($path, $_REQUEST["recordset"], array('default' => null));
-				
+				$value = \system\Utils::getParam($path, $_REQUEST["node"], array('default' => null));
+
+				if ($metaType instanceof MetaBoolean) {
+					$value = \is_null($value) ? 0 : 1;
+				}
+
 				try {
-					if ($metaType instanceof MetaBoolean) {
-						$value = \is_null($value) ? 0 : 1;
-					}
-					
-					$recordset->setEdit($curPath, $value);
+
+					list($rs, $name) = $recordset->searchParent($path, true);
+					$rs->setEdit($name, $value);
 					
 				} catch (ValidationException $ex) {
 					$errors[$path] = $ex->getMessage();

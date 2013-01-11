@@ -1,4 +1,4 @@
-<?php /* Smarty version Smarty-3.1.12, created on 2013-01-08 00:26:51
+<?php /* Smarty version Smarty-3.1.12, created on 2013-01-08 23:23:34
          compiled from "module\core\templates\header.tpl" */ ?>
 <?php /*%%SmartyHeaderCode:2317850df1e0b1d3f83-82538920%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
@@ -7,7 +7,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
     '2afb656c211dbadb47968e6d4e55de4a9b7f633b' => 
     array (
       0 => 'module\\core\\templates\\header.tpl',
-      1 => 1357604802,
+      1 => 1357687413,
       2 => 'file',
     ),
   ),
@@ -31,6 +31,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
 <?php if ($_valid && !is_callable('content_50df1e0b34ab84_47350198')) {function content_50df1e0b34ab84_47350198($_smarty_tpl) {?><?php if (!is_callable('smarty_block_link')) include 'system/tpl-api\\block.link.php';
 if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
 if (!is_callable('smarty_block_panel')) include 'system/tpl-api\\block.panel.php';
+if (!is_callable('smarty_function_lang_link')) include 'system/tpl-api\\function.lang_link.php';
 if (!is_callable('smarty_block_protected')) include 'system/tpl-api\\block.protected.php';
 ?>	<div id="admin-menu-wrapper">
 		<ul id="admin-menu">
@@ -85,10 +86,9 @@ foreach ($_from as $_smarty_tpl->tpl_vars['lang']->key => $_smarty_tpl->tpl_vars
 $_smarty_tpl->tpl_vars['lang']->_loop = true;
 ?>
 							<?php if ($_smarty_tpl->tpl_vars['lang']->value!=$_smarty_tpl->tpl_vars['system']->value['lang']){?>
-							<?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>"lang/".((string)$_smarty_tpl->tpl_vars['lang']->value))); $_block_repeat=true; echo smarty_block_link(array('url'=>"lang/".((string)$_smarty_tpl->tpl_vars['lang']->value)), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-<img src="<?php echo smarty_function_theme_path(array('url'=>"img/lang/40/".((string)$_smarty_tpl->tpl_vars['lang']->value).".jpg"),$_smarty_tpl);?>
-"/><?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>"lang/".((string)$_smarty_tpl->tpl_vars['lang']->value)), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-
+							<a href="http://<?php echo smarty_function_lang_link(array('id'=>$_smarty_tpl->tpl_vars['lang']->value),$_smarty_tpl);?>
+"><img src="<?php echo smarty_function_theme_path(array('url'=>"img/lang/40/".((string)$_smarty_tpl->tpl_vars['lang']->value).".jpg"),$_smarty_tpl);?>
+"/></a>
 							<?php }?>
 						<?php } ?>
 					</div>

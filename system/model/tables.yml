@@ -234,10 +234,18 @@ record_mode:
       table: record_mode_log
       type: 1-N
       clauses: [id: record_mode_id]
-    user:
+    owner:
       table: user
       type: N-1
-      clauses: [user_id: id]
+      clauses: [owner_id: id]
+    users:
+      table: record_mode_user
+      type: 1-N
+      clauses: [id: record_mode_id]
+    roles:
+      table: record_mode_role
+      type: 1-N
+      clauses: [id: record_mode_id]
 record_mode_log:
   fields:
     id:

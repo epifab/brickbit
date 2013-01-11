@@ -1,8 +1,14 @@
 <?php
 namespace config;
 
-if (\array_key_exists(\session_name(), $_REQUEST)) {
-	@\session_id($_REQUEST[\session_name()]);
+//if (\array_key_exists(\session_name(), $_REQUEST)) {
+//	@\session_id($_REQUEST[\session_name()]);
+//}
+
+$domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
+if (\count($domains) >= 3) {
+	\session_set_cookie_params(0, '/', '.' . $domains[1] . '.' . $domains[0]);
+//	\ini_set('session.cookie_domain', '.' . $domains[1] . '.' . $domains[0]);
 }
 
 @\session_start();
@@ -45,6 +51,7 @@ class Config {
 		"LANGUAGES" => array(
 			"en",
 			"it",
+			"de",
 		),
 		"DEFAULT_LANG" => "en",
 		
@@ -55,8 +62,7 @@ class Config {
 		"DEFAULT_THEME" => "dark",
 		 
 		// links
-		"DOMAIN" => "",
-		"BASE_DIR" => "",
+		"BASE_DIR" => "/",
 		
 		"IP_ADDRESS" => "",
 		
@@ -84,8 +90,7 @@ class Config {
 		"DB_NAME" => "cider",
 		"DB_TYPE" => Config::DBMS_MYSQL,
 		 
-		"DOMAIN" => "http://localhost",
-		"BASE_DIR" => "/episoft.it/",
+		"BASE_DIR" => "/",
 		
 		"SITE_TITLE" => "Episoft.it | DEV",
 		 
@@ -99,7 +104,6 @@ class Config {
 		"DB_NAME" => "Sql487621_4",
 		"DB_TYPE" => Config::DBMS_MYSQL,
 		 
-		"DOMAIN" => "http://www.episoft.it",
 		"BASE_DIR" => "/",
 	);
 	
@@ -130,7 +134,11 @@ class Config {
 	public function __get($name) {
 		switch ($name) {
 			case "SITE_ADDRESS":
-				return $this->data["DOMAIN"] . $this->data["BASE_DIR"];
+				return $this->DOMAIN . $this->data["BASE_DIR"];
+				break;
+			
+			case "DOMAIN":
+				return $_SERVER["HTTP_HOST"];
 				break;
 			
 			default:
@@ -169,4 +177,8 @@ class Config {
 
 \spl_autoload_register('\config\Config::autoload');
 
+\system\Lang::setLang(\strpos($_SERVER["HTTP_HOST"], ".")
+	? substr($_SERVER["HTTP_HOST"], 0, \strpos($_SERVER["HTTP_HOST"], ".")) 
+	: $_SERVER["HTTP_HOST"]
+);
 ?>

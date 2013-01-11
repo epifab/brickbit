@@ -191,6 +191,9 @@ node_text:
     lang:
       type: MetaString
       size: 2
+    urn:
+      type: MetaString
+      size: 32
     title:
       type: MetaString
       size: 64
@@ -205,6 +208,8 @@ node_text:
   keys:
     primary_key:
       fields: [node_id, lang]
+    urn_key:
+      fields: [urn, lang]
   relations:
     node:
       type: N-1
@@ -362,6 +367,36 @@ node:
         function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
           $text->addFilter(new \system\model\FilterClause(
             $text->lang, '=', \system\Lang::getLang()
+          ));
+        }
+    text_en:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, '=', 'en'
+          ));
+        }
+    text_it:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, '=', 'it'
+          ));
+        }
+    text_de:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, '=', 'de'
           ));
         }
     file:

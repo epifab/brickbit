@@ -53,6 +53,9 @@ class Recordset implements RecordsetInterface {
 		return $this->builder->getMetaTypeList();
 	}
 	
+	/**
+	 * @return \system\RecordsetBuilder
+	 */
 	public function getBuilder() {
 		return $this->builder;
 	}
@@ -151,6 +154,33 @@ class Recordset implements RecordsetInterface {
 			return null;
 		}
 	}
+	
+	public function searchParent($path, $required=false) {
+		if (empty($path)) {
+			if ($required) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path)));
+			} else {
+				return null;
+			}
+		}
+		$dotPosition = strpos($path, ".");
+		try {
+			if ($dotPosition === false) {
+				return array($this, $path);
+			} else {
+				$first = $this->__get(substr($path, 0, $dotPosition));
+				if ($first instanceof RecordsetInterface) {
+					return $first->searchParent(substr($path, $dotPosition+1), $required);
+				} else if ($required) {
+					throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path)));
+				} else {
+					return null;
+				}
+			}
+		} catch (\system\InternalErrorException $ex) {
+			return null;
+		}
+	}
 
 	public function setProg($name, $value) {
 		if (\array_key_exists($name, $this->fields)) {
@@ -159,7 +189,7 @@ class Recordset implements RecordsetInterface {
 			}
 			$this->fields[$name] = $value;
 		} else {
-			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> does not exist or is not used.', array('@name' => $name)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $name)));
 		}
 	}
 	
@@ -173,7 +203,7 @@ class Recordset implements RecordsetInterface {
 			if ($mt && $mt instanceof MetaVirtual) {
 				return \call_user_func($mt->getHandler(), $this);
 			}
-			throw new \system\InternalErrorException(\system\Lang::translate('Field, relation or key <em>@name</em> not found.', array("@name" => $name)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Field, relation or key <em>@path</em> not found.', array("@path" => $name)));
 		}
 	}
 	
@@ -194,11 +224,11 @@ class Recordset implements RecordsetInterface {
 		if (\array_key_exists($name, $this->fields)) {
 			$metaType = $this->builder->searchMetaType($name);
 			if ($metaType instanceof MetaVirtual) {
-				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@name</em> value (virtual field).', array("@name" => $name)));
+				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@path</em> value (virtual field).', array("@path" => $name)));
 			}
 			$this->modifiedFields[$name] = $metaType->edit2Prog($value);
 		} else {
-			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@name</em> not found.', array("@name" => $name)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> not found.', array("@path" => $name)));
 		}
 	}
 	
@@ -265,8 +295,8 @@ class Recordset implements RecordsetInterface {
 		$this->modifiedFields = array();
 		
 		if ($this->builder->isAutoIncrement()) {
-			$primaryMetaTypeList = $this->builder->getPrimaryKey();
-			$this->fields[$primaryMetaTypeList[0]->getName()] = $dataAccess->sqlLastInsertId();
+			$primaryMetaTypeList = $this->builder->getPrimaryKey()->getMetaTypes();
+			$this->fields[current($primaryMetaTypeList)->getName()] = $dataAccess->sqlLastInsertId();
 		}
 
 		$this->stored = true;
@@ -460,14 +490,14 @@ class Recordset implements RecordsetInterface {
 		$rs = $recordModeLog->newRecordset();
 
 		$rs->record_mode_id = $recordMode->id;
-		$rs->modifier_id = $recordMode->last_modifier_id;
+		$rs->user_id = $recordMode->last_modifier_id;
 		$rs->upd_date_time = $recordMode->last_upd_date_time;
 		
 		$rs->create();
 	}
 	
 	
-	public static function checkKey($keyName, &$errors) {
+	public function checkKey($keyName, &$errors) {
 		$key = $this->builder->searchKey($keyName, true);
 		if (is_null($key)) {
 			throw new InternalErrorException("Chiave $keyName non trovata");

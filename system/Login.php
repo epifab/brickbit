@@ -102,7 +102,8 @@ class Login {
 	 */
 	private function setLoginCookie() {
 		$contents = \md5($this->user->email) . "%%" . $this->user->password;
-		\setcookie("login", $contents, LOGIN_COOKIE_TIME, "/");
+		$domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
+		\setcookie("login", $contents, LOGIN_COOKIE_TIME, "/", \count($domains) >= 3 ? "." . $domains[1] . '.' . $domains[0] : "");
 	}
 
 	/**
@@ -116,7 +117,8 @@ class Login {
 	 * Elimina il cookie riguardante i dati di login
 	 */
 	private static function unsetLoginCookie() {
-		\setcookie("login", "", time()-3600, "/");
+		$domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
+		\setcookie("login", "", time()-3600, "/", \count($domains) >= 3 ? "." . $domains[1] . '.' . $domains[0] : "");
 	}
 
 	/* ---------------------------------------- *

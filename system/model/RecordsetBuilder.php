@@ -183,7 +183,7 @@ class RecordsetBuilder {
 	
 	public function isAutoIncrement() {
 		return $this->getPrimaryKey()
-			? $this->primaryKey()->isAutoIncrement()
+			? $this->getPrimaryKey()->isAutoIncrement()
 			: false;
 	}
 	
@@ -284,6 +284,9 @@ class RecordsetBuilder {
 		$this->tableName = $tableName;
 		$this->tableInfo = \system\logic\Module::getTable($tableName);
 		$this->tableAlias = self::getUniqueAlias($tableName);
+		
+		$this->useAllKeysRecursive();
+		
 		// Automatically importing record mode
 		if ($this->isRecordModed()) {
 			$this->using("record_mode.*");
@@ -291,18 +294,17 @@ class RecordsetBuilder {
 				$this->using("record_mode.logs.*");
 			}
 		}
-		$this->useAllKeysRecursive();
 	}
 	
 	public function isRecordModed() {
 		return $this->relationExists("record_mode");
 	}
 	
-	public function recordModeField() {
+	public function getRecordModeField() {
 		if ($this->isRecordModed()) {
 			$clauses = $this->tableInfo["relations"]["record_mode"]["clauses"];
-			\reset($clauses);
-			return \key($clauses);
+			\reset($clauses[0]);
+			return \current($clauses[0]);
 		}
 		return null;
 	}
@@ -350,31 +352,34 @@ class RecordsetBuilder {
 	}
 	
 	private function useAllKeys() {
+		$this->importKeys = self::KEYS_ALL;
+
 		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
 			foreach ($this->tableInfo["keys"] as $name => $key) {
 				$this->loadKey($name);
 			}
 		}
-		$this->importKeys = self::KEYS_ALL;
 	}
 	
 	private function useAllKeysRecursive() {
+		$this->importKeys = self::KEYS_ALL_RECURSIVE;
+
 		$this->useAllKeys();
 		
 		foreach ($this->relationBuilderList as $builder) {
 			$builder->useAllKeysRecursive();
 		}
-		$this->importKeys = self::KEYS_ALL_RECURSIVE;
 	}
 
 	private function usePrimaryKey() {
+		$this->importKeys = self::KEYS_PRIMARY;
+
 		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
 			foreach ($this->tableInfo["keys"] as $name => $key) {
 				$this->loadKey($name);
 				break; // only the first key
 			}
 		}
-		$this->importKeys = self::KEYS_PRIMARY;
 	}
 	
 	private function usePrimaryKeyRecursive() {
@@ -473,7 +478,7 @@ class RecordsetBuilder {
 			} else {
 				return null;
 			}
-		} else if (\is_array($res)) {
+		} else if ($res instanceof Key) {
 			return $res;
 		} else {
 			throw new \system\InternalErrorException(\system\Lang::translate('Key @path not found.', array('@path' => $path)));

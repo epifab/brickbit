@@ -256,6 +256,7 @@ abstract class Component {
 				'subtitle' => \config\settings()->SITE_SUBTITLE,
 				'domain' => \config\settings()->DOMAIN,
 				'base' => \config\settings()->SITE_ADDRESS,
+				'defaultLang' => \config\settings()->DEFAULT_LANG,
 			);
 		}
 		return $settings;

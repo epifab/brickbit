@@ -28,7 +28,7 @@
 					<div id="header-sidebar-langs">
 						<{foreach $system.langs as $lang}>
 							<{if $lang != $system.lang}>
-							<{link url="lang/`$lang`"}><img src="<{theme_path url="img/lang/40/`$lang`.jpg"}>"/><{/link}>
+							<a href="http://<{lang_link id=$lang}>"><img src="<{theme_path url="img/lang/40/`$lang`.jpg"}>"/></a>
 							<{/if}>
 						<{/foreach}>
 					</div>
