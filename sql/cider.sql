@@ -1,3 +1,4 @@
+DROP DATABASE cider;
 CREATE DATABASE cider
 DEFAULT CHARACTER SET utf8
 DEFAULT COLLATE utf8_general_ci;
@@ -125,7 +126,7 @@ CREATE TABLE record_mode_log (
 	id INT AUTO_INCREMENT,
 	record_mode_id INT,
 	upd_date_time DATETIME,
-	modifier_id INT,
+	user_id INT,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
@@ -154,64 +155,53 @@ CREATE TABLE file (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE image (
-	id INT AUTO_INCREMENT,
-	width1 INT,
-	height1 INT,
-	file1_id INT,
-	width2 INT,
-	height2 INT,
-	file2_id INT,
-	width3 INT,
-	height3 INT,
-	file3_id INT,
-	width4 INT,
-	height4 INT,
-	file4_id INT,
-	PRIMARY KEY (id)
-) ENGINE=InnoDB;
-
 CREATE TABLE lang (
 	id CHAR(2),
 	name VARCHAR(32),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-
 CREATE TABLE node (
 	id INT AUTO_INCREMENT,
 	parent_id INT,
 	ldel INT,
 	rdel INT,
-	urn VARCHAR(128), -- il contenuto diventa raggiungibile alla url www.xxx.yyy/content/url.html
 	type VARCHAR(32),
 	subtype VARCHAR(32),
 	sort_index INT,
-	image_id INT,
-	file_id INT,
 	record_mode_id INT, -- gestione attiva del record mode
-	UNIQUE KEY (urn),
 	PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE node_file (
+	node_id INT,
+	file_id INT,
+	node_index VARCHAR(32),
+	sort_index INT,
+	virtual_name VARCHAR(32),
+	preview_file_path VARCHAR(64),
+	download_mode INT,
+	PRIMARY KEY (node_id, file_id),
+	UNIQUE KEY (node_id, virtual_name)
 ) ENGINE=InnoDB;
 
 CREATE TABLE node_text (
 	node_id INT,
+	urn VARCHAR(32),
 	lang CHAR(2),
 	title VARCHAR(128),
 	subtitle VARCHAR(256),
 	preview TEXT,
 	body TEXT,
-	PRIMARY KEY (node_id, lang_id)
+	PRIMARY KEY (node_id, lang),
+	UNIQUE KEY (lang, urn)
 ) ENGINE=InnoDB;
 
-CREATE TABLE comment (
-	id INT AUTO_INCREMENT,
-	content_id INT,
-	comment_id INT, -- risposte a commenti (albero di commenti)
+CREATE TABLE content_comment(
+	node_id INT,
 	approved INT(1),
-	record_mode_id INT,
 	body TEXT,
-	PRIMARY KEY (id)
+	PRIMARY KEY (node_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE term (

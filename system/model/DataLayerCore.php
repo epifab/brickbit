@@ -235,6 +235,34 @@ class DataLayerCore {
 	}
 
 	/**
+	 * Esegue la query e restituisce la prima prima riga restituita
+	 * o null nel caso la query non abbia prodotto alcun risultato.
+	 * <p>Solleva l'eccezione DataLayerException
+	 * se l'esecuzione della query non va a buon fine.</p>
+	 * @param string $query Query sql SELECT
+	 * @param string $file costante __FILE__
+	 * @param int $line costante __LINE__
+	 * @return array Risultato scalare
+	 * @throws DataLayerException
+	 */
+	public function executeRow($query, $file, $line) {
+		$res = $this->sqlQuery($query);
+		if (!$res) {
+			throw new DataLayerException($file, $line, $query, $this->sqlError());
+		}
+		$arr = $this->sqlFetchArray($res, true);
+		if (!$arr) {
+			\system\Log::add(\system\Lang::translate("No results for the previous query.") . "<br/>");
+			return null;
+		}
+		$x = $arr;
+		$this->sqlFreeResult($res);
+		\system\Log::add(\system\Lang::translate("Query result: <em>@value</em>.", array('@value' => print_r($x, true))) . "<br/>");
+	
+		return $x;
+	}
+
+	/**
 	 * Esegue la query e ne restituisce il risultato.
 	 * <p>Solleva l'eccezione DataLayerException
 	 * se l'esecuzione della query non va a buon fine.</p>

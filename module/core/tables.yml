@@ -24,6 +24,8 @@ file:
     name:
       type: MetaString
       size: 32
+    record_mode_id:
+      type: MetaInteger
     path:
       type: MetaVirtual
       dependencies: [dir.path]
@@ -43,59 +45,18 @@ file:
       fields: [id]
       autoIncrement: 1
   relations:
+    record_mode:
+      table: record_mode
+      type: 1-1
+      clauses: [record_mode_id: id]
     dir:
       table: dir
       clauses: [dir_id: id]
       type: N-1
-image:
-  fields:
-    id:
-      type: MetaInteger
-    file1_id:
-      type: MetaInteger
-    width1:
-      type: MetaInteger
-    height1:
-      type: MetaInteger
-    file2_id:
-      type: MetaInteger
-    width2:
-      type: MetaInteger
-    height2:
-      type: MetaInteger
-    file3_id:
-      type: MetaInteger
-    width3:
-      type: MetaInteger
-    height3:
-      type: MetaInteger
-    file4_id:
-      type: MetaInteger
-    width4:
-      type: MetaInteger
-    height4:
-      type: MetaInteger
-  keys:
-    primary:
-      fields: [id]
-      autoIncrement: 1
-  relations:
-    file1:
-      table: file
-      clauses: [file1_id: id]
-      type: N-1
-    file2:
-      table: file
-      clauses: [file2_id: id]
-      type: N-1
-    file3:
-      table: file
-      clauses: [file3_id: id]
-      type: N-1
-    file4:
-      table: file
-      clauses: [file4_id: id]
-      type: N-1
+    node:
+      table: node_file
+      clauses: [id: file_id]
+      type: 1-1
 comment:
   fields:
     id:
@@ -219,9 +180,6 @@ node:
   fields:
     id:
       type: MetaInteger
-    urn:
-      type: MetaString
-      size: 32
     record_mode_id:
       type: MetaInteger
     ldel:
@@ -238,88 +196,15 @@ node:
       size: 16
     sort_index:
       type: MetaInteger
-    image_id:
-      type: MetaInteger
-    file_id:
-      type: MetaInteger
-    image1_url:
-      type: MetaVirtual
-      dependencies: [urn, image.file1.extension]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          return \config\settings()->BASE_DIR . 'node/image/1/' . $recordset->urn . '.' . $recordset->image->file1->extension;
-        }
-    image2_url:
-      type: MetaVirtual
-      dependencies: [urn, image.file2.extension]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          return \config\settings()->BASE_DIR . 'node/image/2/' . $recordset->urn . '.' . $recordset->image->file2->extension;
-        }
-    image3_url:
-      type: MetaVirtual
-      dependencies: [urn, image.file3.extension]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          return \config\settings()->BASE_DIR . 'node/image/3/' . $recordset->urn . '.' . $recordset->image->file3->extension;
-        }
-    image4_url:
-      type: MetaVirtual
-      dependencies: [urn, image.file4.extension]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          return \config\settings()->BASE_DIR . 'node/image/4/' . $recordset->urn . '.' . $recordset->image->file4->extension;
-        }
-    file_url:
-      type: MetaVirtual
-      dependencies: [urn, file.extension]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          return \config\settings()->BASE_DIR . 'node/file/' . $recordset->urn . '.' . $recordset->file->extension;
-        }
-    url:
-      type: MetaVirtual
-      dependencies: [urn, type]
-      handle: |
-        function(\system\model\Recordset $recordset) {
-          switch ($recordset->type) {
-            case 'page':
-              return \config\settings()->BASE_DIR . $recordset->urn . '.html';
-              break;
-            default:
-              return \config\settings()->BASE_DIR . $recordset->type . '/' . $recordset->urn . '.html';
-          }
-        }
-#    edit_url:
-#      type: MetaVirtual
-#      dependencies: [urn, type]
-#      handle: |
-#        function(\system\model\Recordset $recordset) {
-#          switch ($recordset->type) {
-#            default:
-#              return \config\settings()->BASE_DIR . $recordset->type . '/edit/' . $recordset->urn;
-#          }
-#        }
-#    delete_url:
-#      type: MetaVirtual
-#      dependencies: [urn, type]
-#      handle: |
-#        function(\system\model\Recordset $recordset) {
-#          switch ($recordset->type) {
-#            default:
-#              return \config\settings()->BASE_DIR . $recordset->type . '/delete/' . $recordset->urn;
-#          }
-#        }
   keys:
     primary_key:
       fields: [id]
-    urn_key:
-      fields: [urn]
   relations:
     record_mode:
       table: record_mode
       type: 1-1
       clauses: [record_mode_id: id]
+# ancestors/descendants
     parent:
       table: node
       type: N-1
@@ -333,32 +218,24 @@ node:
       table: node
       clauses: []
       type: 1-N
-      filterHandle: \module\core\model\Callbacks::termAncestors
+      filterHandle: \module\core\model\Callbacks::ancestors
     descendants:
       table: node
       clauses: []
       type: 1-N
-      filterHandle: \module\core\model\Callbacks::termDescendants
+      filterHandle: \module\core\model\Callbacks::descendants
+# TERMS
     terms:
       table: node_term
       type: 1-N
       clauses: [id: node_id]
       onDelete: CASCADE
+# TRANSLATIONS
     texts:
       table: node_text
       type: 1-N
       clauses: [id: node_id]
       onDelete: CASCADE
-    text_default:
-      table: node_text
-      type: 1-1
-      clauses: [id: node_id]
-      filterHandle: |
-        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-          $text->addFilter(new \system\model\FilterClause(
-            $text->lang, '=', \config\settings()->DEFAULT_LANG
-          ));
-        }
     text:
       table: node_text
       type: 1-1
@@ -367,6 +244,16 @@ node:
         function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
           $text->addFilter(new \system\model\FilterClause(
             $text->lang, '=', \system\Lang::getLang()
+          ));
+        }
+    text_und:
+      table: node_text
+      type: 1-1
+      clauses: [id: node_id]
+      filterHandle: |
+        function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+          $text->addFilter(new \system\model\FilterClause(
+            $text->lang, 'IS_NULL'
           ));
         }
     text_en:
@@ -399,17 +286,13 @@ node:
             $text->lang, '=', 'de'
           ));
         }
-    file:
+# FILES
+    files:
       table: file
-      type: 1-1
-      clauses: [file_id: id]
+      type: 1-N
+      clauses: [id: node_id]
       onDelete: CASCADE
-    image:
-      table: image
-      type: 1-1
-      clauses: [image_id: id]
-      onDelete: CASCADE
-
+# VIRTUALS - PAGE
     page_header:
       table: node
       type: 1-1
@@ -417,7 +300,8 @@ node:
       filterHandle: |
         function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'page-header'
+            $child->type, '=', 'page',
+            $child->type, '=', 'header'
           ));
         }
     page_footer:
@@ -427,7 +311,8 @@ node:
       filterHandle: |
         function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'page-footer'
+            $child->type, '=', 'page',
+            $child->type, '=', 'footer'
           ));
         }
     page_banners:
@@ -437,7 +322,8 @@ node:
       filterHandle: |
         function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'page-banner'
+            $child->type, '=', 'page',
+            $child->subtype, '=', 'banner'
           ));
         }
     page_articles:
@@ -447,9 +333,11 @@ node:
       filterHandle: |
         function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'article'
+            $child->type, '=', 'article',
+            $child->subtype, 'IS_NULL'
           ));
         }
+# VIRTUALS - ARTICLES
     article_attachements:
       table: node
       type: 1-N
@@ -457,7 +345,19 @@ node:
       filterHandle: |
         function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'article-attachement'
+            $child->type, '=', 'article',
+            $child->subtype, '=', 'attachement'
+          ));
+        }
+    article_images:
+      table: node
+      type: 1-N
+      clauses: [id: parent_id]
+      filterHandle: |
+        function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+          $child->addFilter(new \system\model\FilterClause(
+            $child->type, '=', 'article',
+            $child->subtype, '=', 'image'
           ));
         }
     article_mp3s:
@@ -467,7 +367,8 @@ node:
       filterHandle: |
         function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'article-mp3'
+            $child->type, '=', 'article',
+            $child->subtype, '=', 'mp3'
           ));
         }
     article_videos:
@@ -477,6 +378,57 @@ node:
       filterHandle: |
         function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
           $child->addFilter(new \system\model\FilterClause(
-            $child->type, '=', 'article-video'
+            $child->type, '=', 'article',
+            $child->subtype, '=', 'video'
           ));
+        }
+node_file:
+  fields:
+    node_id:
+      type: MetaInteger
+    index:
+      type: MetaString
+      size: 16
+    sort_index:
+      type: MetaInteger
+    file_id:
+      type: MetaInteger
+    virtual_name:
+      type: MetaString
+      size: 32
+    download_mode:
+      type: MetaOption
+      options:
+#        0: Nobody
+#        1: Superuser
+        2: Node owner only
+        3: Node admins
+        4: Registered
+        5: Anyone
+    download_path:
+      type: MetaVirtual
+      handle: |
+        function($recordset) {
+          return $recordset->virtual_name;
+        }
+  keys:
+    primary:
+      fields: [node_id, index]
+  relations:
+    node:
+      type: N-1
+      table: node
+      clauses: [node_id: id]
+    file:
+      type: 1-1
+      table: file
+      clauses: [file_id: id]
+      onDelete: DELETE
+user:
+  fields:
+    superuser:
+      type: MetaVirtual
+      handle: |
+        function(\system\model\Recordset $user) {
+          return $user->id == 1;
         }

@@ -29,10 +29,12 @@ abstract class Module {
 	private static function getConfiguration($rebuild=false) {
 		static $modulesConf = null;
 		if (\is_null($modulesConf)) {
-			$modulesConf = $rebuild ? null : \system\Utils::get("system-modules", null);
+			$modulesConf = $rebuild || !\config\settings()->CORE_CACHE ? null : \system\Utils::get("system-modules", null);
 			if (\is_null($modulesConf)) {
 				$modulesConf = self::initConfiguration();
-				\system\Utils::set("system-modules", $modulesConf);
+				if (\config\settings()->CORE_CACHE) {
+					\system\Utils::set("system-modules", $modulesConf);
+				}
 			}
 		}
 		return $modulesConf;
@@ -131,9 +133,9 @@ abstract class Module {
 								
 								foreach ($tables as $tableName => $table) {
 									if (\array_key_exists($tableName, $dynModel)) {
-										$dynModel[$tableName]["fields"] = array_merge($dynModel[$tableName]["fields"], $table["fields"]);
-										$dynModel[$tableName]["keys"] = array_merge($dynModel[$tableName]["fields"], $table["fields"]);
-										$dynModel[$tableName]["relations"] = array_merge($dynModel[$tableName]["fields"], $table["fields"]);
+										$dynModel[$tableName]["fields"] = \array_merge($dynModel[$tableName]["fields"], (@\is_array($table["fields"])? $table["fields"] : array()));
+										$dynModel[$tableName]["keys"] = \array_merge($dynModel[$tableName]["keys"], (@\is_array($table["keys"])? $table["keys"] : array()));
+										$dynModel[$tableName]["relations"] = \array_merge($dynModel[$tableName]["relations"], (@\is_array($table["relations"])? $table["relations"] : array()));
 									}
 									else {
 										$dynModel[$tableName] = $table;
@@ -248,8 +250,12 @@ abstract class Module {
 		}
 		
 		if (\is_null($urls)) {
-			// Url cache
-			$urls = \system\Utils::get("system-urls", array());
+			if (\config\settings()->CORE_CACHE) {
+				// Url cache
+				$urls = \system\Utils::get("system-urls", array());
+			} else {
+				$urls = array();
+			}
 		}
 		if (!\array_key_exists($url, $urls)) {
 			$urls[$url] = null;
@@ -264,7 +270,9 @@ abstract class Module {
 						"action" => $component["action"],
 						"urlArgs" => $m
 					);
-					\system\Utils::set("system-urls", $urls);
+					if (\config\settings()->CORE_CACHE) {
+						\system\Utils::set("system-urls", $urls);
+					}
 					break;
 				}
 			}

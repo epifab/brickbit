@@ -374,6 +374,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->read_mode = $readMode;
 				break;
@@ -388,6 +389,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->edit_mode = $editMode;
 				break;
@@ -402,6 +404,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->delete_mode = $deleteMode;
 				break;
@@ -437,6 +440,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->read_mode = $readMode;
 				break;
@@ -451,6 +455,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->edit_mode = $editMode;
 				break;
@@ -465,6 +470,7 @@ class Recordset implements RecordsetInterface {
 			case \system\model\RecordMode::MODE_SU:
 			case \system\model\RecordMode::MODE_SU_OWNER:
 			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+			case \system\model\RecordMode::MODE_REGISTERED:
 			case \system\model\RecordMode::MODE_ANYONE:
 				$recordMode->delete_mode = $deleteMode;
 				break;

@@ -1,67 +1,12 @@
-TRUNCATE TABLE xmca_comment;
-TRUNCATE TABLE xmca_component;
-TRUNCATE TABLE xmca_content;
-TRUNCATE TABLE xmca_content_style;
-TRUNCATE TABLE xmca_content_tag;
-TRUNCATE TABLE xmca_content_text;
-TRUNCATE TABLE xmca_dir;
-TRUNCATE TABLE xmca_email;
-TRUNCATE TABLE xmca_file;
-TRUNCATE TABLE xmca_group;
-TRUNCATE TABLE xmca_group_component;
-TRUNCATE TABLE xmca_image;
-TRUNCATE TABLE xmca_lang;
-TRUNCATE TABLE xmca_log;
-TRUNCATE TABLE xmca_page;
-TRUNCATE TABLE xmca_page_style;
-TRUNCATE TABLE xmca_page_tag;
-TRUNCATE TABLE xmca_page_text;
-TRUNCATE TABLE xmca_record_mode;
-TRUNCATE TABLE xmca_record_mode_log;
-TRUNCATE TABLE xmca_tag;
-TRUNCATE TABLE xmca_user;
-TRUNCATE TABLE xmca_user_group;
-
-INSERT INTO xmca_component (name) VALUES ('EditPage');
-INSERT INTO xmca_component (name) VALUES ('DeletePage');
-INSERT INTO xmca_component (name) VALUES ('EditContent');
-INSERT INTO xmca_component (name) VALUES ('DeleteContent');
-INSERT INTO xmca_component (name) VALUES ('EditComment');
-INSERT INTO xmca_component (name) VALUES ('DeleteComment');
-INSERT INTO xmca_component (name) VALUES ('EditGroup');
-INSERT INTO xmca_component (name) VALUES ('DeleteGroup');
-INSERT INTO xmca_component (name) VALUES ('EditUser');
-INSERT INTO xmca_component (name) VALUES ('DeleteUser');
-INSERT INTO xmca_component (name) VALUES ('Users');
-INSERT INTO xmca_component (name) VALUES ('ToggleUserGroup');
-INSERT INTO xmca_component (name) VALUES ('ErrorLog');
-
-INSERT INTO xmca_group (name) VALUES ('ADMINS');
-INSERT INTO xmca_group (name) VALUES ('GUESTS');
-
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 1);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 2);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 3);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 4);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 5);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 6);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 7);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 8);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 9);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 10);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 11);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 12);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (1, 13);
--- Commenti per i guests
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (2, 5);
-INSERT INTO xmca_group_component (group_id, component_id) VALUES (2, 6);
+INSERT INTO role (name) VALUES ('REGISTERED');
+INSERT INTO role (name) VALUES ('ADMIN');
 
 -- CREO AMMINISTRATORI DEL SITO
-INSERT INTO xmca_user (email, password, full_name, last_login, ins_date_time, last_upd_date_time) VALUES
+INSERT INTO user (email, password, full_name, last_login, ins_date_time, last_upd_date_time) VALUES
 ('epifab@gmail.com', 'bed128365216c019988915ed3add75fb', 'Fabio Epifani', NULL, NOW(), NOW());
 
 -- AGGIUNGO AL GRUPPO DI AMMINISTRATORI
-INSERT INTO xmca_user_group (user_id, group_id) VALUES
+INSERT INTO user_role (user_id, group_id) VALUES
 (1,1);
 
 -- AGGIUNGO I LOG INIZIALI DELLE SEZIONI

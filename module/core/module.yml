@@ -3,6 +3,15 @@ weight: 1
 enabled: 1
 componentsNs: components
 components:
+  role:
+    class: Role
+    pages:
+      - url: role/list
+        action: List
+      - url: role/add
+        action: Add
+      - url: role/delete
+        action: Delete
   user:
     class: User
     pages:
@@ -18,72 +27,100 @@ components:
         action: Create
       - url: user/([0-9]+)
         action: Read
-      - url: user/edit/([0-9]+)
+      - url: user/([0-9]+)/edit
         action: Update
-      - url: user/delete/([0-9]+)
+      - url: user/([0-9]+)/delete
         action: Delete
-  page_node:
-    class: Page
-    pages:
-      - url: (@strid).html
-        action: Read
+      - url: user/([0-9]+)/add-role/([0-9]+)
+        action: AddRole
+      - url: user/([0-9]+)/delete-role/([0-9]+)
+        action: DeleteRole
+#  file:
+#    class: File
+#    pages:
+#      - url: file/upload
+#        action: Handler
+#      - url: file
+#        action: Handler
+#      - url: file/thumbnail/(@strid)\.(jpe?g|gif|png)
+#        action: Thumbnail
+#      - url: file/(@strid)\.(@strid)
+#        action: Download
   node:
     class: Node
     pages:
-      # article/search
-      - url: (@strid)/search
+      # node/search
+      - url: node/search
         action: Search
-      # article/add
-      - url: (@strid)/add
-        action: Create
-      # article/about-me.html
-      - url: (@strid)/(@strid).html
+      # node/add/article
+      - url: node/add/(@strid)
+        action: Add
+      # node/123/add/article
+      - url: node/([0-9]+)/add/(@strid)
+        action: Add
+      # node/123
+      - url: node/([0-9]+)
         action: Read
-      # article/about-me/edit
-      - url: (@strid)/(@strid)/edit
-        action: Update
-      # article/about-me/delete
-      - url: (@strid)/(@strid)/delete
+      # node/about-me
+      - url: node/(@strid)\.html
+        action: ReadByUrn
+      # node/123/edit
+      - url: node/([0-9]+)/edit
+        action: Edit
+      # node/123/delete
+      - url: node/([0-9]+)/delete
+        action: Delete
+      # node/123/move/after/234
+      - url: node/([0-9]+)/move/(before|after)/([0-9]+)
+        action: Move
+  node_file:
+    class: NodeFile
+    pages:
+      - url: node/file/([0-9]+).(@strid)
+        action: Get
+#      - url: node/([0-9]+)/file/add
+#        action: AddNode
+#      - url: node/([0-9]+)/file/replace
+#        action: ReplaceNode
+#      - url: node/([0-9]+)/file/delete
+#        action: DeleteNode
+      - url: node/file/add
+        action: Add
+      - url: node/file/([0-9]+)/replace
+        action: Replace
+      - url: node/file/([0-9]+)/delete
         action: Delete
   node_image:
     class: NodeImage
     pages:
-      # article/img/about-me/add
-      - url: (@strid)/img/(@strid)/add
-        action: Create
-      # article/img/1/about-me.jpg
-      - url: (@strid)/img/([1-4])/(@strid).(@strid)
-        action: Read
-      # article/img/about-me/edit
-      - url: (@strid)/img/(@strid)/edit
-        action: Update
-      # article/img/about-me/delete
-      - url: (@strid)/img/(@strid)/delete
-        action: Delete
-  node_file:
-    class: NodeFile
-    pages:
-      # article/file/about-me/add
-      - url: (@strid)/file/(@strid)/add
-        action: Create
-      # article/file/about-me.pdf
-      - url: (@strid)/file/(@strid).(@strid)
-        action: Read
-      # article/file/about-me/edit
-      - url: (@strid)/file/(@strid)/edit
-        action: Update
-      # article/file/about-me/delete
-      - url: (@strid)/file/(@strid)/delete
+      - url: node/image/([0-9]+)x([0-9]+)/([0-9]+)\.(jpe?g|png|gif)
+        action: GetResized
+      - url: node/image/([0-9]+)\.(jpe?g|png|gif)
+        action: Get
+#      - url: node/([0-9]+)/image/add
+#        action: AddNode
+#      - url: node/([0-9]+)/image/replace
+#        action: ReplaceNode
+#      - url: node/([0-9]+)/image/delete
+#        action: DeleteNode
+      - url: node/image/add
+        action: Add
+      - url: node/image/([0-9]+)/replace
+        action: Replace
+      - url: node/image/([0-9]+)/delete
         action: Delete
   comment:
     class: Comment
     pages:
-      # comment/add/about-me
-      - url: comment/add/(@strid)
-        action: Create
-      # comment/123.html
-      - url: comment/([0-9]+).html
-        action: Read
+      # node/123/comment/add
+      - url: node/([0-9]+)/comment/add
+        action: Add2Node
+      # user/3/add
+      - url: user/([0-9]+)/add
+        action: Add2User
+      # comment/3/add
+      - url: comment/([0-9]+)/add
+        action: Add2Comment
       # comment/123/edit
       - url: comment/([0-9]+)/edit
         action: Update
@@ -95,3 +132,8 @@ components:
 #    pages:
 #      - url: term/search
 #        action: Search
+  node_page:
+    class: Page
+    pages:
+      - url: (@strid).html
+        action: Read

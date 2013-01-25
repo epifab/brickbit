@@ -297,19 +297,19 @@ abstract class Component {
 		);
 	}
 	
-	protected function addJs($js) {
+	public function addJs($js) {
 		if (!\in_array($js, $this->datamodel['page']['js'])) {
 			$this->datamodel['page']['js'][] = $js;
 		}
 	}
 	
-	protected function addCss($css) {
+	public function addCss($css) {
 		if (!\in_array($css, $this->datamodel['page']['css'])) {
 			$this->datamodel['page']['css'][] = $css;
 		}
 	}
 	
-	protected function addMeta($meta) {
+	public function addMeta($meta) {
 		$this->datamodel['page']['meta'][] = $meta;
 	}
 	
@@ -359,6 +359,10 @@ abstract class Component {
 	
 	final public function getUrlArgs() {
 		return $this->urlArgs;
+	}
+	
+	final public function getUrlArg($index) {
+		return \array_key_exists($index, $this->urlArgs) ? $this->urlArgs[$index] : null;
 	}
 	
 	final public function getRequestData() {

@@ -3,8 +3,11 @@ body {
 	line-height: 1.5;
 	padding: 15px;
 	margin: 15px 0px;
-	background-color: #FFF;
+	background-color: #b2b2b2;
 	font-size: 10pt;
+}
+p {
+	background-color: #2b2b2b !important;
 }
 
 blockquote {
@@ -13,7 +16,7 @@ blockquote {
 	background-position: left top;
 	background-repeat: no-repeat;
 	font-style: italic;
-	color: #999;
+	/*color: #999;*/
 	display: block;
 	clear: both;
 }

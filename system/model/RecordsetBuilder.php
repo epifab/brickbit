@@ -1032,7 +1032,7 @@ class RecordsetBuilder {
 			);
 
 			// Tolta la condizione 1, se l'utente è un superutente, non c'è nient'altro da verificare
-			if (!\system\Login::getLoggedUserId || !\system\Login::getLoggedUser()->superuser) {
+			if (!\system\Login::getLoggedUserId() || !\system\Login::getLoggedUser()->superuser) {
 				// SOLTANTO SE l'utente NON e' un un SUPERUSER
 				// l'accesso si restringe a queste condizioni:
 				// modalità = ANYONE
@@ -1042,6 +1042,8 @@ class RecordsetBuilder {
 				$anyoneFilter = new FilterClause($this->record_mode->$mode, "=", \system\model\RecordMode::MODE_ANYONE);
 
 				if (!\system\Login::getInstance()->isAnonymous()) {
+					$registeredFilter = new FilterClause($this->record_mode->mode, ">=", \system\model\RecordMode::MODE_REGISTERED);
+					
 					$adminsFilter = new FilterClauseGroup(
 						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ADMINS),
 						"AND",
@@ -1061,6 +1063,8 @@ class RecordsetBuilder {
 					// unisco tutte le condizioni
 					$rmFilter->addClauses("AND", new FilterClauseGroup(
 						$anyoneFilter,
+						"OR",
+						$registeredFilter,
 						"OR",
 						$ownerFilter,
 						"OR",

@@ -1,4 +1,4 @@
-<?php /* Smarty version Smarty-3.1.12, created on 2013-01-11 19:35:23
+<?php /* Smarty version Smarty-3.1.12, created on 2013-01-12 00:40:00
          compiled from "module\core\templates\edit-content-page.tpl" */ ?>
 <?php /*%%SmartyHeaderCode:344550e85bf14c6ed3-03649821%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
@@ -7,7 +7,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
     '486c5732233f6c2cfd833d6d14961cf888e1247a' => 
     array (
       0 => 'module\\core\\templates\\edit-content-page.tpl',
-      1 => 1357932921,
+      1 => 1357951198,
       2 => 'file',
     ),
   ),
@@ -28,9 +28,9 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   'has_nocache_code' => false,
 ),false); /*/%%SmartyHeaderCode%%*/?>
 <?php if ($_valid && !is_callable('content_50e85bf14c87b1_72270052')) {function content_50e85bf14c87b1_72270052($_smarty_tpl) {?><?php if (!is_callable('smarty_block_edit_form')) include 'system/tpl-api\\block.edit_form.php';
+if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
 if (!is_callable('smarty_modifier_t')) include 'system/tpl-api\\modifier.t.php';
 if (!is_callable('smarty_function_de_form_error')) include 'system/tpl-api\\function.de_form_error.php';
-if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
 if (!is_callable('smarty_function_de_submit_control')) include 'system/tpl-api\\function.de_submit_control.php';
 ?><?php $_smarty_tpl->smarty->_tag_stack[] = array('edit_form', array()); $_block_repeat=true; echo smarty_block_edit_form(array(), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
 
@@ -40,26 +40,7 @@ if (!is_callable('smarty_function_de_submit_control')) include 'system/tpl-api\\
 	<?php }?>
 
 	<div class="dataedit">
-		<div class="de-row">
-			<div class="de-label-wrapper">
-				<label class="de-label" for="edit-node-urn"><?php echo smarty_modifier_t("URN");?>
-</label>
-			</div>
-			<div class="de-input-wrapper">
-				<input type="text" class="de-input xl" name="node[urn]" id="edit-node-urn" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->getEdit('urn');?>
-"/>
-				<p class="de-info">
-					<?php echo smarty_modifier_t("Once you choose a URN you shouldn't change it anymore.");?>
-<br/>
-					<?php echo smarty_modifier_t("In order to get the highest rating from search engines you should choose a URN containing important keywords directly related to the content itself.");?>
-
-					<?php echo smarty_modifier_t("Each word should be separeted by the dash characted.");?>
-
-				</p>
-				<?php echo smarty_function_de_form_error(array('path'=>"urn"),$_smarty_tpl);?>
-
-			</div>
-		</div>
+		
 		<fieldset>
 			<legend>
 				<?php  $_smarty_tpl->tpl_vars['lang'] = new Smarty_Variable; $_smarty_tpl->tpl_vars['lang']->_loop = false;
@@ -87,11 +68,10 @@ if (!empty($_capture_buffer)) {
 } else $_smarty_tpl->capture_error();?>
 			<div class="node-lang node-lang-<?php echo $_smarty_tpl->tpl_vars['lang']->value;?>
 ">
-				<?php if ($_smarty_tpl->tpl_vars['lang']->value!=$_smarty_tpl->tpl_vars['website']->value['defaultLang']){?>
 				<div class="de-row">
 					<div class="de-label-wrapper">
 						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
--urn"><?php echo smarty_modifier_t("URN alias");?>
+-urn"><?php echo smarty_modifier_t("URN");?>
 </label>
 					</div>
 					<div class="de-input-wrapper">
@@ -99,19 +79,24 @@ if (!empty($_capture_buffer)) {
 .urn]" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -urn" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('urn');?>
 "/>
-						<p class="de-info">
-							<?php echo smarty_modifier_t("URN translation.");?>
+						<div class="de-info">
+							<p>
+								<?php echo smarty_modifier_t("Once you choose a URN you shouldn't change it anymore.");?>
 <br/>
-							<?php echo smarty_modifier_t("Please follow the same instruction as the general URN.");?>
-<br/>
-							<?php echo smarty_modifier_t("Please note also that two different contents, translated in @lang, must have two different URNs.",array('@lang'=>Smarty::$_smarty_vars['capture']['langDesc']));?>
+								<?php echo smarty_modifier_t("In order to get the highest rating from search engines you should choose a URN containing important keywords directly related to the content itself.");?>
 
-						</p>
+								<?php echo smarty_modifier_t("Each word should be separeted by the dash characted.");?>
+
+							</p>
+							<p>
+								<?php echo smarty_modifier_t("Please note also that two different contents, translated in @lang, must have two different URNs.",array('@lang'=>Smarty::$_smarty_vars['capture']['langDesc']));?>
+
+							</p>
+						</div>
 						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".urn"),$_smarty_tpl);?>
 
 					</div>
 				</div>
-				<?php }?>
 				<div class="de-row">
 					<div class="de-label-wrapper">
 						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
@@ -174,6 +159,22 @@ if (!empty($_capture_buffer)) {
 				</div>
 			</div>
 			<?php } ?>
+		</fieldset>
+
+		<fieldset class="de-fieldset">
+			<legend><?php echo smarty_modifier_t("Attachements");?>
+</legend>
+			<div class="de-row">
+				<div class="de-label-wrapper">
+					<label class="de-label" for="edit-node-record_mode-users"><?php echo smarty_modifier_t("Image");?>
+</label>
+				</div>
+				<div class="de-input-wrapper">
+					<input class="de-input xl" type="file" name="node[image]" id="edit-node-record_mode-users" value=""/>
+					<?php echo smarty_function_de_form_error(array('path'=>"record_mode.users"),$_smarty_tpl);?>
+
+				</div>
+			</div>
 		</fieldset>
 		
 		<fieldset class="de-fieldset">

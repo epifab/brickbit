@@ -56,10 +56,10 @@ class Config {
 		"DEFAULT_LANG" => "en",
 		
 		"THEMES" => array(
-			"classic",
+			"standard",
 			"dark"	
 		),
-		"DEFAULT_THEME" => "dark",
+		"DEFAULT_THEME" => "standard",
 		 
 		// links
 		"BASE_DIR" => "/",
@@ -80,7 +80,7 @@ class Config {
 		"TPL_CACHE" => true,
 		"TPL_CACHE_DIR" => "temp/tpl_cache",
 		
-		"URLALIAS_CACHE" => true,
+		"CORE_CACHE" => true,
 	);
 
 	private $dataTest = array(
@@ -90,11 +90,11 @@ class Config {
 		"DB_NAME" => "cider",
 		"DB_TYPE" => Config::DBMS_MYSQL,
 		 
-		"BASE_DIR" => "/",
-		
 		"SITE_TITLE" => "Episoft.it | DEV",
 		 
 		"DEBUG_MODE" => true,
+		 
+		"CORE_CACHE" => false,
 	);
 	
 	private $dataProd = array(
@@ -103,8 +103,6 @@ class Config {
 		"DB_PASS" => "aead487a",
 		"DB_NAME" => "Sql487621_4",
 		"DB_TYPE" => Config::DBMS_MYSQL,
-		 
-		"BASE_DIR" => "/",
 	);
 	
 	/**
@@ -135,6 +133,10 @@ class Config {
 		switch ($name) {
 			case "SITE_ADDRESS":
 				return $this->DOMAIN . $this->data["BASE_DIR"];
+				break;
+			
+			case "BASE_DIR_ABS":
+				return dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
 				break;
 			
 			case "DOMAIN":

@@ -208,7 +208,8 @@ record_mode:
 #        1: Superuser
         2: Owner only
         3: Admins
-        4: Anyone
+        4: Registered
+        5: Anyone
     edit_mode:
       type: MetaOptions
       options:
@@ -216,7 +217,8 @@ record_mode:
         1: Superuser
         2: Owner
         3: Admins
-        4: Anyone
+        4: Registered
+        5: Anyone
     delete_mode:
       type: MetaOptions
       options:
@@ -224,7 +226,8 @@ record_mode:
         1: Superuser
         2: Owner
         3: Admins
-        4: Anyone
+        4: Registered
+        5: Anyone
   keys:
     primary:
       fields: [id]

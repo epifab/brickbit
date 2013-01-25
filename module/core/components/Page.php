@@ -84,6 +84,27 @@ class Page extends Component {
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
+	private function editForm($node, $errors=array()) {
+		$this->datamodel["node"] = $node;
+		$this->datamodel["errors"] = $errors;
+		$this->setMainTemplate("edit-node-form");
+		return \system\logic\Component::RESPONSE_TYPE_FORM;
+	}
+	
+	private function notify($title="", $message="") {
+		$this->datamodel["title"] = $title;
+		$this->datamodel["message"] = $message;
+		$this->setMainTemplate('notify');
+		return \system\logic\Component::RESPONSE_TYPE_NOTIFY;
+	}
+	
+	private function error($title="", $message="") {
+		$this->datamodel["title"] = $title;
+		$this->datamodel["message"] = $message;
+		$this->setMainTemplate('error');
+		return \system\logic\Component::RESPONSE_TYPE_ERROR;
+	}
+	
 	public function runAdd() {
 		$rsb = new RecordsetBuilder('node');
 		$rsb->usingAll();
@@ -91,18 +112,10 @@ class Page extends Component {
 		
 		$recordset->type = 'page';
 		
-		$this->datamodel["node"] = $recordset;
-
-//		$this->setMainTemplate('edit-content-page');
-//		$this->datamodel['errors'] = array();
-//		return Component::RESPONSE_TYPE_FORM;
-		$this->setMainTemplate('edit-content-page');
-
 		if (\array_key_exists("node", $this->getRequestData())) {
 			$errors = array();
-			$posted = \module\core\Core::loadRSFormData($recordset, $errors, array("urn"));
-			$posted = $posted && $recordset->checkKey("urn_key", $errors);
-
+			$posted = true;
+			
 			foreach (\config\settings()->LANGUAGES as $lang) {
 				$posted = \module\core\Core::loadRSFormData($recordset, $errors, array(
 					"text_" . $lang . ".urn",
@@ -112,48 +125,74 @@ class Page extends Component {
 					"text_" . $lang . ".preview"
 				)) && $posted;
 
-				// Controllo che non ci siano versioni senza titolo ma con descrizione
-				if (empty($recordset->__get("text_" . $lang)->title) && !empty($recordset->__get("text_" . $lang)->body)) {
-					// Titolo vuoto, testo non vuoto
-					$errors["text_" . $lang . ".title"] = \system\Lang::translate("Please insert title.");
+				$rs = $recordset->__get('text_' . $lang);
+				
+				if (!$rs->urn && ($rs->title || $rs->subtitle || $rs->body || $rs->preview)) {
+					$errors["text_" . $lang . ".urn"] = \system\Lang::translate("Please insert a URN.");
 					$posted = false;
 				}
 			}
 
-			if ($posted) {
-				// Controllo titolo lingua principale
-				if (!($recordset->__get('text_' . \config\settings()->DEFAULT_LANG)->title)) {
-					$errors['text_' . \config\settings()->DEFAULT_LANG . '.title'] = \system\Lang::translate("Please insert title for the website default language.");
-					$posted = false;
-				}
+			// Controllo titolo lingua principale
+			if (!($recordset->__get('text_' . \config\settings()->DEFAULT_LANG)->urn)) {
+				$errors['text_' . \config\settings()->DEFAULT_LANG . '.title'] = \system\Lang::translate("Please insert a URN for the default language.");
+				$posted = false;
 			}
 
 			if (!$posted) {
-				$this->datamodel["node"] = $recordset;
-				$this->datamodel["errors"] = $errors;
-				return \system\logic\Component::RESPONSE_TYPE_FORM;
+				return $this->editForm($recordset, $errors);
 			}
 
 			else {
-				$da = \system\model\DataLayerCore::getInstance();
-				$da->beginTransaction();
-
-				$recordset->type = "page";
-				// Calcolo l'indice di ordinamento
-				$recordset->sort_index = 1 + $da->executeScalar("SELECT MAX(sort_index) FROM node WHERE type = 'page'", __FILE__, __LINE__);
-
 				try {
+					$da = \system\model\DataLayerCore::getInstance();
+					$da->beginTransaction();
+
+					$parent = null;
+
+					$recordset->type = "page";
+
+					if (!$parent) {
+						$recordset->parent_id = null;
+						$recordset->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node", __FILE__, __LINE__);
+					} else {
+						$recordset->parent_id = $parent->id;
+						$recordset->ldel = $parent->rdel;
+					}
+					$recordset->rdel = $recordset->ldel + 1;
+
+					$da->executeUpdate("UPDATE node SET l_del = l_del + 2 WHERE l_del > " . $data["max_rdel"], __FILE__, __LINE__);
+					$da->executeUpdate("UPDATE node SET r_del = r_del + 2 WHERE r_del >= " . $data["max_rdel"], __FILE__, __LINE__);
+
+					if ($parent) {
+						$parent->rdel = $parent->rdel + 2;
+					}
+
+					$recordset->sort_index = $data = $da->executeRow(
+						"SELECT MAX(sort_index) FROM node"
+						. " WHERE " . ($parent ? "parent_id = " . $parent->id : "parent_id IS NULL")
+							, __FILE__, __LINE__);
+
+					$recordset->sort_index = 1 + $data["max_sort_index"];
+					
+					$request = $this->getRequestData();
+					if (\system\Login::getLoggedUser()->superuser) {
+						$read = \system\Utils::getParam("record_mode.read_mode", $request["node"], array('default' => null));
+						$edit = \system\Utils::getParam("record_mode.edit_mode", $request["node"], array('default' => null));
+						$delete = \system\Utils::getParam("record_mode.delete_mode", $request["node"], array('default' => null));
+					} else {
+						$read = null;
+						$edit = null;
+						$delete = null;
+					}
+
 					// Salvo il record mode
-					$recordset->create(
-						\system\Utils::getParam("record_mode.read_mode", $_REQUEST["node"], array('default' => null)),
-						\system\Utils::getParam("record_mode.edit_mode", $_REQUEST["node"], array('default' => null)),
-						\system\Utils::getParam("record_mode.delete_mode", $_REQUEST["node"], array('default' => null))
-					);
+					$recordset->create($read, $edit, $delete);
 					
 					foreach (\config\settings()->LANGUAGES as $lang) {
 						// Inserisco tutti i nuovi testi
 						$textRs = $recordset->__get('text_' . $lang);
-						if ($textRs->getRead('title')) {
+						if ($textRs->urn) {
 							$textRs->node_id = $recordset->id;
 							$textRs->create();
 						}
@@ -161,7 +200,7 @@ class Page extends Component {
 
 					$da->commitTransaction();
 					
-					return \system\logic\Component::RESPONSE_TYPE_NOTIFY;
+					return $this->notify();
 
 				} catch (\Exception $ex) {
 					$da->rollbackTransaction();
@@ -169,7 +208,7 @@ class Page extends Component {
 				}
 			}
 		} else {
-			return \system\logic\Component::RESPONSE_TYPE_FORM;
+			return $this->editForm($recordset);
 		}
 	}
 	
