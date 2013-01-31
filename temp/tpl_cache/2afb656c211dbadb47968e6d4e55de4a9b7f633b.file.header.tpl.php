@@ -1,22 +1,22 @@
-<?php /* Smarty version Smarty-3.1.12, created on 2013-01-08 23:23:34
+<?php /* Smarty version Smarty-3.1.12, created on 2013-01-27 09:59:00
          compiled from "module\core\templates\header.tpl" */ ?>
-<?php /*%%SmartyHeaderCode:2317850df1e0b1d3f83-82538920%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:648851032fa023feb9-64268032%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     '2afb656c211dbadb47968e6d4e55de4a9b7f633b' => 
     array (
       0 => 'module\\core\\templates\\header.tpl',
-      1 => 1357687413,
+      1 => 1359280738,
       2 => 'file',
     ),
   ),
-  'nocache_hash' => '2317850df1e0b1d3f83-82538920',
+  'nocache_hash' => '648851032fa023feb9-64268032',
   'function' => 
   array (
   ),
   'version' => 'Smarty-3.1.12',
-  'unifunc' => 'content_50df1e0b34ab84_47350198',
+  'unifunc' => 'content_51032fa0493a93_12097720',
   'variables' => 
   array (
     'website' => 0,
@@ -28,7 +28,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_50df1e0b34ab84_47350198')) {function content_50df1e0b34ab84_47350198($_smarty_tpl) {?><?php if (!is_callable('smarty_block_link')) include 'system/tpl-api\\block.link.php';
+<?php if ($_valid && !is_callable('content_51032fa0493a93_12097720')) {function content_51032fa0493a93_12097720($_smarty_tpl) {?><?php if (!is_callable('smarty_block_link')) include 'system/tpl-api\\block.link.php';
 if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
 if (!is_callable('smarty_block_panel')) include 'system/tpl-api\\block.panel.php';
 if (!is_callable('smarty_function_lang_link')) include 'system/tpl-api\\function.lang_link.php';
@@ -106,9 +106,9 @@ foreach ($_from as $_smarty_tpl->tpl_vars["menuItem"]->key => $_smarty_tpl->tpl_
 $_smarty_tpl->tpl_vars["menuItem"]->_loop = true;
 ?>
 			<li <?php if ($_smarty_tpl->tpl_vars['page']->value['url']==$_smarty_tpl->tpl_vars['menuItem']->value['url']){?>class="selected" <?php }?>id="item-<?php echo $_smarty_tpl->tpl_vars['menuItem']->value['id'];?>
-"><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url'])); $_block_repeat=true; echo smarty_block_link(array('url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url']), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-<span><?php echo $_smarty_tpl->tpl_vars['menuItem']->value['title'];?>
-</span><?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url']), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
+"><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('ajax'=>false,'url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url'])); $_block_repeat=true; echo smarty_block_link(array('ajax'=>false,'url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url']), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
+<?php echo $_smarty_tpl->tpl_vars['menuItem']->value['title'];?>
+<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('ajax'=>false,'url'=>$_smarty_tpl->tpl_vars['menuItem']->value['url']), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
 </li>
 			<?php } ?>
 			<?php $_smarty_tpl->smarty->_tag_stack[] = array('protected', array('url'=>"page/add")); $_block_repeat=true; echo smarty_block_protected(array('url'=>"page/add"), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
@@ -118,21 +118,6 @@ $_smarty_tpl->tpl_vars["menuItem"]->_loop = true;
 </li>
 			<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_protected(array('url'=>"page/add"), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
 
-			<li><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>'')); $_block_repeat=true; echo smarty_block_link(array('url'=>''), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-about<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>''), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-</li>
-			<li><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>'')); $_block_repeat=true; echo smarty_block_link(array('url'=>''), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-live demo<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>''), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-</li>
-			<li><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>'')); $_block_repeat=true; echo smarty_block_link(array('url'=>''), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-download<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>''), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-</li>
-			<li><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>'')); $_block_repeat=true; echo smarty_block_link(array('url'=>''), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-docs<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>''), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-</li>
-			<li><?php $_smarty_tpl->smarty->_tag_stack[] = array('link', array('url'=>'')); $_block_repeat=true; echo smarty_block_link(array('url'=>''), null, $_smarty_tpl, $_block_repeat);while ($_block_repeat) { ob_start();?>
-contacts<?php $_block_content = ob_get_clean(); $_block_repeat=false; echo smarty_block_link(array('url'=>''), $_block_content, $_smarty_tpl, $_block_repeat);  } array_pop($_smarty_tpl->smarty->_tag_stack);?>
-</li>
 		</ul>
 	</div>
 <?php }} ?>

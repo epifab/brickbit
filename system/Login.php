@@ -53,12 +53,12 @@ class Login {
 		return self::getLoggedUserId() == 1;
 	}
 	
-	public static function getLoggedUserId() {
-		return self::getInstance()->user ? self::getInstance()->user->id : 0;
-	}
-	
 	public static function getLoggedUser() {
 		return self::getInstance()->user;
+	}
+	
+	public static function getLoggedUserId() {
+		return self::getLoggedUser() ? self::getLoggedUser()->id : 0;
 	}
 	
 	/**

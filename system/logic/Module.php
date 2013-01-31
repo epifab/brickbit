@@ -105,8 +105,8 @@ abstract class Module {
 									$regexp = (string)@$page["url"];
 
 									$rules = array(
-										"@strid" => "[a-zA-Z0-9_-]+",
-										"@urlarg" => "[^/]+",
+										"@strid" => "[a-zA-Z0-9\-_]+",
+										"@urlarg" => "[a-zA-Z0-9\-_.]+",
 									);
 
 									foreach ($rules as $search => $replace) {
@@ -185,6 +185,11 @@ abstract class Module {
 		\ksort($configuration["model"]);
 		
 		return $configuration;
+	}
+	
+	public static function getActiveModules() {
+		$conf = $this->getConfiguration();
+		return $conf['modules'];
 	}
 	
 	public static function getPath($module, $subpath=null) {
@@ -285,26 +290,44 @@ abstract class Module {
 		return \array_key_exists($module, $configuration["modules"]);
 	}
 	
+	/**
+	 * Raise an event.
+	 * It takes a variable number of parameters 
+	 * to pass to the event implementation defined on each active module.
+	 * @param string $eventName Event name
+	 * @return array Array consisting of the event implementations results
+	 */
 	public static function raise($eventName) {
 		$configuration = self::getConfiguration();
+		$result = array();
 		if (\array_key_exists($eventName, $configuration["events"])) {
 			foreach ($configuration["events"][$eventName] as $class) {
-				\func_num_args() == 1
+				$result[$class] = \func_num_args() == 1
 					? \call_user_func(array($class, $eventName))
 					: \call_user_func_array(array($class, $eventName), \array_shift(\func_get_args()));
 			}
 		}
+		return $result;
 	}
 	
+	public static function raiseUltimate($eventName) {
+		
+	}
+	
+	/**
+	 * Run the component associated with the url.
+	 * @param string $url
+	 * @param array $request
+	 */
 	public static function run($url, $request=null) {
 		$component = self::getComponent($url);
 		if (!$component) {
 			$component = array(
 				"name" => "page",
 				"module" => "core",
-				"class" => Module::getNamespace('core', 'components') . "Page",
-				"action" => "Read",
-				"urlArgs" => array("home")
+				"class" => Module::getNamespace('core', 'components') . \system\Utils::get('not-found-class', 'Node'),
+				"action" => \system\Utils::get('not-found-action', 'NotFound'),
+				"urlArgs" => array($url)
 			);
 		}
 		$obj = new $component["class"]($component["name"], $component["module"], $component["action"], $url, $component["urlArgs"], $request);

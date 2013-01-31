@@ -325,8 +325,8 @@ abstract class Component {
 		$this->tplManager->addTemplate($template, $region, $weight);
 	}
 	
-	protected function setOutlineTemplateWrapper($template) {
-		$this->tplManager->setOutlineTemplateWrapper($template);
+	protected function setOutlineWrapperTemplate($template) {
+		$this->tplManager->setOutlineWrapperTemplate($template);
 	}
 	
 	private function setResponseType($responseType) {

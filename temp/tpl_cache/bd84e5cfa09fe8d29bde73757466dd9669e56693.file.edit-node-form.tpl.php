@@ -1,22 +1,22 @@
-<?php /* Smarty version Smarty-3.1.12, created on 2013-01-23 21:56:11
+<?php /* Smarty version Smarty-3.1.12, created on 2013-01-30 20:02:00
          compiled from "module\core\templates\edit-node-form.tpl" */ ?>
-<?php /*%%SmartyHeaderCode:3004750f34b4a169fe7-93506193%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:114765103af1d8a0252-18333587%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     'bd84e5cfa09fe8d29bde73757466dd9669e56693' => 
     array (
       0 => 'module\\core\\templates\\edit-node-form.tpl',
-      1 => 1358978169,
+      1 => 1359576118,
       2 => 'file',
     ),
   ),
-  'nocache_hash' => '3004750f34b4a169fe7-93506193',
+  'nocache_hash' => '114765103af1d8a0252-18333587',
   'function' => 
   array (
   ),
   'version' => 'Smarty-3.1.12',
-  'unifunc' => 'content_50f34b4a74a272_73538295',
+  'unifunc' => 'content_5103af1dc5a1d6_62643059',
   'variables' => 
   array (
     'system' => 0,
@@ -27,7 +27,7 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_50f34b4a74a272_73538295')) {function content_50f34b4a74a272_73538295($_smarty_tpl) {?><?php if (!is_callable('smarty_function_path')) include 'system/tpl-api\\function.path.php';
+<?php if ($_valid && !is_callable('content_5103af1dc5a1d6_62643059')) {function content_5103af1dc5a1d6_62643059($_smarty_tpl) {?><?php if (!is_callable('smarty_function_path')) include 'system/tpl-api\\function.path.php';
 if (!is_callable('smarty_modifier_t')) include 'system/tpl-api\\modifier.t.php';
 if (!is_callable('smarty_block_edit_form')) include 'system/tpl-api\\block.edit_form.php';
 if (!is_callable('smarty_function_theme_path')) include 'system/tpl-api\\function.theme_path.php';
@@ -207,97 +207,148 @@ if (!empty($_capture_buffer)) {
 ">
 				<div class="de-row">
 					<div class="de-label-wrapper">
-						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
--urn"><?php echo smarty_modifier_t("URN");?>
-</label>
 					</div>
 					<div class="de-input-wrapper">
-						<input type="text" class="de-input xl" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+						<input type="checkbox" class="de-input show-hide-class" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+.enable]"<?php if ($_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->lang){?> checked="checked"<?php }?> id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-enable"/> <label for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-enable"><?php echo smarty_modifier_t("Content available for this language.");?>
+</label>
+					</div>
+				</div>
+				<div id="node-lang-<?php echo $_smarty_tpl->tpl_vars['lang']->value;?>
+-fields" class="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-enable">
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-urn"><?php echo smarty_modifier_t("URN");?>
+</label>
+						</div>
+						<div class="de-input-wrapper">
+							<input type="text" class="de-input xl" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 .urn]" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -urn" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('urn');?>
 "/>
-						<div class="de-info">
-							<p>
-								<?php echo smarty_modifier_t("Once you choose a URN you shouldn't change it anymore.");?>
+							<div class="de-info">
+								<p>
+									<?php echo smarty_modifier_t("Once you choose a URN you shouldn't change it anymore.");?>
 <br/>
-								<?php echo smarty_modifier_t("In order to get the highest rating from search engines you should choose a URN containing important keywords directly related to the content itself.");?>
+									<?php echo smarty_modifier_t("In order to get the highest rating from search engines you should choose a URN containing important keywords directly related to the content itself.");?>
 
-								<?php echo smarty_modifier_t("Each word should be separeted by the dash characted.");?>
+									<?php echo smarty_modifier_t("Each word should be separeted by the dash characted.");?>
 
-							</p>
-							<p>
-								<?php echo smarty_modifier_t("Please note also that two different contents, translated in @lang, must have two different URNs.",array('@lang'=>Smarty::$_smarty_vars['capture']['langDesc']));?>
+								</p>
+								<p>
+									<?php echo smarty_modifier_t("Please note also that two different contents, translated in @lang, must have two different URNs.",array('@lang'=>Smarty::$_smarty_vars['capture']['langDesc']));?>
 
-							</p>
+								</p>
+							</div>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".urn"),$_smarty_tpl);?>
+
 						</div>
-						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".urn"),$_smarty_tpl);?>
-
 					</div>
-				</div>
-				<div class="de-row">
-					<div class="de-label-wrapper">
-						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-description"><?php echo smarty_modifier_t("Description");?>
+</label>
+						</div>
+						<div class="de-input-wrapper">
+							<input class="de-input xxl" type="text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+-description" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+.description]" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('description');?>
+"/>
+							<div class="de-info">
+								<p>
+									<?php echo smarty_modifier_t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes.");?>
+
+								</p>
+							</div>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".description"),$_smarty_tpl);?>
+
+						</div>
+					</div>
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -title"><?php echo smarty_modifier_t("Title");?>
 </label>
-					</div>
-					<div class="de-input-wrapper">
-						<input class="de-input l" type="text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+						</div>
+						<div class="de-input-wrapper">
+							<input class="de-input l" type="text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -title" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 .title]" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('title');?>
 "/>
-						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".title"),$_smarty_tpl);?>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".title"),$_smarty_tpl);?>
 
+						</div>
 					</div>
-				</div>
-				<div class="de-row">
-					<div class="de-label-wrapper">
-						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -subtitle"><?php echo smarty_modifier_t("Subtitle");?>
 </label>
-					</div>
-					<div class="de-input-wrapper">
-						<input class="de-input xl" type="text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+						</div>
+						<div class="de-input-wrapper">
+							<input class="de-input xl" type="text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -subtitle" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 .subtitle]" value="<?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('subtitle');?>
 "/>
-						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".subtitle"),$_smarty_tpl);?>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".subtitle"),$_smarty_tpl);?>
 
+						</div>
 					</div>
-				</div>
-				<div class="de-row">
-					<div class="de-label-wrapper">
-						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -body"><?php echo smarty_modifier_t("Body");?>
 </label>
-					</div>
-					<div class="de-input-wrapper">
-						<textarea class="de-input xxl rich-text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+						</div>
+						<div class="de-input-wrapper">
+							<textarea class="de-input xxl rich-text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -body" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 .body]"><?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('body');?>
 </textarea>
-						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".body"),$_smarty_tpl);?>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".body"),$_smarty_tpl);?>
 
+						</div>
 					</div>
-				</div>
-				<div class="de-row">
-					<div class="de-label-wrapper">
-						<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+					<div class="de-row">
+						<div class="de-label-wrapper">
+							<label class="de-label" for="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -preview"><?php echo smarty_modifier_t("Preview");?>
 </label>
-					</div>
-					<div class="de-input-wrapper">
-						<textarea class="de-input xxl rich-text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
+						</div>
+						<div class="de-input-wrapper">
+							<textarea class="de-input xxl rich-text" id="edit-node-<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 -preview" name="node[<?php echo $_smarty_tpl->tpl_vars['text']->value;?>
 .preview]"><?php echo $_smarty_tpl->tpl_vars['node']->value->{$_smarty_tpl->tpl_vars['text']->value}->getEdit('preview');?>
 </textarea>
-						<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".preview"),$_smarty_tpl);?>
+							<?php echo smarty_function_de_form_error(array('path'=>((string)$_smarty_tpl->tpl_vars['text']->value).".preview"),$_smarty_tpl);?>
 
+						</div>
 					</div>
 				</div>
 			</div>
 			<?php } ?>
 		</fieldset>
 
+		<fieldset>
+			<legend><?php echo smarty_modifier_t("Tags");?>
+</legend>
+			<div class="de-row">
+				<div class="de-label-wrapper">
+					<label class="de-label" for="edit-node-terms"/>
+						<?php echo smarty_modifier_t("Tags");?>
+
+					</label>
+				</div>
+				<div class="de-input-wrapper">
+					<input type="text" class="de-input xl" name="node[tags]"/>
+				</div>
+			</div>
+		</fieldset>
 		
 		<fieldset class="de-fieldset">
 			<legend><?php echo smarty_modifier_t("Content access");?>
@@ -322,9 +373,11 @@ if (!empty($_capture_buffer)) {
 					<select class="de-input l" id="edit-node-record_mode-read_mode" name="node[record_mode.read_mode]">
 						<option value="2"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==2){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner only");?>
 </option>
-						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner and group");?>
+						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Content admins");?>
 </option>
-						<option value="4"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==4){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Public content");?>
+						<option value="4"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==4){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Registered users");?>
+</option>
+						<option value="5"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->read_mode==5){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Anyone");?>
 </option>
 					</select>
 					<?php echo smarty_function_de_form_error(array('path'=>"record_mode.read_mode"),$_smarty_tpl);?>
@@ -342,7 +395,9 @@ if (!empty($_capture_buffer)) {
 </option>
 						<option value="2"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==2){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner only");?>
 </option>
-						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner and group");?>
+						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Content admins");?>
+</option>
+						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==4){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Registered users");?>
 </option>
 					</select>
 					<?php echo smarty_function_de_form_error(array('path'=>"record_mode.edit_mode"),$_smarty_tpl);?>
@@ -356,11 +411,13 @@ if (!empty($_capture_buffer)) {
 				</div>
 				<div class="de-input-wrapper">
 					<select class="de-input l" id="edit-node-record_mode-delete_mode" name="node[record_mode.delete_mode]">
-						<option value="1"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==1){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Nobody");?>
+						<option value="1"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->delete_mode==1){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Nobody");?>
 </option>
-						<option value="2"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==2){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner only");?>
+						<option value="2"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->delete_mode==2){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner only");?>
 </option>
-						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->edit_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Owner and group");?>
+						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->delete_mode==3){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Content admins");?>
+</option>
+						<option value="3"<?php if ($_smarty_tpl->tpl_vars['node']->value->record_mode->delete_mode==4){?> selected="selected"<?php }?>><?php echo smarty_modifier_t("Registered users");?>
 </option>
 					</select>
 					<?php echo smarty_function_de_form_error(array('path'=>"record_mode.delete_mode"),$_smarty_tpl);?>

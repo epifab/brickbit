@@ -29,7 +29,7 @@ abstract class MetaType {
 	
 	protected static function checkCallable($func) {
 		if (!\is_callable($func)) {
-			throw new \system\InternalErrorException("Il parametro non rappresenta ne' una funzione ne' un metodo");
+			throw new \system\InternalErrorException(\system\Lang::translate("Invalid validation handler for metatype <em>@name</em>", array('@name' => $this->getName())));
 		}
 	}
 	

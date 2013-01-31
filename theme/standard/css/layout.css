@@ -214,6 +214,7 @@ input, textarea {
 	padding: 3px;
 	font-size: 10pt;
 	line-height: 1.5;
+	vertical-align: middle;
 }
 .dataedit .de-row .de-input-wrapper select.de-input {
 	font-size: 10pt;
@@ -274,6 +275,26 @@ input, textarea {
 .dataedit .de-controls .de-control:hover {
 	background-color: #FFF;
 	color: #330;
+}
+
+.dataedit .de-error {
+	background-color: #FDD;
+	color: #F11;
+	font-weight: bold;
+	padding: 10px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	margin: 1px 0px;
+}
+
+.dataedit .de-info {
+	background-color: #FFE;
+	padding: 10px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	margin: 1px 0px;
 }
 
 table {

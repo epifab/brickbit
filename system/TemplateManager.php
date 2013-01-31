@@ -7,7 +7,7 @@ class TemplateManager extends \Smarty {
 	private $regions = array();
 	private $mainTemplate;
 	private $outlineTemplate;
-	private $outlineTemplateWrapper;
+	private $outlineWrapperTemplate;
 	
 	public function getOutlineTemplate() {
 		return $this->outlineTemplate;
@@ -17,12 +17,12 @@ class TemplateManager extends \Smarty {
 		$this->outlineTemplate = empty($tpl) ? null : \system\File::stripExtension($tpl) . ".tpl";
 	}
 	
-	public function getOutlineTemplateWrapper() {
-		return $this->outlineTemplateWrapper;
+	public function getOutlineWrapperTemplate() {
+		return $this->outlineWrapperTemplate;
 	}
 	
-	public function setOutlineTemplateWrapper($tpl) {
-		$this->outlineTemplateWrapper = empty($tpl) ? null : \system\File::stripExtension($tpl) . ".tpl";
+	public function setOutlineWrapperTemplate($tpl) {
+		$this->outlineWrapperTemplate = empty($tpl) ? null : \system\File::stripExtension($tpl) . ".tpl";
 	}
 	
 	public function getMainTemplate() {
@@ -56,14 +56,14 @@ class TemplateManager extends \Smarty {
 		$datamodel['system']['templates'] = array(
 			'main' => $this->mainTemplate,
 			'outline' => $this->outlineTemplate,
-			'outline-wrapper' => $this->outlineTemplateWrapper,
+			'outline-wrapper' => $this->outlineWrapperTemplate,
 			'regions' => $this->regions
 		);
 		foreach ($datamodel as $k => $v) {
 			$this->assign($k, $v);
 		}
-		if ($this->outlineTemplateWrapper) {
-			$this->display($this->outlineTemplateWrapper);
+		if ($this->outlineWrapperTemplate) {
+			$this->display($this->outlineWrapperTemplate);
 		} else if ($this->outlineTemplate) {
 			$this->display($this->outlineTemplate);
 		} else if ($this->mainTemplate) {

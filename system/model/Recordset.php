@@ -21,6 +21,10 @@ class Recordset implements RecordsetInterface {
 		
 		// Inizializzo i valori dei campi
 		foreach ($this->builder->getMetaTypeList() as $name => $metaType) {
+			if ($metaType instanceof MetaVirtual) {
+				continue;
+			}
+			
 			// inizializzo il campo
 			$this->fields[$name] = null;
 			
@@ -68,8 +72,8 @@ class Recordset implements RecordsetInterface {
 		
 		// HAS MANY RELATION COMPLETE AUTO IMPORT
 		if ($this->builder->hasManyRelationExists($name) && !$this->builder->searchRelationBuilder($name)) {
-			$this->builder->using($name . ".*");
-			$this->builder->searchRelationBuilder($name)->usingAll();
+			$this->builder->using($name);
+			$this->builder->searchRelationBuilder($name, true)->usingAll();
 		}
 		
 		if (\array_key_exists($name, $this->hasOneRelations)) {
@@ -321,20 +325,17 @@ class Recordset implements RecordsetInterface {
 			$this->updateRecordMode($readMode, $editMode, $deleteMode);
 		}
 
-		foreach ($this->modifiedFields as $name => $value) {
-			$metaType = $this->builder->searchMetaType($name);
-			$q1 .= ($q1 === "" ? "" : ", ") . $name . " = " . $metaType->prog2Db($this->modifiedFields[$name]);
-		}
+		if (\count($this->modifiedFields) > 0) {
+			foreach ($this->modifiedFields as $name => $value) {
+				$metaType = $this->builder->searchMetaType($name);
+				$q1 .= ($q1 === "" ? "" : ", ") . $name . " = " . $metaType->prog2Db($this->modifiedFields[$name]);
+			}
 
-		$query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE ";
-		$first = true;
-		foreach ($this->builder->getPrimaryKey()->getMetaTypes() as $metaType) {
-			$first ? $first = false : $query .= " AND ";
-			$query .= $metaType->getName() . " = " . $metaType->prog2Db($this->fields[$metaType->getName()]);
-		}
+			$query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE " . $this->filterByPrimaryClause();
 
-		$dataAccess = DataLayerCore::getInstance();
-		$dataAccess->executeUpdate($query, __FILE__, __LINE__);
+			$dataAccess = DataLayerCore::getInstance();
+			$dataAccess->executeUpdate($query, __FILE__, __LINE__);
+		}
 	}
 
 	/**
@@ -344,19 +345,29 @@ class Recordset implements RecordsetInterface {
 		if (!$this->isStored()) {
 			return;
 		}
-		
 		\system\logic\Module::raise("onDelete", $this);
 		
-		$query = "DELETE FROM " . $this->builder->getTableName() . " WHERE ";
-		$first = true;
-		foreach ($this->builder->getPrimaryKey() as $metaType) {
-			$first ? $first = false : $query .= " AND ";
-			$query .= $metaType->getName() . " = " . $metaType->prog2Db($this->fields[$metaType->getName()]);
-		}
+		$query = "DELETE FROM " . $this->builder->getTableName() . " WHERE " . $this->filterByPrimaryClause();
 		$dataAccess = DataLayerCore::getInstance();
 		$dataAccess->executeUpdate($query, __FILE__, __LINE__);
 
 		$this->stored = false;
+	}
+	
+	private function filterByPrimaryClause() {
+		if (!$this->builder->getPrimaryKey()) {
+			throw new \system\InternalErrorException('No keys have been set for <em>@name</em> table.', array('@name' => $this->builder->getTableName()));
+		}
+		$first = true;
+		$query = "";
+		foreach ($this->builder->getPrimaryKey()->getMetaTypes() as $metaType) {
+			if (!\array_key_exists($metaType->getName(), $this->fields) || \is_null($this->fields[$metaType->getName()])) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Primary key fields not imported or invalid.'));
+			}
+			$first ? $first = false : $query .= " AND ";
+			$query .= $metaType->getName() . " = " . $metaType->prog2Db($this->fields[$metaType->getName()]);
+		}
+		return $query;
 	}
 
 	/**

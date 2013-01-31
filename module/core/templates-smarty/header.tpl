@@ -40,15 +40,10 @@
 	<div id="main-menu-wrapper">
 		<ul id="main-menu">
 			<{foreach from=$page.mainMenu item="menuItem"}>
-			<li <{if $page.url == $menuItem.url}>class="selected" <{/if}>id="item-<{$menuItem.id}>"><{link url=$menuItem.url}><span><{$menuItem.title}></span><{/link}></li>
+			<li <{if $page.url == $menuItem.url}>class="selected" <{/if}>id="item-<{$menuItem.id}>"><{link ajax=false url=$menuItem.url}><{$menuItem.title}><{/link}></li>
 			<{/foreach}>
 			<{protected url="page/add"}>
 			<li><{link url="page/add" width=800 height=500 title="Create new page"}>+<{/link}></li>
 			<{/protected}>
-			<li><{link url=""}>about<{/link}></li>
-			<li><{link url=""}>live demo<{/link}></li>
-			<li><{link url=""}>download<{/link}></li>
-			<li><{link url=""}>docs<{/link}></li>
-			<li><{link url=""}>contacts<{/link}></li>
 		</ul>
 	</div>

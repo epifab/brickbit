@@ -221,6 +221,7 @@ class RecordsetBuilder {
 	 * @return \system\model\self 
 	 */
 	private function loadRelationBuilder($name) {
+		
 		if (\array_key_exists($name, $this->relationBuilderList)) {
 			return $this->relationBuilderList[$name];
 		}
@@ -256,7 +257,7 @@ class RecordsetBuilder {
 			if (\array_key_exists($name, $this->tableInfo["keys"])) {
 				$keyInfo = $this->tableInfo["keys"][$name];
 			} else {
-				throw new \system\InternalErrorException(\system\Lang::translate('Key <em>@name</em> not found.', array('@name' => $name)));
+				return null;
 			}
 		}
 		
@@ -522,9 +523,10 @@ class RecordsetBuilder {
 			} else {
 				return null;
 			}
-		} else if ($res instanceof RecordsetBuilder) {
+		} else if ($res instanceof self) {
 			return $res;
 		} else {
+			die("ooo");
 			throw new \system\InternalErrorException(\system\Lang::translate('Relation @path not found.', array('@path' => $path)));
 		}
 	}
@@ -569,20 +571,16 @@ class RecordsetBuilder {
 					$this->paths[$path] = $this->relationBuilderList[$path];
 				} else if (\array_key_exists($path, $this->keyList)) {
 					$this->paths[$path] = $this->keyList[$path];
-				} else {
-					$this->paths[$path] = null;
 				}
 			} else {
 				$relation = substr($path, 0, $dotPosition);
 
 				if (\array_key_exists($relation, $this->relationBuilderList)) {
 					$this->paths[$path] = $this->relationBuilderList[$relation]->searchProperty(substr($path, $dotPosition+1));
-				} else {
-					$this->paths[$path] = null;
 				}
 			}
 		}
-		return $this->paths[$path];
+		return \array_key_exists($path, $this->paths) ? $this->paths[$path] : null;
 	}
 
 	/**
@@ -957,6 +955,20 @@ class RecordsetBuilder {
 	}
 	///</editor-fold>
 
+	public function selectQuery() {
+		$q1 = "";
+		$q2 = "";
+		$this->initQuery($q1, $q2);
+		
+		$query = "SELECT $q1 FROM $q2";
+		
+		$query .= \is_null($this->filterClauses) ? "" : " WHERE " . $this->filterClauses->getQuery();
+		$query .= \is_null($this->sortClauses) ? "" : " ORDER BY " . $this->sortClauses->getQuery();
+		$query .= \is_null($this->limitClause) ? "" : " LIMIT " . $this->limitClause->getQuery();
+		
+		return $query;
+	}
+	
 	/**
 	 * Metodo per la costruzione di query select.<br/>
 	 * Una volta conclusa la chiamata si avra'  che:
@@ -965,7 +977,7 @@ class RecordsetBuilder {
 	 * <li>$q2 conterra' la lista delle tabelle dalle quali selezionarli in sintassi SQL</li>
 	 * </ul>
 	 */
-	public function selectQuery(&$q1, &$q2) {
+	protected function initQuery(&$q1, &$q2) {
 		if (empty($q2)) {
 			$q2 .= $this->getSelectExpression() . " " . $this->getTableAlias();
 		}
@@ -1006,7 +1018,7 @@ class RecordsetBuilder {
 
 			$builder->setFilter($oldFilter);
 			
-			$builder->selectQuery($q1, $q2);
+			$builder->initQuery($q1, $q2);
 		}
 	}
 	
@@ -1030,9 +1042,9 @@ class RecordsetBuilder {
 			$rmFilter = new FilterClauseGroup(
 				new FilterClause($this->record_mode->$mode, ">", \system\model\RecordMode::MODE_NOBODY)
 			);
-
+			
 			// Tolta la condizione 1, se l'utente è un superutente, non c'è nient'altro da verificare
-			if (!\system\Login::getLoggedUserId() || !\system\Login::getLoggedUser()->superuser) {
+			if (!\system\Login::isSuperuser()) {
 				// SOLTANTO SE l'utente NON e' un un SUPERUSER
 				// l'accesso si restringe a queste condizioni:
 				// modalità = ANYONE
@@ -1041,7 +1053,7 @@ class RecordsetBuilder {
 
 				$anyoneFilter = new FilterClause($this->record_mode->$mode, "=", \system\model\RecordMode::MODE_ANYONE);
 
-				if (!\system\Login::getInstance()->isAnonymous()) {
+				if (!\system\Login::isLogged()) {
 					$registeredFilter = new FilterClause($this->record_mode->mode, ">=", \system\model\RecordMode::MODE_REGISTERED);
 					
 					$adminsFilter = new FilterClauseGroup(
@@ -1133,16 +1145,8 @@ class RecordsetBuilder {
 	 * @return RecordsetInterface[]
 	 */
 	public function select() {
-		
-		$q1 = "";
-		$q2 = "";
-		$this->selectQuery($q1, $q2);
-		
-		$query = "SELECT $q1 FROM $q2";
-		
-		$query .= \is_null($this->filterClauses) ? "" : " WHERE " . $this->filterClauses->getQuery();
-		$query .= \is_null($this->sortClauses) ? "" : " ORDER BY " . $this->sortClauses->getQuery();
-		$query .= \is_null($this->limitClause) ? "" : " LIMIT " . $this->limitClause->getQuery();
+
+		$query = $this->selectQuery();
 
 		$dataAccess = DataLayerCore::getInstance();
 		$result = $dataAccess->executeQuery($query, __FILE__, __LINE__);
@@ -1157,7 +1161,7 @@ class RecordsetBuilder {
 		
 		return $recordsets;
 	}
-	
+
 	/**
 	 * Seleziona soltanto il primo risultato del recordset
 	 * @return RecordsetInterface
@@ -1184,7 +1188,7 @@ class RecordsetBuilder {
 		if ($ignoreRelations) {
 			$q2 = $this->getTableName() . " AS " . $this->getTableAlias();
 		} else {
-			$this->selectQuery($q1, $q2);
+			$this->initQuery($q1, $q2);
 		}
 		
 		$query = "SELECT COUNT(*) FROM $q2";
@@ -1205,7 +1209,7 @@ class RecordsetBuilder {
 	public function countPages($pageSize) {
 		$q1 = "";
 		$q2 = "";
-		$this->selectQuery($q1, $q2);
+		$this->initQuery($q1, $q2);
 
 		$query = "SELECT COUNT(*) FROM $q2";
 

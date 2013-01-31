@@ -154,7 +154,14 @@ node_text:
       size: 2
     urn:
       type: MetaString
+      validationHandle: |
+        function($x) {
+          \system\Validation::
+        }
       size: 32
+    description:
+      type: MetaString
+      size: 128
     title:
       type: MetaString
       size: 64
@@ -196,6 +203,63 @@ node:
       size: 16
     sort_index:
       type: MetaInteger
+    title:
+      type: MetaVirtual
+      dependencies: [text.title, text_und.title, type]
+      handle: |
+        function(\system\model\Recordset $recordset) {
+          if ($recordset->text->title) {
+            return $recordset->text->title;
+          } else if ($recordset->text_und->title) {
+            return $recordset->text_und->title;
+          } else {
+            return 'Untitled ' . $recordset->type;
+          }
+        }
+    read_url:
+      type: MetaVirtual
+      dependencies: [id, text.urn, text_und.urn]
+      handle: |
+        function(\system\model\Recordset $recordset) {
+          if ($recordset->text->urn) {
+            return 'content/' . $recordset->text->urn . '.html';
+        //  } else if ($recordset->text_und->urn) {
+        //    return 'content/' . $recordset->text_und->urn . '.html';
+          } else {
+            return 'content/' . $recordset->id;
+          }
+        }
+    edit_url:
+      type: MetaVirtual
+      dependencies: [id]
+      handle: |
+        function(\system\model\Recordset $recordset) {
+          return 'content/' . $recordset->id . '/edit';
+        }
+    delete_url:
+      type: MetaVirtual
+      dependencies: [id]
+      handle: |
+        function(\system\model\Recordset $recordset) {
+          return 'content/' . $recordset->id . '/delete';
+        }
+    content:
+      type: MetaVirtual
+      dependencies: [id, type]
+      handle: |
+        function(\system\model\Recordset $node) {
+          static $r = false;
+          if ($r === false) {
+            try {
+              $rsb = new \system\RecordsetBuilder('content_' . $node->type);
+              $rsb->using('*');
+              $r = $rsb->selectFirstBy('node_id', $node->id);
+            } catch (\Exception $ex) {
+              $r = null;
+            }
+          }
+          return $r;
+        }
   keys:
     primary_key:
       fields: [id]
@@ -386,14 +450,17 @@ node_file:
   fields:
     node_id:
       type: MetaInteger
-    index:
+    node_index:
       type: MetaString
-      size: 16
+      size: 32
     sort_index:
       type: MetaInteger
     file_id:
       type: MetaInteger
     virtual_name:
+      type: MetaString
+      size: 32
+    preview_file_path:
       type: MetaString
       size: 32
     download_mode:
@@ -405,6 +472,31 @@ node_file:
         3: Node admins
         4: Registered
         5: Anyone
+    read_url:
+      type: MetaVirtual
+      dependencies: [virtual_name, node_index, node_id, file_id, file.extension]
+      handle: |
+        function(\system\model\Recordset $rs) {
+          if (!$rs->node_id) {
+            return 'content/file/' . $rs->file_id . '.' . $rs->file->extension;
+          } else {
+            return 'content/' . $rs->node_id . '/file/' . $rs->node_index . '/' . $rs->virtual_name;
+          }
+        }
+    edit_url:
+      type: MetaVirtual
+      dependencies: [file_id]
+      handle: |
+        function(\system\model\Recordset $rs) {
+          return 'content/file/' . $rs->file_id . '/edit';
+        }
+    delete_url:
+      type: MetaVirtual
+      dependencies: [file_id]
+      handle: |
+        function(\system\model\Recordset $rs) {
+          return 'content/file/' . $rs->file_id . '/delete';
+        }
     download_path:
       type: MetaVirtual
       handle: |
@@ -413,7 +505,9 @@ node_file:
         }
   keys:
     primary:
-      fields: [node_id, index]
+      fields: [file_id]
+    node_key:
+      fields: [node_id, node_index, virtual_name]
   relations:
     node:
       type: N-1

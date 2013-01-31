@@ -191,13 +191,14 @@ CREATE TABLE node_text (
 	lang CHAR(2),
 	title VARCHAR(128),
 	subtitle VARCHAR(256),
+	description VARCHAR(256),
 	preview TEXT,
 	body TEXT,
 	PRIMARY KEY (node_id, lang),
 	UNIQUE KEY (lang, urn)
 ) ENGINE=InnoDB;
 
-CREATE TABLE content_comment(
+CREATE TABLE content_comment (
 	node_id INT,
 	approved INT(1),
 	body TEXT,
