@@ -1,39 +1,35 @@
 <?php
 namespace system\model;
 
-class MetaBoolean extends MetaOptions {
-//	private $nullAsZero;
-	
-	public function __construct($name, $builder, $baseMetaType='Integer') {
-		parent::__construct($name, $builder, $baseMetaType);
-		parent::setOptions(array(
-			 "0" => "False", 
-			 "1" => "True"
-		));
+class MetaBoolean extends MetaType {
+	public function prog2Db($x) {
+		if (\is_null($x)) {
+			if ($this->getAttr('nullable', array('default' => true))) {
+				return "NULL";
+			} else {
+				return "0";
+			}
+		} else {
+			return $x;
+		}
 	}
 	
-//	public function setNullAsZero($nullAsZero) {
-//		$this->nullAsZero = (bool)$nullAsZero;
-//	}
-//	public function getNullAsZero() {
-//		return $this->nullAsZero;
-//	}
+	public function db2Prog($x) {
+		$x = (bool)$x;
+		return $x;
+	}
+	
+	public function edit2Prog($x) {
+		$x = (bool)$x;
+		$this->validate($x);
+		return $x;
+	}
+	
+	public function validate($x) {
+	}
 
-	protected function _stdDb2Prog($x) {
-		return ((int)((bool)$x));
+	public function getEditWidgetDefault() {
+		return 'checkbox';
 	}
-	
-	protected function _stdProg2Db($x) {
-		return ((int)$x);
-	}
-	
-	protected function _stdEdit2Prog($x) {
-		return ((int)((bool)$x));
-	}
-	
-	protected function _formalValidation($x) {
-		return true;
-	}
-	
 }
 ?>

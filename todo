@@ -1,0 +1,25 @@
+(#) DONE
+(-) not completed
+(*) not started
+
+- fields system
+	# il tipo dei campi non dovrebbe riferirsi direttamente ad una classe ma essere generico esempio "int" o "real"
+	# il mapping "tipo campo" => "classe" (che estende MetaType) dovrebbe essere determinato
+	# da un evento del modulo come metaTypesMap() : array(tipo1 => classe1, tipo2 => classe2, ...)
+	# inoltre, per i tipi base (int, real, string, date, time, datetime) dovrebbero essere fornite delle classi di default
+	# (ovviamente anch'esse definibili a runtime attraverso l'evento)
+	# infine va rivista l'intera classe MetaType
+	# anche la definizione stessa dei campi nel model.yml dovrebbe essere adattata ai cambiamenti
+	* il valore di widget (fornito di default dalla classe MetaType) 
+	* potrebbe essere utilizzato come template API per la visualizzazione del form
+
+* verificare se i cambiamenti alla classe MetaType richiedono modifiche al resto del sistema (probabile)
+
+* completare sviluppo delle API per i templates
+
+* riprendere sviluppo e testing del core
+
+- non completato / non testato
+	- nuovo sistema templates
+	- estendibilita' (creare almeno un secondo modulo di test)
+	- piattaforma frontend

@@ -153,6 +153,41 @@ class RecordsetBuilder {
 	 */
 	private $limitClause = null;
 	
+	public static function getMetaTypesMap() {
+		static $map = null;
+		if (\is_null($map)) {
+			if (\config\settings()->CORE_CACHE) {
+				$map = \system\Utils::get('system-mtmap', null);
+				if (!\is_null($map)) {
+					return $map;
+				}
+			}
+			$map = array();
+			$conf = \system\logic\Module::raise('metaTypesMap');
+			
+			// default overridable values
+			$map['integer'] = '\\system\\model\\MetaInteger';
+			$map['decimal'] = '\\system\\model\\MetaDecimal';
+			$map['string'] = '\\system\\model\\MetaString';
+			$map['boolean'] = '\\system\\model\\MetaBoolean';
+			$map['date'] = '\\system\\model\\MetaDate';
+			$map['datetime'] = '\\system\\model\\MetaDateTime';
+			$map['virtual'] = '\\system\\model\\MetaVirtual';
+			
+			foreach ($conf as $m) {
+				if (\is_array($m)) {
+					foreach ($m as $type => $class) {
+						$map[$type] = $class;
+					}
+				}
+			}
+			if (\config\settings()->CORE_CACHE) {
+				\system\Utils::set('system-mtmap', $map);
+			}
+			return $map;
+		}
+	}
+	
 	public function getTableInfo() {
 		return $this->tableInfo;
 	}
@@ -199,18 +234,15 @@ class RecordsetBuilder {
 				$this->loadMetaType($name);
 			}
 			return $this->getMetaTypeList();
-		} else if (\array_key_exists($name, $this->tableInfo["fields"])) {
-			$metaTypeClass = "\\system\\model\\" . $this->tableInfo["fields"][$name]["type"];
-			$metaType = new $metaTypeClass($name, $this);
-			$metaType instanceof MetaType;
-			if ($metaType->isVirtual()) {
-				$dependencies = \system\Utils::getParam('dependencies', $this->tableInfo["fields"][$name], array('default' => array()));
-				foreach ($dependencies as $d) {
-					$this->using($d);
-				}
-				$handle = \system\Utils::getParam('handle', $this->tableInfo["fields"][$name], array('required' => true));
-				$metaType->setHandler($handle);
-			}
+		}
+		
+		else if (\array_key_exists($name, $this->tableInfo["fields"])) {
+			$mtmap = RecordsetBuilder::getMetaTypesMap();
+			
+			$metaTypeClass = \system\Utils::getParam($this->tableInfo['fields'][$name]['type'], $mtmap, array('required' => true));
+			
+			$metaType = new $metaTypeClass($name, $this->tableInfo['fields'][$name]['type'], $this, $this->tableInfo['fields'][$name]);
+
 			$this->metaTypeList[$name] = $metaType;
 			return $metaType;
 		}

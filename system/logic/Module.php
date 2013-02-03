@@ -310,10 +310,6 @@ abstract class Module {
 		return $result;
 	}
 	
-	public static function raiseUltimate($eventName) {
-		
-	}
-	
 	/**
 	 * Run the component associated with the url.
 	 * @param string $url

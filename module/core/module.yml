@@ -1,6 +1,12 @@
 class: Core
 weight: 1
 enabled: 1
+# modelNs: model
+modelClass: Model
+# templatesNs: templates
+templatesClass: Api
+templatesDirs:
+  - templates
 componentsNs: components
 components:
   role:

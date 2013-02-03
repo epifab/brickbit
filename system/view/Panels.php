@@ -68,27 +68,27 @@ class Panels {
 		return $this->panels;
 	}
 	
-	public static function getFormId($smarty) {
-		$vars = $smarty->getTemplateVars();
+	public static function getFormId() {
+		$vars = \system\view\Template::current()->getVars();
 		return 'system-panel-form-' . $vars['system']['component']['requestId'];
 	}
 	
-	public static function getFormName($smarty) {
-		$vars = $smarty->getTemplateVars();
+	public static function getFormName() {
+		$vars = \system\view\Template::current()->getVars();
 		return 'system-panel-' . $vars['system']['component']['requestId'];
 	}
 	
-	public static function getForm($smarty) {
+	public static function getForm() {
 		static $forms = array();
 
-		$vars = $smarty->getTemplateVars();
+		$vars = \system\view\Template::current()->getVars();
 
 		if (\array_key_exists($vars['system']['component']['requestId'], $forms)) {
 			return $forms[$vars['system']['component']['requestId']];
 		}
 		else {
-			$formId = self::getFormId($smarty);
-			$formName = self::getFormName($smarty);
+			$formId = self::getFormId();
+			$formName = self::getFormName();
 
 			$forms[$vars['system']['component']['requestId']] = array($formId, $formName, '');
 

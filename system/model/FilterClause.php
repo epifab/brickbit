@@ -164,13 +164,22 @@ class FilterClause implements SelectClauseInterface {
 			$clause = $this->metaType->getTableAlias() . "." . $this->metaType->getName();
 		}
 		
-		try {
 			switch ($this->type) {
 				case FilterClause::OP_EQ:
-					$clause .= " = " . $this->metaType->prog2Db($this->expression);
+					$x = $this->metaType->prog2Db($this->expression);
+					if ($x == "NULL") {
+						$clause .= " IS NULL";
+					} else {
+						$clause .= " = " . $x;
+					}
 					break;
 				case FilterClause::OP_NEQ:
-					$clause .= " <> " . $this->metaType->prog2Db($this->expression);
+					$x = $this->metaType->prog2Db($this->expression);
+					if ($x == "NULL") {
+						$clause .= " IS NOT NULL";
+					} else {
+						$clause .= " <> " . $x;
+					}
 					break;
 				case FilterClause::OP_LT:
 					$clause .= " < " . $this->metaType->prog2Db($this->expression);
@@ -201,9 +210,6 @@ class FilterClause implements SelectClauseInterface {
 					break;
 			}
 			return $clause;
-		} catch (\Exception $ex) {
-			return "1";
-		}
 	}
 }
 ?>

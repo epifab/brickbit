@@ -119,13 +119,5 @@ class Utils {
 			}
 		}
 	}
-	
-	public static function addJsCode($content, \Smarty_Internal_Template &$smarty) {
-		Utils::$javascript .= "\n" . $content . "\n";
-	}
-	
-	public static function getJsCode() {
-		return Utils::$javascript;
-	}
 }
 ?>

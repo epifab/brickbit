@@ -197,54 +197,57 @@ class Recordset implements RecordsetInterface {
 		}
 	}
 	
-	public function getProg($name) {
-		if (\array_key_exists($name, $this->modifiedFields)) {
-			return $this->modifiedFields[$name];
-		} else if (\array_key_exists($name, $this->fields)) {
-			return $this->fields[$name];
+	public function getProg($path) {
+		list($rs, $name) = $this->searchParent($path, true);
+		if (\array_key_exists($name, $rs->modifiedFields)) {
+			return $rs->modifiedFields[$name];
+		} else if (\array_key_exists($name, $rs->fields)) {
+			return $rs->fields[$name];
 		} else {
-			$mt = $this->builder->searchMetaType($name);
+			$mt = $rs->builder->searchMetaType($name);
 			if ($mt && $mt instanceof MetaVirtual) {
-				return \call_user_func($mt->getHandler(), $this);
+				return \call_user_func($mt->getHandler(), $rs);
 			}
 			throw new \system\InternalErrorException(\system\Lang::translate('Field, relation or key <em>@path</em> not found.', array("@path" => $name)));
 		}
 	}
 	
-	public function setDb($name, $value) {
-		if (\array_key_exists($name, $this->fields)) {
-			$metaType = $this->builder->searchMetaType($name);
-			$this->fields[$name] = $metaType->db2Prog($value);
+	public function setDb($path, $value) {
+		list($rs, $name) = $this->searchParent($path, true);
+		if (\array_key_exists($name, $rs->fields)) {
+			$metaType = $rs->builder->searchMetaType($name);
+			$rs->fields[$name] = $metaType->db2Prog($value);
 		}
 	}
 	
-	public function getDb($name) {
-		$progValue = $this->getProg($name);
-		$metaType = $this->builder->searchMetaType($name);
+	public function getDb($path) {
+		$progValue = $this->getProg($path);
+		$metaType = $this->builder->searchMetaType($path);
 		return $metaType->prog2Db($progValue);
 	}
 
-	public function setEdit($name, $value) {
-		if (\array_key_exists($name, $this->fields)) {
-			$metaType = $this->builder->searchMetaType($name);
+	public function setEdit($path, $value) {
+		list($rs, $name) = $this->searchParent($path, true);
+		if (\array_key_exists($name, $rs->fields)) {
+			$metaType = $rs->builder->searchMetaType($name);
 			if ($metaType instanceof MetaVirtual) {
 				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@path</em> value (virtual field).', array("@path" => $name)));
 			}
-			$this->modifiedFields[$name] = $metaType->edit2Prog($value);
+			$rs->modifiedFields[$name] = $metaType->edit2Prog($value);
 		} else {
 			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> not found.', array("@path" => $name)));
 		}
 	}
 	
-	public function getEdit($name) {
-		$progValue = $this->getProg($name);
-		$metaType = $this->builder->searchMetaType($name);
+	public function getEdit($path) {
+		$progValue = $rs->getProg($path);
+		$metaType = $rs->builder->searchMetaType($path);
 		return $metaType->prog2Edit($progValue);
 	}
 	
-	public function getRead($name) {
-		$progValue = $this->getProg($name);
-		$metaType = $this->builder->searchMetaType($name);
+	public function getRead($path) {
+		$progValue = $this->getProg($path);
+		$metaType = $this->builder->searchMetaType($path);
 		return $metaType->prog2Read($progValue);
 	}
 	

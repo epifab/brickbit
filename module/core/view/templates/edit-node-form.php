@@ -172,7 +172,7 @@
 <script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload-jui.js'); ?>"></script>
 
 
-<?php $this->api->open('edit_form'); ?>
+<?php $this->api->open('deForm'); ?>
 	<?php if ($node->id): ?>
 	<input type="hidden" name="id" value="<?php print $node->getEdit('id'); ?>"/>
 	<?php endif; ?>
@@ -206,7 +206,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<input type="text" class="de-input xl" name="node[text_<?php print $lang; ?>.urn]" id="edit-node-text_<?php print $lang; ?>-urn" value="<?php print $node->__get('text_'.$lang)->getEdit('urn'); ?>"/>
+							<?php $this->api->deInput($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("Once you choose a URN you shouldn't change it anymore."); ?><br/>
@@ -217,7 +217,7 @@
 									<?php print $this->api->t("Please note also that two different contents, translated in @lang, must have two different URNs.", array('@lang' => $this->api->t($lang))); ?>
 								</p>
 							</div>
-							<?php print $this->api->de_form_error('text_' . $lang . '.urn'); ?>
+							<?php print $this->api->deError('text_' . $lang . '.urn'); ?>
 						</div>
 					</div>
 					<div class="de-row">

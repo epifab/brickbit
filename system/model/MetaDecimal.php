@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-class MetaInteger extends MetaType {
+class MetaDecimal extends MetaType {
 	
 	public function prog2Db($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
@@ -31,10 +31,10 @@ class MetaInteger extends MetaType {
 				$x = array($x); // just to make sure
 			}
 			foreach ($x as $k => $v) {
-				$x[$k] = (int)$v;
+				$x[$k] = (double)$v;
 			}
 		} else {
-			$x = (int)$x;
+			$x = (double)$x;
 		}
 		return $x;
 	}
@@ -45,10 +45,10 @@ class MetaInteger extends MetaType {
 				$x = array($x); // just to make sure
 			}
 			foreach ($x as $k => $v) {
-				$x[$k] = (int)$v;
+				$x[$k] = (double)$v;
 			}
 		} else {
-			$x = (int)$x;
+			$x = (double)$x;
 		}
 		$this->validate($x);
 		return $x;
@@ -107,7 +107,7 @@ class MetaInteger extends MetaType {
 			}
 		}
 	}
-
+	
 	public function getEditWidgetDefault() {
 		if ($this->attrExists('options')) {
 			if ($this->attrExists('multiple')) {
