@@ -27,8 +27,6 @@ class Api {
 		return null;
 	}
 	
-	private function __construct() { }
-	
 	public function __call($method, $args) {
 		$api = $this->getApi($method);
 		if ($api) {
@@ -44,11 +42,6 @@ class Api {
 		}
 		\array_push($this->blocks, array($callback, $args));
 		\ob_start();
-		
-		$openCallback = $this->getApi($callback . 'Start');
-		if ($openCallback) {
-			\call_user_func($openCallback, $args);
-		}
 	}
 	
 	public function close() {
@@ -57,11 +50,11 @@ class Api {
 		}
 		list($callback, $args) = \array_pop($this->blocks);
 		$content = \ob_get_clean();
-		\call_user_func(array($this, $callback), $content, $args);
+		return \call_user_func(array($this, $callback), $content, $args);
 	}
 	
 	public function modulePath($module, $url) {
-		return \system\logic\Module::getPath($module) . $url;
+		return \system\logic\Module::getAbsPath($module) . $url;
 	}
 	
 	public function themePath($url) {

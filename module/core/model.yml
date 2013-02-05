@@ -1,0 +1,561 @@
+tables:
+  dir:
+    fields:
+      id:
+        type: integer
+        label: Id
+      path:
+        type: plaintext
+        label: Dir path
+        maxlength: 32
+        regexp: /^[a-zA-Z0-9-]+$/
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      files:
+        table: file
+        clauses: [id: dir_id]
+        type: 1-N
+        onDelete: CASCADE
+  file:
+    fields:
+      id:
+        type: integer
+        label: Id
+      dir_id:
+        type: integer
+        label: Dir id
+      name:
+        type: plaintext
+        label: File name
+        maxlength: 32
+        regexp: /^[a-zA-Z0-9._-]+$/
+    virtuals:
+      path:
+        dependencies: [dir.path]
+        label: File path
+        handle: |
+          function(\system\model\Recordset $file) {
+            return $file->dir->path . $file->name;
+          }
+      extension:
+        dependencies: [name]
+        label: File extension
+        handle: |
+          function(\system\model\Recordset $file) {
+            return \system\File::getExtension($file->name);
+          }
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      dir:
+        table: dir
+        clauses: [dir_id: id]
+        type: N-1
+      node:
+        table: node_file
+        clauses: [id: file_id]
+        type: 1-1
+  vocabulary:
+    fields:
+      id:
+        type: integer
+        label: Id
+      name:
+        type: plaintext
+        label: Vocabulary
+        maxlength: 32
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      terms:
+        table: term
+        clauses: [id: vocabulary_id]
+        type: 1-N
+  term:
+    fields:
+      id:
+        type: integer
+        label: Id
+      vocabulary_id:
+        type: integer
+        label: Vocabulary
+      parent_id:
+        type: integer
+        label: Parent term
+      ldel:
+        type: integer
+        label: Left delimiter
+      rdel:
+        type: integer
+        label: Right delimiter
+      urn:
+        type: plaintext
+        label: Term URN
+        maxlength: 32
+        regexp: /^[A-Za-z0-9_-]+$/
+      value:
+        type: plaintext
+        label: Label
+        minlength: 1
+        maxlength: 64
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      vocabulary:
+        table: vocabulary
+        type: N-1
+        clauses: [vocabulary_id: id]
+      parent:
+        table: term
+        type: N-1
+        clauses: [parent_id: id]
+      children:
+        table: term
+        type: 1-N
+        clauses: [id: parent_id]
+        onDelete: CASCADE
+      ancestors:
+        table: term
+        clauses: []
+        type: 1-N
+        filterHandle: \module\core\model\Callbacks::termAncestors
+      descendants:
+        table: term
+        clauses: []
+        type: 1-N
+        filterHandle: \module\core\model\Callbacks::termDescendants
+      nodes:
+        table: node_term
+        type: 1-N
+        clauses: [id: term_id]
+        onDelete: CASCADE
+  node_term:
+    fields:
+      node_id:
+        type: integer
+        label: Node id
+      term_id:
+        type: integer
+        label: Term id
+    keys:
+      primary:
+        fields: [node_id, term_id]
+    relations:
+      node:
+        table: node
+        type: N-1
+        clauses: [node_id: id]
+      term:
+        table: term
+        type: N-1
+        clauses: [term_id: id]
+  node_text:
+    fields:
+      node_id:
+        type: integer
+        label: Node id
+      lang:
+        type: plaintext
+        label: Language
+        minlength: 2
+        maxlength: 2
+      urn:
+        type: plaintext
+        label: URN
+        regexp: /^[A-Za-z0-9_-]*$/
+        minlength: 3
+        maxlength: 32
+      description:
+        type: plaintext
+        label: Description
+        maxlength: 128
+      title:
+        type: plaintext
+        label: Title
+        maxlength: 64
+      subtitle:
+        type: plaintext
+        label: Subtitle
+        maxlength: 128
+      preview:
+        type: html
+        label: Preview
+        maxlength: 256
+        # allow just a limited number of tags and attributes
+        html: filtered
+      body:
+        type: html
+        label: Body
+        # allow just a limited number of tags and attributes
+        html: filtered
+    keys:
+      primary_key:
+        fields: [node_id, lang]
+      urn_key:
+        fields: [urn, lang]
+    relations:
+      node:
+        type: N-1
+        table: node
+        clauses: [node_id: id]
+  node:
+    fields:
+      id:
+        type: integer
+        label: Id
+      record_mode_id:
+        type: integer
+        label: Record mode id
+      ldel:
+        type: integer
+        label: Left delimiter
+      rdel:
+        type: integer
+        label: Right delimiter
+      parent_id:
+        type: integer
+        label: Parent id
+      type:
+        type: plaintext
+        label: Type
+        maxlength: 16
+      subtype:
+        type: plaintext
+        label: Subtype
+        maxlength: 16
+      sort_index:
+        type: integer
+        label: Sort index
+    virtuals:
+      title:
+        label: Title
+        dependencies: [text.title, text_und.title, type]
+        handle: |
+          function(\system\model\Recordset $recordset) {
+            if ($recordset->text->title) {
+              return $recordset->text->title;
+            } else if ($recordset->text_und->title) {
+              return $recordset->text_und->title;
+            } else {
+              return 'Untitled ' . $recordset->type;
+            }
+          }
+      read_url:
+        label: Node URL
+        dependencies: [id, text.urn, text_und.urn]
+        handle: |
+          function(\system\model\Recordset $recordset) {
+            if ($recordset->text->urn) {
+              return 'content/' . $recordset->text->urn . '.html';
+          //  } else if ($recordset->text_und->urn) {
+          //    return 'content/' . $recordset->text_und->urn . '.html';
+            } else {
+              return 'content/' . $recordset->id;
+            }
+          }
+      edit_url:
+        label: Edit URL
+        dependencies: [id]
+        handle: |
+          function(\system\model\Recordset $recordset) {
+            return 'content/' . $recordset->id . '/edit';
+          }
+      delete_url:
+        label: Delete URL
+        dependencies: [id]
+        handle: |
+          function(\system\model\Recordset $recordset) {
+            return 'content/' . $recordset->id . '/delete';
+          }
+      content:
+        label: Content
+        dependencies: [id, type]
+        handle: |
+          function(\system\model\Recordset $node) {
+            static $r = false;
+            if ($r === false) {
+              try {
+                $rsb = new \system\RecordsetBuilder('content_' . $node->type);
+                $rsb->using('*');
+                $r = $rsb->selectFirstBy('node_id', $node->id);
+              } catch (\Exception $ex) {
+                $r = null;
+              }
+            }
+            return $r;
+          }
+    keys:
+      primary_key:
+        fields: [id]
+    relations:
+      record_mode:
+        table: record_mode
+        type: 1-1
+        clauses: [record_mode_id: id]
+  # ancestors/descendants
+      parent:
+        table: node
+        type: N-1
+        clauses: [parent_id: id]
+      children:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        onDelete: CASCADE
+      ancestors:
+        table: node
+        clauses: []
+        type: 1-N
+        filterHandle: \module\core\model\Callbacks::ancestors
+      descendants:
+        table: node
+        clauses: []
+        type: 1-N
+        filterHandle: \module\core\model\Callbacks::descendants
+  # TERMS
+      terms:
+        table: node_term
+        type: 1-N
+        clauses: [id: node_id]
+        onDelete: CASCADE
+  # TRANSLATIONS
+      texts:
+        table: node_text
+        type: 1-N
+        clauses: [id: node_id]
+        onDelete: CASCADE
+      text:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+            $text->addFilter(new \system\model\FilterClause(
+              $text->lang, '=', \system\Lang::getLang()
+            ));
+          }
+      text_und:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+            $text->addFilter(new \system\model\FilterClause(
+              $text->lang, 'IS_NULL'
+            ));
+          }
+      text_en:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+            $text->addFilter(new \system\model\FilterClause(
+              $text->lang, '=', 'en'
+            ));
+          }
+      text_it:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+            $text->addFilter(new \system\model\FilterClause(
+              $text->lang, '=', 'it'
+            ));
+          }
+      text_de:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
+            $text->addFilter(new \system\model\FilterClause(
+              $text->lang, '=', 'de'
+            ));
+          }
+  # FILES
+      files:
+        table: file
+        type: 1-N
+        clauses: [id: node_id]
+        onDelete: CASCADE
+  # VIRTUALS - PAGE
+      page_header:
+        table: node
+        type: 1-1
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'page',
+              $child->type, '=', 'header'
+            ));
+          }
+      page_footer:
+        table: node
+        type: 1-1
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'page',
+              $child->type, '=', 'footer'
+            ));
+          }
+      page_banners:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'page',
+              $child->subtype, '=', 'banner'
+            ));
+          }
+      page_articles:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'article',
+              $child->subtype, 'IS_NULL'
+            ));
+          }
+  # VIRTUALS - ARTICLES
+      article_attachements:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'article',
+              $child->subtype, '=', 'attachement'
+            ));
+          }
+      article_images:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'article',
+              $child->subtype, '=', 'image'
+            ));
+          }
+      article_mp3s:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'article',
+              $child->subtype, '=', 'mp3'
+            ));
+          }
+      article_videos:
+        table: node
+        type: 1-N
+        clauses: [id: parent_id]
+        filterHandle: |
+          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
+            $child->addFilter(new \system\model\FilterClause(
+              $child->type, '=', 'article',
+              $child->subtype, '=', 'video'
+            ));
+          }
+  node_file:
+    fields:
+      node_id:
+        type: integer
+      node_index:
+        type: plaintext
+        maxlength: 32
+      sort_index:
+        type: integer
+      file_id:
+        type: integer
+      virtual_name:
+        type: plaintext
+        maxlength: 32
+      preview_file_path:
+        type: plaintext
+        maxlength: 32
+      download_mode:
+        type: MetaOption
+        options:
+  #        0: Nobody
+  #        1: Superuser
+          2: Node owner only
+          3: Node admins
+          4: Registered
+          5: Anyone
+      read_url:
+        type: MetaVirtual
+        dependencies: [virtual_name, node_index, node_id, file_id, file.extension]
+        handle: |
+          function(\system\model\Recordset $rs) {
+            if (!$rs->node_id) {
+              return 'content/file/' . $rs->file_id . '.' . $rs->file->extension;
+            } else {
+              return 'content/' . $rs->node_id . '/file/' . $rs->node_index . '/' . $rs->virtual_name;
+            }
+          }
+      edit_url:
+        type: MetaVirtual
+        dependencies: [file_id]
+        handle: |
+          function(\system\model\Recordset $rs) {
+            return 'content/file/' . $rs->file_id . '/edit';
+          }
+      delete_url:
+        type: MetaVirtual
+        dependencies: [file_id]
+        handle: |
+          function(\system\model\Recordset $rs) {
+            return 'content/file/' . $rs->file_id . '/delete';
+          }
+      download_path:
+        type: MetaVirtual
+        handle: |
+          function($recordset) {
+            return $recordset->virtual_name;
+          }
+    keys:
+      primary:
+        fields: [file_id]
+      node_key:
+        fields: [node_id, node_index, virtual_name]
+    relations:
+      node:
+        type: N-1
+        table: node
+        clauses: [node_id: id]
+      file:
+        type: 1-1
+        table: file
+        clauses: [file_id: id]
+        onDelete: DELETE
+  user:
+    fields:
+      superuser:
+        type: MetaVirtual
+        handle: |
+          function(\system\model\Recordset $user) {
+            return $user->id == 1;
+          }

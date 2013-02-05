@@ -163,7 +163,6 @@ class RecordsetBuilder {
 				}
 			}
 			$map = array();
-			$conf = \system\logic\Module::raise('metaTypesMap');
 			
 			// default overridable values
 			$map['integer'] = '\\system\\model\\MetaInteger';
@@ -174,6 +173,8 @@ class RecordsetBuilder {
 			$map['datetime'] = '\\system\\model\\MetaDateTime';
 			$map['virtual'] = '\\system\\model\\MetaVirtual';
 			
+			$conf = \system\Main::raiseModel('metaTypesMap');
+
 			foreach ($conf as $m) {
 				if (\is_array($m)) {
 					foreach ($m as $type => $class) {
@@ -315,7 +316,7 @@ class RecordsetBuilder {
 	
 	public function __construct($tableName) {
 		$this->tableName = $tableName;
-		$this->tableInfo = \system\logic\Module::getTable($tableName);
+		$this->tableInfo = \system\Main::getTable($tableName);
 		$this->tableAlias = self::getUniqueAlias($tableName);
 		
 		$this->useAllKeysRecursive();
@@ -458,9 +459,9 @@ class RecordsetBuilder {
 			$rs =  new $func($this, $data);
 		}
 		if (!\is_null($data)) {
-			\system\logic\Module::raise("onRead", $rs);		
+			\system\Main::raiseModel("onRead", $rs);		
 		} else {
-			\system\logic\Module::raise("onInitRs", $rs);
+			\system\Main::raiseModel("onInitRs", $rs);
 		}
 		return $rs;
 	}

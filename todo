@@ -4,16 +4,19 @@
 
 - fields system
 	# il tipo dei campi non dovrebbe riferirsi direttamente ad una classe ma essere generico esempio "int" o "real"
-	# il mapping "tipo campo" => "classe" (che estende MetaType) dovrebbe essere determinato
-	# da un evento del modulo come metaTypesMap() : array(tipo1 => classe1, tipo2 => classe2, ...)
-	# inoltre, per i tipi base (int, real, string, date, time, datetime) dovrebbero essere fornite delle classi di default
-	# (ovviamente anch'esse definibili a runtime attraverso l'evento)
-	# infine va rivista l'intera classe MetaType
-	# anche la definizione stessa dei campi nel model.yml dovrebbe essere adattata ai cambiamenti
+	  il mapping "tipo campo" => "classe" (che estende MetaType) dovrebbe essere determinato
+	  da un evento del modulo come metaTypesMap() : array(tipo1 => classe1, tipo2 => classe2, ...)
+	  inoltre, per i tipi base (int, real, string, date, time, datetime) dovrebbero essere fornite delle classi di default
+	  (ovviamente anch'esse definibili a runtime attraverso l'evento)
+	  infine va rivista l'intera classe MetaType
+	  anche la definizione stessa dei campi nel model.yml dovrebbe essere adattata ai cambiamenti
 	* il valore di widget (fornito di default dalla classe MetaType) 
-	* potrebbe essere utilizzato come template API per la visualizzazione del form
+	  potrebbe essere utilizzato come template API per la visualizzazione del form
 
-* verificare se i cambiamenti alla classe MetaType richiedono modifiche al resto del sistema (probabile)
+* rivedere struttura file yml 
+  (sarebbe meglio avere un file info.yml prettamente di configurazione 
+   e due file separati controller.yml e model.yml per i due strati)
+  sarebbe anche eventualmente da rivedere nome e posizione del file yml per le tabelle di base
 
 * completare sviluppo delle API per i templates
 

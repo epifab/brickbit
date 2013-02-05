@@ -5,7 +5,7 @@ class Api {
 	  //////////////////////
 	 // BLOCKS
 	//////////////////////
-	public function deForm($content) {
+	public function de_form($content) {
 		$vars = \system\view\Template::current()->getVars();
 
 		$formId = 'system-edit-form-' . $vars['system']['component']['requestId'];
@@ -18,9 +18,15 @@ class Api {
 		return $form . $content . '</form>';
 	}
 	
-public function deInput(\system\model\Recordset $recordset, $path, $params) {
-		$inputName = 'node[' . $path . ']';
-		$inputId = 'edit-node-' . \str_replace('.', '-', $path);
+	public function de_textbox(\system\model\Recordset $recordset, $path, $params=null) {
+		$inputName = 'recordset[' . $path . ']';
+		$inputId = 'dataedit-input-' . \str_replace('.', '-', $path);
+		
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		
+		$password = $mt->getAttr('password', false);
+		$maxlength = $mt->getAttr('maxlength', false);
+		
 		$type = \system\Utils::getParam('type', $params, array('default' => 'text', 'options' => array('text', 'password')));
 		
 		return '<input type="' . $type . ' "'
@@ -141,7 +147,7 @@ public function deInput(\system\model\Recordset $recordset, $path, $params) {
 	public function protect($content, $params) {
 		$url = \system\Utils::getParam('url', $params, array('required' => true));
 		$args = \system\Utils::getParam('args', $params, array('default' => array()));
-		\system\logic\Module::checkAccess($url, $args) ? $content : '';
+		\system\Main::checkAccess($url, $args) ? $content : '';
 	}
 
 	

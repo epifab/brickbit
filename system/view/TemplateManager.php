@@ -13,13 +13,14 @@ class TemplateManager implements TemplateManagerInterface {
 		if (\is_null($tpl)) {
 			return null;
 		}
-		$tpl = \system\File::stripExtension($tpl) . ".php";
-		foreach ($this->templateDirs as $dir) {
-			if (\file_exists($dir . DIRECTORY_SEPARATOR . $tpl)) {
-				return $dir . DIRECTORY_SEPARATOR . $tpl;
-			}
-		}
-		throw new \system\InternalErrorException(\t('Template <em>@name</em> not found.', array('@name' => \system\File::stripExtension($tpl))));
+		\system\Main::getTemplatePath($tpl);
+//		$tpl = \system\File::stripExtension($tpl) . ".php";
+//		foreach ($this->templateDirs as $dir) {
+//			if (\file_exists($dir . DIRECTORY_SEPARATOR . $tpl)) {
+//				return $dir . DIRECTORY_SEPARATOR . $tpl;
+//			}
+//		}
+//		throw new \system\InternalErrorException(\t('Template <em>@name</em> not found.', array('@name' => \system\File::stripExtension($tpl))));
 	}
 	
 	public function getOutlineWrapperTemplate() {

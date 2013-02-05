@@ -13,7 +13,6 @@ use system\TemplateManager;
 use system\Utils;
 
 use system\AuthorizationException;
-use system\ConversionException;
 use system\InternalErrorException;
 use system\ValidationException;
 
@@ -253,7 +252,7 @@ abstract class Component {
 	}
 	
 	private function initView() {
-		$this->tplManager = Module::getTemplateManager();
+		$this->tplManager = \system\Main::getTemplateManager();
 		
 		$this->datamodel = array(
 			'system' => array(
@@ -505,7 +504,7 @@ abstract class Component {
 			
 			// checking permission
 			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData)) {
-				throw new AuthorizationException("Utente non autorizzato");
+				throw new AuthorizationException(\t('Sorry, you are not authorized to access this resource.'));
 			}
 			
 			// onProcess event

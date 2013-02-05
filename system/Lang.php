@@ -4,13 +4,13 @@ namespace system;
  * How the lang system work:
  *  
  * $vocabulary = array (
- * 	'Hai mangiato @numero confetti' => function($args) {
+ * 	'You eat @numero sweets' => function($args) {
  * 		if ($args["@numero"] == 0) {
- * 			return 'Non hai mangiato nessun confetto';
+ * 			return 'Non hai mangiato nessun dolcetto';
  * 		} else if ($args["@numero"] == 1) {
- * 			return 'Hai mangiato un confetto';
+ * 			return 'Hai mangiato un dolcetto';
  * 		} else {
- * 			return 'Hai mangiato ' . $args["@numero"] . ' confetti';
+ * 			return 'Hai mangiato ' . $args["@numero"] . ' dolcetti';
  * 		}
  * 	},
  * 	'Hello @user! How is it going?' => 'Ciao @user! Come stai?',

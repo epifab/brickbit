@@ -1,0 +1,149 @@
+class: Core
+weight: 1
+enabled: 1
+modelNs: model
+modelClass: Model
+templatesNs: templates
+templatesClass: Api
+templatesDir: templates
+componentsNs: components
+events:
+	- cron
+components:
+  role:
+    class: Role
+    pages:
+      - url: role/list
+        action: List
+      - url: role/add
+        action: Add
+      - url: role/delete
+        action: Delete
+  user:
+    class: User
+    pages:
+      - url: user/register
+        action: Register
+      - url: user/login
+        action: Login
+      - url: user/logout
+        action: Logout
+      - url: user/list
+        action: List
+      - url: user/add
+        action: Create
+      - url: user/([0-9]+)
+        action: Read
+      - url: user/([0-9]+)/edit
+        action: Update
+      - url: user/([0-9]+)/delete
+        action: Delete
+      - url: user/([0-9]+)/add-role/([0-9]+)
+        action: AddRole
+      - url: user/([0-9]+)/delete-role/([0-9]+)
+        action: DeleteRole
+#  file:
+#    class: File
+#    pages:
+#      - url: file/upload
+#        action: Handler
+#      - url: file
+#        action: Handler
+#      - url: file/thumbnail/(@strid)\.(jpe?g|gif|png)
+#        action: Thumbnail
+#      - url: file/(@strid)\.(@strid)
+#        action: Download
+  node:
+    class: Node
+    pages:
+      # content/search
+      - url: content/search
+        action: Search
+      # content/add/article
+      - url: content/add/(@strid)
+        action: Add
+      # content/123/add/article
+      - url: content/([0-9]+)/add/(@strid)
+        action: Add2Node
+      # content/123
+      - url: content/([0-9]+)
+        action: Read
+      # content/about-me
+      - url: content/(@strid)\.html
+        action: ReadByUrn
+      # content/123/edit
+      - url: content/([0-9]+)/edit
+        action: Edit
+      # content/123/delete
+      - url: content/([0-9]+)/delete
+        action: Delete
+      # content/123/move/after/234
+      - url: content/([0-9]+)/move/(before|after)/([0-9]+)
+        action: Move
+  node_file:
+    class: NodeFile
+    pages:
+      # content/123/file/image/about-me.jpg
+      - url: content/([0-9]+)/file/(@strid)/(@strid)\.(@strid)
+        action: Get
+      - url: content/file/([0-9]+)\.(@strid)
+        action: Get
+      - url: content/([0-9]+)/file/add
+        action: Add2Node
+#      - url: content/([0-9]+)/file/replace
+#        action: ReplaceNode
+#      - url: content/([0-9]+)/file/delete
+#        action: DeleteNode
+      - url: content/file/add
+        action: Add
+      - url: content/file/([0-9]+)/replace
+        action: Replace
+      - url: content/file/([0-9]+)/delete
+        action: Delete
+  node_image:
+    class: NodeImage
+    pages:
+      - url: content/image/([0-9]+)x([0-9]+)/([0-9]+)\.(jpe?g|png|gif)
+        action: GetResized
+      - url: content/image/([0-9]+)\.(jpe?g|png|gif)
+        action: Get
+#      - url: content/([0-9]+)/image/add
+#        action: AddNode
+#      - url: content/([0-9]+)/image/replace
+#        action: ReplaceNode
+#      - url: content/([0-9]+)/image/delete
+#        action: DeleteNode
+      - url: content/image/add
+        action: Add
+      - url: content/image/([0-9]+)/replace
+        action: Replace
+      - url: content/image/([0-9]+)/delete
+        action: Delete
+#  comment:
+#    class: Comment
+#    pages:
+#      # content/123/comment/add
+#      - url: content/([0-9]+)/comment/add
+#        action: Add2Node
+#      # user/3/add
+#      - url: user/([0-9]+)/add
+#        action: Add2User
+#      # comment/3/add
+#      - url: comment/([0-9]+)/add
+#        action: Add2Comment
+#      # comment/123/edit
+#      - url: comment/([0-9]+)/edit
+#        action: Update
+#      # comment/123/delete
+#      - url: comment/([0-9]+)/delete
+#        action: Delete
+#  term:
+#    class: Term
+#    pages:
+#      - url: term/search
+#        action: Search
+  node_page:
+    class: Page
+    pages:
+      - url: (@strid).html
+        action: Read
