@@ -11,6 +11,8 @@ use \system\model\SortClause;
 use \system\model\SortClauseGroup;
 
 class Page extends Node {
-	
+	public function runPageNotFound() {
+		
+	}
 }
 ?>

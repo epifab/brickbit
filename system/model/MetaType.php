@@ -49,7 +49,7 @@ abstract class MetaType {
 		return $this->builder;
 	}
 	
-	protected abstract function getEditWidgetDefault() { }
+	protected abstract function getEditWidgetDefault();
 	
 	public final function getEditWidget() {
 		return $this->attrExists('widget')

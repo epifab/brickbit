@@ -1,5 +1,5 @@
 <?php
-namespace module\core;
+namespace module\core\view;
 
 class Api {
 	  //////////////////////

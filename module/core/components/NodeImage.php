@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-class Node {
+class NodeImage {
 	public function runSearch() {
 		
 	}

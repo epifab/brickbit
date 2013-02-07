@@ -2,7 +2,7 @@
 namespace system\view;
 
 class Template {
-	public static $templates;
+	public static $templates = array();
 	private $templatePath;
 	private $vars;
 	private $api;
@@ -15,7 +15,7 @@ class Template {
 	}
 	
 	public function __construct($tplPath, $vars) {
-		$this->tplPath = $tplPath;
+		$this->templatePath = $tplPath;
 		$this->vars = $vars;
 		$this->api = Api::getInstance();
 	}
@@ -52,7 +52,7 @@ class Template {
 			$this->nextVar();
 		}
 		unset($___k);
-		@include $this->templatePath;
+		include $this->templatePath;
 		\array_pop(self::$templates);
 	}
 }

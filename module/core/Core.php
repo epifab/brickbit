@@ -3,6 +3,10 @@ namespace module\core;
 
 class Core extends \system\logic\Module {
 	
+	
+	public static function cron() {
+
+	}
 	public static function onRun(\system\logic\Component $component) {
 
 	}

@@ -27,7 +27,7 @@
 
 			<div id="main-wrapper">
 				<div id="main">
-					<?php $this->api->include($system['templates']['main']); ?>
+					<?php $this->api->load($system['templates']['main']); ?>
 					<?php $this->api->region('sidebar'); ?>
 				</div>
 			</div>
@@ -37,6 +37,6 @@
 			</div>
 
 		</div>
-		<script type="text/javascript"><?php $this->api->javascript(); ?></script>
+		<script type="text/javascript"><?php $this->api->jss(); ?></script>
 	</body>
 </html>

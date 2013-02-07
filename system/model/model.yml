@@ -1,0 +1,338 @@
+tables:
+  module:
+    fields:
+      id:
+        type: integer
+      name:
+        type: string
+        size: 32
+      class:
+        type: string
+        size: 32
+      weight:
+        type: integer
+      enabled:
+        type: boolean
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+      name_key:
+        fields: [name]
+    relations:
+      components:
+        table: component
+        type: 1-N
+        clauses: [id: module_id]
+        onDelete: CASCADE
+  component:
+    fields:
+      id:
+        type: integer
+      module_id:
+        type: integer
+      name:
+        type: string
+        size: 32
+    keys:
+      primary:
+        fields: [id]
+      name_key:
+        fields: [module_id, name]
+    relations:
+      module:
+        table: module
+        type: N-1
+        clauses: [module_id: id]
+      actions:
+        table: action
+        type: 1-N
+        clauses: [id: component_id]
+        onDelete: CASCADE
+  action:
+    fields:
+      id:
+        type: integer
+      name:
+        type: string
+        size: 32
+      component_id:
+        type: integer
+      name:
+        type: string
+        size: 32
+      url:
+        type: string
+        size: 128
+    keys:
+      primary:
+        fields: [id]
+      name_key:
+        fields: [component_id, name]
+    relations:
+      component:
+        table: component
+        type: N-1
+        clauses: [component_id: id]
+  user:
+    fields:
+      id:
+        type: integer
+      email:
+        type: string
+        size: 128
+      password:
+        type: string
+        size: 32
+        edit2Prog: |
+          function($x) {
+            return \md5($x);
+          }
+      full_name:
+        type: string
+        size: 128
+      last_login:
+        type: datetime
+      ins_date_time:
+        type: datetime
+      last_upd_date_time:
+        type: datetime
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+      email_key:
+        fields: [email]
+    relations:
+      roles:
+        table: user_role
+        type: 1-N
+        clauses: [id: user_id]
+        onDelete: CASCADE
+  role:
+    fields:
+      id:
+        type: integer
+      description:
+        type: string
+        size: 128
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      users:
+        table: user_role
+        type: 1-N
+        clauses: [id: user_id]
+        onDelete: CASCADE
+  #    components:
+  #      table: role_component
+  #      type: 1-N
+  #      clauses: [id: role_id]
+  #      onDelete: CASCADE
+      actions:
+        table: role_action
+        type: 1-N
+        clauses: [id: role_id]
+        onDelete: CASCADE
+  user_role:
+    fields:
+      user_id:
+        type: integer
+      role_id:
+        type: integer
+    keys:
+      primary:
+        fields: [user_id, role_id]
+    relations:
+      user:
+        table: user
+        type: N-1
+        clauses: [user_id: id]
+      role:
+        table: role
+        type: N-1
+        clauses: [role_id: id]
+  #role_component:
+  #  fields:
+  #    role_id:
+  #      type: integer
+  #    component_id:
+  #      type: integer
+  #  keys:
+  #    primary:
+  #      fields: [role_id, component_id]
+  #  relations:
+  #    component:
+  #      table: component
+  #      type: N-1
+  #      clauses: [component_id: id]
+  #    role:
+  #      table: role
+  #      type: N-1
+  #      clauses: [role_id: id]
+  role_action:
+    fields:
+      role_id:
+        type: integer
+      action_id:
+        type: integer
+    keys:
+      primary:
+        fields: [role_id, action_id]
+    relations:
+      action:
+        table: action
+        type: N-1
+        clauses: [action_id: id]
+      role:
+        table: role
+        type: N-1
+        clauses: [role_id: id]
+  record_mode:
+    fields:
+      id:
+        type: integer
+      owner_id:
+        type: integer
+      last_modifier_id:
+        type: integer
+      ins_date_time:
+        type: datetime
+      last_upd_date_time:
+        type: datetime
+      read_mode:
+        type: integer
+        options:
+  #        0: Nobody
+  #        1: Superuser
+          2: Owner only
+          3: Admins
+          4: Registered
+          5: Anyone
+      edit_mode:
+        type: integer
+        options:
+  #        0: Nobody
+          1: Superuser
+          2: Owner
+          3: Admins
+          4: Registered
+          5: Anyone
+      delete_mode:
+        type: integer
+        options:
+  #        0: Nobody
+          1: Superuser
+          2: Owner
+          3: Admins
+          4: Registered
+          5: Anyone
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      logs:
+        table: record_mode_log
+        type: 1-N
+        clauses: [id: record_mode_id]
+      owner:
+        table: user
+        type: N-1
+        clauses: [owner_id: id]
+      users:
+        table: record_mode_user
+        type: 1-N
+        clauses: [id: record_mode_id]
+      roles:
+        table: record_mode_role
+        type: 1-N
+        clauses: [id: record_mode_id]
+  record_mode_log:
+    fields:
+      id:
+        type: integer
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+      upd_date_time:
+        type: datetime
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: [record_mode_id: id]
+  record_mode_role:
+    fields:
+      record_mode_id:
+        type: integer
+      role_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, role_id]
+    relations:
+      role:
+        table: role
+        type: N-1
+        clauses: [role_id: id]
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: [record_mode_id: id]
+  record_mode_user:
+    fields:
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, user_id]
+    relations:
+      user:
+        table: user
+        type: N-1
+        clauses: [user_id: id]
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: [record_mode_id: id]
+  log:
+    fields:
+      id:
+        type: integer
+      module:
+        type: string
+        size: 32
+      component:
+        type: string
+        size: 32
+      action:
+        type: string
+        size: 32
+      url:
+        type: string
+        size: 64
+      date_time_request:
+        type: datetime
+      user_id:
+        type: integer
+      ip_address:
+        type: string
+        size: 16
+      body:
+        type: string
+      output:
+        type: string
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1

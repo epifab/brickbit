@@ -7,7 +7,14 @@ use system\model\FilterClause;
 use system\model\FilterClauseGroup;
 use system\model\SortClause;
 
-class Callbacks {
+class Model {
+	public static function metaTypesMap() {
+		echo "x";
+		return array(
+			'html' => '\module\core\model\MetaHTML',
+			'plaintext' => '\system\model\MetaString'
+		);
+	}
 	public static function ancestors(Recordset $child, RecordsetBuilder $ancestors) {
 		$ancestors->setFilter(new \system\model\FilterClauseGroup(
 			new FilterClause($ancestors->rdel, '>', $child->rdel),

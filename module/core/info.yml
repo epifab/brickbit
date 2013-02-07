@@ -3,12 +3,12 @@ weight: 1
 enabled: 1
 modelNs: model
 modelClass: Model
-templatesNs: templates
-templatesClass: Api
-templatesDir: templates
+viewNs: view
+viewClass: Api
+templatesPath: view/templates
 componentsNs: components
 events:
-	- cron
+  - cron
 components:
   role:
     class: Role

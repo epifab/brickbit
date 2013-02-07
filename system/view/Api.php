@@ -19,7 +19,11 @@ class Api {
 	}
 	
 	protected function getApi($method) {
-		foreach ($this->apiClasses as $c) {
+		static $viewClasses = null;
+		if (\is_null($viewClasses)) {
+			$viewClasses = \system\Main::getViewClasses();
+		}
+		foreach ($viewClasses as $c) {
 			if (\method_exists($method, $c)) {
 				return array($c, $method);
 			}
@@ -32,7 +36,7 @@ class Api {
 		if ($api) {
 			\call_user_func($api, $args);
 		} else {
-			throw new \system\InternalErrorException(\t('Template API <em>@name</em> not found.', array('@name' => $method)));
+			throw new \system\InternalErrorException(\system\Lang::translate('Template API <em>@name</em> not found.', array('@name' => $method)));
 		}
 	}
 	
@@ -53,12 +57,34 @@ class Api {
 		return \call_user_func(array($this, $callback), $content, $args);
 	}
 	
-	public function modulePath($module, $url) {
+	public function path($url) {
+		return \config\settings()->BASE_DIR_ABS . $url;
+	}
+	
+	public function module_path($module, $url) {
 		return \system\logic\Module::getAbsPath($module) . $url;
 	}
 	
-	public function themePath($url) {
-		return \system\Theme::getThemePath() . $url;
+	public function theme_path($url) {
+		return \system\Theme::getAbsThemePath() . $url;
+	}
+	
+	public function load($path, $args=array()) {
+		$tpl = new \system\view\Template($path, $args + \system\view\Template::current()->getVars());
+		$tpl->render();
+	}
+	
+	public function region($region) {
+		$vars = \system\view\Template::current()->getVars();
+
+		if (\array_key_exists($region, $vars['system']['templates']['regions'])) {
+			\asort($vars['system']['templates']['regions'][$region]);
+			foreach ($vars['system']['templates']['regions'][$region] as $templates) {
+				foreach ($templates as $tpl) {
+					$this->load($tpl);
+				}
+			}
+		}
 	}
 	
 	public function t($sentence, $args=null) {

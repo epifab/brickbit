@@ -93,7 +93,7 @@ class Utils {
 		}
 	}
 	
-	public static function getParam($needle, $haystack, $options) {
+	public static function getParam($needle, $haystack, $options=array()) {
 		if (!\array_key_exists($needle, $haystack)) {
 			if (\array_key_exists('required', $options) && (bool)$options['required']) {
 				throw new InternalErrorException(Lang::translate('Required arg @name.', array('@name' => $needle)));

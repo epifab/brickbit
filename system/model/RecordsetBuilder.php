@@ -173,7 +173,7 @@ class RecordsetBuilder {
 			$map['datetime'] = '\\system\\model\\MetaDateTime';
 			$map['virtual'] = '\\system\\model\\MetaVirtual';
 			
-			$conf = \system\Main::raiseModel('metaTypesMap');
+			$conf = \system\Main::raiseModelEvent('metaTypesMap');
 
 			foreach ($conf as $m) {
 				if (\is_array($m)) {
@@ -185,8 +185,8 @@ class RecordsetBuilder {
 			if (\config\settings()->CORE_CACHE) {
 				\system\Utils::set('system-mtmap', $map);
 			}
-			return $map;
 		}
+		return $map;
 	}
 	
 	public function getTableInfo() {
@@ -229,20 +229,45 @@ class RecordsetBuilder {
 			: null;
 	}
 	
+	private function loadVirtual($name) {
+		if (\array_key_exists($name, $this->tableInfo["virtuals"])) {
+			$v = new \system\model\MetaVirtual(
+				$name, 
+				'virtual',
+				$this,
+				$this->tableInfo['fields'][$name]
+			);
+
+			$this->metaTypeList[$name] = $metaType;
+			return $metaType;
+		}
+	}
+	
 	private function loadMetaType($name) {
 		if ($name == "*") {
 			foreach ($this->tableInfo["fields"] as $name => $info) {
+				$this->loadMetaType($name);
+			}
+			foreach ($this->tableInfo["virtuals"] as $name => $info) {
 				$this->loadMetaType($name);
 			}
 			return $this->getMetaTypeList();
 		}
 		
 		else if (\array_key_exists($name, $this->tableInfo["fields"])) {
-			$mtmap = RecordsetBuilder::getMetaTypesMap();
+			$mtmap = self::getMetaTypesMap();
 			
-			$metaTypeClass = \system\Utils::getParam($this->tableInfo['fields'][$name]['type'], $mtmap, array('required' => true));
-			
-			$metaType = new $metaTypeClass($name, $this->tableInfo['fields'][$name]['type'], $this, $this->tableInfo['fields'][$name]);
+			$type = $this->tableInfo['fields'][$name]['type'];
+			if (!\array_key_exists($type, $mtmap)) {
+				throw new \system\InternalErrorException(\system\Lang::translate('Unknown metatype <em>@name</em>', array('@name' => $type)));
+			}
+			$metaTypeClass = $mtmap[$type];
+			$metaType = new $metaTypeClass(
+				$name, 
+				$this->tableInfo['fields'][$name]['type'],
+				$this,
+				$this->tableInfo['fields'][$name]
+			);
 
 			$this->metaTypeList[$name] = $metaType;
 			return $metaType;
@@ -459,9 +484,9 @@ class RecordsetBuilder {
 			$rs =  new $func($this, $data);
 		}
 		if (!\is_null($data)) {
-			\system\Main::raiseModel("onRead", $rs);		
+			\system\Main::raiseModelEvent("onRead", $rs);		
 		} else {
-			\system\Main::raiseModel("onInitRs", $rs);
+			\system\Main::raiseModelEvent("onInitRs", $rs);
 		}
 		return $rs;
 	}

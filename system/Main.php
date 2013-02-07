@@ -1,7 +1,14 @@
 <?php
 namespace system;
 
+use system\logic\Component;
+use system\logic\Module;
+
 class Main {
+	public static function setMessage($message, $type="error") {
+		echo "<p>$message</p>";
+	}
+	
 	/**
 	 * Generates the module configuration array.
 	 * Parses each info.yml looking for active modules
@@ -21,12 +28,13 @@ class Main {
 		
 		while (($moduleName = \readdir($d))) {
 			
-			if (!\is_dir($moduleName)) {
+			if (!\is_dir(Module::getPath($moduleName))) {
 				continue;
 			}
 			
-			$moduleDir = logic\Module::getPath($moduleName);
-			$moduleNs = logic\Module::getNamespace($moduleName);
+			$moduleDir = Module::getPath($moduleName);
+			$moduleNs = Module::getNamespace($moduleName);
+			
 			
 			if (\file_exists($moduleDir . "info.yml")) {
 
@@ -53,7 +61,7 @@ class Main {
 					$weight = (int)\system\Utils::getParam('weight', $moduleInfo, array('default' => 0));
 					
 					// model class
-					$modelNs = \system\logic\Module::getNamespace($moduleName, \system\Utils::getParam('modelNs', $moduleInfo, array('default' => null)));
+					$modelNs = Module::getNamespace($moduleName, \system\Utils::getParam('modelNs', $moduleInfo, array('default' => null)));
 					$modelClass = \system\Utils::getParam('modelClass', $moduleInfo, array(
 						 'default' => null,
 						 'prefix' => $modelNs
@@ -62,7 +70,7 @@ class Main {
 						throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $modelClass)));
 					}
 					// templates class (API)
-					$viewNs = \system\logic\Module::getNamespace($moduleName, \system\Utils::getParam('viewNs', $moduleInfo, array('default' => null)));
+					$viewNs = Module::getNamespace($moduleName, \system\Utils::getParam('viewNs', $moduleInfo, array('default' => null)));
 					$viewClass = \system\Utils::getParam('viewClass', $moduleInfo, array(
 						 'default' => null,
 						 'prefix' => $viewNs
@@ -71,13 +79,19 @@ class Main {
 						throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $viewClass)));
 					}
 					
-					$templatesPath = \system\Utils::getParam('templatesPath', $moduleInfo, array('default' => null));
+					$templatesPath = \system\Utils::getParam('templatesPath', $moduleInfo, array(
+						'default' => null,
+						'prefix' => $moduleDir
+					));
 					if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
 						throw new \system\InternalErrorException(\system\Lang::translate('Directory <em>@path</em> not found', array('@path' => $templatesPath)));
 					}
 					
 					// components namespace
-					$componentsNs = \system\logic\Module::getNamespace($moduleName, \system\Utils::getParam('controllerNs', $moduleInfo, array('default' => null)));
+					$componentsNs = Module::getNamespace(
+						$moduleName,
+						\system\Utils::getParam('componentsNs', $moduleInfo)
+					);
 					
 					$events = \system\Utils::getParam('events', $moduleInfo, array('default' => array()));
 					foreach ($events as $eventName) {
@@ -88,19 +102,24 @@ class Main {
 					
 					$components = \system\Utils::getParam('components', $moduleInfo, array('default' => array()));
 					foreach ($components as $componentName => $component) {
-						$componentClass = \system\Utils::getParam('class', $component, array('required' => true, 'prefix' => $componentNs));
+						$componentClass = \system\Utils::getParam('class', $component, array(
+							 'required' => true, 
+							 'prefix' => $componentsNs
+						));
 						if (!\class_exists($componentClass)) {
-							throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $componentClass)));
+							throw new InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $componentClass)));
+							unset($components[$componentName]);
+							continue;
 						}
 						$components[$componentName] = array(
 							'name' => $componentName,
 							'class' => $componentClass,
 							'pages' => \system\Utils::getParam('pages', $component, array('default' => array()))
 						);
-						
-						foreach ($components[$componentName]['pages'] as $i => $page) {
+						foreach ($component['pages'] as $i => $page) {
 							$components[$componentName]['pages'][$i] = array(
 								'url' => \system\Utils::getParam('url', $page, array('required' => true)),
+								'name' => $componentName,
 								'action' => \system\Utils::getParam('action', $page, array('required' => true))
 							);
 
@@ -135,8 +154,7 @@ class Main {
 					);
 					
 				} catch (\Exception $ex) {
-					print_r($ex);
-					continue;
+					throw $ex;
 				}
 			}
 		}
@@ -149,7 +167,7 @@ class Main {
 			foreach ($modules as $module) {
 				$MODULES[$module['name']] = $module;
 				foreach ($module['components'] as $component) {
-					foreach ($component['pages'] as $page) {
+					foreach ($component['pages'] as $i => $page) {
 						$URLS[$page['url']] = array(
 							'module' => array(
 								'name' => $module['name'],
@@ -176,15 +194,49 @@ class Main {
 				}
 			}
 		}
+		
+		// sorting the array by module weight descending
+		//  this is because the view classes are designed for templates API,
+		//  it makes more sense to search for the right api in hevier modules first
+		\asort($VIEW_CLASSES);
+		
 		return array(
 			'modules' => $MODULES,
 			'urls' => $URLS,
 			'events' => $EVENTS,
-			'tables' => $this->loadModelCfg($MODULES),
+			'tables' => self::loadModelCfg($MODULES),
 			'modelClasses' => $MODEL_CLASSES,
-			'templates' => $this->loadViewCfg($MODULES),
+			'templates' => self::loadViewCfg($MODULES),
 			'viewClasses' => $VIEW_CLASSES
 		);
+	}
+	
+	private static function setTables($tables, &$TABLES) {
+		foreach ($tables as $tableName => $table) {
+			if (!\array_key_exists($tableName, $TABLES)) {
+				$TABLES[$tableName] = array(
+					'fields' => array(),
+					'keys' => array(),
+					'relations' => array(),
+				);
+			}
+			$fields = \system\Utils::getParam('fields', $table, array('default' => array()));
+			foreach ($fields as $fieldName => $field) {
+				$TABLES[$tableName]['fields'][$fieldName] = $field;
+			}
+			$keys = \system\Utils::getParam('keys', $table, array('default' => array()));
+			foreach ($keys as $keyName => $key) {
+				$TABLES[$tableName]['keys'][$keyName] = $key;
+			}
+			$relations = \system\Utils::getParam('relations', $table, array('default' => array()));
+			foreach ($relations as $relationName => $relation) {
+				$TABLES[$tableName]['relations'][$relationName] = $relation;
+			}
+			$virtuals = \system\Utils::getParam('virtuals', $table, array('default' => array()));
+			foreach ($virtuals as $virtualName => $virtual) {
+				$TABLES[$tableName]['virtuals'][$virtualName] = $virtual;
+			}
+		}
 	}
 	
 	/**
@@ -197,44 +249,33 @@ class Main {
 	 */
 	private static function loadModelCfg($modules) {
 		$TABLES = array();
+		$baseModel = 'system/model/model.yml';
+		try {
+			$model = \system\yaml\Yaml::parse($baseModel);
+			self::setTables(
+				\system\Utils::getParam('tables', $model, array('required' => true)),
+				$TABLES
+			);
+		} catch (\Exception $ex) {
+			throw $ex;
+		}
+		
 		
 		foreach ($modules as $module) {
 			if (\file_exists($module['path'] . 'model.yml')) {
 				try {
 					$model = \system\yaml\Yaml::parse($module['path'] . "model.yml");
-					
-					$tables = \system\Utils::getParam('tables', $model, array('required' => true));
-					
-					foreach ($tables as $tableName => $table) {
-						if (!\array_key_exists($tableName, $TABLES)) {
-							$TABLES[$tableName] = array(
-								'fields' => array(),
-								'keys' => array(),
-								'relations' => array(),
-							);
-						}
-						$fields = \system\Utils::getParam('fields', $table, array('default' => array()));
-						foreach ($fields as $fieldName => $field) {
-							$TABLES[$tableName]['fields'][$fieldName] = $field;
-						}
-						$keys = \system\Utils::getParam('keys', $table, array('default' => array()));
-						foreach ($keys as $keyName => $key) {
-							$TABLES[$tableName]['keys'][$keyName] = $key;
-						}
-						$relations = \system\Utils::getParam('relations', $table, array('default' => array()));
-						foreach ($relations as $relationName => $relation) {
-							$TABLES[$tableName]['keys'][$relationName] = $relation;
-						}
-						$virtuals = \system\Utils::getParam('virtuals', $table, array('default' => array()));
-						foreach ($virtuals as $virtualName => $virtual) {
-							$TABLES[$tableName]['keys'][$virtualName] = $virtual;
-						}
-					}
+					self::setTables(
+						\system\Utils::getParam('tables', $model, array('required' => true)),
+						$TABLES
+					);
 				} catch (\Exception $ex) {
-					
+					throw $ex;
 				}
 			}
 		}
+		
+		return $TABLES;
 	}
 	
 	/**
@@ -246,12 +287,12 @@ class Main {
 		// so modules with higher priority can override templates
 		// moreover, it will be easier for the template manager to check a template really exists and to look for a template 
 		foreach ($modules as $module) {
-			if ($module['templatesDir']) {
-				$d = \opendir($module['templatesDir']);
-				while ((\readdir($d) = $fileName)) {
-					if (\substr($fileName, -8) == '.php.tpl') {
+			if ($module['templatesPath']) {
+				$d = \opendir($module['templatesPath']);
+				while (($fileName = \readdir($d))) {
+					if (\substr($fileName, -8) == '.tpl.php') {
 						$templateName = \substr($fileName, 0, -8);
-						$TEMPLATES[$templateName] = $d . $fileName;
+						$TEMPLATES[$templateName] = $module['templatesPath'] . DIRECTORY_SEPARATOR . $fileName;
 					}
 				}
 				\closedir($d);
@@ -262,10 +303,10 @@ class Main {
 		
 		if (!\is_null($themeTplPath) && \is_dir($themeTplPath)) {
 			$d = \opendir($themeTplPath);
-			while ((\readdir($d) = $fileName)) {
-				if (\substr($fileName, -8) == '.php.tpl') {
+			while (($fileName = \readdir($d))) {
+				if (\substr($fileName, -8) == '.tpl.php') {
 					$templateName = \substr($fileName, 0, -8);
-					$TEMPLATES[$templateName] = $d . $fileName;
+					$TEMPLATES[$templateName] = $themeTplPath . DIRECTORY_SEPARATOR . $fileName;
 				}
 			}
 			\closedir($d);
@@ -354,10 +395,14 @@ class Main {
 	}
 	
 	public static function getTemplate($templateName) {
+		if (\is_null($templateName)) {
+			return null;
+		}
 		if (self::templateExists($templateName)) {
 			$c = self::configuration();
 			return $c['templates'][$templateName];
 		} else {
+			$c = self::configuration();
 			throw new \system\InternalErrorException(\t('Template <em>@name</em> not found.', array('@name' => $templateName)));
 		}
 	}
@@ -408,10 +453,10 @@ class Main {
 		if (!\array_key_exists($url, $urls)) {
 			$urls[$url] = null;
 			$configuration = self::configuration();
-			foreach ($configuration['urls'] as $url => $info) {
+			foreach ($configuration['urls'] as $regexp => $info) {
 				if (\preg_match('@^' . $regexp . '$@', $url, $m)) {
 					\array_shift($m);
-					$urls[$url] = $info;array(
+					$urls[$url] = array(
 						'module' => $info['module']['name'],
 						'name' => $info['component']['name'],
 						'class' => $info['component']['class'],
@@ -431,7 +476,7 @@ class Main {
 	public static function checkAccess($url, $request=null) {
 		if (self::urlExists($url)) {
 			$x = self::getComponent($url);
-			return \system\logic\Component::access(
+			return Component::access(
 				$x['class'],
 				$x['action'],
 				$component['urlArgs'],
@@ -447,21 +492,26 @@ class Main {
 			$request = $_REQUEST;
 		}
 		
-		$component = self::getAction($url);
+		$component = self::getComponent($url);
+		
+		if (!\is_null($component)) {
+			$obj = new $component['class'](
+				$component['name'],
+				$component['module'],
+				$component['action'],
+				$url,
+				$component['urlArgs'],
+				$request
+			);
 
-		$obj = new $component['class'](
-			$component['name'],
-			$component['module'],
-			$component['action'],
-			$url,
-			$component['urlArgs'],
-			$request
-		);
-		
-		// Raise event onRun
-		self::raiseEvent('onRun', $obj);
-		
-		$obj->process();
+			// Raise event onRun
+			self::raiseEvent('onRun', $obj);
+
+			$obj->process();
+		} else {
+			\header("HTTP/1.0 404 Not Found");
+			die('404');
+		}
 	}
 
 	public static function raiseEvent($eventName) {
@@ -480,14 +530,24 @@ class Main {
 	public static function raiseModelEvent($eventName) {
 		$c = self::configuration();
 		$result = array();
-		foreach ($c['modelClasses'] as $m) {
-			if (\method_exists($m, $eventName)) {
+		foreach ($c['modelClasses'] as $class) {
+			if (\method_exists($class, $eventName)) {
 				$result[] = \func_num_args() == 1
 					? \call_user_func(array($class, $eventName))
 					: \call_user_func_array(array($class, $eventName), \array_shift(\func_get_args()));
 			}
 		}
 		return $result;
+	}
+	
+	public static function getModelClasses() {
+		$c = self::configuration();
+		return $c['modelClasses'];
+	}
+	
+	public static function getViewClasses() {
+		$c = self::configuration();
+		return $c['viewClasses'];
 	}
 
 	public static function getTemplateManager() {

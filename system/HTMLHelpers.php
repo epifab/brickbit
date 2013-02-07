@@ -77,7 +77,7 @@ class HTMLHelpers {
 	 * @param message Messaggio di errore
 	 * @param out Print writer
 	 */
-	public static function makeErrorPage(TemplateManager $templateManager, $datamodel, $mainException, $executionTime=0) {
+	public static function makeErrorPage(\system\view\TemplateManager $templateManager, $datamodel, $mainException, $executionTime=0) {
 		$msg = "";
 		
 		$exception = $mainException;

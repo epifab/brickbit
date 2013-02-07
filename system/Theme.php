@@ -19,8 +19,12 @@ class Theme {
 		}
 	}
 	
-	public static function getThemePath($subfolder=null) {
+	public static function getAbsThemePath($subfolder=null) {
 		return \config\settings()->BASE_DIR . "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
+	}
+	
+	public static function getThemePath($subfolder=null) {
+		return "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
 	}
 }
 ?>

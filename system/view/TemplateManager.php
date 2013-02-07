@@ -9,26 +9,12 @@ class TemplateManager implements TemplateManagerInterface {
 	
 	private $templateDirs = array();
 	
-	private function getTemplatePath($tpl) {
-		if (\is_null($tpl)) {
-			return null;
-		}
-		\system\Main::getTemplatePath($tpl);
-//		$tpl = \system\File::stripExtension($tpl) . ".php";
-//		foreach ($this->templateDirs as $dir) {
-//			if (\file_exists($dir . DIRECTORY_SEPARATOR . $tpl)) {
-//				return $dir . DIRECTORY_SEPARATOR . $tpl;
-//			}
-//		}
-//		throw new \system\InternalErrorException(\t('Template <em>@name</em> not found.', array('@name' => \system\File::stripExtension($tpl))));
-	}
-	
 	public function getOutlineWrapperTemplate() {
 		return $this->outlineWrapperTemplate;
 	}
 	
 	public function setOutlineWrapperTemplate($tpl) {
-		$this->outlineWrapperTemplate = $this->getTemplatePath($tpl);
+		$this->outlineWrapperTemplate = \system\Main::getTemplate($tpl);
 	}
 	
 	public function getOutlineTemplate() {
@@ -36,7 +22,7 @@ class TemplateManager implements TemplateManagerInterface {
 	}
 	
 	public function setOutlineTemplate($tpl) {
-		$this->outlineTemplate = $this->getTemplatePath($tpl);
+		$this->outlineTemplate = \system\Main::getTemplate($tpl);
 	}
 	
 	public function getMainTemplate() {
@@ -44,7 +30,7 @@ class TemplateManager implements TemplateManagerInterface {
 	}
 	
 	public function setMainTemplate($tpl) {
-		$this->mainTemplate = $this->getTemplatePath($tpl);
+		$this->mainTemplate = \system\Main::getTemplate($tpl);
 	}
 	
 	public function addTemplate($tpl, $region, $weight=0) {
@@ -54,7 +40,7 @@ class TemplateManager implements TemplateManagerInterface {
 		if (!\array_key_exists($weight, $this->regions[$region])) {
 			$this->regions[$region][$weight] = array();
 		}
-		$this->regions[$region][$weight][] = $this->getTemplatePath($tpl);
+		$this->regions[$region][$weight][] = \system\Main::getTemplate($tpl);
 	}
 
 	public function addTemplateDir($dir) {
