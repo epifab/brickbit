@@ -11,11 +11,11 @@
 		<script type="text/javascript" src="<{$private.siteAddr}>js/nivoslider/jquery.nivoslider.js"></script>
 		<script type="text/javascript" src="<{$private.siteAddr}>js/jquery.form.js"></script>
 		<script type="text/javascript" src="<{$private.siteAddr}>js/tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
-		<script type="text/javascript" src="<{$private.siteAddr}>js/jquery.xmca.js"></script>
+		<script type="text/javascript" src="<{$private.siteAddr}>js/jquery.ciderbit.js"></script>
 		<script type="text/javascript" src="<{$private.siteAddr}>js/plupload/js/plupload.full.js"></script>
 		<script type="text/javascript" src="<{$private.siteAddr}>js/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js"></script>
 		
-		<link href="<{theme}>css/xmca.css" type="text/css" rel="stylesheet"/>
+		<link href="<{theme}>css/ciderbit.css" type="text/css" rel="stylesheet"/>
 		<link href="<{theme}>jquery_ui/jquery-ui-1.9.2.custom.css" type="text/css" rel="stylesheet"/>
 <!--		<link href="<{theme}>css/jquery.autocomplete.css" type="text/css" rel="stylesheet"/>-->
 		<link href="<{theme}>js/nivoslider/css/jquery.nivoslider.css" type="text/css" rel="stylesheet"/>
@@ -41,7 +41,7 @@
 		<div id="main">
 		
 			<div id="header">
-				<{xmca_nested_component component="Header" prefix="header" args=["url" => $url]}>
+				<{ciderbit_nested_component component="Header" prefix="header" args=["url" => $url]}>
 			</div>
 			
 			<div id="container">
@@ -49,10 +49,10 @@
 			</div>
 
 			<div id="footer">
-				<{xmca_nested_component component="Footer" prefix="footer" args=[]}>
+				<{ciderbit_nested_component component="Footer" prefix="footer" args=[]}>
 			</div>
 		</div>
 
-		<script type="text/javascript"><{xmca_get_javascript}></script>
+		<script type="text/javascript"><{ciderbit_get_javascript}></script>
 	</body>
 </html>

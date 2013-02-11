@@ -8,7 +8,7 @@
 		<script type="text/javascript" src="<{path url="js/jquery-1.8.2.js"}>"></script>
 		<script type="text/javascript" src="<{path url="js/jquery_ui/jquery-ui-1.9.0.custom.js"}>"></script>
 		<script type="text/javascript" src="<{path url="js/jquery.form.js"}>"></script>
-		<script type="text/javascript" src="<{path url="js/jquery.xmca.js"}>"></script>
+		<script type="text/javascript" src="<{path url="js/jquery.ciderbit.js"}>"></script>
 		<{foreach from=$page.js item="js"}>
 		<script type="text/javascript" src="<{$js}>"></script>
 		<{/foreach}>

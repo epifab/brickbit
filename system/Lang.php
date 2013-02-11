@@ -35,8 +35,8 @@ class Lang {
 		}
 	}
 	
-	public static function langLink($langId) {
-		return $langId . substr(\config\settings()->DOMAIN, \strpos($_SERVER["HTTP_HOST"], ".")) . $_SERVER["REQUEST_URI"];
+	public static function langPath($langId) {
+		return 'http://' . $langId . \substr(\config\settings()->DOMAIN, \strpos($_SERVER["HTTP_HOST"], ".")) . $_SERVER["REQUEST_URI"];
 	}
 	
 	public static function setLang($langId) {

@@ -74,7 +74,7 @@
 					<div>
 						<h3>Benvenuto su <{$private.siteName}>!</h3>
 						<p>La password per accedere al portale &egrave; stata inviata al tuo indirizzo email.</p>
-						<p class="info">Se non hai ricevuto la password <{xmca_control component="SendUserPassword" title="clicca qui" style="link"}> per riceverla nuovamente o in alternativa contatta il nostro staff tramite la pagina <a href="Contatti.html">contatti</a>.</p>
+						<p class="info">Se non hai ricevuto la password <{ciderbit_control component="SendUserPassword" title="clicca qui" style="link"}> per riceverla nuovamente o in alternativa contatta il nostro staff tramite la pagina <a href="Contatti.html">contatti</a>.</p>
 					</div>
 					<h2>Effettua il login per accedere</h2>
 					<div class="signup">
@@ -96,7 +96,7 @@
 									<{if isset($loginError)}><p class="alert"><{$loginError}></p><{/if}>
 									<input type="hidden" name="login" value="1"/>
 									<input type="hidden" name="id" value="<{$content->id}>"/>
-									<input type="submit" class="xmca_control xl" value="Accedi"/>
+									<input type="submit" class="ciderbit_control xl" value="Accedi"/>
 								</div>
 							</div>
 							<div style="clear: both"></div>
@@ -132,7 +132,7 @@
 								<div class="cell l right">
 									<input type="hidden" name="signup" value="1"/>
 									<input type="hidden" name="id" value="<{$content->id}>"/>
-									<input type="submit" class="xmca_control xl" value="Completa iscrizione"/>
+									<input type="submit" class="ciderbit_control xl" value="Completa iscrizione"/>
 								</div>
 							</div>
 							<div style="clear: both"></div>
@@ -143,10 +143,10 @@
 
 					<div>
 						<p>La password per accedere al portale verr&agrave; inviata al tuo indirizzo email.</p>
-						<p class="info">Se non hai ricevuto la password o l'hai dimenticata, <{xmca_control component="SendUserPassword" title="clicca qui" okButtonLabel="Invia nuova password" style="link"}> per riceverla nuovamente o in alternativa contatta il nostro staff tramite la pagina <a href="Contatti.html">contatti</a></p>
+						<p class="info">Se non hai ricevuto la password o l'hai dimenticata, <{ciderbit_control component="SendUserPassword" title="clicca qui" okButtonLabel="Invia nuova password" style="link"}> per riceverla nuovamente o in alternativa contatta il nostro staff tramite la pagina <a href="Contatti.html">contatti</a></p>
 					</div>
 
-					<h3>Sei già iscritto? <{xmca_control component="Login" style="link" title="Effettua il login" okButtonLabel="Login" width=300 showResponse=false}></h3>
+					<h3>Sei già iscritto? <{ciderbit_control component="Login" style="link" title="Effettua il login" okButtonLabel="Login" width=300 showResponse=false}></h3>
 				<{/if}>
 			<{else}>
 				<div class="download_link">
@@ -172,4 +172,4 @@
 <div class="section content">
 	<{content_display content=$content level=1}>
 </div>
-<{/xmca_read_content}>
+<{/ciderbit_read_content}>

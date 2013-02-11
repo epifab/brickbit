@@ -11,16 +11,18 @@ class Template {
 	 * @return Template
 	 */
 	public static function current() {
-		return current(self::$templates);
+		return \end(self::$templates);
 	}
 	
 	public function __construct($tplPath, $vars) {
 		$this->templatePath = $tplPath;
+//		print_r(array_keys($vars));
 		$this->vars = $vars;
 		$this->api = Api::getInstance();
 	}
 
 	public function getVars() {
+		\reset($this->vars);
 		return $this->vars;
 	}
 	

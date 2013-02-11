@@ -1,158 +1,275 @@
 <?php
+
 namespace module\core\view;
 
 class Api {
-	  //////////////////////
-	 // BLOCKS
+
+	public static function generate_input_id($path) {
+		static $ids = array();
+		if (\array_key_exists($path, $ids)) {
+			$ids[$path]++;
+			return 'de-input-' . \str_replace('.', '-', $path) . '-' . $ids[$path];
+		} else {
+			$ids[$path] = 0;
+			return 'de-input-' . \str_replace('.', '-', $path);
+		}
+	}
+
+	public static function input_name($path) {
+		return 'recordset[' . $path . ']';
+	}
+
 	//////////////////////
-	public function de_form($content) {
+	// BLOCKS
+	//////////////////////
+	public static function de_form($content) {
 		$vars = \system\view\Template::current()->getVars();
 
 		$formId = 'system-edit-form-' . $vars['system']['component']['requestId'];
 
 		$form = "\n"
-		. '<form id="' . $formId . '" name="' . $formId . '" method="post" enctype="multipart/form-data" action="' . $vars['system']['component']['url'] .'">'
-		// forzo le risposte ad avere gli stessi ID per il form e per i contenuti
-		. '<input type="hidden" name="system[requestId]" value="' . $vars['system']['component']['requestId'] . '"/>';
+				  . '<form id="' . $formId . '" name="' . $formId . '" method="post" enctype="multipart/form-data" action="' . $vars['system']['component']['url'] . '">'
+				  // forzo le risposte ad avere gli stessi ID per il form e per i contenuti
+				  . '<input type="hidden" name="system[requestId]" value="' . $vars['system']['component']['requestId'] . '"/>';
 
 		return $form . $content . '</form>';
 	}
 	
-	public function de_textbox(\system\model\Recordset $recordset, $path, $params=null) {
-		$inputName = 'recordset[' . $path . ']';
-		$inputId = 'dataedit-input-' . \str_replace('.', '-', $path);
+	public static function de_row(\system\model\Recordset $recordset, $path, $options) {
 		
+	}
+	
+	public static function de_error($path) {
+		$vars = \system\view\Template::current()->getVars();
+		if (\array_key_exists('errors', $vars) && \array_key_exists($path, $vars['errors'])) {
+			return '<div class="de-error">' . $vars['errors'][$path] . '</div>';
+		}
+	}
+	
+	public static function hidden(\system\model\Recordset $recordset, $path) {
+		return '<input'
+			. ' type="hidden"'
+			. ' id="' . self::generate_input_id($path) . '"'
+			. ' name="' . self::input_name($path) . '"'
+			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' value="' . \htmlentities($recordset->getProg($path)) . '"/>';
+	}
+
+	public static function textbox(\system\model\Recordset $recordset, $path, $params = array()) {
 		$mt = $recordset->getBuilder()->searchMetaType($path, true);
-		
-		$password = $mt->getAttr('password', false);
-		$maxlength = $mt->getAttr('maxlength', false);
-		
-		$type = \system\Utils::getParam('type', $params, array('default' => 'text', 'options' => array('text', 'password')));
-		
-		return '<input type="' . $type . ' "'
-			. ' name="' . $inputName . '"'
-			. ' id="' . $inputId . '"'
+
+		$params += $mt->getAttributes();
+
+		return 
+			'<input type="' . (\system\Utils::getParam('password', $params, array('default' => false)) ? 'password' : 'text') . '"'
+			. ' name="' . self::input_name($path) . '"'
+			. ' id="' . self::generate_input_id($path) . '"'
 			. \system\Utils::getParam('size', $params, array('prefix' => ' size="', 'suffix' => '"', 'default' => ''))
 			. \system\Utils::getParam('maxlength', $params, array('prefix' => ' maxlength="', 'suffix' => '"', 'default' => ''))
 			. \system\Utils::getParam('placeholder', $params, array('prefix' => ' placeholder="', 'suffix' => '"', 'default' => ''))
-			. ' class="' . \implode(' ', \array_merge(array('de-input'), \system\Utils::getParam('class', $params, array('defalt' => array())))) . '"'
-			. ' value="' . $recordset->getEdit($path) . "/>";
+			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' value="' . \htmlentities($recordset->getProg($path)) . '"/>';
 	}
 	
-	public function deSelect(\system\model\Recordset $recordset, $path, $params) {
-		$inputName = 'node[' . $path . ']';
-		$inputId = 'edit-node-' . \str_replace('.', '-', $path);
-		$type = \system\Utils::getParam('type', $params, array('required' => true));
+	public static function textarea(\system\model\Recordset $recordset, $path, $params = array()) {
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
 		
-		$x = '<select'
-			. ' name="' . $inputName . '"'
-			. ' id="' . $inputId . '"'
-			. ' class="' . \implode(' ', \array_merge(array('de-input'), \system\Utils::getParam('class', $params, array('defalt' => array())))) . '"/>';
-		$mt = $recordset->searchMetaType($path);
+		$params += $mt->getAttributes();
 		
-		$options = \system\Utils::getParam('options', $params, array('default' => false));
-		
+		return
+			'<textarea'
+			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' id="' . self::generate_input_id($path) . '"'
+			. ' name="' . self::input_name($path) . '"'
+			. ' rows="' . \system\Utils::getParam('rows', $params, array('default' => 5)) . '"'
+			. ' cols="' . \system\Utils::getParam('cols', $params, array('default' => 35)) . '"'
+			. '>' . \htmlentities($recordset->getProg($path)) . '</textarea>';
+	}
 
-		$options = $mt->getAttr('options', array('default' => \system\Utils::getParam('options', $params)));
+	public static function selectbox(\system\model\Recordset $recordset, $path, $params = array()) {
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+
+		$params += $mt->getAttributes();
+
+		$return = 
+			'<select'
+			. ' name="' . self::input_name($path) . '"'
+			. ' id="' . self::generate_input_id($path) . '"'
+			. (\system\Utils::getParam('multiple', $params, array('default' => false)) ? ' multiple="multiple"' : '')
+			. ' size="' . (\system\Utils::getParam('multiple', $params, array('default' => false)) ? '5' : '1') . '"'
+			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '">';
+
+		$values = $recordset->getProg($path);
+		if (!\is_array($values)) {
+			if (\is_null($values)) {
+				$values = array();
+			} else {
+				$values = array($values);
+			}
+		}
+
+		$options = \system\Utils::getParam('options', $params, array('default' => array()));
+		
 		if (\is_array($options)) {
 			foreach ($options as $key => $val) {
-				$x .= '<option value="' . $key . '"' 
+				$return .= 
+					'<option value="' . \htmlentities($key) . '"'
 					. ($key == $recordset->getProg($path) ? ' selected="selected"' : '') . '>'
 					. \system\Lang::translate($val) . '</option>';
 			}
 		}
-		$x .= '</select>';
+		$return .= '</select>';
+		return $return;
+	}
+
+	public static function radiobuttons(\system\model\Recordset $recordset, $path, $params = array()) {
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+
+		$params += $mt->getAttributes();
+
+		$options = \system\Utils::getParam('options', $params, array('default' => array()));
+		
+		$id = self::generate_input_id($path);
+
+		$return = '';
+		if (\is_array($options)) {
+			foreach ($options as $key => $val) {
+				$return .=
+					'<div class="de-radio">'
+					. '<input'
+					. ' type="radio"'
+					. ' name="' . self::input_name($path) . '"'
+					. ' id="' . $id . '-' . \htmlentities($key) . '"'
+					. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+					. ($recordset->getProg($path) == $key ? ' checked="checked"' : '')
+					. ' value="' . \htmlentities($key) . '"/>'
+					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\Lang::translate($val) . '</label>'
+					. '</div>';
+			}
+		}
+		return $return;
 	}
 	
-	public function deCheckbox(\system\model\Recordset $recordset, $path, $params) {
-		$inputName = 'node[' . $path . ']';
-		$inputId = 'edit-node-' . \str_replace('.', '-', $path);
-		$type = \system\Utils::getParam('type', $params, array('required' => true));
+	public static function checkboxes(\system\model\Recordset $recordset, $path, $params = array()) {
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+
+		$params += $mt->getAttributes();
+
+		$options = \system\Utils::getParam('options', $params, array('default' => array()));
 		
-		return '<input type="' . $type . ' "'
-			. ' name="' . $inputName . '"'
-			. ' id="' . $inputId . '"'
-			. \system\Utils::getParam('checked', $params, array('prefix' => ' checked="', 'suffix' => '"', 'default' => ''))
-			. ' class="' . \implode(' ', \array_merge(array('de-input'), \system\Utils::getParam('class', $params, array('defalt' => array())))) . '"'
-			. ' value="' . $recordset->getEdit($path) . "/>";
+		$id = self::generate_input_id($path);
 		
+		$values = $recordset->getProg($path);
+		if (!\is_array($values)) {
+			if (\is_null($values)) {
+				$values = array();
+			} else {
+				$values = array($values);
+			}
+		}
+
+		$return = '';
+		if (\is_array($options)) {
+			foreach ($options as $key => $val) {
+				$return .=
+					'<div class="de-checkbox">'
+					. '<input'
+					. ' type="checkbox"'
+					. ' name="' . self::input_name($path) . '[' . \htmleentities($key) . ']"'
+					. ' id="' . $id . '-' . \htmlentities($key) . '"'
+					. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+					. (\in_array($key, $values) ? ' checked="checked"' : '')
+					. ' value="1"/>'
+					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\Lang::translate($val) . '</label>'
+					. '</div>';
+			}
+		}
+		return $return;
 	}
 	
-	public function deRadios(\system\model\Recordset $recordset, $path, $params) {
-		
+	public static function checkbox(\system\model\Recordset $recordset, $path, $params = array()) {
+		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+
+		$params += $mt->getAttributes();
+
+		return
+			'<input'
+			. ' type="checkbox"'
+			. ' name="' . self::input_name($path) . ']"'
+			. ' id="' . self::generate_input_id($path) . '"'
+			. ($recordset->getProg($path) ? ' checked="checked"' : '')
+			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' value="1"/>';
 	}
-	
-	
-	public function link($content, $params) {
+
+	public static function link($content, $params) {
 		$params['url'] = \system\Utils::getParam('url', $params, array('required' => true, 'prefix' => \config\settings()->BASE_DIR));
 
 		$url = $params['url'];
 		$ajax = \system\Utils::getParam('ajax', $params, array('default' => true, 'options' => array(false, true)));
 		$class = \system\Utils::getParam('class', $params, array('default' => 'link'));
 		$params['system'] = array(
-			'requestType' => 'MAIN',
+			 'requestType' => 'MAIN',
 //			'requestId' => null
 		);
 		$jsArgs = \system\Utils::php2Js($params); //array_merge(array('url' => $url), \system\Utils::getParam('args', $params, array('default' => array()))));
 
 		if ($ajax) {
-			$confirm = system\Utils::getParam('confirm', $params, array('default' => false, 'options' => array(false, true)));
+			$confirm = \system\Utils::getParam('confirm', $params, array('default' => false, 'options' => array(false, true)));
 			if ($confirm) {
 				$confirmTitle = str_replace("'", "\\'", \system\Utils::getParam('confirmTitle', $params, array('default' => '')));
 				$confirmQuest = str_replace("'", "\\'", \system\Utils::getParam('confirmQuest', $params, array('default' => '')));
-				$action = "xmca.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
+				$action = "ciderbit.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
 			} else {
-				$action = "xmca.request(" . $jsArgs . "); return false;";
+				$action = "ciderbit.request(" . $jsArgs . "); return false;";
 			}
 		}
-		return '<a href="' . $url . '"' 
-			. (empty($class) ? '' : ' class="' . $class . '"')
-			. (empty($action) ? '' : ' onclick="' . $action . '"') . '>' 
-			. $content 
-			. '</a>';
+		return '<a href="' . $url . '"'
+				  . (empty($class) ? '' : ' class="' . $class . '"')
+				  . (empty($action) ? '' : ' onclick="' . $action . '"') . '>'
+				  . $content
+				  . '</a>';
 	}
-	
-	public function panelStart($params) {
+
+	public static function panelStart($params) {
 		system\view\Panels::getInstance()->openPanel();
 	}
-	
-	public function panel($content, $params) {
+
+	public static function panel($content, $params) {
 		list(, $formName, $output) = \system\view\Panels::getForm();
-		
+
 		$panelName = \system\Utils::getParam('name', $params, array('required' => true));
-		$panelClass = 
-			'system-panel system-panel-' . $panelName . ' ' . $formName
-			. \system\Utils::getParam('class', $params, array('prefix' => ' ', 'default' => ''));
-		$vars = $smarty->getTemplateVars();
-		
+		$panelClass =
+				  'system-panel system-panel-' . $panelName . ' ' . $formName
+				  . \system\Utils::getParam('class', $params, array('prefix' => ' ', 'default' => ''));
+		$vars = \system\view\Template::current()->getVars();
+
 		$panelId = 'system-panel-' . $vars['system']['component']['requestId'] . '-' . $panelName;
-		
+
 		$content = '<div id="' . $panelId . '" class="' . $panelClass . '">' . $content . '</div>';
-		
+
 		\system\view\Panels::getInstance()->closePanel($panelId, $panelName, $panelClass, $content);
-		
+
 		return $output . $content;
 	}
-	
-	public function panels($content, $params) {
+
+	public static function panels($content, $params) {
 		$content = '';
-		
+
 		$panels = \system\view\Panels::getInstance()->getPanels();
 		foreach ($panels as $panel) {
 			$content .= $panel;
 		}
 		return $content;
 	}
-	
-	public function protect($content, $params) {
-		$url = \system\Utils::getParam('url', $params, array('required' => true));
-		$args = \system\Utils::getParam('args', $params, array('default' => array()));
-		\system\Main::checkAccess($url, $args) ? $content : '';
+
+	public static function access($url, $args = array()) {
+		return \system\Main::checkAccess($url, $args);
 	}
 
-	
-	  //////////////////////
-	 // 
+	//////////////////////
+	// 
 	//////////////////////
 }
+
 ?>

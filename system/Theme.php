@@ -24,7 +24,7 @@ class Theme {
 	}
 	
 	public static function getThemePath($subfolder=null) {
-		return "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
+		return \config\settings()->BASE_DIR . "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
 	}
 }
 ?>

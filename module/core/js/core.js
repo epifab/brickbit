@@ -1,4 +1,4 @@
-xmca.setBehavior('core-file-upload', function () {
+ciderbit.setBehavior('core-file-upload', function () {
 	'use strict';
 
 	// Initialize the jQuery File Upload widget:
@@ -38,7 +38,7 @@ xmca.setBehavior('core-file-upload', function () {
 	$('#fileupload .files').imagegallery();
 });
 
-xmca.setBehavior('show-hide-class', function () {
+ciderbit.setBehavior('show-hide-class', function () {
 	$('a.show-hide-class').each(function() {
 		if ($(this).hasClass('expanded')) {
 			$('.' + $(this).attr('id')).show();

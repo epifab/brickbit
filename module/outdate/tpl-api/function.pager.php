@@ -34,7 +34,7 @@ function smarty_function_pager($params, &$smarty) {
 //			$r .= '<li><button>' . ($i+1) . '</button></li>';
 //			$r .= '<li>' . ($i+1) . '</li>';
 		} else {
-			$output .= '<li><button onclick="xmca.paging(\'' . $formId . '\', ' . $i . ')">' . ($i+1) . '</button></li>';
+			$output .= '<li><button onclick="ciderbit.paging(\'' . $formId . '\', ' . $i . ')">' . ($i+1) . '</button></li>';
 		}
 	}
 	$output .= '</ul>';

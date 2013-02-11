@@ -1,17 +1,17 @@
 <{function name=content_display content=null}>
-	<{xmca_restricted_area component="EditContent" args=["id" => $content->id]}>
+	<{ciderbit_restricted_area component="EditContent" args=["id" => $content->id]}>
 		<div class="content_controls top">
-			<{xmca_control class="update" component="EditContent" width=800 height=550 title="Modifica dettaglio" args=["id" => $content->id]}> 
+			<{ciderbit_control class="update" component="EditContent" width=800 height=550 title="Modifica dettaglio" args=["id" => $content->id]}> 
 			<{if $level == 0}>
-					<{xmca_control class="create" component="EditContent" width=800 height=550 title="Aggiungi dettaglio" args=["supercontent_id" => $content->id]}> 
+					<{ciderbit_control class="create" component="EditContent" width=800 height=550 title="Aggiungi dettaglio" args=["supercontent_id" => $content->id]}> 
 			<{/if}>
-			<{xmca_control class="delete" confirm=true confirmTitle="Il contenuto verr&agrave; eliminato definitivamente" component="DeleteContent" title="Elimina dettaglio" args=["id" => $content->id]}>
+			<{ciderbit_control class="delete" confirm=true confirmTitle="Il contenuto verr&agrave; eliminato definitivamente" component="DeleteContent" title="Elimina dettaglio" args=["id" => $content->id]}>
 		</div>
-	<{/xmca_restricted_area}>
+	<{/ciderbit_restricted_area}>
 
 	<div class="content_box">
 		
-		<{$content->tags|xmca_tags_link}>
+		<{$content->tags|ciderbit_tags_link}>
 	
 		<{if $content->expandable}>
 			<div class="content_preview" id="content_preview_<{$content->id}>">
@@ -28,7 +28,7 @@
 					<{$content->preview}>
 				</div>
 					<div class="content_preview_controls">
-						<a class="xmca_control" href="content/<{$content->url}>.html" onclick="ShowContent(<{$content->id}>); return false">Visualizza tutto &raquo;</a>
+						<a class="ciderbit_control" href="content/<{$content->url}>.html" onclick="ShowContent(<{$content->id}>); return false">Visualizza tutto &raquo;</a>
 					</div>
 			</div>
 		<{/if}>
@@ -77,7 +77,7 @@
 			<div style="clear: both"></div>
 			<{if $content->expandable}>
 				<div class="content_preview_controls">
-					<a class="xmca_control" href="javascript:HideContent(<{$content->id}>)">&laquo; Anteprima</a>
+					<a class="ciderbit_control" href="javascript:HideContent(<{$content->id}>)">&laquo; Anteprima</a>
 				</div>
 			<{/if}>
 		</div>
@@ -87,7 +87,7 @@
 		<div class="subcontents<{if $content->expandable}> hidden<{/if}>" id="subcontents_<{$content->id}>">
 			<{if count($content->contents)}>
 				<{foreach $content->contents as $subcontent}>
-					<div class="subcontent<{xmca_restricted_area component="EditContent"}> admin<{/xmca_restricted_area}>">
+					<div class="subcontent<{ciderbit_restricted_area component="EditContent"}> admin<{/ciderbit_restricted_area}>">
 						<{content_display content=$subcontent level=($level+1)}>
 					</div>
 				<{/foreach}>
@@ -116,13 +116,13 @@
 	</div>
 		
 	
-	<{xmca_restricted_area component="EditContent" args=["id" => $content->id]}>
+	<{ciderbit_restricted_area component="EditContent" args=["id" => $content->id]}>
 		<div class="content_controls bottom">
-			<{xmca_control class="update" component="EditContent" width=800 height=550 title="Modifica dettaglio" args=["id" => $content->id]}> 
+			<{ciderbit_control class="update" component="EditContent" width=800 height=550 title="Modifica dettaglio" args=["id" => $content->id]}> 
 			<{if $level == 0}>
-					<{xmca_control class="create" component="EditContent" width=800 height=550 title="Aggiungi dettaglio" args=["supercontent_id" => $content->id]}> 
+					<{ciderbit_control class="create" component="EditContent" width=800 height=550 title="Aggiungi dettaglio" args=["supercontent_id" => $content->id]}> 
 			<{/if}>
-			<{xmca_control class="delete" confirm=true confirmTitle="Il contenuto verr&agrave; eliminato definitivamente" component="DeleteContent" title="Elimina dettaglio" args=["id" => $content->id]}>
+			<{ciderbit_control class="delete" confirm=true confirmTitle="Il contenuto verr&agrave; eliminato definitivamente" component="DeleteContent" title="Elimina dettaglio" args=["id" => $content->id]}>
 		</div>
-	<{/xmca_restricted_area}>
+	<{/ciderbit_restricted_area}>
 <{/function}>

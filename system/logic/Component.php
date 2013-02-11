@@ -133,7 +133,7 @@ abstract class Component {
 //			}
 
 //		try {
-//			$id = \module\core\model\XmcaLog::saveLog($this->name, $pageOutput);
+//			$id = \module\core\model\ciderbitLog::saveLog($this->name, $pageOutput);
 //		} catch (\Exception $ex) {
 //			echo "<h1>" . $ex->getMessage() . "</h1>";
 //			if ($ex instanceof DataLayerException) {

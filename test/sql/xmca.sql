@@ -1,10 +1,10 @@
-CREATE DATABASE xmca
+CREATE DATABASE ciderbit
 DEFAULT CHARACTER SET utf8
 DEFAULT COLLATE utf8_general_ci;
 
-USE xmca;
+USE ciderbit;
 
-CREATE TABLE xmca_config (
+CREATE TABLE ciderbit_config (
 	label VARCHAR(32),
 	intval INT,
 	real_val DOUBLE,
@@ -17,7 +17,7 @@ CREATE TABLE xmca_config (
 	PRIMARY KEY (label)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_email (
+CREATE TABLE ciderbit_email (
 	id INT AUTO_INCREMENT,
 	sent_date_time DATETIME,
 	ip_address VARCHAR(15),
@@ -30,27 +30,27 @@ CREATE TABLE xmca_email (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_component (
+CREATE TABLE ciderbit_component (
 	id INT AUTO_INCREMENT,
 	name VARCHAR(30),
 	PRIMARY KEY (id),
 	UNIQUE KEY (name)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_group (
+CREATE TABLE ciderbit_group (
 	id INT AUTO_INCREMENT,
 	name VARCHAR(30),
 	PRIMARY KEY (id),
 	UNIQUE KEY (name)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_group_component (
+CREATE TABLE ciderbit_group_component (
 	group_id INT,
 	component_id INT,
 	PRIMARY KEY (group_id, component_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_user (
+CREATE TABLE ciderbit_user (
 	id INT AUTO_INCREMENT,
 	email VARCHAR(80),
 	password CHAR(32),
@@ -62,13 +62,13 @@ CREATE TABLE xmca_user (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_user_group (
+CREATE TABLE ciderbit_user_group (
 	user_id INT,
 	group_id INT,
 	PRIMARY KEY (user_id, group_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_record_mode (
+CREATE TABLE ciderbit_record_mode (
 	id INT AUTO_INCREMENT,
 	owner_id INT,
 	group_id INT,
@@ -81,7 +81,7 @@ CREATE TABLE xmca_record_mode (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_record_mode_log (
+CREATE TABLE ciderbit_record_mode_log (
 	id INT AUTO_INCREMENT,
 	record_mode_id INT,
 	upd_date_time DATETIME,
@@ -89,7 +89,7 @@ CREATE TABLE xmca_record_mode_log (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_log (
+CREATE TABLE ciderbit_log (
 	id INT AUTO_INCREMENT,
 	user_id INT,
 	script_url VARCHAR(100),
@@ -100,13 +100,13 @@ CREATE TABLE xmca_log (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_dir (
+CREATE TABLE ciderbit_dir (
 	id INT AUTO_INCREMENT,
 	path VARCHAR(80),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_file (
+CREATE TABLE ciderbit_file (
 	id INT AUTO_INCREMENT,
 	dir_id INT,
 	name VARCHAR(20),
@@ -114,7 +114,7 @@ CREATE TABLE xmca_file (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_image (
+CREATE TABLE ciderbit_image (
 	id INT AUTO_INCREMENT,
 	width1 INT,
 	height1 INT,
@@ -131,21 +131,21 @@ CREATE TABLE xmca_image (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_lang (
+CREATE TABLE ciderbit_lang (
 	id CHAR(2),
 	description VARCHAR(20),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 
-CREATE TABLE xmca_page_style (
+CREATE TABLE ciderbit_page_style (
 	code VARCHAR(15),
 	description VARCHAR(100),
 	page_template VARCHAR(50),
 	PRIMARY KEY (code)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_page (
+CREATE TABLE ciderbit_page (
 	id INT AUTO_INCREMENT,
 	url VARCHAR(50), -- www.xxx.yyy/URL.html
 	style_code VARCHAR(15),
@@ -158,7 +158,7 @@ CREATE TABLE xmca_page (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_page_text (
+CREATE TABLE ciderbit_page_text (
 	page_id INT,
 	lang_id CHAR(2),
 	title VARCHAR(100),
@@ -166,13 +166,13 @@ CREATE TABLE xmca_page_text (
 	PRIMARY KEY (page_id, lang_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_content_type (
+CREATE TABLE ciderbit_content_type (
 	code VARCHAR(32),
 	description VARCHAR(100),
 	PRIMARY KEY (code)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_content_style (
+CREATE TABLE ciderbit_content_style (
 	code VARCHAR(32),
 	description VARCHAR(100),
 	content_template VARCHAR(50),
@@ -180,7 +180,7 @@ CREATE TABLE xmca_content_style (
 	PRIMARY KEY (code)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_content (
+CREATE TABLE ciderbit_content (
 	id INT AUTO_INCREMENT,
 	page_id INT, -- 0 per contenuti visibile su ogni pagina
 	supercontent_id INT,
@@ -208,7 +208,7 @@ CREATE TABLE xmca_content (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_content_text (
+CREATE TABLE ciderbit_content_text (
 	content_id INT,
 	lang_id CHAR(2),
 	title VARCHAR(100),
@@ -218,7 +218,7 @@ CREATE TABLE xmca_content_text (
 	PRIMARY KEY (content_id, lang_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_comment (
+CREATE TABLE ciderbit_comment (
 	id INT AUTO_INCREMENT,
 	content_id INT,
 	comment_id INT, -- risposte a commenti (albero di commenti)
@@ -228,19 +228,19 @@ CREATE TABLE xmca_comment (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_tag (
+CREATE TABLE ciderbit_tag (
 	id INT AUTO_INCREMENT,
 	value VARCHAR(50),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_content_tag (
+CREATE TABLE ciderbit_content_tag (
 	content_id INT,
 	tag_id INT,
 	PRIMARY KEY (content_id, tag_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE xmca_page_tag (
+CREATE TABLE ciderbit_page_tag (
 	page_id INT,
 	tag_id INT,
 	PRIMARY KEY (page_id, tag_id)

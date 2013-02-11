@@ -171,17 +171,12 @@
 <!-- The File Upload jQuery UI plugin -->
 <script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload-jui.js'); ?>"></script>
 
-
-<?php $this->api->open('deForm'); ?>
-	<?php if ($node->id): ?>
-	<input type="hidden" name="id" value="<?php print $node->getEdit('id'); ?>"/>
-	<?php endif; ?>
-
+<?php $this->api->open('de_form'); ?>
 	<div class="dataedit">
 		<fieldset>
 			<legend>
 				<?php foreach ($system['langs'] as $lang): ?>
-				<a href="#" id="node-lang-<?php print $lang; ?>" class="node-lang-control show-hide-class<?php if ($lang == $website->defaultLang): ?> expanded<?php endif; ?>">
+				<a href="#" id="node-lang-<?php print $lang; ?>" class="node-lang-control show-hide-class<?php if ($lang == $website['defaultLang']): ?> expanded<?php endif; ?>">
 					<img src="<?php print $this->api->theme_path('img/lang/40/' . $lang . '.jpg'); ?>"/>
 				</a>
 				<?php endforeach; ?>
@@ -206,7 +201,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php $this->api->deInput($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
+							<?php $this->api->textbox($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("Once you choose a URN you shouldn't change it anymore."); ?><br/>
@@ -217,7 +212,7 @@
 									<?php print $this->api->t("Please note also that two different contents, translated in @lang, must have two different URNs.", array('@lang' => $this->api->t($lang))); ?>
 								</p>
 							</div>
-							<?php print $this->api->deError('text_' . $lang . '.urn'); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.urn'); ?>
 						</div>
 					</div>
 					<div class="de-row">
@@ -225,13 +220,13 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-description"><?php print $this->api->t('Description'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<input class="de-input xxl" type="text" id="edit-node-text_<?php print $lang; ?>-description" name="node[text_<?php print $lang; ?>.description]" value="<?php print $node->__get('text_'.$lang)->getEdit('description'); ?>"/>
+							<?php print $this->api->textbox($node, 'text_' . $lang . '.description', array('class' => 'xxl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
 								</p>
 							</div>
-							<?php print $this->api->de_form_error('text_' . $lang . '.description'); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.description'); ?>
 						</div>
 					</div>
 					<div class="de-row">
@@ -239,8 +234,8 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-title"><?php print $this->api->t('Title'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<input class="de-input l" type="text" id="edit-node-text_<?php print $lang; ?>-title" name="node[text_<?php print $lang; ?>.title]" value="<?php print $node->__get('text_'.$lang)->getEdit('title'); ?>"/>
-							<?php print $this->api->de_form_error('text_' . $lang . '.title'); ?>
+							<?php print $this->api->textbox($node, 'text_' . $lang . '.title', array('class' => 'l')); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.title'); ?>
 						</div>
 					</div>
 					<div class="de-row">
@@ -248,8 +243,8 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-subtitle"><?php print $this->api->t('Subtitle'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<input class="de-input xl" type="text" id="edit-node-text_<?php print $lang; ?>-subtitle" name="node[text_<?php print $lang; ?>.subtitle]" value="<{$node->$text->getEdit('subtitle')?>"/>
-							<?php print $this->api->de_form_error('text_' . $lang . '.subtitle'); ?>
+							<?php print $this->api->textbox($node, 'text_' . $lang . '.subtitle', array('class' => 'xl')); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.subtitle'); ?>
 						</div>
 					</div>
 					<div class="de-row">
@@ -257,8 +252,8 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-body"><?php print $this->api->t('Body'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<textarea class="de-input xxl rich-text" id="edit-node-text_<?php print $lang; ?>-body" name="node[text_<?php print $lang; ?>.body]"><{$node->$text->getEdit('body')?></textarea>
-							<?php print $this->api->de_form_error('text_' . $lang . '.body'); ?>
+							<?php print $this->api->textarea($node, 'text_' . $lang . '.body', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.body'); ?>
 						</div>
 					</div>
 					<div class="de-row">
@@ -266,8 +261,8 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-preview"><?php print $this->api->t('Preview'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<textarea class="de-input xxl rich-text" id="edit-node-text_<?php print $lang; ?>-preview" name="node[text_<?php print $lang; ?>.preview]"><{$node->$text->getEdit('preview')?></textarea>
-							<?php print $this->api->de_form_error('text_' . $lang . '.preview'); ?>
+							<?php print $this->api->textarea($node, 'text_' . $lang . '.preview', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->de_error('text_' . $lang . '.preview'); ?>
 						</div>
 					</div>
 				</div>
@@ -296,7 +291,7 @@
 				</div>
 				<div class="de-input-wrapper">
 					<input class="de-input xl" type="text" name="node[record_mode.users]" id="edit-node-record_mode-users" value=""/>
-					<?php print $this->api->de_form_error("record_mode.users"); ?>
+					<?php print $this->api->de_error("record_mode.users"); ?>
 				</div>
 			</div>
 			<div class="de-row">
@@ -304,13 +299,8 @@
 					<label class="de-label" for="edit-node-record_mode-read_mode"><?php print $this->api->t('Read access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<select class="de-input l" id="edit-node-record_mode-read_mode" name="node[record_mode.read_mode]">
-						<option value="2"<?php if ($node->record_mode->read_mode == 2): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Owner only'); ?></option>
-						<option value="3"<?php if ($node->record_mode->read_mode == 3): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Content admins'); ?></option>
-						<option value="4"<?php if ($node->record_mode->read_mode == 4): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Registered users'); ?></option>
-						<option value="5"<?php if ($node->record_mode->read_mode == 5): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Anyone'); ?></option>
-					</select>
-					<?php print $this->api->de_form_error("record_mode.read_mode"); ?>
+					<?php echo $this->api->selectbox($node, 'record_mode.read_mode', array('class' => 'l')); ?>
+					<?php print $this->api->de_error("record_mode.read_mode"); ?>
 				</div>
 			</div>
 			<div class="de-row">
@@ -318,13 +308,8 @@
 					<label class="de-label" for="edit-node-record_mode-edit_mode"><?php print $this->api->t('Edit access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<select class="de-input l" id="edit-node-record_mode-edit_mode" name="node[record_mode.edit_mode]">
-						<option value="1"<?php if ($node->record_mode->edit_mode == 1): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Nobody'); ?></option>
-						<option value="2"<?php if ($node->record_mode->edit_mode == 2): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Owner only'); ?></option>
-						<option value="3"<?php if ($node->record_mode->edit_mode == 3): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Content admins'); ?></option>
-						<option value="4"<?php if ($node->record_mode->edit_mode == 4): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Registered users'); ?></option>
-					</select>
-					<?php print $this->api->de_form_error("record_mode.edit_mode"); ?>
+					<?php echo $this->api->selectbox($node, 'record_mode.edit_mode', array('class' => 'l')); ?>
+					<?php print $this->api->de_error("record_mode.edit_mode"); ?>
 				</div>
 			</div>
 			<div class="de-row">
@@ -332,16 +317,11 @@
 					<label class="de-label" for="edit-node-record_mode-delete_mode"><?php print $this->api->t('Delete access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<select class="de-input l" id="edit-node-record_mode-delete_mode" name="node[record_mode.delete_mode]">
-						<option value="1"<?php if ($node->record_mode->delete_mode == 1): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Nobody'); ?></option>
-						<option value="2"<?php if ($node->record_mode->delete_mode == 2): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Owner only'); ?></option>
-						<option value="3"<?php if ($node->record_mode->delete_mode == 3): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Content admins'); ?></option>
-						<option value="4"<?php if ($node->record_mode->delete_mode == 4): ?> selected="selected"<?php endif; ?>><?php print $this->api->t('Registered users'); ?></option>
-					</select>
-					<?php print $this->api->de_form_error("record_mode.delete_mode"); ?>
+					<?php echo $this->api->selectbox($node, 'record_mode.delete_mode', array('class' => 'l')); ?>
+					<?php print $this->api->de_error("record_mode.delete_mode"); ?>
 				</div>
 			</div>
 		</fieldset>
-		<?php print $this->api->de_submit_control(); ?>
+		<?php //print $this->api->de_submit_control(); ?>
 	</div>
 <?php $this->api->close(); ?>

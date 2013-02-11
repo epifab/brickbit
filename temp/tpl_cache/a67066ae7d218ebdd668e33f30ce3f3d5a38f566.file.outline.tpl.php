@@ -44,7 +44,7 @@ if (!is_callable('smarty_function_javascript')) include 'system/tpl-api\\functio
 "></script>
 		<script type="text/javascript" src="<?php echo smarty_function_path(array('url'=>"js/jquery.form.js"),$_smarty_tpl);?>
 "></script>
-		<script type="text/javascript" src="<?php echo smarty_function_path(array('url'=>"js/jquery.xmca.js"),$_smarty_tpl);?>
+		<script type="text/javascript" src="<?php echo smarty_function_path(array('url'=>"js/jquery.ciderbit.js"),$_smarty_tpl);?>
 "></script>
 		<?php  $_smarty_tpl->tpl_vars["js"] = new Smarty_Variable; $_smarty_tpl->tpl_vars["js"]->_loop = false;
  $_from = $_smarty_tpl->tpl_vars['page']->value['js']; if (!is_array($_from) && !is_object($_from)) { settype($_from, 'array');}

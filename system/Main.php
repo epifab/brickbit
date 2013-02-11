@@ -218,6 +218,7 @@ class Main {
 					'fields' => array(),
 					'keys' => array(),
 					'relations' => array(),
+					'virtuals' => array()
 				);
 			}
 			$fields = \system\Utils::getParam('fields', $table, array('default' => array()));

@@ -1,5 +1,5 @@
 //(function ($) {
-	var xmca = {
+	var ciderbit = {
 		"translate": function(sentence,args) {
 			return sentence;
 		},
@@ -7,22 +7,22 @@
 		"behaviors": new Array(),
 
 		"setBehavior": function(k,f) {
-			xmca.behaviors[k] = f;
+			ciderbit.behaviors[k] = f;
 		},
 		
 		"init": function(javascript) {
 			$(document).ready(function() {
 				var node = $(document);
-				xmca.waitDialogInit();
+				ciderbit.waitDialogInit();
 
 				$('.system-panel-form', node).each(function() {
 					formId = $(this).attr("id");
 					formName = $(this).attr("name");
-					xmca.addComponentForm(formId, formName);
+					ciderbit.addComponentForm(formId, formName);
 				});
 
-				for (x in xmca.behaviors) {
-					xmca.behaviors[x]();
+				for (x in ciderbit.behaviors) {
+					ciderbit.behaviors[x]();
 				}
 
 	//			$(".event_description").hide();
@@ -179,7 +179,7 @@
 	//			}
 	//		});
 
-			var xmcaResponse = {
+			var ciderbitResponse = {
 				// Contenuto della risposta AJAX
 				'content': $('content', $(componentResponse)).contents(),
 
@@ -203,20 +203,20 @@
 				'javascript': $('javascript', $(componentResponse)).text()
 			};
 
-			return xmcaResponse;
+			return ciderbitResponse;
 		},
 
 	//	"waitDialog": function() {
-	//		return $('<div><h4>' + xmca.translate('Please wait') + '</h4></div>');
+	//		return $('<div><h4>' + ciderbit.translate('Please wait') + '</h4></div>');
 	//	},
 
 		"waitDialog": $('<div><h4>Please wait</h4></div>'),
 
 		"waitDialogInit": function() {
-			xmca.waitDialog.dialog({
+			ciderbit.waitDialog.dialog({
 				'dialogClass': 'system-dialog system-wait-dialog',
 				'position': 'center',
-				'title': xmca.translate('Please wait'),
+				'title': ciderbit.translate('Please wait'),
 				'resizable': false,
 				'draggable': false,
 				'stack': true,
@@ -229,31 +229,31 @@
 		},
 
 		"waitDialogShow": function() {
-			xmca.waitDialog.dialog("open");
+			ciderbit.waitDialog.dialog("open");
 		},
 
 		"waitDialogHide": function() {
-			xmca.waitDialog.dialog("close");
+			ciderbit.waitDialog.dialog("close");
 		},
 
 		"confirm": function(title, question, options) {
 			width = 400;
 
 			if (question == undefined || question == '') {
-				question = xmca.translate("Are you sure?");
+				question = ciderbit.translate("Are you sure?");
 			}
 
 			target = $("<div><h2>" + title + "</h2><p class=\"alert\">" + question + "</p></div>");
 
-			okLabel = xmca.translate('Ok');
-			cancelLabel = xmca.translate('Cancel');
+			okLabel = ciderbit.translate('Ok');
+			cancelLabel = ciderbit.translate('Cancel');
 
 			buttons = {};
-			buttons[xmca.translate('Ok')] = function() {
+			buttons[ciderbit.translate('Ok')] = function() {
 				target.dialog("close");
-				xmca.request(options);
+				ciderbit.request(options);
 			}
-			buttons[xmca.translate('Cancel')] = function() {
+			buttons[ciderbit.translate('Cancel')] = function() {
 				target.dialog("close");
 			}
 
@@ -288,7 +288,7 @@
 
 
 			buttons = {};
-			buttons[xmca.translate('Ok')] = function() {
+			buttons[ciderbit.translate('Ok')] = function() {
 				target.dialog("close");
 			}
 
@@ -315,17 +315,17 @@
 		"addComponentForm": function(formId, formName) {
 			$("#" + formId).ajaxForm({
 				success: function(data) {
-					xmcaResponse = xmca.getResponseObject(data);
+					ciderbitResponse = ciderbit.getResponseObject(data);
 
-					if (xmcaResponse.type == undefined) {
+					if (ciderbitResponse.type == undefined) {
 						dialog = $("<div></div>");
-						dialog.append($('<h3>' + xmca.translate('Bad server response.') + '</h3>'));
-						xmca.dialogNotify(dialog, xmca.translate('Fatal error'));
+						dialog.append($('<h3>' + ciderbit.translate('Bad server response.') + '</h3>'));
+						ciderbit.dialogNotify(dialog, ciderbit.translate('Fatal error'));
 					}
-					else if (xmcaResponse.type == "ERROR") {
+					else if (ciderbitResponse.type == "ERROR") {
 						dialog = $("<div></div>");
-						dialog.append(xmcaResponse.content);
-						xmca.dialogNotify(dialog, xmcaResponse.title, 400);
+						dialog.append(ciderbitResponse.content);
+						ciderbit.dialogNotify(dialog, ciderbitResponse.title, 400);
 					}
 					else {
 						// Reload every panel
@@ -336,7 +336,7 @@
 								$(id, $(data)).children()
 							);
 						});
-						xmca.init(xmcaResponse.javascript);
+						ciderbit.init(ciderbitResponse.javascript);
 					}
 				}
 			});
@@ -358,40 +358,40 @@
 			if (options.prefix == undefined) {
 				options.prefix = '';
 			}
-			xmca._setSort(options);
+			ciderbit._setSort(options);
 			$("#" + options.formId).submit();
 		},
 
 		"_inputFilters": new Array(),
 
 		"_setFilter": function(options) {
-			if (xmca._inputFilters[options.ctrlId] == undefined) {
-				xmca._inputFilters[options.ctrlId] = new Array();
-				xmca._inputFilters[options.ctrlId]["path"] =  $('<input type="hidden" class="system-filter system-filter-path"  name="' + options.prefix + '_filters[' + options.ctrlId + '][path]"  value="' + options.path + '"/>');
-				xmca._inputFilters[options.ctrlId]["lop"] =   $('<input type="hidden" class="system-filter system-filter-lop"   name="' + options.prefix + '_filters[' + options.ctrlId + '][lop]"   value="AND"/>');
-				xmca._inputFilters[options.ctrlId]["rop"] =   $('<input type="hidden" class="system-filter system-filter-rop"   name="' + options.prefix + '_filters[' + options.ctrlId + '][rop]"   value="' + options.rop + '"/>');
-				xmca._inputFilters[options.ctrlId]["value"] = $('<input type="hidden" class="system-filter system-filter-value" name="' + options.prefix + '_filters[' + options.ctrlId + '][value]" value=""/>');
+			if (ciderbit._inputFilters[options.ctrlId] == undefined) {
+				ciderbit._inputFilters[options.ctrlId] = new Array();
+				ciderbit._inputFilters[options.ctrlId]["path"] =  $('<input type="hidden" class="system-filter system-filter-path"  name="' + options.prefix + '_filters[' + options.ctrlId + '][path]"  value="' + options.path + '"/>');
+				ciderbit._inputFilters[options.ctrlId]["lop"] =   $('<input type="hidden" class="system-filter system-filter-lop"   name="' + options.prefix + '_filters[' + options.ctrlId + '][lop]"   value="AND"/>');
+				ciderbit._inputFilters[options.ctrlId]["rop"] =   $('<input type="hidden" class="system-filter system-filter-rop"   name="' + options.prefix + '_filters[' + options.ctrlId + '][rop]"   value="' + options.rop + '"/>');
+				ciderbit._inputFilters[options.ctrlId]["value"] = $('<input type="hidden" class="system-filter system-filter-value" name="' + options.prefix + '_filters[' + options.ctrlId + '][value]" value=""/>');
 
-				$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["path"]);
-				$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["lop"]);
-				$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["rop"]);
-				$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["value"]);
+				$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["path"]);
+				$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["lop"]);
+				$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["rop"]);
+				$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["value"]);
 			}
-			if (xmca._inputFilters[options.ctrlId]["value"].val() == $("#"+options.ctrlId).val()) {
+			if (ciderbit._inputFilters[options.ctrlId]["value"].val() == $("#"+options.ctrlId).val()) {
 				return false;
 			} else {
-				xmca._inputFilters[options.ctrlId]["value"].val($("#"+options.ctrlId).val());
+				ciderbit._inputFilters[options.ctrlId]["value"].val($("#"+options.ctrlId).val());
 				return true;
 			}
 		},
 
 		"_unsetFilter": function(ctrlId) {
-			if (xmca._inputFilters[ctrlId] != undefined) {
-				xmca._inputFilters[ctrlId]["path"].remove();
-				xmca._inputFilters[ctrlId]["lop"].remove();
-				xmca._inputFilters[ctrlId]["rop"].remove();
-				xmca._inputFilters[ctrlId]["value"].remove();
-				delete xmca._inputFilters[ctrlId];
+			if (ciderbit._inputFilters[ctrlId] != undefined) {
+				ciderbit._inputFilters[ctrlId]["path"].remove();
+				ciderbit._inputFilters[ctrlId]["lop"].remove();
+				ciderbit._inputFilters[ctrlId]["rop"].remove();
+				ciderbit._inputFilters[ctrlId]["value"].remove();
+				delete ciderbit._inputFilters[ctrlId];
 				return true;
 			}
 			return false;
@@ -404,10 +404,10 @@
 			}
 			var reload = false;
 			if ($("#" + options.ctrlId).val() == "") {
-				xmca._unsetFilter(options.ctrlId);
+				ciderbit._unsetFilter(options.ctrlId);
 				reload = true;
 			} else {
-				reload = xmca._setFilter(options);
+				reload = ciderbit._setFilter(options);
 			}
 			if (reload) {
 				// will reset pager
@@ -429,30 +429,30 @@
 	//			defaults.target.dialog("destroy");
 			}
 
-			xmcaResponse = xmca.getResponseObject(componentResponse);
+			ciderbitResponse = ciderbit.getResponseObject(componentResponse);
 
-			if (xmcaResponse.type == undefined) {
-				defaults.target.append($('<h3>' + xmca.translate('Bad server response.') + '</h3>'));
-				xmca.dialogNotify(defaults.target, xmca.translate('Fatal error'))
+			if (ciderbitResponse.type == undefined) {
+				defaults.target.append($('<h3>' + ciderbit.translate('Bad server response.') + '</h3>'));
+				ciderbit.dialogNotify(defaults.target, ciderbit.translate('Fatal error'))
 			}
 
-			else if (xmcaResponse.type == "READ") {
+			else if (ciderbitResponse.type == "READ") {
 
-				defaults.target.append(xmcaResponse.content);
+				defaults.target.append(ciderbitResponse.content);
 
 				if (defaults.popup) {
-					xmca.dialogNotify(defaults.target, xmcaResponse.title, defaults.width);
+					ciderbit.dialogNotify(defaults.target, ciderbitResponse.title, defaults.width);
 				}
 
-				xmca.init(xmcaResponse.javascript);
+				ciderbit.init(ciderbitResponse.javascript);
 
-				defaults.onRead(xmcaResponse);
+				defaults.onRead(ciderbitResponse);
 
 			}
 
-			else if (xmcaResponse.type == "FORM") {
+			else if (ciderbitResponse.type == "FORM") {
 
-				defaults.target.append(xmcaResponse.content);
+				defaults.target.append(ciderbitResponse.content);
 
 				// La risposta del componente è un form
 				buttons = new Array();
@@ -461,10 +461,10 @@
 					okButtonStdHandler = function() {
 						var sent = 0;
 						if (defaults.waitMessages) {
-							xmca.waitDialogShow();
+							ciderbit.waitDialogShow();
 						}
-						$("#" + xmcaResponse.editFormId).ajaxSubmit({
-							url: xmcaResponse.url,
+						$("#" + ciderbitResponse.editFormId).ajaxSubmit({
+							url: ciderbitResponse.url,
 							beforeSubmit: function() {
 								sent++;
 								if (sent > 1) {
@@ -476,9 +476,9 @@
 							},
 							success: function(newComponentResponse) {
 								if (defaults.waitMessages) {
-									xmca.waitDialogHide();
+									ciderbit.waitDialogHide();
 								}
-								xmca.stdHandler(newComponentResponse, defaults);
+								ciderbit.stdHandler(newComponentResponse, defaults);
 							}
 						});
 					}
@@ -508,7 +508,7 @@
 					defaults.target.dialog({
 						'dialogClass': "system-dialog",
 						'position': "center",
-						'title': xmcaResponse.title,
+						'title': ciderbitResponse.title,
 						'modal': true,
 						'buttons': buttons,
 						'width': defaults.width,
@@ -536,30 +536,30 @@
 					defaults.target.append(formControls);
 				}
 
-				xmca.init(xmcaResponse.javascript);
-				defaults.onForm(xmcaResponse);
+				ciderbit.init(ciderbitResponse.javascript);
+				defaults.onForm(ciderbitResponse);
 			}
 
-			else if (xmcaResponse.type == "NOTIFY") {
+			else if (ciderbitResponse.type == "NOTIFY") {
 				if (defaults.popup) {
 					defaults.target.remove();
 				} else {
 					defaults.target.children().remove();
 				}
 
-				xmca.reloadComponents();
+				ciderbit.reloadComponents();
 
 				if (defaults.showResponse) {
 					dialog = $("<div></div>");
-					dialog.append(xmcaResponse.content);
-					xmca.dialogNotify(dialog, xmcaResponse.title);
+					dialog.append(ciderbitResponse.content);
+					ciderbit.dialogNotify(dialog, ciderbitResponse.title);
 					setTimeout(function() {dialog.dialog("close");}, 2000);
 				}
 
-				defaults.onSuccess(xmcaResponse);
+				defaults.onSuccess(ciderbitResponse);
 			}
 
-			else if (xmcaResponse.type == "ERROR") {
+			else if (ciderbitResponse.type == "ERROR") {
 				if (defaults.popup) {
 					defaults.target.remove();
 				} else {
@@ -567,10 +567,10 @@
 				}
 
 				dialog = $("<div></div>");
-				dialog.append(xmcaResponse.content);
-				xmca.dialogNotify(dialog, xmcaResponse.title, 400);
+				dialog.append(ciderbitResponse.content);
+				ciderbit.dialogNotify(dialog, ciderbitResponse.title, 400);
 
-				defaults.onError(xmcaResponse);
+				defaults.onError(ciderbitResponse);
 			}
 		},
 
@@ -586,10 +586,10 @@
 				'target': null,
 				'popup': true,
 
-				'onForm': function(xmcaResponse) {},
-				'onRead': function(xmcaResponse) {},
-				'onSuccess': function(xmcaResponse) {},
-				'onError': function(xmcaResponse) {},
+				'onForm': function(ciderbitResponse) {},
+				'onRead': function(ciderbitResponse) {},
+				'onSuccess': function(ciderbitResponse) {},
+				'onError': function(ciderbitResponse) {},
 
 				'okButton': true,
 				'okButtonLabel': 'Save',
@@ -604,7 +604,7 @@
 	//			'customControls': null,
 
 				'waitMessages': true,
-				'waitMessagesLabel': xmca.translate('Please wait')
+				'waitMessagesLabel': ciderbit.translate('Please wait')
 			};
 
 			$.extend(defaults, options);
@@ -624,11 +624,11 @@
 				'url': defaults.url,
 				'data': defaults.args,
 				success: function(componentResponse) {
-					xmca.stdHandler(componentResponse, defaults);
+					ciderbit.stdHandler(componentResponse, defaults);
 				}
 			});
 		}
 	}
 
-	xmca.init();
+	ciderbit.init();
 //})(jQuery);

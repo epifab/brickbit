@@ -1,4 +1,4 @@
-var xmca = {
+var ciderbit = {
 	"rootPath": "/cambiamentodue.it/",
 	
 	"init": function(javascript) {
@@ -6,7 +6,7 @@ var xmca = {
 			$(document).ready(function() {
 			var node = $(document);
 			$(".event_description").hide();
-			xmca.waitDialogInit();
+			ciderbit.waitDialogInit();
 
 			InitTwitter(document,"script","twitter-wjs");
 
@@ -34,17 +34,17 @@ var xmca = {
 				afterLoad: function(){} // Triggers when slider has loaded
 			});
 			
-			$('.xmca_reload_form', node).each(function() {
+			$('.ciderbit_reload_form', node).each(function() {
 				formId = $(this).attr("id");
 				destId = $(this).attr("name");
-				xmca.addReloadForm(formId, destId);
+				ciderbit.addReloadForm(formId, destId);
 			});
 			
 			$('.datepicker').datepicker();
 			
 			$('textarea.rich_text').tinymce({
 				// Location of TinyMCE script
-				script_url : xmca.rootPath + 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
+				script_url : ciderbit.rootPath + 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
 
 				width: 600,
 				height: 300,
@@ -68,7 +68,7 @@ var xmca = {
 			
 			$('textarea.rich_text_light').tinymce({
 				// Location of TinyMCE script
-				script_url : xmca.rootPath + 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
+				script_url : ciderbit.rootPath + 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
 
 				width: 600,
 				height: 250,
@@ -92,7 +92,7 @@ var xmca = {
 				theme_advanced_resizing : true
 			});
 
-			buttonClasses = '.xmca_control, button';
+			buttonClasses = '.ciderbit_control, button';
 
 			$(buttonClasses, node).button("destroy");
 
@@ -165,7 +165,7 @@ var xmca = {
 			}
 		});
 
-		var xmcaResponse = {
+		var ciderbitResponse = {
 			// Contenuto della risposta AJAX
 			'content': $('content', $(componentResponse)).contents(),
 
@@ -192,14 +192,14 @@ var xmca = {
 			'javascript': $('javascript', $(componentResponse)).text()
 		};
 		
-		return xmcaResponse;
+		return ciderbitResponse;
 	},
 	
 	"waitDialog": $('<div><h4>Please wait...</h4></div>'),
 
 	"waitDialogInit": function() {
-		xmca.waitDialog.dialog({
-			'dialogClass': 'xmca_dialog xmca_wait_dialog',
+		ciderbit.waitDialog.dialog({
+			'dialogClass': 'ciderbit_dialog ciderbit_wait_dialog',
 			'position': 'center',
 			'title': 'Please wait',
 			'resizable': false,
@@ -214,11 +214,11 @@ var xmca = {
 	},
 
 	"waitDialogShow": function() {
-		xmca.waitDialog.dialog("open");
+		ciderbit.waitDialog.dialog("open");
 	},
 
 	"waitDialogHide": function() {
-		xmca.waitDialog.dialog("close");
+		ciderbit.waitDialog.dialog("close");
 	},
 	
 	"confirm": function(title, question, options) {
@@ -231,7 +231,7 @@ var xmca = {
 		target = $("<div><h2>" + title + "</h2><p class=\"alert\">" + question + "</p></div>");
 
 		target.dialog({
-			'dialogClass': 'xmca_dialog untitled',
+			'dialogClass': 'ciderbit_dialog untitled',
 			'position': 'center',
 			'modal': true,
 			'autoOpen': false,
@@ -246,7 +246,7 @@ var xmca = {
 			'buttons': {
 				'Ok': function() {
 					target.dialog("close");
-					xmca.request(options);
+					ciderbit.request(options);
 				},
 				'Annulla': function() {
 					target.dialog("close");
@@ -262,9 +262,9 @@ var xmca = {
 			width = 600;
 		}
 		if (title == undefined) {
-			cl = 'xmca_dialog untitled';
+			cl = 'ciderbit_dialog untitled';
 		} else {
-			cl = 'xmca_dialog';
+			cl = 'ciderbit_dialog';
 		}
 		target.dialog({
 			'dialogClass': cl,
@@ -294,29 +294,29 @@ var xmca = {
 		$("#" + formId).ajaxForm({
 			success: function(data) {
 				
-				xmcaResponse = xmca.getResponseObject(data);
+				ciderbitResponse = ciderbit.getResponseObject(data);
 				
-				if (xmcaResponse.type == undefined) {
+				if (ciderbitResponse.type == undefined) {
 					dialog = $("<div></div>");
 					dialog.append($('<h3>La risposta inviata dal server non e\' stata interpretata correttamente</h3>'));
-					xmca.dialogNotify(dialog, 'Errore interno')
+					ciderbit.dialogNotify(dialog, 'Errore interno')
 				}
-				else if (xmcaResponse.type == "ERROR") {
+				else if (ciderbitResponse.type == "ERROR") {
 					dialog = $("<div></div>");
-					dialog.append(xmcaResponse.content);
-					xmca.dialogNotify(dialog, xmcaResponse.title);
+					dialog.append(ciderbitResponse.content);
+					ciderbit.dialogNotify(dialog, ciderbitResponse.title);
 				}
 				else {
 					$("#" + destId).children().remove();
-					$("#" + destId).append($("#" + xmcaResponse.contId, $(data)).children());
-					xmca.init(xmcaResponse.javascript);
+					$("#" + destId).append($("#" + ciderbitResponse.contId, $(data)).children());
+					ciderbit.init(ciderbitResponse.javascript);
 				}
 			}
 		});
 	},
 
 	"reloadComponents": function() {
-		$(".xmca_reload_form").each(function() {
+		$(".ciderbit_reload_form").each(function() {
 			$(this).submit();
 		});
 	},
@@ -330,40 +330,40 @@ var xmca = {
 		if (options.prefix == undefined) {
 			options.prefix = '';
 		}
-		xmca._setSort(options);
+		ciderbit._setSort(options);
 		$("#" + options.formId).submit();
 	},
 
 	"_inputFilters": new Array(),
 	
 	"_setFilter": function(options) {
-		if (xmca._inputFilters[options.ctrlId] == undefined) {
-			xmca._inputFilters[options.ctrlId] = new Array();
-			xmca._inputFilters[options.ctrlId]["path"] = $('<input type="hidden" class="xmca_filter xmca_filter_path" name="' + options.prefix + 'filters[' + options.ctrlId + '][path]" value="' + options.path + '"/>');
-			xmca._inputFilters[options.ctrlId]["lop"] = $('<input type="hidden" class="xmca_filter xmca_filter_lop" name="' + options.prefix + 'filters[' + options.ctrlId + '][lop]" value="AND"/>');
-			xmca._inputFilters[options.ctrlId]["rop"] = $('<input type="hidden" class="xmca_filter xmca_filter_rop" name="' + options.prefix + 'filters[' + options.ctrlId + '][rop]" value="' + options.rop + '"/>');
-			xmca._inputFilters[options.ctrlId]["value"] = $('<input type="hidden" class="xmca_filter xmca_filter_value" name="' + options.prefix + 'filters[' + options.ctrlId + '][value]" value=""/>');
+		if (ciderbit._inputFilters[options.ctrlId] == undefined) {
+			ciderbit._inputFilters[options.ctrlId] = new Array();
+			ciderbit._inputFilters[options.ctrlId]["path"] = $('<input type="hidden" class="ciderbit_filter ciderbit_filter_path" name="' + options.prefix + 'filters[' + options.ctrlId + '][path]" value="' + options.path + '"/>');
+			ciderbit._inputFilters[options.ctrlId]["lop"] = $('<input type="hidden" class="ciderbit_filter ciderbit_filter_lop" name="' + options.prefix + 'filters[' + options.ctrlId + '][lop]" value="AND"/>');
+			ciderbit._inputFilters[options.ctrlId]["rop"] = $('<input type="hidden" class="ciderbit_filter ciderbit_filter_rop" name="' + options.prefix + 'filters[' + options.ctrlId + '][rop]" value="' + options.rop + '"/>');
+			ciderbit._inputFilters[options.ctrlId]["value"] = $('<input type="hidden" class="ciderbit_filter ciderbit_filter_value" name="' + options.prefix + 'filters[' + options.ctrlId + '][value]" value=""/>');
 
-			$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["path"]);
-			$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["lop"]);
-			$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["rop"]);
-			$("#" + options.formId).append(xmca._inputFilters[options.ctrlId]["value"]);
+			$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["path"]);
+			$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["lop"]);
+			$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["rop"]);
+			$("#" + options.formId).append(ciderbit._inputFilters[options.ctrlId]["value"]);
 		}
-		if (xmca._inputFilters[options.ctrlId]["value"].val() == $("#"+options.ctrlId).val()) {
+		if (ciderbit._inputFilters[options.ctrlId]["value"].val() == $("#"+options.ctrlId).val()) {
 			return false;
 		} else {
-			xmca._inputFilters[options.ctrlId]["value"].val($("#"+options.ctrlId).val());
+			ciderbit._inputFilters[options.ctrlId]["value"].val($("#"+options.ctrlId).val());
 			return true;
 		}
 	},
 	
 	"_unsetFilter": function(ctrlId) {
-		if (xmca._inputFilters[ctrlId] != undefined) {
-			xmca._inputFilters[ctrlId]["path"].remove();
-			xmca._inputFilters[ctrlId]["lop"].remove();
-			xmca._inputFilters[ctrlId]["rop"].remove();
-			xmca._inputFilters[ctrlId]["value"].remove();
-			delete xmca._inputFilters[ctrlId];
+		if (ciderbit._inputFilters[ctrlId] != undefined) {
+			ciderbit._inputFilters[ctrlId]["path"].remove();
+			ciderbit._inputFilters[ctrlId]["lop"].remove();
+			ciderbit._inputFilters[ctrlId]["rop"].remove();
+			ciderbit._inputFilters[ctrlId]["value"].remove();
+			delete ciderbit._inputFilters[ctrlId];
 			return true;
 		}
 		return false;
@@ -376,20 +376,20 @@ var xmca = {
 		}
 		var reload = false;
 		if ($("#" + options.ctrlId).val() == "") {
-			xmca._unsetFilter(options.ctrlId);
+			ciderbit._unsetFilter(options.ctrlId);
 			reload = true;
 		} else {
-			reload = xmca._setFilter(options);
+			reload = ciderbit._setFilter(options);
 		}
 		if (reload) {
-			$(".xmca_paging", $("#" + options.formId)).remove();
+			$(".ciderbit_paging", $("#" + options.formId)).remove();
 			$("#" + options.formId).submit();
 		}
 	},
 
 	"paging": function (formId, page) {
-		$(".xmca_paging", $("#" + formId)).remove();
-		$("#" + formId).append($('<input type="hidden" class="xmca_paging" name="paging[page]" value="' + page + '"/>'));
+		$(".ciderbit_paging", $("#" + formId)).remove();
+		$("#" + formId).append($('<input type="hidden" class="ciderbit_paging" name="paging[page]" value="' + page + '"/>'));
 		$("#" + formId).submit();
 	},
 
@@ -401,30 +401,30 @@ var xmca = {
 			defaults.target.dialog("destroy");
 		}
 
-		xmcaResponse = xmca.getResponseObject(componentResponse);
+		ciderbitResponse = ciderbit.getResponseObject(componentResponse);
 
-		if (xmcaResponse.type == undefined) {
+		if (ciderbitResponse.type == undefined) {
 			defaults.target.append($('<h3>La risposta inviata dal server non e\' stata interpretata correttamente</h3>'));
-			xmca.dialogNotify(defaults.target, 'Errore interno')
+			ciderbit.dialogNotify(defaults.target, 'Errore interno')
 		}
 		
-		else if (xmcaResponse.type == "READ") {
+		else if (ciderbitResponse.type == "READ") {
 			
-			defaults.target.append(xmcaResponse.content);
+			defaults.target.append(ciderbitResponse.content);
 			
 			if (defaults.popup) {
-				xmca.dialogNotify(defaults.target, xmcaResponse.title, defaults.width);
+				ciderbit.dialogNotify(defaults.target, ciderbitResponse.title, defaults.width);
 			}
 			
-			xmca.init(xmcaResponse.javascript);
+			ciderbit.init(ciderbitResponse.javascript);
 			
-			defaults.onRead(xmcaResponse);
+			defaults.onRead(ciderbitResponse);
 			
 		}
 
-		else if (xmcaResponse.type == "FORM") {
+		else if (ciderbitResponse.type == "FORM") {
 
-			defaults.target.append(xmcaResponse.content);
+			defaults.target.append(ciderbitResponse.content);
 
 			// La risposta del componente è un form
 			buttons = new Array();
@@ -433,10 +433,10 @@ var xmca = {
 				okButtonStdHandler = function() {
 					var sent = 0;
 					if (defaults.waitMessages) {
-						xmca.waitDialogShow();
+						ciderbit.waitDialogShow();
 					}
-					$("#" + xmcaResponse.formId).ajaxSubmit({
-						url: xmcaResponse.address,
+					$("#" + ciderbitResponse.formId).ajaxSubmit({
+						url: ciderbitResponse.address,
 						beforeSubmit: function() {
 							sent++;
 							if (sent > 1) {
@@ -448,9 +448,9 @@ var xmca = {
 						},
 						success: function(newComponentResponse) {
 							if (defaults.waitMessages) {
-								xmca.waitDialogHide();
+								ciderbit.waitDialogHide();
 							}
-							xmca.stdHandler(newComponentResponse, defaults);
+							ciderbit.stdHandler(newComponentResponse, defaults);
 						}
 					});
 				}
@@ -478,9 +478,9 @@ var xmca = {
 
 			if (defaults.popup) {
 				defaults.target.dialog({
-					'dialogClass': "xmca_dialog",
+					'dialogClass': "ciderbit_dialog",
 					'position': "center",
-					'title': xmcaResponse.title,
+					'title': ciderbitResponse.title,
 					'modal': true,
 					'buttons': buttons,
 					'width': defaults.width,
@@ -508,30 +508,30 @@ var xmca = {
 				defaults.target.append(formControls);
 			}
 
-			xmca.init(xmcaResponse.javascript);
-			defaults.onForm(xmcaResponse);
+			ciderbit.init(ciderbitResponse.javascript);
+			defaults.onForm(ciderbitResponse);
 		}
 
-		else if (xmcaResponse.type == "NOTIFY") {
+		else if (ciderbitResponse.type == "NOTIFY") {
 			if (defaults.popup) {
 				defaults.target.remove();
 			} else {
 				defaults.target.children().remove();
 			}
 			
-			xmca.reloadComponents();
+			ciderbit.reloadComponents();
 
 			if (defaults.showResponse) {
 				dialog = $("<div></div>");
-				dialog.append(xmcaResponse.content);
-				xmca.dialogNotify(dialog, xmcaResponse.title);
+				dialog.append(ciderbitResponse.content);
+				ciderbit.dialogNotify(dialog, ciderbitResponse.title);
 				setTimeout(function() {dialog.dialog("close");}, 2000);
 			}
 
-			defaults.onSuccess(xmcaResponse);
+			defaults.onSuccess(ciderbitResponse);
 		}
 
-		else if (xmcaResponse.type == "ERROR") {
+		else if (ciderbitResponse.type == "ERROR") {
 			if (defaults.popup) {
 				defaults.target.remove();
 			} else {
@@ -539,10 +539,10 @@ var xmca = {
 			}
 			
 			dialog = $("<div></div>");
-			dialog.append(xmcaResponse.content);
-			xmca.dialogNotify(dialog, xmcaResponse.title);
+			dialog.append(ciderbitResponse.content);
+			ciderbit.dialogNotify(dialog, ciderbitResponse.title);
 
-			defaults.onError(xmcaResponse);
+			defaults.onError(ciderbitResponse);
 		}
 	},
 
@@ -558,10 +558,10 @@ var xmca = {
 			'target': null,
 			'popup': true,
 
-			'onForm': function(xmcaResponse) {},
-			'onRead': function(xmcaResponse) {},
-			'onSuccess': function(xmcaResponse) {},
-			'onError': function(xmcaResponse) {},
+			'onForm': function(ciderbitResponse) {},
+			'onRead': function(ciderbitResponse) {},
+			'onSuccess': function(ciderbitResponse) {},
+			'onError': function(ciderbitResponse) {},
 
 			'okButton': true,
 			'okButtonLabel': 'Save',
@@ -593,16 +593,16 @@ var xmca = {
 		
 		$.ajax({
 			'dataType': "html",
-			'url': xmca.rootPath + defaults.component + ".html",
+			'url': ciderbit.rootPath + defaults.component + ".html",
 			'data': defaults.args,
 			success: function(componentResponse) {
-				xmca.stdHandler(componentResponse, defaults);
+				ciderbit.stdHandler(componentResponse, defaults);
 			}
 		});
 	}
 }
 
-xmca.init();
+ciderbit.init();
 
 function ShowContent(content_id) {
 	$("#content_preview_" + content_id).hide();

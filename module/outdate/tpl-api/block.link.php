@@ -14,10 +14,10 @@
  *		string 'target': eventuale id elemento html designato a contenere la maschera (popup disabilitato),
  *		boolean 'popup': se true la maschera apparirà come popup,
  * ## HANDLES JS
- *		string 'onForm': function(xmcaResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto form
- *		string 'onRead': function(xmcaResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto read
- *		string 'onSuccess': function(xmcaResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto success
- *		string 'onError': function(xmcaResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto error
+ *		string 'onForm': function(ciderbitResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto form
+ *		string 'onRead': function(ciderbitResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto read
+ *		string 'onSuccess': function(ciderbitResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto success
+ *		string 'onError': function(ciderbitResponse) {}, funzione javascript da lanciare alla visualizzazione di contenuto error
  * ## OK BUTTON (FORM)
  *		boolean 'okButton': se true verrà visualizzato un bottone di conferma (per i form)
  *		string 'okButtonLabel': etichetta del bottone di conferma (default: 'Save') (per i form)
@@ -51,9 +51,9 @@ function smarty_block_link($params, $content, &$smarty, $repeat) {
 			if ($confirm) {
 				$confirmTitle = str_replace("'", "\\'", system\Utils::getParam('confirmTitle', $params, array('default' => '')));
 				$confirmQuest = str_replace("'", "\\'", system\Utils::getParam('confirmQuest', $params, array('default' => '')));
-				$action = "xmca.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
+				$action = "ciderbit.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
 			} else {
-				$action = "xmca.request(" . $jsArgs . "); return false;";
+				$action = "ciderbit.request(" . $jsArgs . "); return false;";
 			}
 		}
 		return '<a href="' . $url . '"' 

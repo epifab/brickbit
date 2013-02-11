@@ -100,7 +100,7 @@ class RecordsetBuilder {
 	 * Alias della tabella associata al nodo
 	 * @var string
 	 */
-	private $tableAlias = "xmca";
+	private $tableAlias = "ciderbit";
 	
 	/**
 	 * Espressione per la selezione della tabella
@@ -235,11 +235,11 @@ class RecordsetBuilder {
 				$name, 
 				'virtual',
 				$this,
-				$this->tableInfo['fields'][$name]
+				$this->tableInfo['virtuals'][$name]
 			);
 
-			$this->metaTypeList[$name] = $metaType;
-			return $metaType;
+			$this->metaTypeList[$name] = $v;
+			return $v;
 		}
 	}
 	
@@ -249,7 +249,7 @@ class RecordsetBuilder {
 				$this->loadMetaType($name);
 			}
 			foreach ($this->tableInfo["virtuals"] as $name => $info) {
-				$this->loadMetaType($name);
+				$this->loadVirtual($name);
 			}
 			return $this->getMetaTypeList();
 		}
@@ -271,6 +271,9 @@ class RecordsetBuilder {
 
 			$this->metaTypeList[$name] = $metaType;
 			return $metaType;
+		}
+		else {
+			return $this->loadVirtual($name);
 		}
 	}
 	
@@ -1092,67 +1095,54 @@ class RecordsetBuilder {
 		$this->addRecordModeFilters("delete");
 	}
 	
-	private function addRecordModeFilters($mode_type) {
+	private function addRecordModeFilters($modeType) {
 		if ($this->isRecordModed()) {
-			$mode = $mode_type . "_mode";
-
-			// CONDIZIONE 1: record mode > NOBODY
-			$rmFilter = new FilterClauseGroup(
-				new FilterClause($this->record_mode->$mode, ">", \system\model\RecordMode::MODE_NOBODY)
-			);
+      $mode = $modeType . "_mode";
 			
-			// Tolta la condizione 1, se l'utente è un superutente, non c'è nient'altro da verificare
-			if (!\system\Login::isSuperuser()) {
-				// SOLTANTO SE l'utente NON e' un un SUPERUSER
-				// l'accesso si restringe a queste condizioni:
-				// modalità = ANYONE
-				// OPPURE modalità >= ADMINS e utente nel gruppo del record
-				// OPPURE modalità >= OWNER e utente owner
-
-				$anyoneFilter = new FilterClause($this->record_mode->$mode, "=", \system\model\RecordMode::MODE_ANYONE);
-
-				if (!\system\Login::isLogged()) {
-					$registeredFilter = new FilterClause($this->record_mode->mode, ">=", \system\model\RecordMode::MODE_REGISTERED);
-					
-					$adminsFilter = new FilterClauseGroup(
-						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ADMINS),
-						"AND",
-						new FilterClauseGroup(
-							new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT user_id FROM record_mode_user WHERE record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName()),
-							"OR",
-							new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT ur.user_id FROM record_mode_role rmr INNER JOIN user_role ur ON ur.role_id = rmr.role_id WHERE rmr.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName())
-						)
-					);
-
-					$ownerFilter = new FilterClauseGroup(
-						new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER),
-						"AND",
-						new FilterClause($this->record_mode->owner_id, "=", \system\Login::getLoggedUserId())
-					);
-
-					// unisco tutte le condizioni
-					$rmFilter->addClauses("AND", new FilterClauseGroup(
-						$anyoneFilter,
-						"OR",
-						$registeredFilter,
-						"OR",
-						$ownerFilter,
-						"OR",
-						$adminsFilter
-					));
-				} else {
-					$rmFilter->addClauses("AND", $anyoneFilter);
-				}
+			if (\system\Login::isSuperuser()) {
+				// SUPERUSER -> just make sure the record mode is >= than MODE_SU
+				$this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_SU));
+				return;
 			}
-
-			$oldFilter = $this->getFilter();
-
-			if (\is_null($oldFilter)) {
-				$this->setFilter($rmFilter);
+			
+			else if (\system\Login::isAnonymous()) {
+				// NOT LOGGED -> not logged user can access the recordset only when record mode is = MODE_ANYONE
+				$this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_ANYONE));
+				return;
 			}
+			
 			else {
-				$newFilter = new FilterClauseGroup($oldFilter, "AND", $rmFilter);
-				$this->setFilter($newFilter);
+				// GENERIC LOGGED USER
+				//  logged users can access the recordset when
+				//   1) the user owns the recordset and the record mode is >= than MODE_SU_OWNER
+				//   2) the user is amid the recordset admininstrators and the record mode is >= than MODE_SU_OWNER_ADMINS 
+				//   3) the record mode is >= than MODE_REGISTERED 
+				$registeredFilter = new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_REGISTERED);
+				
+				$adminsFilter = new FilterClauseGroup(
+					new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ADMINS),
+					"AND",
+					new FilterClauseGroup(
+						new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT user_id FROM record_mode_user rmu WHERE rmu.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName()),
+						"OR",
+						new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT ur.user_id FROM record_mode_role rmr INNER JOIN user_role ur ON ur.role_id = rmr.role_id WHERE rmr.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName())
+					)
+				);
+				
+				$ownerFilter = new FilterClauseGroup(
+					new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER),
+					"AND",
+					new FilterClause($this->record_mode->owner_id, "=", \system\Login::getLoggedUserId())
+				);
+				
+				$this->addFilter(new FilterClauseGroup(
+					$registeredFilter,
+					'OR',
+					$adminsFilter,
+					'OR',
+					$ownerFilter
+				));
+				return;
 			}
 		}
 	}

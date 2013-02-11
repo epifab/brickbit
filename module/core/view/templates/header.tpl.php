@@ -3,8 +3,7 @@
 			<li><?php $this->api->open('link',array(
 						'url' => "content/add/page",
 						'title' => 'Your account'
-					)); ?>
-					account<?php $this->api->close(); ?>
+					)); ?>account<?php echo $this->api->close(); ?>
 			</li>
 		</ul>
 	</div>
@@ -13,10 +12,10 @@
 		<div id="header">
 			<h1 id="header-title">
 				<?php $this->api->open('link', array(
-					 'url' => '',
+					'url' => '',
 					'ajax' => false
-				)); ?><img src="<?php $this->api->theme_path("img/logo.png"); ?>" alt="<?php print $website['title']; ?>"/>
-				<?php $this->api->close(); ?>
+				)); ?><img src="<?php echo $this->api->theme_path("img/logo.png"); ?>" alt="<?php echo $website['title']; ?>"/>
+				<?php echo $this->api->close(); ?>
 			</h1>
 			<?php // <h2 id="header-subtitle"><span><{$website.subtitle </span></h2> ?>
 
@@ -25,14 +24,14 @@
 					'name' => "header-sidebar"
 				)); ?>
 					<div id="header-sidebar-login">
-						<?php if (!$user->id): ?>
+						<?php if (!$user): ?>
 							<li><?php $this->api->open('link', array(
 									'url' => 'user/login',
 									'okButtonLabel' => $this->api->t("Login"),
 									'width' => 300,
 									'showResponse' => false
-								)); ?><img src="<?php print $this->api->theme_path("img/login.jpg"); ?>" alt="Login"/>
-								<?php $this->api->close(); ?>
+								)); ?><img src="<?php echo $this->api->theme_path("img/login.jpg"); ?>" alt="Login"/>
+								<?php echo $this->api->close(); ?>
 							</li>
 						<?php else: ?>
 							<li>
@@ -41,21 +40,21 @@
 									'okButtonLabel' => $this->api->t('Logout'),
 									'width' => 300,
 									'showResponse' => false
-								)); ?><img src="<?php print $this->api->theme_path('img/logout.jpg'); ?>" alt="Logout"/>
-								<?php $this->tpl->close(); ?>
+								)); ?><img src="<?php echo $this->api->theme_path('img/logout.jpg'); ?>" alt="Logout"/>
+								<?php echo $this->tpl->close(); ?>
 							</li>
 						<?php endif; ?>
 					</div>
 					<div id="header-sidebar-langs">
 						<?php foreach ($system['langs'] as $lang): ?>
 							<?php if ($lang != $system['lang']): ?>
-							<a href="http://<?php print $this->api->lang_link($lang); ?>">
-								<img alt="<?php print $lang; ?>" src="<?php print $this->api->theme_path('img/lang/40/' . $lang . '.jpg'); ?>"/>
+							<a href="<?php echo $this->api->lang_path($lang); ?>">
+								<img alt="<?php echo $lang; ?>" src="<?php echo $this->api->theme_path('img/lang/40/' . $lang . '.jpg'); ?>"/>
 							</a>
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</div>
-				<?php $this->api->close(); ?>
+				<?php echo $this->api->close(); ?>
 			</div>
 		</div>
 	</div>
@@ -63,14 +62,14 @@
 	<div id="main-menu-wrapper">
 		<ul id="main-menu">
 			<?php foreach ($page['mainMenu'] as $menuItem): ?>
-				<li <?php if ($page['url'] == $menuItem['url']): ?>class="selected" <?php endif; ?>id="item-<?php print $menuItem['id']; ?>">
+				<li <?php if ($page['url'] == $menuItem['url']): ?>class="selected" <?php endif; ?>id="item-<?php echo $menuItem['id']; ?>">
 					<?php $this->api->open('link', array(
 						'ajax' => false,
 						'url' => $menuItem['url']
-					)); ?><?php print $menuItem['title']; ?><?php $this->api->close(); ?>
+					)); ?><?php echo $menuItem['title']; ?><?php echo $this->api->close(); ?>
 				</li>
 			<?php endforeach; ?>
-			<?php $this->api->open('protected', array('url' => 'content/add/page')); ?>
+			<?php if ($this->api->access('content/add/page')): ?>
 				<li>
 					<?php $this->api->open('link', array(
 						'url' => 'content/add/page',
@@ -79,8 +78,8 @@
 						'title' => $this->api->t('Create a new page')
 					)); ?>
 						Create a new page
-					<?php $this->api->close(); ?>
+					<?php echo $this->api->close(); ?>
 				</li>
-			<?php $this->api->close(); // protected ?>
+			<?php endif; ?>
 		</ul>
 	</div>

@@ -1,14 +1,14 @@
-<{xmca_edit_form}>
+<{ciderbit_edit_form}>
 <{if $recordset->id}>
 <input type="hidden" name="id" value="<{$recordset->getEdit('id')}>"/>
 <{/if}>
-<{xmca_javascript}>
+<{ciderbit_javascript}>
 $(document).ready(function() {
 	EditPageLang('<{$private.defaultLang}>');
 });
-<{/xmca_javascript}>
+<{/ciderbit_javascript}>
 
-<table class="xmca_dataedit">
+<table class="ciderbit_dataedit">
 	<tr>
 		<th class="label">URL</th>
 		<td class="input">
@@ -43,7 +43,7 @@ $(document).ready(function() {
 	<tr>
 		<th class="label">Lingua</th>
 		<td class="input">
-			<div class="xmca_languages_input">
+			<div class="ciderbit_languages_input">
 				<{foreach $private.languages as $lang}>
 				<a href="javascript:EditPageLang('<{$lang}>')" id="lang_control_<{$lang}>" class="lang_control"><img src="<{theme}>img/lang/40/<{$lang}>.jpg"/></a>
 				<{/foreach}>
@@ -169,8 +169,8 @@ $(document).ready(function() {
 	
 	<{if !$private.isAjaxRequest}>
 	<tr>
-		<th class="controls" colspan="2"><input type="submit" class="xmca_control xxl" value="Invia"/></th>
+		<th class="controls" colspan="2"><input type="submit" class="ciderbit_control xxl" value="Invia"/></th>
 	</tr>
 	<{/if}>
 </table>
-<{/xmca_edit_form}>
+<{/ciderbit_edit_form}>

@@ -7,5 +7,5 @@
 	contId="<{$private.contId}>"
 	id="<{$private.requestId}>">
 	<content><{include file=$private.mainTemplate}></content>
-	<javascript><{xmca_get_javascript}></javascript>
+	<javascript><{ciderbit_get_javascript}></javascript>
 </response>

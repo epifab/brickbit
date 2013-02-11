@@ -3,6 +3,10 @@ namespace system\model;
 
 class MetaString extends MetaType {
 	public static function stdProg2Db($x) {
+		return "'" . \system\model\DataLayerCore::getInstance()->sqlRealEscapeStrings($x) . "'";
+	}
+	
+	public function prog2Db($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
 			if (\is_array($x)) {
 				$x = \serialize($x);
@@ -21,10 +25,6 @@ class MetaString extends MetaType {
 		} else {
 			return "'" . \system\model\DataLayerCore::getInstance()->sqlRealEscapeStrings($x) . "'";
 		}
-	}
-	
-	public function prog2Db($x) {
-		return self::stdProg2Db($x);
 	}
 	
 	public function db2Prog($x) {

@@ -9,7 +9,6 @@ use system\model\SortClause;
 
 class Model {
 	public static function metaTypesMap() {
-		echo "x";
 		return array(
 			'html' => '\module\core\model\MetaHTML',
 			'plaintext' => '\system\model\MetaString'

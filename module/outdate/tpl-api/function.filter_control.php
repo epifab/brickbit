@@ -22,7 +22,7 @@ function smarty_function_filter_control($params, &$smarty) {
 	
 	$id = "system-" . $vars["private"]["requestId"] . "-filter-control-" . $count[$vars["private"]["requestId"]];
 	$class = 'system-filter-control';
-	$onkeyup = "xmca.filter({formId: '$formId', path: '$path', rop: '$type', ctrlId: '$ctrlId', prefix: '$prefix'});";
+	$onkeyup = "ciderbit.filter({formId: '$formId', path: '$path', rop: '$type', ctrlId: '$ctrlId', prefix: '$prefix'});";
 	
 	$output .= '<input class="' . $class . '" name="" size="' . $size . '" id="' . $id . '" type="text" value="' . @$_REQUEST["filters"][$ctrlId]["value"] . '" onkeyup="' . $onkeyup . '"/>';
 	return $output;

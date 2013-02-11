@@ -1,5 +1,5 @@
 <?php
-namespace xmca;
+namespace ciderbit;
 
 require_once "install/Config.php";
 require_once "install/Install.php";

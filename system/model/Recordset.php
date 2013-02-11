@@ -186,12 +186,13 @@ class Recordset implements RecordsetInterface {
 		}
 	}
 
-	public function setProg($name, $value) {
-		if (\array_key_exists($name, $this->fields)) {
+	public function setProg($path, $value) {
+		list($rs, $name) = $this->searchParent($path, true);
+		if (\array_key_exists($name, $rs->fields)) {
 			if (!$this->getBuilder()->searchMetaType($name)->isVirtual()) {
-				$this->modifiedFields[$name] = $value;
+				$rs->modifiedFields[$name] = $value;
 			}
-			$this->fields[$name] = $value;
+			$rs->fields[$name] = $value;
 		} else {
 			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $name)));
 		}
@@ -228,28 +229,32 @@ class Recordset implements RecordsetInterface {
 
 	public function setEdit($path, $value) {
 		list($rs, $name) = $this->searchParent($path, true);
-		if (\array_key_exists($name, $rs->fields)) {
-			$metaType = $rs->builder->searchMetaType($name);
-			if ($metaType instanceof MetaVirtual) {
-				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@path</em> value (virtual field).', array("@path" => $name)));
-			}
-			$rs->modifiedFields[$name] = $metaType->edit2Prog($value);
-		} else {
-			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> not found.', array("@path" => $name)));
-		}
+		$rs->setProg($name, $value);
+		$rs->modifiedFields[$name] = $value;
+		
+//		list($rs, $name) = $this->searchParent($path, true);
+//		if (\array_key_exists($name, $rs->fieslds)) {
+//			$metaType = $rs->builder->searchMetaType($name);
+//			if ($metaType instanceof MetaVirtual) {
+//				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@path</em> value (virtual field).', array("@path" => $name)));
+//			}
+//			$rs->modifiedFields[$name] = $metaType->edit2Prog($value);
+//		} else {
+//			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> not found.', array("@path" => $name)));
+//		}
 	}
 	
-	public function getEdit($path) {
-		$progValue = $rs->getProg($path);
-		$metaType = $rs->builder->searchMetaType($path);
-		return $metaType->prog2Edit($progValue);
-	}
-	
-	public function getRead($path) {
-		$progValue = $this->getProg($path);
-		$metaType = $this->builder->searchMetaType($path);
-		return $metaType->prog2Read($progValue);
-	}
+//	public function getEdit($path) {
+//		$progValue = $rs->getProg($path);
+//		$metaType = $rs->builder->searchMetaType($path);
+//		return $metaType->prog2Edit($progValue);
+//	}
+//	
+//	public function getRead($path) {
+//		$progValue = $this->getProg($path);
+//		$metaType = $this->builder->searchMetaType($path);
+//		return $metaType->prog2Read($progValue);
+//	}
 	
 	public function save($readMode=null, $editMode=null, $deleteMode=null) {
 		if (!$this->isStored()) {

@@ -77,7 +77,14 @@ class TemplateManager implements TemplateManagerInterface {
 			return;
 		}
 		
-		$tpl->render();
+		try {
+			\ob_start();
+			$tpl->render();
+			\ob_flush();
+		} catch (\Exception $ex) {
+			while (\ob_get_clean()); // erase output buffer
+			throw $ex;
+		}
 	}	
 }
 

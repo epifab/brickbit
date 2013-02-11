@@ -1,6 +1,6 @@
-<{xmca_edit_form}>
+<{ciderbit_edit_form}>
 
-<table class="xmca_dataedit">
+<table class="ciderbit_dataedit">
 	<tr>
 		<th>Email</th>
 		<td>
@@ -9,4 +9,4 @@
 		</td>
 	</tr>
 </table>
-<{/xmca_edit_form}>
+<{/ciderbit_edit_form}>

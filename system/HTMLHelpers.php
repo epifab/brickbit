@@ -79,7 +79,6 @@ class HTMLHelpers {
 	 */
 	public static function makeErrorPage(\system\view\TemplateManager $templateManager, $datamodel, $mainException, $executionTime=0) {
 		$msg = "";
-		
 		$exception = $mainException;
 		
 		if ($exception->getCode() != ErrorCodes::AUTHORIZATION) {

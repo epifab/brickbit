@@ -20,7 +20,7 @@ function smarty_function_sort_control($params, &$smarty) {
 	
 	$id = 'system-' . $vars['system']['requestId'] . '-sort-control-' . $count[$vars['system']['requestId']];
 	$class = 'system-sort-control system-sort-' . $type;
-	$onclick = "xmca.sort({formId: '" . $formId . "', path: '" . $path . "', type: '" . $type . "', prefix: '" . $prefix . "'});";
+	$onclick = "ciderbit.sort({formId: '" . $formId . "', path: '" . $path . "', type: '" . $type . "', prefix: '" . $prefix . "'});";
 	
 	$output .= '<button id="' . $id . '" class="' . $class . '" onclick="' . $onclick . '">' . \system\Lang::translate('Sort @type', array('type' => $type)) . '</button>';
 	return $output;

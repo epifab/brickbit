@@ -23,8 +23,8 @@ function settings() {
 }
 
 /**
- * Config class for the XMCA application
- * XMCA PHP Generator 0.1 - Auto generated code
+ * Config class for the ciderbit application
+ * ciderbit PHP Generator 0.1 - Auto generated code
  * @author episoft
  */
 class Config {
@@ -153,13 +153,13 @@ class Config {
 	}
 	
 	
-	// caricamento automatico di classi del framework xmca
+	// caricamento automatico di classi del framework ciderbit
 	public static function autoload($name) {
 		$path = \str_replace('\\', DIRECTORY_SEPARATOR, $name);
 		if (\file_exists($path . ".php")) {
 			require_once $path . ".php";
 		}
-//		if (count($namespaces) == 3 && $namespaces[0] == "xmca") {
+//		if (count($namespaces) == 3 && $namespaces[0] == "ciderbit") {
 //			switch ($namespaces[1]) {
 //				case "model":
 //				case "controller":
