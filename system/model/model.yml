@@ -208,26 +208,26 @@ tables:
   #        0: Nobody
   #        1: Superuser
           2: Owner only
-          3: Admins
-          4: Registered
+          3: Administrators
+          4: Registered users
           5: Anyone
       edit_mode:
         type: integer
         options:
   #        0: Nobody
           1: Superuser
-          2: Owner
-          3: Admins
-          4: Registered
+          2: Owner only
+          3: Administrators
+          4: Registered users
           5: Anyone
       delete_mode:
         type: integer
         options:
   #        0: Nobody
           1: Superuser
-          2: Owner
-          3: Admins
-          4: Registered
+          2: Owner only
+          3: Administrators
+          4: Registered users
           5: Anyone
     keys:
       primary:

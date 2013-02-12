@@ -19,7 +19,7 @@ class Main {
 		$WEIGHTS = array();
 		
 		$MODULES = array();
-		$EVENTS = array();
+//		$EVENTS = array();
 		$MODEL_CLASSES = array();
 		$VIEW_CLASSES = array();
 		$URLS = array();
@@ -181,11 +181,11 @@ class Main {
 						);
 					}
 				}
-				foreach ($module['events'] as $eventName) {
-					if (\array_key_exists($eventName, $EVENTS)) {
-						$EVENTS[$eventName][] = $module['class'];
-					}
-				}
+//				foreach ($module['events'] as $eventName) {
+//					if (\array_key_exists($eventName, $EVENTS)) {
+//						$EVENTS[$eventName][] = $module['class'];
+//					}
+//				}
 				if ($module['modelClass']) {
 					$MODEL_CLASSES[] = $module['modelClass'];
 				}
@@ -203,7 +203,7 @@ class Main {
 		return array(
 			'modules' => $MODULES,
 			'urls' => $URLS,
-			'events' => $EVENTS,
+//			'events' => $EVENTS,
 			'tables' => self::loadModelCfg($MODULES),
 			'modelClasses' => $MODEL_CLASSES,
 			'templates' => self::loadViewCfg($MODULES),
@@ -518,11 +518,25 @@ class Main {
 	public static function raiseEvent($eventName) {
 		$configuration = self::configuration();
 		$result = array();
-		if (\array_key_exists($eventName, $configuration["events"])) {
-			foreach ($configuration["events"][$eventName] as $class) {
-				$result[] = \func_num_args() == 1
+		
+		if (\func_num_args() > 1) {
+			$args = \func_get_args();
+			\array_shift($args);
+		} else {
+			$args = null;
+		}
+		
+		foreach ($configuration['modules'] as $module) {
+			$class = $module['class'];
+			if (\method_exists($class, $eventName)) {
+				$x = \is_null($args)
 					? \call_user_func(array($class, $eventName))
-					: \call_user_func_array(array($class, $eventName), \array_shift(\func_get_args()));
+					: \call_user_func_array(array($class, $eventName), $args);
+				if (\is_null($x)) {
+					// do nothing
+				} else {
+					$result[] = $x;
+				}
 			}
 		}
 		return $result;
@@ -533,9 +547,14 @@ class Main {
 		$result = array();
 		foreach ($c['modelClasses'] as $class) {
 			if (\method_exists($class, $eventName)) {
-				$result[] = \func_num_args() == 1
+				$x = \func_num_args() == 1
 					? \call_user_func(array($class, $eventName))
 					: \call_user_func_array(array($class, $eventName), \array_shift(\func_get_args()));
+				if (\is_null($x)) {
+					// do nothing
+				} else {
+					$result[] = $x;
+				}
 			}
 		}
 		return $result;

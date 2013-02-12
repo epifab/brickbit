@@ -276,7 +276,7 @@ class Recordset implements RecordsetInterface {
 	 */
 	public function create($readMode=null, $editMode=null, $deleteMode=null) {
 		
-		\system\Main::raiseModel("onCreate", $this);
+		\system\Main::raiseModelEvent("onCreate", $this);
 		
 		if ($this->builder->isRecordModed()) {
 			$this->createRecordMode($readMode, $editMode, $deleteMode);
@@ -322,7 +322,7 @@ class Recordset implements RecordsetInterface {
 	public function update($readMode=null, $editMode=null, $deleteMode=null) {
 		$q1 = "";
 		
-		\system\Main::raiseModel("onUpdate", $this);
+		\system\Main::raiseModelEvent("onUpdate", $this);
 
 		if (!$this->isStored()) {
 			throw new \system\InternalErrorException(\system\Lang::translate('Recordset does not exist.'));
@@ -353,7 +353,7 @@ class Recordset implements RecordsetInterface {
 		if (!$this->isStored()) {
 			return;
 		}
-		\system\Main::raiseModel("onDelete", $this);
+		\system\Main::raiseModelEvent("onDelete", $this);
 		
 		$query = "DELETE FROM " . $this->builder->getTableName() . " WHERE " . $this->filterByPrimaryClause();
 		$dataAccess = DataLayerCore::getInstance();

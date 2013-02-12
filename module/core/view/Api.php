@@ -3,6 +3,18 @@
 namespace module\core\view;
 
 class Api {
+	public static function panel_form_id() {
+		return \system\view\Panels::getInstance()->getFormId();
+	}
+	
+	public static function panel_form_name() {
+		return \system\view\Panels::getInstance()->getFormName();
+	}
+	
+	public static function edit_form_id() {
+		$vars = \system\view\Template::current()->getVars();
+		return 'system-edit-form-' . $vars['system']['component']['requestId'];
+	}
 
 	public static function generate_input_id($path) {
 		static $ids = array();

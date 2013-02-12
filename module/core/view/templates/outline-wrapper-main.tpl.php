@@ -1,11 +1,11 @@
 <response
-	type="<{$system.responseType}>"
-	url="<{$system.component.url}>"
-	title="<{$page.title}>"
-	editFormId="<{edit_form_id}>"
-	panelFormId="<{panel_form_id}>"
-	panelFormName="<{panel_form_name}>"
-	id="<?php print $system['component']['requestId']; ?>">
-	<content><?php $this->api->include($system['templates']['main']); ?></content>
-	<javascript><?php $this->api->javascript(); ?></javascript>
+	type="<?php echo $system['responseType']; ?>"
+	url="<?php echo $system['component']['url']; ?>"
+	title="<?php echo $page['title']; ?>"
+	editFormId="<?php echo $this->api->edit_form_id(); ?>"
+	panelFormId="<?php echo $this->api->panel_form_id(); ?>"
+	panelFormName="<?php echo $this->api->panel_form_name(); ?>"
+	id="<?php echo $system['component']['requestId']; ?>">
+	<content><?php $this->api->load($system['templates']['main']); ?></content>
+	<javascript><?php echo $this->api->jss(); ?></javascript>
 </response>

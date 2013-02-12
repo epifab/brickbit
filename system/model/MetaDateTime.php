@@ -12,7 +12,7 @@ class MetaDateTime extends MetaType {
 				return "'" . \date($this->sqlFormat) . "'";
 			}
 		} else {
-			return \date($this->sqlFormat, $x);
+			return "'" . \date($this->sqlFormat, $x) . "'";
 		}
 	}
 	

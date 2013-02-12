@@ -41,7 +41,7 @@
 									'width' => 300,
 									'showResponse' => false
 								)); ?><img src="<?php echo $this->api->theme_path('img/logout.jpg'); ?>" alt="Logout"/>
-								<?php echo $this->tpl->close(); ?>
+								<?php echo $this->api->close(); ?>
 							</li>
 						<?php endif; ?>
 					</div>

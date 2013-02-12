@@ -35,15 +35,15 @@ class User extends Page {
 			try {
 				$user = \system\Login::login();
 			} catch (\system\LoginException $ex) {
-				$this->datamodel["errorMessage"] = $ex->getMessage();
+				$this->datamodel['message'] = $ex->getMessage();
 			}
 		}
 		
 		if ($user) {
 			$this->setMainTemplate('notify');
-			$this->datamodel["message"] = array(
+			$this->datamodel['message'] = array(
 				'title' => \system\Lang::translate('Logged in'),
-				'body' => \system\Lang::translate('<p>Welcome @name!</p>', array('@name' => $user->getRead('full_name')))
+				'body' => \system\Lang::translate('<p>Welcome @name!</p>', array('@name' => $user->full_name))
 			);
 			return \system\logic\Component::RESPONSE_TYPE_NOTIFY;	
 		}

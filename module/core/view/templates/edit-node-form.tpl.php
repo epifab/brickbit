@@ -1,96 +1,96 @@
 <?php /*
-<form class="dataedit" id="fileupload" action="<?php print $this->api->path('file/upload'); ?>" method="POST" enctype="multipart/form-data">
-	<fieldset>
-		<legend>Attachement</legend>
-		<div class="de-row">
-			<div class="de-cell">
-				<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-				<div class="row fileupload-buttonbar">
-					<div class="span7">
-						<!-- The fileinput-button span is used to style the file input field as button -->
-						<span class="btn btn-success fileinput-button">
-							<i class="icon-plus icon-white"></i>
-							<span>Add files...</span>
-							<input type="file" name="files[]" multiple>
-						</span>
-						<button type="submit" class="btn btn-primary start">
-							<i class="icon-upload icon-white"></i>
-							<span>Start upload</span>
-						</button>
-						<button type="reset" class="btn btn-warning cancel">
-							<i class="icon-ban-circle icon-white"></i>
-							<span>Cancel upload</span>
-						</button>
-						<button type="button" class="btn btn-danger delete">
-							<i class="icon-trash icon-white"></i>
-							<span>Delete</span>
-						</button>
-						<input type="checkbox" class="toggle">
-					</div>
-					<!-- The global progress information -->
-					<div class="span5 fileupload-progress fade">
-						<!-- The global progress bar -->
-						<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-							<div class="bar" style="width:0%;"></div>
-						</div>
-						<!-- The extended global progress information -->
-						<div class="progress-extended">&nbsp;</div>
-					</div>
-				</div>
-				<!-- The loading indicator is shown during file processing -->
-				<div classs="fileupload-loading"></div>
-				<!-- The table listing the files available for upload/download -->
-				<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-			</div>
-		</div>
-	</fieldset>
+<form class="dataedit" id="fileupload" action="<{path url="file/upload"}>" method="POST" enctype="multipart/form-data">
+        <fieldset>
+                <legend>Attachement</legend>
+                <div class="de-row">
+                        <div class="de-cell">
+                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                                <div class="row fileupload-buttonbar">
+                                        <div class="span7">
+                                                <!-- The fileinput-button span is used to style the file input field as button -->
+                                                <span class="btn btn-success fileinput-button">
+                                                        <i class="icon-plus icon-white"></i>
+                                                        <span>Add files...</span>
+                                                        <input type="file" name="files[]" multiple>
+                                                </span>
+                                                <button type="submit" class="btn btn-primary start">
+                                                        <i class="icon-upload icon-white"></i>
+                                                        <span>Start upload</span>
+                                                </button>
+                                                <button type="reset" class="btn btn-warning cancel">
+                                                        <i class="icon-ban-circle icon-white"></i>
+                                                        <span>Cancel upload</span>
+                                                </button>
+                                                <button type="button" class="btn btn-danger delete">
+                                                        <i class="icon-trash icon-white"></i>
+                                                        <span>Delete</span>
+                                                </button>
+                                                <input type="checkbox" class="toggle">
+                                        </div>
+                                        <!-- The global progress information -->
+                                        <div class="span5 fileupload-progress fade">
+                                                <!-- The global progress bar -->
+                                                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                                        <div class="bar" style="width:0%;"></div>
+                                                </div>
+                                                <!-- The extended global progress information -->
+                                                <div class="progress-extended">&nbsp;</div>
+                                        </div>
+                                </div>
+                                <!-- The loading indicator is shown during file processing -->
+                                <div classs="fileupload-loading"></div>
+                                <!-- The table listing the files available for upload/download -->
+                                <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+                        </div>
+                </div>
+        </fieldset>
 </form>
 */ ?>
 
-<form class="dataedit" id="fileupload" action="<?php print $this->api->path('file/upload'); ?>" method="POST" enctype="multipart/form-data">
-	<fieldset>
-		<legend><?php print $this->api->t("Image"); ?></legend>
-		<div class="de-row">
-			<div class="de-label-wrapper">
-				<span class="de-label"><?php $this->api->t("Image"); ?></span>
-			</div>
-			<div class="de-input-wrapper">
-				<input type="hidden" name="system[requestId]" value="<?php print $system['component']['requestId']; ?>"/>
-				<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-				<div class="row fileupload-buttonbar">
-					<div class="span7">
-						<!-- The fileinput-button span is used to style the file input field as button -->
-						<span class="btn btn-success fileinput-button">
-							<i class="icon-plus icon-white"></i>
-							<span>Add file...</span>
-							<input type="file" name="files[]" multiple>
-						</span>
-						<button type="submit" class="btn btn-primary start">
-							<i class="icon-upload icon-white"></i>
-							<span>Start upload</span>
-						</button>
-						<button type="reset" class="btn btn-warning cancel">
-							<i class="icon-ban-circle icon-white"></i>
-							<span>Cancel upload</span>
-						</button>
-					</div>
-					<!-- The global progress information -->
-					<div class="span5 fileupload-progress fade">
-						<!-- The global progress bar -->
-						<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-							<div class="bar" style="width:0%;"></div>
-						</div>
-						<!-- The extended global progress information -->
-						<div class="progress-extended">&nbsp;</div>
-					</div>
-				</div>
-				<!-- The loading indicator is shown during file processing -->
-				<div classs="fileupload-loading"></div>
-				<!-- The table listing the files available for upload/download -->
-				<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-			</div>
-		</div>
-	</fieldset>
+<form class="dataedit" id="fileupload" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
+        <fieldset>
+                <legend><?php echo $this->api->t("Image"); ?></legend>
+                <div class="de-row">
+                        <div class="de-label-wrapper">
+                                <span class="de-label"><?php echo $this->api->t("Image"); ?></span>
+                        </div>
+                        <div class="de-input-wrapper">
+                                <input type="hidden" name="system[requestId]" value="<?php echo $system['component']['requestId']; ?>"/>
+                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                                <div class="row fileupload-buttonbar">
+                                        <div class="span7">
+                                                <!-- The fileinput-button span is used to style the file input field as button -->
+                                                <span class="btn btn-success fileinput-button">
+                                                        <i class="icon-plus icon-white"></i>
+                                                        <span>Add file...</span>
+                                                        <input type="file" name="files[]" multiple>
+                                                </span>
+                                                <button type="submit" class="btn btn-primary start">
+                                                        <i class="icon-upload icon-white"></i>
+                                                        <span>Start upload</span>
+                                                </button>
+                                                <button type="reset" class="btn btn-warning cancel">
+                                                        <i class="icon-ban-circle icon-white"></i>
+                                                        <span>Cancel upload</span>
+                                                </button>
+                                        </div>
+                                        <!-- The global progress information -->
+                                        <div class="span5 fileupload-progress fade">
+                                                <!-- The global progress bar -->
+                                                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                                        <div class="bar" style="width:0%;"></div>
+                                                </div>
+                                                <!-- The extended global progress information -->
+                                                <div class="progress-extended">&nbsp;</div>
+                                        </div>
+                                </div>
+                                <!-- The loading indicator is shown during file processing -->
+                                <div classs="fileupload-loading"></div>
+                                <!-- The table listing the files available for upload/download -->
+                                <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+                        </div>
+                </div>
+        </fieldset>
 </form>
 
 <!-- The template to display files available for upload -->
@@ -144,7 +144,7 @@
             <td colspan="2"></td>
         {% } %}
         <td class="delete">
-            <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}"{% if (file.delete_with_credentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %?>
+            <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}"{% if (file.delete_with_credentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
                 <i class="icon-trash icon-white"></i>
                 <span>Delete</span>
             </button>
@@ -161,15 +161,16 @@
 <!-- jQuery Image Gallery -->
 <script src="http://blueimp.github.com/jQuery-Image-Gallery/js/jquery.image-gallery.min.js"></script>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.iframe-transport.js'); ?>"></script>
+<script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.iframe-transport.js"); ?>"></script>
 <!-- The basic File Upload plugin -->
-<script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload.js'); ?>"></script>
+<script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload.js"); ?>"></script>
 <!-- The File Upload file processing plugin -->
-<script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload-fp.js'); ?>"></script>
+<script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-fp.js"); ?>"></script>
 <!-- The File Upload user interface plugin -->
-<script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload-ui.js'); ?>"></script>
+<script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-ui.js"); ?>"></script>
 <!-- The File Upload jQuery UI plugin -->
-<script src="<?php print $this->api->path('js/jquery-file-upload/js/jquery.fileupload-jui.js'); ?>"></script>
+<script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-jui.js"); ?>"></script>
+
 
 <?php $this->api->open('de_form'); ?>
 	<div class="dataedit">
@@ -201,7 +202,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php $this->api->textbox($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
+							<?php echo $this->api->textbox($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("Once you choose a URN you shouldn't change it anymore."); ?><br/>

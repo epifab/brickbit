@@ -12,11 +12,44 @@ use \system\model\SortClauseGroup;
 
 class Node extends \system\logic\Component {
 	
-	public static function accessCreate($urlArgs, $request, $userId) {
-		$rsb = new RecordsetBuilder('user');
-		$rsb->using('*');
-		$user = $rsb->selectFirstBy('id', $userId);
-		return $user && $user->superuser;
+	public static function accessAdd($urlArgs, $request) {
+		$nodeTypes = \module\core\Utils::getNodeTypes();
+		
+		if (\module\core\Utils::nodeTypeExists($urlArgs[0])) {
+			throw new \system\InternalErrorException(\t('Invalid node type.'));
+		}
+		if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
+			return false;
+		}
+		
+		// only superuser is able to add nodes to the root
+		return \system\Login::isSuperuser();
+	}
+	
+	public static function accessAdd2Node($urlArgs, $request) {
+		$nodeTypes = \module\core\Utils::getNodeTypes();
+		
+		if (\module\core\Utils::nodeTypeExists($urlArgs[1])) {
+			throw new \system\InternalErrorException(\t('Invalid node type.'));
+		}
+		
+		// get the parent node
+		$rsb = new RecordsetBuilder('node');
+		$rsb->using('type');
+		$rsb->addFilter(new FilterClause($rsb->id, '=', $urlArgs[0]));
+		$rsb->addEditModeFilters(); // Check if the logged user has sufficient permissions to edit the parent node
+		$parentNode = $rsb->selectFirst();
+		
+		if (!$parentNode) {
+			return false;
+		}
+		// edit permissions ok
+		
+		// just need to check that is allowed to add the node
+		if (!\in_array($urlArgs[1], @$nodeTypes[$parentNode->type]['children'])) {
+			return false;
+		}
+		return true;
 	}
 	
 	public static function accessRED($action, $id) {

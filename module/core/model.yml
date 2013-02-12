@@ -385,7 +385,7 @@ tables:
           }
   # FILES
       files:
-        table: file
+        table: node_file
         type: 1-N
         clauses: [id: node_id]
         onDelete: CASCADE
@@ -497,7 +497,7 @@ tables:
         type: plaintext
         maxlength: 32
       download_mode:
-        type: MetaOption
+        type: integer
         options:
   #        0: Nobody
   #        1: Superuser
@@ -505,8 +505,8 @@ tables:
           3: Node admins
           4: Registered
           5: Anyone
+    virtuals:
       read_url:
-        type: MetaVirtual
         dependencies: [virtual_name, node_index, node_id, file_id, file.extension]
         handle: |
           function(\system\model\Recordset $rs) {
@@ -517,21 +517,18 @@ tables:
             }
           }
       edit_url:
-        type: MetaVirtual
         dependencies: [file_id]
         handle: |
           function(\system\model\Recordset $rs) {
             return 'content/file/' . $rs->file_id . '/edit';
           }
       delete_url:
-        type: MetaVirtual
         dependencies: [file_id]
         handle: |
           function(\system\model\Recordset $rs) {
             return 'content/file/' . $rs->file_id . '/delete';
           }
       download_path:
-        type: MetaVirtual
         handle: |
           function($recordset) {
             return $recordset->virtual_name;
@@ -550,11 +547,10 @@ tables:
         type: 1-1
         table: file
         clauses: [file_id: id]
-        onDelete: DELETE
+        onDelete: CASCADE
   user:
-    fields:
+    virtuals:
       superuser:
-        type: MetaVirtual
         handle: |
           function(\system\model\Recordset $user) {
             return $user->id == 1;

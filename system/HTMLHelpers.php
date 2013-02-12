@@ -135,12 +135,12 @@ class HTMLHelpers {
 		
 		switch ($mainException->getCode()) {
 			case ErrorCodes::AUTHORIZATION:
-				$title = \system\Lang::translate("Forbidden.");
-				$msg = \system\Lang::translate("You must login to access this resource.");
+				$title = \system\Lang::translate("Forbidden");
+				$msg = \system\Lang::translate("You don't have sufficient permission to access this resource.");
 				break;
 			
 			default:
-				$title = \system\Lang::translate("Fatal error.");
+				$title = \system\Lang::translate("Fatal error");
 				$msg .= \system\Log::get();
 				break;
 		}

@@ -42,7 +42,7 @@ class Login {
 	}
 	
 	public static function isAnonymous() {
-		return !self::getLoggedUserId();
+		return self::getLoggedUserId() == 0;
 	}
 	
 	public static function isLogged() {

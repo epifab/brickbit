@@ -1,6 +1,6 @@
 <?php if ($node): ?>
 <div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?>">
-	<?php $this->api->open('protected', array('url' => $node->edit_url)); ?>
+	<?php if ($this->api->access($node->edit_url)): ?>
 		<div class="page-controls">
 			<?php $this->api->open('link', array(
 				'url' => $node->edit_url,
@@ -15,7 +15,7 @@
 				'title' => $this->api->t('Delete @name', array('@name' => $node->type))
 			)); ?><?php $this->api->t('Delete @name', array('@name' => $node->type)); ?><?php $this->api->close(); ?>
 		</div>
-	<?php $this->api->close(); ?>
+	<?php endif; ?>
 
 	<?php if ($node->text): ?>
 		<div class="node-text" lang="<?php print $node->text->lang; ?>">
