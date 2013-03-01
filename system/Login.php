@@ -12,6 +12,9 @@ class Login {
 	private static $login;
 	
 	private $user;
+	
+	private static $users = array();
+	private static $usersByEmail = array();
 
 	private function __construct() {	}
 	
@@ -58,7 +61,7 @@ class Login {
 	}
 	
 	public static function getLoggedUserId() {
-		return self::getLoggedUser() ? self::getLoggedUser()->id : 0;
+		return !self::getLoggedUser() ? 0 : self::getLoggedUser()->id;
 	}
 	
 	/**
@@ -69,17 +72,51 @@ class Login {
 	 * @return Login oggetto di tipo login inizializzato / null se i dati non sono validi
 	 */
 	private static function getUserByLoginData($cryptedEmail, $cryptedPassword) {
-		$rsb = new model\RecordsetBuilder('user');
-		$rsb->usingAll();
-		
-		$rsb->setFilter(new model\FilterClauseGroup(
-			new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
-			"AND",
-			new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\model\MetaString::stdProg2Db($cryptedEmail))
-		));
-		
-		return $rsb->selectFirst();
+		if (\array_key_exists($cryptedEmail, self::$usersByEmail)) {
+			if (self::$usersByEmail[$cryptedEmail]->password == $cryptedPassword) {
+				return self::$usersByEmail[$cryptedEmail];
+			} else {
+				return null;
+			}
+		} else {
+			$rsb = new model\RecordsetBuilder('user');
+			$rsb->usingAll();
+
+			$rsb->setFilter(new model\FilterClauseGroup(
+				new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
+				"AND",
+				new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\model\MetaString::stdProg2Db($cryptedEmail))
+			));
+
+			$user = $rsb->selectFirst();
+			if ($user) {
+				self::$users[$user->id] = $user;
+				self::$usersByEmail[$cryptedEmail] = $user;
+				return $user;
+			} else {
+				return null;
+			}
+		}
 	}
+	
+	public static function getUser($uid, $reset=false) {
+		if (\is_object($uid)) {
+			throw new \Exception('Cazza mi piss?');
+		}
+		if (!$reset && \array_key_exists($uid, self::$users)) {
+			return self::$users[$uid];
+		} else {
+			$rsb = new model\RecordsetBuilder('user');
+			$rsb->usingAll();
+			self::$users[$uid] = $rsb->selectFirstBy("id", $uid);
+			if (self::$users[$uid]) {
+				self::$usersByEmail[self::$users[$uid]->email] = self::$users[$uid];
+			}
+		}
+		return self::$users[$uid];
+	}
+	
+
 
 	/* ---------------------------------------- *
 	 *  salvataggio e rimozione della login

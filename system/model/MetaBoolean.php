@@ -3,7 +3,7 @@ namespace system\model;
 
 class MetaBoolean extends MetaType {
 	public function prog2Db($x) {
-		if (\is_null($x)) {
+		if (empty($x)) {
 			if ($this->getAttr('nullable', array('default' => true))) {
 				return "NULL";
 			} else {

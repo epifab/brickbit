@@ -2,6 +2,26 @@
 namespace module\core;
 
 class Core extends \system\logic\Module {
+	public static function getNodeUrn(\system\model\RecordsetInterface $recordset) {
+		if ($recordset->text->urn) {
+			if ($recordset->type == 'page') {
+				return $recordset->text->urn . '.html';
+			} else {
+				return 'content/' . $recordset->text->urn . '.html';
+			}
+		} else {
+			return \config\settings()->BASE_DIR . 'content/' . $recordset->id;
+		}
+	}
+	
+	public static function getEditNodeUrn(\system\model\RecordsetInterface $recordset) {
+		return \config\settings()->BASE_DIR . 'content/' . $recordset->id . '/edit';
+	}
+	
+	public static function getDeleteNodeUrn(\system\model\RecordsetInterface $recordset) {
+		return \config\settings()->BASE_DIR . 'content/' . $recordset->id . '/delete';
+	}
+	
 	/**
 	 * Define node types and variables allowed files / node children
 	 * @return type 
@@ -11,10 +31,15 @@ class Core extends \system\logic\Module {
 			'#' => array(
 				'page'
 			),
+			'profile' => array(
+				'label' => \t('User profile'),
+				'file' => array('avatar'),
+				'children' => array() // no children
+			),
 			'page' => array(
 				'label' => \t('Page'),
 				'children' => array(
-					'article',
+					'article'
 				),
 				'files' => array() // no files allowed for pages
 			),

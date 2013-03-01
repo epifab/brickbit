@@ -7,8 +7,6 @@ viewNs: view
 viewClass: Api
 templatesPath: view/templates
 componentsNs: components
-events:
-  - cron
 components:
   role:
     class: Role
@@ -83,7 +81,7 @@ components:
   node_file:
     class: NodeFile
     pages:
-      # content/123/file/image/about-me.jpg
+      # content/123/file/images/about-me.jpg
       - url: content/([0-9]+)/file/(@strid)/(@strid)\.(@strid)
         action: Get
       - url: content/file/([0-9]+)\.(@strid)
@@ -146,4 +144,4 @@ components:
     class: Page
     pages:
       - url: (@strid).html
-        action: Read
+        action: ReadByUrn

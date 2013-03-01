@@ -2,8 +2,6 @@
 namespace system;
 
 class Utils {
-	private static $javascript = "";
-	
 	public static function get($name, $default=null) {
 		if (file_exists("config/vars/" . $name . ".var")) {
 			$fp = fopen("config/vars/" . $name . ".var", "r");
@@ -24,6 +22,25 @@ class Utils {
 		$fp = fopen("config/vars/" . $name . ".var", "w");
 		fwrite($fp, $content);
 		fclose($fp);
+	}
+	
+	public static function getSession($module, $key, $default) {
+		if (!\array_key_exists($module, $_SESSION)) {
+			$_SESSION[$module] = array();
+		}
+		return self::getParam($key, $_SESSION[$module], array('default' => $default));
+	}
+	
+	public static function setSession($module, $key, $value) {
+		$_SESSION[$module][$key] = $value;
+	}
+	
+	public static function unsetSession($module, $key=null) {
+		if (\is_null($key)) {
+			unset($_SESSION[$module]);
+		} else {
+			unset($_SESSION[$module][$key]);
+		}
 	}
 
 	

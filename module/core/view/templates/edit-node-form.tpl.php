@@ -1,126 +1,129 @@
-<?php /*
+<?php 
+echo $recordset->id;
+echo $recordset->type;
+/*
 <form class="dataedit" id="fileupload" action="<{path url="file/upload"}>" method="POST" enctype="multipart/form-data">
-        <fieldset>
-                <legend>Attachement</legend>
-                <div class="de-row">
-                        <div class="de-cell">
-                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-                                <div class="row fileupload-buttonbar">
-                                        <div class="span7">
-                                                <!-- The fileinput-button span is used to style the file input field as button -->
-                                                <span class="btn btn-success fileinput-button">
-                                                        <i class="icon-plus icon-white"></i>
-                                                        <span>Add files...</span>
-                                                        <input type="file" name="files[]" multiple>
-                                                </span>
-                                                <button type="submit" class="btn btn-primary start">
-                                                        <i class="icon-upload icon-white"></i>
-                                                        <span>Start upload</span>
-                                                </button>
-                                                <button type="reset" class="btn btn-warning cancel">
-                                                        <i class="icon-ban-circle icon-white"></i>
-                                                        <span>Cancel upload</span>
-                                                </button>
-                                                <button type="button" class="btn btn-danger delete">
-                                                        <i class="icon-trash icon-white"></i>
-                                                        <span>Delete</span>
-                                                </button>
-                                                <input type="checkbox" class="toggle">
-                                        </div>
-                                        <!-- The global progress information -->
-                                        <div class="span5 fileupload-progress fade">
-                                                <!-- The global progress bar -->
-                                                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                                                        <div class="bar" style="width:0%;"></div>
-                                                </div>
-                                                <!-- The extended global progress information -->
-                                                <div class="progress-extended">&nbsp;</div>
-                                        </div>
-                                </div>
-                                <!-- The loading indicator is shown during file processing -->
-                                <div classs="fileupload-loading"></div>
-                                <!-- The table listing the files available for upload/download -->
-                                <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-                        </div>
-                </div>
-        </fieldset>
+	<fieldset>
+		<legend>Attachement</legend>
+		<div class="de-row">
+			<div class="de-cell">
+				<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+				<div class="row fileupload-buttonbar">
+					<div class="span7">
+						<!-- The fileinput-button span is used to style the file input field as button -->
+						<span class="btn btn-success fileinput-button">
+							<i class="icon-plus icon-white"></i>
+							<span>Add files...</span>
+							<input type="file" name="files[]" multiple>
+						</span>
+						<button type="submit" class="btn btn-primary start">
+							<i class="icon-upload icon-white"></i>
+							<span>Start upload</span>
+						</button>
+						<button type="reset" class="btn btn-warning cancel">
+							<i class="icon-ban-circle icon-white"></i>
+							<span>Cancel upload</span>
+						</button>
+						<button type="button" class="btn btn-danger delete">
+							<i class="icon-trash icon-white"></i>
+							<span>Delete</span>
+						</button>
+						<input type="checkbox" class="toggle">
+					</div>
+					<!-- The global progress information -->
+					<div class="span5 fileupload-progress fade">
+						<!-- The global progress bar -->
+						<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+							<div class="bar" style="width:0%;"></div>
+						</div>
+						<!-- The extended global progress information -->
+						<div class="progress-extended">&nbsp;</div>
+					</div>
+				</div>
+				<!-- The loading indicator is shown during file processing -->
+				<div classs="fileupload-loading"></div>
+				<!-- The table listing the files available for upload/download -->
+				<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+			</div>
+		</div>
+	</fieldset>
 </form>
 */ ?>
 
 <form class="dataedit" id="fileupload" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
-        <fieldset>
-                <legend><?php echo $this->api->t("Image"); ?></legend>
-                <div class="de-row">
-                        <div class="de-label-wrapper">
-                                <span class="de-label"><?php echo $this->api->t("Image"); ?></span>
-                        </div>
-                        <div class="de-input-wrapper">
-                                <input type="hidden" name="system[requestId]" value="<?php echo $system['component']['requestId']; ?>"/>
-                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-                                <div class="row fileupload-buttonbar">
-                                        <div class="span7">
-                                                <!-- The fileinput-button span is used to style the file input field as button -->
-                                                <span class="btn btn-success fileinput-button">
-                                                        <i class="icon-plus icon-white"></i>
-                                                        <span>Add file...</span>
-                                                        <input type="file" name="files[]" multiple>
-                                                </span>
-                                                <button type="submit" class="btn btn-primary start">
-                                                        <i class="icon-upload icon-white"></i>
-                                                        <span>Start upload</span>
-                                                </button>
-                                                <button type="reset" class="btn btn-warning cancel">
-                                                        <i class="icon-ban-circle icon-white"></i>
-                                                        <span>Cancel upload</span>
-                                                </button>
-                                        </div>
-                                        <!-- The global progress information -->
-                                        <div class="span5 fileupload-progress fade">
-                                                <!-- The global progress bar -->
-                                                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                                                        <div class="bar" style="width:0%;"></div>
-                                                </div>
-                                                <!-- The extended global progress information -->
-                                                <div class="progress-extended">&nbsp;</div>
-                                        </div>
-                                </div>
-                                <!-- The loading indicator is shown during file processing -->
-                                <div classs="fileupload-loading"></div>
-                                <!-- The table listing the files available for upload/download -->
-                                <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-                        </div>
-                </div>
-        </fieldset>
+	<fieldset>
+		<legend><?php echo $this->api->t("Image"); ?></legend>
+		<div class="de-row">
+			<div class="de-label-wrapper">
+				<span class="de-label"><?php echo $this->api->t("Image"); ?></span>
+			</div>
+			<div class="de-input-wrapper">
+				<input type="hidden" name="system[requestId]" value="<?php echo $system['component']['requestId']; ?>"/>
+				<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+				<div class="row fileupload-buttonbar">
+					<div class="span7">
+						<!-- The fileinput-button span is used to style the file input field as button -->
+						<span class="btn btn-success fileinput-button">
+							<i class="icon-plus icon-white"></i>
+							<span>Add file...</span>
+							<input type="file" name="files[]" multiple>
+						</span>
+						<button type="submit" class="btn btn-primary start">
+							<i class="icon-upload icon-white"></i>
+							<span>Start upload</span>
+						</button>
+						<button type="reset" class="btn btn-warning cancel">
+							<i class="icon-ban-circle icon-white"></i>
+							<span>Cancel upload</span>
+						</button>
+					</div>
+					<!-- The global progress information -->
+					<div class="span5 fileupload-progress fade">
+						<!-- The global progress bar -->
+						<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+							<div class="bar" style="width:0%;"></div>
+						</div>
+						<!-- The extended global progress information -->
+						<div class="progress-extended">&nbsp;</div>
+					</div>
+				</div>
+				<!-- The loading indicator is shown during file processing -->
+				<div classs="fileupload-loading"></div>
+				<!-- The table listing the files available for upload/download -->
+				<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+			</div>
+		</div>
+	</fieldset>
 </form>
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
-        <td class="preview"><span class="fade"></span></td>
-        <td class="name"><span>{%=file.name%}</span></td>
-        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-        {% if (file.error) { %}
-            <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
-        {% } else if (o.files.valid && !i) { %}
-            <td>
-                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
-            </td>
-            <td class="start">{% if (!o.options.autoUpload) { %}
-                <button class="btn btn-primary">
-                    <i class="icon-upload icon-white"></i>
-                    <span>Start</span>
-                </button>
-            {% } %}</td>
-        {% } else { %}
-            <td colspan="2"></td>
-        {% } %}
-        <td class="cancel">{% if (!i) { %}
-            <button class="btn btn-warning">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>Cancel</span>
-            </button>
-        {% } %}</td>
+	<td class="preview"><span class="fade"></span></td>
+	<td class="name"><span>{%=file.name%}</span></td>
+	<td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+	{% if (file.error) { %}
+	    <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
+	{% } else if (o.files.valid && !i) { %}
+	    <td>
+		<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
+	    </td>
+	    <td class="start">{% if (!o.options.autoUpload) { %}
+		<button class="btn btn-primary">
+		    <i class="icon-upload icon-white"></i>
+		    <span>Start</span>
+		</button>
+	    {% } %}</td>
+	{% } else { %}
+	    <td colspan="2"></td>
+	{% } %}
+	<td class="cancel">{% if (!i) { %}
+	    <button class="btn btn-warning">
+		<i class="icon-ban-circle icon-white"></i>
+		<span>Cancel</span>
+	    </button>
+	{% } %}</td>
     </tr>
 {% } %}
 </script>
@@ -128,27 +131,27 @@
 <script id="template-download" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-download fade">
-        {% if (file.error) { %}
-            <td></td>
-            <td class="name"><span>{%=file.name%}</span></td>
-            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-            <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
-        {% } else { %}
-            <td class="preview">{% if (file.thumbnail_url) { %}
-                <a href="{%=file.url%}" title="{%=file.name%}" data-gallery="gallery" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}"/></a>
-            {% } %}</td>
-            <td class="name">
-                <a href="{%=file.url%}" title="{%=file.name%}" data-gallery="{%=file.thumbnail_url&&'gallery'%}" download="{%=file.name%}">{%=file.name%}</a>
-            </td>
-            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-            <td colspan="2"></td>
-        {% } %}
-        <td class="delete">
-            <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}"{% if (file.delete_with_credentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
-                <i class="icon-trash icon-white"></i>
-                <span>Delete</span>
-            </button>
-        </td>
+	{% if (file.error) { %}
+	    <td></td>
+	    <td class="name"><span>{%=file.name%}</span></td>
+	    <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+	    <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
+	{% } else { %}
+	    <td class="preview">{% if (file.thumbnail_url) { %}
+		<a href="{%=file.url%}" title="{%=file.name%}" data-gallery="gallery" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}"/></a>
+	    {% } %}</td>
+	    <td class="name">
+		<a href="{%=file.url%}" title="{%=file.name%}" data-gallery="{%=file.thumbnail_url&&'gallery'%}" download="{%=file.name%}">{%=file.name%}</a>
+	    </td>
+	    <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+	    <td colspan="2"></td>
+	{% } %}
+	<td class="delete">
+	    <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}"{% if (file.delete_with_credentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+		<i class="icon-trash icon-white"></i>
+		<span>Delete</span>
+	    </button>
+	</td>
     </tr>
 {% } %}
 </script>
@@ -191,7 +194,7 @@
 					<div class="de-input-wrapper">
 						<input type="checkbox"
 							class="de-input show-hide-class" 
-							name="node[text_<?php print $lang; ?>.enable]"<?php if ($node->__get('text_' . $lang)->lang): ?> checked="checked"<?php endif; ?>
+							name="node[text_<?php print $lang; ?>.enable]"<?php if ($recordset->__get('text_' . $lang)->lang): ?> checked="checked"<?php endif; ?>
 							id="edit-node-text_<?php print $lang; ?>-enable"/>
 						<label for="edit-node-text_<?php print $lang; ?>-enable"><?php print $this->api->t("Content available for this language."); ?></label>
 					</div>
@@ -202,7 +205,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php echo $this->api->textbox($node, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
+							<?php echo $this->api->textbox($recordset, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("Once you choose a URN you shouldn't change it anymore."); ?><br/>
@@ -221,7 +224,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-description"><?php print $this->api->t('Description'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($node, 'text_' . $lang . '.description', array('class' => 'xxl')); ?>
+							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.description', array('class' => 'xxl')); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
@@ -235,7 +238,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-title"><?php print $this->api->t('Title'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($node, 'text_' . $lang . '.title', array('class' => 'l')); ?>
+							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.title', array('class' => 'l')); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.title'); ?>
 						</div>
 					</div>
@@ -244,7 +247,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-subtitle"><?php print $this->api->t('Subtitle'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($node, 'text_' . $lang . '.subtitle', array('class' => 'xl')); ?>
+							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.subtitle', array('class' => 'xl')); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.subtitle'); ?>
 						</div>
 					</div>
@@ -253,7 +256,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-body"><?php print $this->api->t('Body'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textarea($node, 'text_' . $lang . '.body', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->textarea($recordset, 'text_' . $lang . '.body', array('class' => 'xxl richtext')); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.body'); ?>
 						</div>
 					</div>
@@ -262,7 +265,7 @@
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-preview"><?php print $this->api->t('Preview'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textarea($node, 'text_' . $lang . '.preview', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->textarea($recordset, 'text_' . $lang . '.preview', array('class' => 'xxl richtext')); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.preview'); ?>
 						</div>
 					</div>
@@ -300,7 +303,7 @@
 					<label class="de-label" for="edit-node-record_mode-read_mode"><?php print $this->api->t('Read access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($node, 'record_mode.read_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->selectbox($recordset, 'record_mode.read_mode', array('class' => 'l')); ?>
 					<?php print $this->api->de_error("record_mode.read_mode"); ?>
 				</div>
 			</div>
@@ -309,7 +312,7 @@
 					<label class="de-label" for="edit-node-record_mode-edit_mode"><?php print $this->api->t('Edit access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($node, 'record_mode.edit_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->selectbox($recordset, 'record_mode.edit_mode', array('class' => 'l')); ?>
 					<?php print $this->api->de_error("record_mode.edit_mode"); ?>
 				</div>
 			</div>
@@ -318,11 +321,11 @@
 					<label class="de-label" for="edit-node-record_mode-delete_mode"><?php print $this->api->t('Delete access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($node, 'record_mode.delete_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->selectbox($recordset, 'record_mode.delete_mode', array('class' => 'l')); ?>
 					<?php print $this->api->de_error("record_mode.delete_mode"); ?>
 				</div>
 			</div>
 		</fieldset>
-		<?php //print $this->api->de_submit_control(); ?>
+		<?php print $this->api->submit_control($this->api->t('Save')); ?>
 	</div>
 <?php $this->api->close(); ?>

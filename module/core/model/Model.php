@@ -35,5 +35,37 @@ class Model {
 			$descendants->rdel, 'DESC'
 		));
 	}
+	
+	public static function onDelete(\system\model\RecordsetInterface $rs) {
+		$table = $rs->getBuilder()->getTableInfo();
+		foreach ($table['relations'] as $relationName => $relation) {
+			if ($relation['onDelete'] == 'CASCADE') {
+				$rsb = new \system\model\RecordsetBuilder($relation['table']);
+				$filter = null;
+				foreach ($relation['clauses'] as $parentField => $childField) {
+					$f = new FilterClause($rsb->{$childField}, '=', $rs->getProg($parentField));
+					\is_null($filter) ? $filter = new \system\model\FilterClauseGroup($f) : $filter->addClauses('AND', $f);
+				}
+				if (\is_null($filter)) {
+					// This should never happen
+					continue;
+				}
+				$rsb->addFilter($filter);
+				$rs = $rsb->select();
+				foreach ($rs as $r) {
+					\system\Main::raiseModelEvent('onDelete', $r);
+				}
+				$q = "DELETE FROM " . $rs->getBuilder()->getTableName() . " WHERE";
+				$first = true;
+				foreach ($relation['clauses'] as $parentField => $childField) {
+					$first ? $first = false : $q .= " AND ";
+					$q .= $childField . " = " . $rs->getDb($parentField);
+				}
+				$da = \system\model\DataLayerCore::getInstance();
+				$da->executeQuery($q, __FILE__, __LINE__);
+				$rs->unsetRelation($relationName);
+			}
+		}
+	}
 }
 ?>

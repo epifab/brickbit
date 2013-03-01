@@ -213,6 +213,16 @@ class Api {
 			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 			. ' value="1"/>';
 	}
+	
+	public static function submit_control($label=null) {
+		if (\is_null($label)) {
+			$label = \t('Save');
+		}
+		$vars = \system\view\Template::current()->getVars();
+		if ($vars['system']['component']['requestType'] != 'MAIN') {
+			return '<div class="de-controls"><input class="de-control" type="submit" value="' . $label . '"/></div>';
+		}
+	}
 
 	public static function link($content, $params) {
 		$params['url'] = \system\Utils::getParam('url', $params, array('required' => true, 'prefix' => \config\settings()->BASE_DIR));

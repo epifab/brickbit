@@ -1,9 +1,26 @@
 	<div id="admin-menu-wrapper">
 		<ul id="admin-menu">
+			<?php if ($user): ?>
 			<li><?php $this->api->open('link',array(
-						'url' => "content/add/page",
+						'url' => 'user/' . $user->id,
 						'title' => 'Your account'
 					)); ?>account<?php echo $this->api->close(); ?>
+			</li>
+			<?php endif; ?>
+			<li><?php $this->api->open('link',array(
+						'url' => 'contents',
+						'title' => 'Contets'
+					)); ?>contents<?php echo $this->api->close(); ?>
+			</li>
+			<li><?php $this->api->open('link',array(
+						'url' => 'users',
+						'title' => 'Settings'
+					)); ?>users<?php echo $this->api->close(); ?>
+			</li>
+			<li><?php $this->api->open('link',array(
+						'url' => 'system/settings',
+						'title' => 'Settings'
+					)); ?>settings<?php echo $this->api->close(); ?>
 			</li>
 		</ul>
 	</div>
@@ -69,17 +86,5 @@
 					)); ?><?php echo $menuItem['title']; ?><?php echo $this->api->close(); ?>
 				</li>
 			<?php endforeach; ?>
-			<?php if ($this->api->access('content/add/page')): ?>
-				<li>
-					<?php $this->api->open('link', array(
-						'url' => 'content/add/page',
-						'width' => 800,
-						'height' => 500,
-						'title' => $this->api->t('Create a new page')
-					)); ?>
-						Create a new page
-					<?php echo $this->api->close(); ?>
-				</li>
-			<?php endif; ?>
 		</ul>
 	</div>

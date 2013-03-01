@@ -5,21 +5,20 @@ class MetaInteger extends MetaType {
 	
 	public function prog2Db($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
-			if (\is_array($x)) {
-				$x = \serialize($x);
-			} else {
+			if (!\is_array($x)) {
 				// make sure we have an array
 				$x = array($x);
 			}
-			$x = \serialize($x);
+			return MetaString::stdProg2Db(\serialize($x));
 		}
-		if (\is_null($x)) {
-			if ($this->getAttr('nullable', array('default' => true))) {
+		else if (empty($x)) {
+			if ($this->getAttr('nullable', array('default' => true)) && \is_null($x)) {
 				return "NULL";
 			} else {
 				return "0";
 			}
-		} else {
+		}
+		else {
 			return $x;
 		}
 	}

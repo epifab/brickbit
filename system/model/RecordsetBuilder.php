@@ -366,7 +366,7 @@ class RecordsetBuilder {
 		if ($this->isRecordModed()) {
 			$clauses = $this->tableInfo["relations"]["record_mode"]["clauses"];
 			\reset($clauses[0]);
-			return \current($clauses[0]);
+			return \key($clauses[0]);
 		}
 		return null;
 	}
@@ -1083,29 +1083,29 @@ class RecordsetBuilder {
 		}
 	}
 	
-	public function addReadModeFilters() {
-		$this->addRecordModeFilters("read");
+	public function addReadModeFilters($user=null) {
+		$this->addRecordModeFilters("read", $user);
 	}
 	
-	public function addEditModeFilters() {
-		$this->addRecordModeFilters("edit");
+	public function addEditModeFilters($user=null) {
+		$this->addRecordModeFilters("edit", $user);
 	}
 	
-	public function addDeleteModeFilters() {
-		$this->addRecordModeFilters("delete");
+	public function addDeleteModeFilters($user=null) {
+		$this->addRecordModeFilters("delete", $user);
 	}
 	
-	private function addRecordModeFilters($modeType) {
+	private function addRecordModeFilters($modeType, $user=null) {
 		if ($this->isRecordModed()) {
-      $mode = $modeType . "_mode";
+			$mode = $modeType . "_mode";
 			
-			if (\system\Login::isSuperuser()) {
+			if ($user && $user->superuser) {
 				// SUPERUSER -> just make sure the record mode is >= than MODE_SU
 				$this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_SU));
 				return;
 			}
 			
-			else if (\system\Login::isAnonymous()) {
+			else if (!$user) {
 				// NOT LOGGED -> not logged user can access the recordset only when record mode is = MODE_ANYONE
 				$this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_ANYONE));
 				return;
@@ -1123,16 +1123,16 @@ class RecordsetBuilder {
 					new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER_ADMINS),
 					"AND",
 					new FilterClauseGroup(
-						new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT user_id FROM record_mode_user rmu WHERE rmu.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName()),
+						new CustomClause($user->id . " IN (SELECT user_id FROM record_mode_user rmu WHERE rmu.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName()),
 						"OR",
-						new CustomClause(\system\Login::getLoggedUserId() . " IN (SELECT ur.user_id FROM record_mode_role rmr INNER JOIN user_role ur ON ur.role_id = rmr.role_id WHERE rmr.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName())
+						new CustomClause($user->id . " IN (SELECT ur.user_id FROM record_mode_role rmr INNER JOIN user_role ur ON ur.role_id = rmr.role_id WHERE rmr.record_mode_id = " . $this->record_mode->getTableAlias() . "." . $this->record_mode_id->getName())
 					)
 				);
 				
 				$ownerFilter = new FilterClauseGroup(
 					new FilterClause($this->record_mode->$mode, ">=", \system\model\RecordMode::MODE_SU_OWNER),
 					"AND",
-					new FilterClause($this->record_mode->owner_id, "=", \system\Login::getLoggedUserId())
+					new FilterClause($this->record_mode->owner_id, "=", $user->id)
 				);
 				
 				$this->addFilter(new FilterClauseGroup(

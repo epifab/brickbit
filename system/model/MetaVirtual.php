@@ -17,7 +17,18 @@ class MetaVirtual extends MetaString {
 	}
 	
 	public function setHandler($handle) {
-		eval('$this->handle = ' . $handle . ';');
+		if (\is_array($handle)) {
+			if (\is_callable($handle)) {
+				$this->handle = $handle;
+			} else {
+				throw new \system\InternalErrorException(\t('Method @class::@method does not exist.', array(
+					'@method' => $handle[1], 
+					'@class' => $handle[0]
+				)));
+			}
+		} else {
+			eval('$this->handle = ' . $handle . ';');
+		}
 	}
 	public function getHandler() {
 		return $this->handle;

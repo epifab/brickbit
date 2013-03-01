@@ -79,10 +79,10 @@ input, textarea {
 }
 #header-wrapper {
 	background-image: url('../img/main-wrapper-bg.jpg');
-	background-position: center left;
+	background-position: bottom left;
 	background-repeat: no-repeat;
-
 }
+
 #header, #footer, #main-menu {
 	width: 900px;
 	margin: 0px auto;

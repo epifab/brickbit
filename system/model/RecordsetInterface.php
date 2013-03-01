@@ -2,6 +2,9 @@
 namespace system\model;
 
 interface RecordsetInterface {
+	/**
+	 * @return \system\model\RecordsetBuilder 
+	 */
 	public function getBuilder();
 	
 	public function create();
@@ -20,6 +23,9 @@ interface RecordsetInterface {
 //	public function getEdit($name);
 	public function setEdit($name, $value);
 //	public function getRead($name);
+	
+	public function setRelation($name, $value);
+	public function unsetRelation($name);
 	
 	public function searchMetaType($path);
 	public function getMetaTypeList();

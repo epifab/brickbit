@@ -25,7 +25,7 @@ class Utils {
 		$numErrors = 0;
 		$builder = $recordset->getBuilder();
 
-		if (\array_key_exists("node", $_REQUEST) && \is_array($_REQUEST["node"])) {
+		if (\array_key_exists('recordset', $_REQUEST) && \is_array($_REQUEST['recordset'])) {
 			
 			foreach ($formInfo as $fieldInfo) {
 				if (\is_array($fieldInfo)) {
@@ -37,7 +37,7 @@ class Utils {
 				$metaType = $builder->searchMetaType($path, true);
 				$metaType instanceof MetaType;
 
-				$value = \system\Utils::getParam($path, $_REQUEST["node"], array('default' => null));
+				$value = \system\Utils::getParam($path, $_REQUEST['recordset'], array('default' => null));
 
 				if ($metaType instanceof MetaBoolean) {
 					$value = \is_null($value) ? 0 : 1;

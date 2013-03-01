@@ -235,6 +235,9 @@ tables:
       sort_index:
         type: integer
         label: Sort index
+      temp:
+        type: boolean
+        label: Temp content
     virtuals:
       title:
         label: Title
@@ -252,29 +255,25 @@ tables:
       read_url:
         label: Node URL
         dependencies: [id, text.urn, text_und.urn]
-        handle: |
-          function(\system\model\Recordset $recordset) {
-            if ($recordset->text->urn) {
-              return 'content/' . $recordset->text->urn . '.html';
-          //  } else if ($recordset->text_und->urn) {
-          //    return 'content/' . $recordset->text_und->urn . '.html';
-            } else {
-              return 'content/' . $recordset->id;
-            }
-          }
+        handle: [\module\core\Core, getNodeUrn]
+#        handle: |
+#          function(\system\model\Recordset $node) {
+#            \module\core\Core::getNodeUrn($node);
+#          }
       edit_url:
         label: Edit URL
         dependencies: [id]
-        handle: |
-          function(\system\model\Recordset $recordset) {
-            return 'content/' . $recordset->id . '/edit';
-          }
+        handle: [\module\core\Core, getEditNodeUrn]
+#        handle: |
+#          function(\system\model\Recordset $node) {
+#            \module\core\Core::getEditNodeUrn($node);
+#          }
       delete_url:
         label: Delete URL
         dependencies: [id]
         handle: |
-          function(\system\model\Recordset $recordset) {
-            return 'content/' . $recordset->id . '/delete';
+          function(\system\model\Recordset $node) {
+            \module\core\Core::getDeleteNodeUrn($node);
           }
       content:
         label: Content
@@ -296,6 +295,7 @@ tables:
     keys:
       primary_key:
         fields: [id]
+        autoIncrement: 1
     relations:
       record_mode:
         table: record_mode

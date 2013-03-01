@@ -7,66 +7,49 @@ namespace system\model;
  */
 class FilterClauseGroup implements SelectClauseInterface {
 	/**
-	 * Operatore di congiunzione
-	 */
-	const OP_AND = "AND"; //1;
-	/**
-	 * Operatore di disgiunzione
-	 */
-	const OP_OR  = "OR"; //2;
-
-	/**
 	 * Clausole figlie
 	 */
 	private $clauses = array();
 
 	public function __construct() {
-		$clauseExpected = true;
 		foreach (func_get_args() as $arg) {
-			$this->addClause(	$arg, $clauseExpected);
-			$clauseExpected = !$clauseExpected;
-		}
-		if ($clauseExpected) {
-			throw new \system\InternalErrorException("Parametri non validi per la clausola Filter");
+			$this->addClause($arg);
 		}
 	}
 
 	public function addClauses() {
-		$clauseExpected = false;
 		foreach (func_get_args() as $arg) {
-			$this->addClause($arg, $clauseExpected);
-			$clauseExpected = !$clauseExpected;
-		}
-		if ($clauseExpected) {
-			throw new \system\InternalErrorException("Parametri non validi per la clausola Filter");
+			$this->addClause($arg);
 		}
 	}
 
-	private function addClause($arg, $clauseExpected) {
-		if ($clauseExpected) {
-			if ($arg instanceof FilterClauseGroup || $arg instanceof FilterClause || $arg instanceof CustomClause) {
-				$this->clauses[] = $arg;
-			} else {
-				throw new \system\InternalErrorException("Parametri non validi per la clausola Filter");
-			}
-		} else {
+	private function addClause($arg) {
+		$odd = (bool)(count($this->clauses) % 2);
+		if ($odd) {
+			// if arg is a clause the AND operator is assumed
 			if (is_string($arg)) {
 				switch (strtoupper($arg)) {
-					case "AND":
-						$this->clauses[] = FilterClauseGroup::OP_AND;
+					case 'AND':
+						$this->clauses[] = 'AND';
 						break;
-					case "OR":
-						$this->clauses[] = FilterClauseGroup::OP_OR;
+					case 'OR':
+						$this->clauses[] = 'OR';
 						break;
 					default:
-						throw new \system\InternalErrorException("Parametri non validi per la clausola Filter");
+						throw new \system\InternalErrorException(\t('Invalid arg parameter. A logical operator was expected.'));
 				}
-			} else if (is_int($arg)) {
-				if ($arg == FilterClauseGroup::OP_AND || $arg == FilterClauseGroup::OP_OR) {
-					$this->clauses[] = $arg;
-				}
+			} else if (\is_object($arg) && ($arg instanceof FilterClause || $arg instanceof FilterClauseGroup || $arg instanceof CustomClause)) {
+				$this->clauses[] = 'AND';
+				$this->clauses[] = $arg;
 			} else {
-				throw new \system\InternalErrorException("Parametri non validi per la clausola Filter");
+				throw new \system\InternalErrorException(\t('Invalid arg parameter. A logical operator, FilterClause or FilterClauseGroup instance was expected.'));
+			}
+		}
+		else {
+			if (\is_object($arg) && ($arg instanceof FilterClause || $arg instanceof FilterClauseGroup || $arg instanceof CustomClause)) {
+				$this->clauses[] = $arg;
+			} else {
+				throw new \system\InternalErrorException(\t('Invalid arg parameter. A FilterClause or FilterClauseGroup instance was expected.'));
 			}
 		}
 	}
@@ -83,13 +66,12 @@ class FilterClauseGroup implements SelectClauseInterface {
 			if ($clauseExpected) {
 				$query .= $clause instanceof FilterClauseGroup ? "(" . $clause->getQuery() . ")" : $clause->getQuery();
 			} else {
-				if ($clause == FilterClauseGroup::OP_AND) {
-					$query .= " AND ";
-				} else {
-					$query .= " OR ";
-				}
+				$query .= ' ' . $clause . ' ';
 			}
 			$clauseExpected = !$clauseExpected;
+		}
+		if ($clauseExpected) {
+			$query .= '1';
 		}
 		return $query;
 	}

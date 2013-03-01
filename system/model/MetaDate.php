@@ -5,7 +5,7 @@ class MetaDate extends MetaType {
 	protected $sqlFormat = 'Y-m-d';
 	
 	public function prog2Db($x) {
-		if (\is_null($x)) {
+		if (empty($x)) {
 			if ($this->getAttr('nullable', array('default' => true))) {
 				return "NULL";
 			} else {

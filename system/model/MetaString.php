@@ -14,16 +14,16 @@ class MetaString extends MetaType {
 				// make sure we have an array
 				$x = array($x);
 			}
-			$x = \serialize($x);
+			return self::stdProg2Db(\serialize($x));
 		}
-		if (\is_null($x)) {
-			if ($this->getAttr('nullable', array('default' => true))) {
+		if (empty($x)) {
+			if ($this->getAttr('nullable', array('default' => true)) && \is_null($x)) {
 				return "NULL";
 			} else {
 				return "''";
 			}
 		} else {
-			return "'" . \system\model\DataLayerCore::getInstance()->sqlRealEscapeStrings($x) . "'";
+			return self::stdProg2Db($x);
 		}
 	}
 	

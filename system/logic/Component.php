@@ -106,15 +106,12 @@ abstract class Component {
 	 * @param string $urlArgs url arguments
 	 * @return boolean true if 
 	 */
-	public static function access($class, $action, $urlArgs, $request, $userId=null) {
-		if (\is_null($userId)) { 
-			$userId = Login::getLoggedUserId();
-		}
+	public static function access($class, $action, $urlArgs, $request, $user) {
 		if (\method_exists($class, "access" . $action)) {
-			return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $userId);
+			return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $user);
 		} 
 		else if (\method_exists($class, "access")) {
-			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $userId);
+			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
 		}
 		return true;
 	}
@@ -503,7 +500,7 @@ abstract class Component {
 			$this->onInit();
 			
 			// checking permission
-			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData)) {
+			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\Login::getLoggedUser())) {
 				throw new AuthorizationException(\t('Sorry, you are not authorized to access this resource.'));
 			}
 			

@@ -474,14 +474,18 @@ class Main {
 		return $urls[$url];
 	}
 	
-	public static function checkAccess($url, $request=null) {
+	public static function checkAccess($url, $request=array(), $user=false) {
+		if ($user === false) {
+			$user = \system\Login::getLoggedUser();
+		}
 		if (self::urlExists($url)) {
 			$x = self::getComponent($url);
 			return Component::access(
 				$x['class'],
 				$x['action'],
-				$component['urlArgs'],
-				$request
+				$x['urlArgs'],
+				$request,
+				$user
 			);
 		} else {
 			return true;

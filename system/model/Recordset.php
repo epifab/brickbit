@@ -70,10 +70,11 @@ class Recordset implements RecordsetInterface {
 	
 	public function __get($name) {
 		
-		// HAS MANY RELATION COMPLETE AUTO IMPORT
-		if ($this->builder->hasManyRelationExists($name) && !$this->builder->searchRelationBuilder($name)) {
+		// RELATION COMPLETE AUTO IMPORT
+		if (($this->builder->hasManyRelationExists($name) && !$this->builder->searchRelationBuilder($name))
+			|| ($this->builder->hasOneRelationExists($name) && !$this->builder->searchRelationBuilder($name))) {
 			$this->builder->using($name);
-			$this->builder->searchRelationBuilder($name, true)->usingAll();
+			$this->builder->searchRelationBuilder($name, true)->using('*');
 		}
 		
 		if (\array_key_exists($name, $this->hasOneRelations)) {
@@ -86,9 +87,9 @@ class Recordset implements RecordsetInterface {
 			// Has Many Relation (precedentemente caricata)
 			return $this->hasManyRelations[$name];
 
-		} else if (\array_key_exists($name, $this->builder->getHasManyRelationBuilderList())) {
+		} else if (\array_key_exists($name, $this->builder->getRelationBuilderList())) {
 			
-			// Has Many Relation valida ma ancora non caricata (LAZY LOAD)
+			// Relation valida ma ancora non caricata (LAZY LOAD)
 
 			// recupero il builder del recordset corrispondente alla has many relation
 			$builder = $this->builder->searchRelationBuilder($name);
@@ -123,12 +124,21 @@ class Recordset implements RecordsetInterface {
 			$builder->setFilter($newFilter);
 
 			// seleziono i records
-			$this->hasManyRelations[$name] = $builder->select();
+			if ($builder->hasMany()) {
+				$this->hasManyRelations[$name] = $builder->select();
+			} else {
+				$this->hasOneRelations[$name] = $builder->selectFirst();
+				if (\is_null($this->hasOneRelations[$name])) {
+					$this->hasOneRelations[$name] = $builder->newRecordset();
+				}
+			}
 
 			// reimposto il filtro originale
 			$builder->setFilter($oldFilter);
 			
-			return $this->hasManyRelations[$name];
+			return $builder->hasMany()
+				? $this->hasManyRelations[$name]
+				: $this->hasOneRelations[$name];
 
 		} else {
 			
@@ -438,6 +448,8 @@ class Recordset implements RecordsetInterface {
 		$recordMode->last_upd_date_time = \time();
 		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
 		
+		echo "EDIT MODE: " . $recordMode->edit_mode;
+		
 		$recordMode->create();
 		
 		if (\config\settings()->RECORD_MODE_LOGS) {
@@ -453,50 +465,60 @@ class Recordset implements RecordsetInterface {
 		if (\is_null($recordMode)) {
 			return null;
 		}
-		
-		switch ($readMode) {
-			case \system\model\RecordMode::MODE_NOBODY:
-			case \system\model\RecordMode::MODE_SU:
-			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
-			case \system\model\RecordMode::MODE_REGISTERED:
-			case \system\model\RecordMode::MODE_ANYONE:
-				$recordMode->read_mode = $readMode;
-				break;
-			
-			default:
-				// Lascio inalterato il valore
-				break;
+
+		if (!\is_null($readMode)) {
+			switch ($readMode) {
+				case \system\model\RecordMode::MODE_NOBODY:
+				case \system\model\RecordMode::MODE_SU:
+				case \system\model\RecordMode::MODE_SU_OWNER:
+				case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+				case \system\model\RecordMode::MODE_REGISTERED:
+				case \system\model\RecordMode::MODE_ANYONE:
+					$recordMode->read_mode = $readMode;
+					break;
+
+				default:
+					// Lascio inalterato il valore
+					break;
+			}
 		}
 		
-		switch ($editMode) {
-			case \system\model\RecordMode::MODE_NOBODY:
-			case \system\model\RecordMode::MODE_SU:
-			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
-			case \system\model\RecordMode::MODE_REGISTERED:
-			case \system\model\RecordMode::MODE_ANYONE:
-				$recordMode->edit_mode = $editMode;
-				break;
-			
-			default:
-				// Lascio inalterato il valore
-				break;
+		if (!\is_null($editMode)) {
+			switch ($editMode) {
+				case null:
+					break;
+				case \system\model\RecordMode::MODE_NOBODY:
+				case \system\model\RecordMode::MODE_SU:
+				case \system\model\RecordMode::MODE_SU_OWNER:
+				case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+				case \system\model\RecordMode::MODE_REGISTERED:
+				case \system\model\RecordMode::MODE_ANYONE:
+					$recordMode->edit_mode = $editMode;
+					break;
+
+				default:
+					// Lascio inalterato il valore
+					break;
+			}
 		}
 		
-		switch ($deleteMode) {
-			case \system\model\RecordMode::MODE_NOBODY:
-			case \system\model\RecordMode::MODE_SU:
-			case \system\model\RecordMode::MODE_SU_OWNER:
-			case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
-			case \system\model\RecordMode::MODE_REGISTERED:
-			case \system\model\RecordMode::MODE_ANYONE:
-				$recordMode->delete_mode = $deleteMode;
-				break;
-			
-			default:
-				// Lascio inalterato il valore
-				break;
+		if (!\is_null($deleteMode)) {
+			switch ($deleteMode) {
+				case null:
+					break;
+				case \system\model\RecordMode::MODE_NOBODY:
+				case \system\model\RecordMode::MODE_SU:
+				case \system\model\RecordMode::MODE_SU_OWNER:
+				case \system\model\RecordMode::MODE_SU_OWNER_ADMINS:
+				case \system\model\RecordMode::MODE_REGISTERED:
+				case \system\model\RecordMode::MODE_ANYONE:
+					$recordMode->delete_mode = $deleteMode;
+					break;
+
+				default:
+					// Lascio inalterato il valore
+					break;
+			}
 		}
 
 		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
@@ -619,6 +641,24 @@ class Recordset implements RecordsetInterface {
 				$errors[$this->builder->getMetaType($parentField)->getAbsolutePath()] = $ex->getMessage();
 			}
 			return false;
+		}
+	}
+	
+	public function setRelation($name, $value) {
+		if (\array_key_exists($name, $this->hasManyRelations)) {
+			$this->hasManyRelations[$name] = $value;
+		}
+		else if (\array_key_exists($name, $this->hasOneRelations)) {
+			$this->hasOneRelations[$name] = $value;
+		}
+	}
+	
+	public function unsetRelation($name) {
+		if (\array_key_exists($name, $this->hasManyRelations)) {
+			unset($this->hasManyRelations[$name]);
+		}
+		else if (\array_key_exists($name, $this->hasOneRelations)) {
+			unset($this->hasOneRelations[$name]);
 		}
 	}
 }
