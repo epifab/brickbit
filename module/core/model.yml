@@ -555,3 +555,8 @@ tables:
           function(\system\model\Recordset $user) {
             return $user->id == 1;
           }
+      anonymous:
+        handle: |
+          function(\system\model\Recordset $user) {
+            return $user->id == 0;
+          }

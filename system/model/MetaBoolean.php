@@ -3,33 +3,27 @@ namespace system\model;
 
 class MetaBoolean extends MetaType {
 	public function prog2Db($x) {
-		if (empty($x)) {
-			if ($this->getAttr('nullable', array('default' => true))) {
-				return "NULL";
-			} else {
-				return "0";
-			}
+		if ($x) {
+			return "1";
 		} else {
-			return $x;
+			return 0;
 		}
 	}
 	
-	public function db2Prog($x) {
-		$x = (bool)$x;
-		return $x;
-	}
-	
-	public function edit2Prog($x) {
-		$x = (bool)$x;
-		$this->validate($x);
-		return $x;
-	}
-	
 	public function validate($x) {
+		
 	}
 
 	public function getEditWidgetDefault() {
 		return 'checkbox';
+	}
+	
+	public function toProg($x) {
+		if (\is_null($x)) {
+			return false;
+		} else {
+			return (bool)$x;
+		}
 	}
 }
 ?>

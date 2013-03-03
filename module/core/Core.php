@@ -118,7 +118,49 @@ class Core extends \system\logic\Module {
 
 	}
 	public static function onRun(\system\logic\Component $component) {
+		switch ($component->getRequestType()) {
+			case "MAIN-PANELS":
+				$component->setOutlineWrapperTemplate('outline-wrapper-main-panels');
+				break;
+			case "MAIN":
+				$component->setOutlineWrapperTemplate('outline-wrapper-main');
+				break;
+			case "PAGE-PANELS":
+				$component->setOutlineWrapperTemplate('outline-wrapper-page-panels');
+				break;
+			case "PAGE":
+			default:
+				$component->setOutlineWrapperTemplate(null);
+				break;
+		}
+		$component->setOutlineTemplate('outline');
+		$component->addTemplate('header', 'header');
+		$component->addTemplate('footer', 'footer');
+//		$component->addTemplate('sidebar', 'sidebar');
 
+		$mm = array();
+		
+		$rsb = new \system\model\RecordsetBuilder("node");
+		$rsb->using(
+			'id', 'type', 'read_url', 'text.title'
+		);
+		$rsb->addFilter(new \system\model\FilterClause($rsb->type, '=', 'page'));
+		$rsb->addFilter(new \system\model\FilterClause($rsb->text->title, 'IS_NOT_NULL'));
+		$rsb->addReadModeFilters(\system\Login::getLoggedUser()	);
+		
+		$rs = $rsb->select();
+		foreach ($rs as $r) {
+			$mm[] = array(
+				'id' => $r->id,
+				'url' => $r->read_url,
+				'title' => $r->text->title
+			);
+		}
+		
+		$component->setData(array('page', 'mainMenu'), $mm);
+		
+		$component->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'core.js');
+		$component->addCss(\system\Theme::getThemePath() . 'css/upload-jquery/jquery.fileupload-ui.css');
 	}
 }
 ?>

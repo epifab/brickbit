@@ -37,5 +37,17 @@ class MetaVirtual extends MetaString {
 	public function isVirtual() {
 		return true;
 	}
+	
+	public function toProg($x) {
+		if (\is_null($x)) {
+			if ($this->getAttr('nullable', array('default' => true))) {
+				return null;
+			} else {
+				return '';
+			} 
+		} else {
+			return \strval($x);
+		}
+	}
 }
 ?>

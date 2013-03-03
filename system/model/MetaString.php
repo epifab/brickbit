@@ -8,12 +8,7 @@ class MetaString extends MetaType {
 	
 	public function prog2Db($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
-			if (\is_array($x)) {
-				$x = \serialize($x);
-			} else {
-				// make sure we have an array
-				$x = array($x);
-			}
+			$x = $this->toArray($x);
 			return self::stdProg2Db(\serialize($x));
 		}
 		if (empty($x)) {
@@ -30,28 +25,24 @@ class MetaString extends MetaType {
 	public function db2Prog($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
 			$x = \unserialize($x);
-			if (!\is_array($x)) {
-				$x = array($x);
-			}
+			$x = $this->toArray($x);
 			foreach ($x as $k => $v) {
-				$x[$k] = (string)$v;
+				$x[$k] = $this->toProg($v);
 			}
 		} else {
-			$x = (string)$x;
+			$x = $this->toProg($x);
 		}
 		return $x;
 	}
 	
 	public function edit2Prog($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
-			if (!\is_array($x)) {
-				$x = array($x);
-			}
+			$x = $this->toArray($x);
 			foreach ($x as $k => $v) {
-				$x[$k] = (string)$v;
+				$x[$k] = $this->toProg($v);
 			}
 		} else {
-			$x = (string)$x;
+			$x = $this->toProg($x);
 		}
 		$this->validate($x);
 		return $x;
@@ -59,9 +50,7 @@ class MetaString extends MetaType {
 	
 	public function validate($x) {
 		if ($this->getAttr('multiple', array('default' => false))) {
-			if (!\is_array($x)) {
-				$x = array($x);
-			}
+			$x = $this->toArray($x);
 			$minOccurrence = $this->getAttr('minOccurrence', array('default' => 0));
 			$maxOccurrence = $this->getAttr('maxOccurrence', array('default' => 0));
 			if (\count($x) < $minOccurrence) {
@@ -128,6 +117,18 @@ class MetaString extends MetaType {
 			}
 		} else {
 			return 'textbox';
+		}
+	}
+	
+	public function toProg($x) {
+		if (\is_null($x)) {
+			if ($this->getAttr('nullable', array('default' => true))) {
+				return null;
+			} else {
+				return '';
+			} 
+		} else {
+			return \strval($x);
 		}
 	}
 }

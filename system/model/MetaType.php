@@ -21,8 +21,11 @@ abstract class MetaType {
 		return false;
 	}
 
+	public abstract function toProg($x);
+
+
 	public function getDefaultValue() {
-		return null;
+		return $this->toProg($this->getAttr('default', array('default' => null)));
 	}
 
 	/**
@@ -83,7 +86,7 @@ abstract class MetaType {
 	}
 
 	public function db2Prog($x) {
-		return $x;
+		return $this->toProg($x);
 	}
 
 	public function prog2Db($x) {
@@ -91,6 +94,8 @@ abstract class MetaType {
 	}
 
 	public function edit2Prog($x) {
+		$x = $this->toProg($x);
+		$this->validate($x);
 		return $x;
 	}
 
@@ -105,7 +110,18 @@ abstract class MetaType {
 	public function validate($x) {
 		
 	}
-
+	
+	protected function toArray($x) {
+		if (!\is_array($x)) {
+			if (\is_null($x)) {
+				return array();
+			} else {
+				return array($x); // just to make sure
+			}
+		} else {
+			return $x;
+		}
+	}
 }
 
 ?>

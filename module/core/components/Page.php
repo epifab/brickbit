@@ -11,8 +11,18 @@ use \system\model\SortClause;
 use \system\model\SortClauseGroup;
 
 class Page extends Node {
-	public function runPageNotFound() {
-		
+	public static function access() {
+		return true;
+	}
+	
+	public function runNotFound() {
+		$this->setMainTemplate('page-not-found');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
+	}
+	
+	public function runHome() {
+		$this->setMainTemplate('home');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 }
 ?>

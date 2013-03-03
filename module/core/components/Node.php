@@ -22,7 +22,7 @@ class Node extends \system\logic\Component {
 		}
 		
 		// only superuser is able to add nodes to the root
-		return $user->superuser;
+		return $user && $user->superuser;
 	}
 	
 	public static function accessAdd2Node($urlArgs, $request, $user) {
@@ -99,49 +99,7 @@ class Node extends \system\logic\Component {
 	}
 
 	protected function onInit() {
-		switch ($this->getRequestType()) {
-			case "MAIN-PANELS":
-				$this->setOutlineWrapperTemplate('outline-wrapper-main-panels');
-				break;
-			case "MAIN":
-				$this->setOutlineWrapperTemplate('outline-wrapper-main');
-				break;
-			case "PAGE-PANELS":
-				$this->setOutlineWrapperTemplate('outline-wrapper-page-panels');
-				break;
-			case "PAGE":
-			default:
-				$this->setOutlineWrapperTemplate(null);
-				break;
-		}
-		$this->setOutlineTemplate('outline');
-		$this->addTemplate('header', 'header');
-		$this->addTemplate('footer', 'footer');
-//		$this->addTemplate('sidebar', 'sidebar');
-
-		$mm = array();
 		
-		$rsb = new RecordsetBuilder("node");
-		$rsb->using(
-			'id', 'type', 'read_url', 'text.title'
-		);
-		$rsb->addFilter(new FilterClause($rsb->type, '=', 'page'));
-		$rsb->addFilter(new FilterClause($rsb->text->title, 'IS_NOT_NULL'));
-		$rsb->addReadModeFilters(\system\Login::getLoggedUser()	);
-		
-		$rs = $rsb->select();
-		foreach ($rs as $r) {
-			$mm[] = array(
-				'id' => $r->id,
-				'url' => $r->read_url,
-				'title' => $r->text->title
-			);
-		}
-		
-		$this->datamodel['page']['mainMenu'] = $mm;
-		
-		$this->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'core.js');
-		$this->addCss(\system\Theme::getThemePath() . 'css/upload-jquery/jquery.fileupload-ui.css');
 	}
 
 	protected function editForm($node, $errors=array()) {

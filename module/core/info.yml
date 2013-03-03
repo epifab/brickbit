@@ -145,3 +145,7 @@ components:
     pages:
       - url: (@strid).html
         action: ReadByUrn
+      - url:
+        action: Home
+      - url: .*
+        action: NotFound

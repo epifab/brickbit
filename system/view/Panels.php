@@ -55,7 +55,7 @@ class Panels {
 	}
 	
 	public function getPanel($id) {
-		return \array_key_exists('id', $this->panels)
+		return \array_key_exists($id, $this->panels)
 			? $this->panels[$id]
 			: '';
 	}

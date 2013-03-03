@@ -38,6 +38,8 @@ class Login {
 					self::$login->user->update();
 					self::$login->setLoginSession(); // salvo i dati di login nella sessione
 					self::$login->setLoginCookie(); // refresh del cookie di login
+				} else {
+					self::$login->user = self::getAnonymousUser();
 				}
 			}
 		}
@@ -63,6 +65,18 @@ class Login {
 	public static function getLoggedUserId() {
 		return !self::getLoggedUser() ? 0 : self::getLoggedUser()->id;
 	}
+	
+	public static function getAnonymousUser() {
+		static $rs = null;
+		if (!$rs) {
+			$rsb = new \system\model\RecordsetBuilder('user');
+			$rsb->usingAll();
+			$rs = $rsb->newRecordset();
+		}
+		return $rs;
+	}
+	
+
 	
 	/**
 	 * Controlla che esista un utente corrispondente all'username e la userpass (criptate) passate al metodo

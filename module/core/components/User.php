@@ -12,16 +12,12 @@ use \system\model\SortClauseGroup;
 
 // Inherits onInit method
 class User extends Page {
-	public static function access($action, $urlArgs, $request, $userId) {
-		
+	public static function accessLogin($urlArgs, $request, $user) {
+		return $user->anonymous;
 	}
 	
-	public static function accessLogin($urlArgs, $request, $userId) {
-		return !$userId;
-	}
-	
-	public static function accessLogout($urlArgs, $request, $userId) {
-		return (bool)$userId;
+	public static function accessLogout($urlArgs, $request, $user) {
+		return !$user->anonymous;
 	}
 	
 	public function runLogin() {
@@ -31,7 +27,7 @@ class User extends Page {
 		
 		$user = \system\Login::getLoggedUser();
 		
-		if (!$user && \array_key_exists("login_form", $_REQUEST)) {
+		if ($user->anonymous && \array_key_exists("login_form", $_REQUEST)) {
 			try {
 				$user = \system\Login::login();
 			} catch (\system\LoginException $ex) {
@@ -39,7 +35,7 @@ class User extends Page {
 			}
 		}
 		
-		if ($user) {
+		if (!$user->anonymous) {
 			$this->setMainTemplate('notify');
 			$this->datamodel['message'] = array(
 				'title' => \system\Lang::translate('Logged in'),

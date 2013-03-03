@@ -110,9 +110,9 @@ abstract class Component {
 		if (\method_exists($class, "access" . $action)) {
 			return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $user);
 		} 
-		else if (\method_exists($class, "access")) {
-			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
-		}
+//		else if (\method_exists($class, "access")) {
+//			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
+//		}
 		return true;
 	}
 	
@@ -148,6 +148,27 @@ abstract class Component {
 		return self::RESPONSE_TYPE_READ;
 	}
 	
+	public function setData($key, $value) {
+		if (\is_array($key)) {
+			$dm =& $this->datamodel;
+			\reset($key);
+			do {
+				$k1 = current($key);
+				$k2 = next($key);
+				if (!$k2) {
+					$dm[$k1] = $value;
+				}	else if (!\array_key_exists($k1, $dm)) {
+					$dm[$k1] = array();
+				}
+				$dm =& $dm[$k1];
+			} while ($k2);
+		}
+	}
+	
+	public function getDataModel() {
+		return $this->datamodel;
+	}
+	
 	public function __construct($name, $module, $action, $url, $urlArgs, $request=null) {
 		$this->name = $name;
 		$this->module = $module;
@@ -162,6 +183,7 @@ abstract class Component {
 		if (!\is_null(self::getCurrentComponent())) {
 			$this->alias = self::getCurrentComponent()->alias . '__' . $this->alias;
 		}
+		$this->initView();
 	}
 	
 	public function getRequestId() {
@@ -251,10 +273,15 @@ abstract class Component {
 	private function initView() {
 		$this->tplManager = \system\Main::getTemplateManager();
 		
+		$mainComponent = self::getMainComponent();
+		if (\is_null($mainComponent)) {
+			$mainComponent = $this;
+		}
+		
 		$this->datamodel = array(
 			'system' => array(
 				'component' => $this->getComponentInfo(),
-				'mainComponent' => self::getMainComponent()->getComponentInfo(),
+				'mainComponent' => $mainComponent->getComponentInfo(),
 				// default response type
 				'responseType' => self::RESPONSE_TYPE_READ,
 				'ajax' => HTMLHelpers::isAjaxRequest(),
@@ -270,7 +297,7 @@ abstract class Component {
 			'website' => $this->getWebsiteInfo(),
 			'page' => array(
 				'title' => '',
-				'url' => self::getMainComponent()->url,
+				'url' => $mainComponent->url,
 				'meta' => array(),
 				'js' => array(),
 				'css' => array(),
@@ -299,19 +326,19 @@ abstract class Component {
 		$this->datamodel['page']['meta'][] = $meta;
 	}
 	
-	protected function setMainTemplate($template) {
+	public function setMainTemplate($template) {
 		$this->tplManager->setMainTemplate($template);
 	}
 	
-	protected function setOutlineTemplate($template) {
+	public function setOutlineTemplate($template) {
 		$this->tplManager->setOutlineTemplate($template);
 	}
 	
-	protected function addTemplate($template, $region, $weight=0) {
+	public function addTemplate($template, $region, $weight=0) {
 		$this->tplManager->addTemplate($template, $region, $weight);
 	}
 	
-	protected function setOutlineWrapperTemplate($template) {
+	public function setOutlineWrapperTemplate($template) {
 		$this->tplManager->setOutlineWrapperTemplate($template);
 	}
 	
@@ -319,7 +346,7 @@ abstract class Component {
 		$this->datamodel['system']['responseType'] = $responseType;
 	}
 	
-	protected function setPageTitle($pageTitle, $adding=false) {
+	public function setPageTitle($pageTitle, $adding=false) {
 		$this->datamodel['page']['title'] = ($adding && !empty($this->datamodel['page']['title']) ? $this->datamodel['system']['title'] . ' | ' : '') . $pageTitle;
 	}
 	
@@ -494,8 +521,6 @@ abstract class Component {
 		$pageOutput = "";
 
 		try {
-			$this->initView();
-			
 			// init event
 			$this->onInit();
 			

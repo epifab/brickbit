@@ -41,7 +41,7 @@
 					'name' => "header-sidebar"
 				)); ?>
 					<div id="header-sidebar-login">
-						<?php if (!$user): ?>
+						<?php if ($user->anonymous): ?>
 							<li><?php $this->api->open('link', array(
 									'url' => 'user/login',
 									'okButtonLabel' => $this->api->t("Login"),
