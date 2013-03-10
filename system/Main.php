@@ -509,13 +509,15 @@ class Main {
 				$request
 			);
 
-			// Raise event onRun
-			self::raiseEvent('onRun', $obj);
+			if (!$obj->isNested()) {
+				// Raise event onRun
+				self::raiseEvent('onRun', $obj);
+			}
 
 			$obj->process();
 		} else {
 			\header("HTTP/1.0 404 Not Found");
-			die('404');
+			die();
 		}
 	}
 
@@ -523,11 +525,10 @@ class Main {
 		$configuration = self::configuration();
 		$result = array();
 		
+		$args = null;
 		if (\func_num_args() > 1) {
 			$args = \func_get_args();
 			\array_shift($args);
-		} else {
-			$args = null;
 		}
 		
 		foreach ($configuration['modules'] as $module) {
@@ -549,11 +550,18 @@ class Main {
 	public static function raiseModelEvent($eventName) {
 		$c = self::configuration();
 		$result = array();
+		
+		$args = null;
+		if (\func_num_args() > 1) {
+			$args = \func_get_args();
+			\array_shift($args);
+		}
+		
 		foreach ($c['modelClasses'] as $class) {
 			if (\method_exists($class, $eventName)) {
-				$x = \func_num_args() == 1
+				$x = \is_null($args)
 					? \call_user_func(array($class, $eventName))
-					: \call_user_func_array(array($class, $eventName), \array_shift(\func_get_args()));
+					: \call_user_func_array(array($class, $eventName), $args);
 				if (\is_null($x)) {
 					// do nothing
 				} else {

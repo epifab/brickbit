@@ -3,14 +3,6 @@
 namespace module\core\view;
 
 class Api {
-	public static function panel_form_id() {
-		return \system\view\Panels::getInstance()->getFormId();
-	}
-	
-	public static function panel_form_name() {
-		return \system\view\Panels::getInstance()->getFormName();
-	}
-	
 	public static function edit_form_id() {
 		$vars = \system\view\Template::current()->getVars();
 		return 'system-edit-form-' . $vars['system']['component']['requestId'];
@@ -252,37 +244,9 @@ class Api {
 				  . $content
 				  . '</a>';
 	}
-
-	public static function panelStart($params) {
-		system\view\Panels::getInstance()->openPanel();
-	}
-
-	public static function panel($content, $params) {
-		list(, $formName, $output) = \system\view\Panels::getForm();
-
-		$panelName = \system\Utils::getParam('name', $params, array('required' => true));
-		$panelClass =
-				  'system-panel system-panel-' . $panelName . ' ' . $formName
-				  . \system\Utils::getParam('class', $params, array('prefix' => ' ', 'default' => ''));
-		$vars = \system\view\Template::current()->getVars();
-
-		$panelId = 'system-panel-' . $vars['system']['component']['requestId'] . '-' . $panelName;
-
-		$content = '<div id="' . $panelId . '" class="' . $panelClass . '">' . $content . '</div>';
-
-		\system\view\Panels::getInstance()->closePanel($panelId, $panelName, $panelClass, $content);
-
-		return $output . $content;
-	}
-
-	public static function panels($content, $params) {
-		$content = '';
-
-		$panels = \system\view\Panels::getInstance()->getPanels();
-		foreach ($panels as $panel) {
-			$content .= $panel;
-		}
-		return $content;
+	
+	public static function node($node) {
+		\system\view\Api::getInstance();
 	}
 
 	public static function access($url, $args = array()) {

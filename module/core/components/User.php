@@ -12,12 +12,48 @@ use \system\model\SortClauseGroup;
 
 // Inherits onInit method
 class User extends Page {
+	public static function accessRED($userId, $loggedUser) {
+		return $loggedUser->superuser || $loggedUser->id == $userId;
+	}
+	
+	public static function accessAdd($urlArgs, $request, $user) {
+		return $user->superuser;
+	}
+	
+	public static function accessRead($urlArgs, $request, $user) {
+		return self::accessRED($urlArgs[0], $user);
+	}
+	
+	public static function accessEdit($urlArgs, $request, $user) {
+		return self::accessRED($urlArgs[0], $user);
+	}
+	
+	public static function accessDelete($urlArgs, $request, $user) {
+		return self::accessRED($urlArgs[0], $user);
+	}
+	
 	public static function accessLogin($urlArgs, $request, $user) {
 		return $user->anonymous;
 	}
 	
 	public static function accessLogout($urlArgs, $request, $user) {
 		return !$user->anonymous;
+	}
+	
+	public static function accessRegister($urlArgs, $request, $user) {
+		return $user->anonymous;
+	}
+	
+	public static function accessAddRole($urlArgs, $request, $user) {
+		return $user->superuser;
+	}
+	
+	public static function accessDeleteRole($urlArgs, $request, $user) {
+		return $user->superuser;
+	}
+	
+	public static function accessList($urlArgs, $request, $user) {
+		return $user->superuser;
 	}
 	
 	public function runLogin() {
@@ -60,27 +96,39 @@ class User extends Page {
 	}
 	
 	public function runRegister() {
-		
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runList() {
-		
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
-	public function runCreate() {
-		
+	public function runAdd() {
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runRead() {
-		
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
-	public function runUpdate() {
-		
+	public function runEdit() {
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runDelete() {
-		
+		$this->setPageTitle(\t('Under development'));
+		$this->setMainTemplate('developing');
+		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 }
 ?>

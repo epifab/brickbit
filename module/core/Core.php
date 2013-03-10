@@ -15,11 +15,11 @@ class Core extends \system\logic\Module {
 	}
 	
 	public static function getEditNodeUrn(\system\model\RecordsetInterface $recordset) {
-		return \config\settings()->BASE_DIR . 'content/' . $recordset->id . '/edit';
+		return 'content/' . $recordset->id . '/edit';
 	}
 	
 	public static function getDeleteNodeUrn(\system\model\RecordsetInterface $recordset) {
-		return \config\settings()->BASE_DIR . 'content/' . $recordset->id . '/delete';
+		return 'content/' . $recordset->id . '/delete';
 	}
 	
 	/**
@@ -117,47 +117,25 @@ class Core extends \system\logic\Module {
 	public static function cron() {
 
 	}
+	
 	public static function onRun(\system\logic\Component $component) {
 		switch ($component->getRequestType()) {
-			case "MAIN-PANELS":
-				$component->setOutlineWrapperTemplate('outline-wrapper-main-panels');
+			case "AJAX":
+				$component->setOutlineWrapperTemplate('outline-wrapper');
+				$component->setOutlineTemplate(null);
+				break;
+			case "HTML":
+				$component->setOutlineWrapperTemplate(null);
+				$component->setOutlineTemplate('outline');
 				break;
 			case "MAIN":
-				$component->setOutlineWrapperTemplate('outline-wrapper-main');
-				break;
-			case "PAGE-PANELS":
-				$component->setOutlineWrapperTemplate('outline-wrapper-page-panels');
-				break;
-			case "PAGE":
-			default:
 				$component->setOutlineWrapperTemplate(null);
+				$component->setOutlineTemplate(null);
 				break;
 		}
-		$component->setOutlineTemplate('outline');
-		$component->addTemplate('header', 'header');
+		$component->addTemplate('website-logo', 'header');
 		$component->addTemplate('footer', 'footer');
 //		$component->addTemplate('sidebar', 'sidebar');
-
-		$mm = array();
-		
-		$rsb = new \system\model\RecordsetBuilder("node");
-		$rsb->using(
-			'id', 'type', 'read_url', 'text.title'
-		);
-		$rsb->addFilter(new \system\model\FilterClause($rsb->type, '=', 'page'));
-		$rsb->addFilter(new \system\model\FilterClause($rsb->text->title, 'IS_NOT_NULL'));
-		$rsb->addReadModeFilters(\system\Login::getLoggedUser()	);
-		
-		$rs = $rsb->select();
-		foreach ($rs as $r) {
-			$mm[] = array(
-				'id' => $r->id,
-				'url' => $r->read_url,
-				'title' => $r->text->title
-			);
-		}
-		
-		$component->setData(array('page', 'mainMenu'), $mm);
 		
 		$component->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'core.js');
 		$component->addCss(\system\Theme::getThemePath() . 'css/upload-jquery/jquery.fileupload-ui.css');

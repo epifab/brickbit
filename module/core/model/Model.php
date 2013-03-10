@@ -39,7 +39,7 @@ class Model {
 	public static function onDelete(\system\model\RecordsetInterface $rs) {
 		$table = $rs->getBuilder()->getTableInfo();
 		foreach ($table['relations'] as $relationName => $relation) {
-			if ($relation['onDelete'] == 'CASCADE') {
+			if (\system\Utils::getParam('onDelete', $relation) == 'CASCADE') {
 				$rsb = new \system\model\RecordsetBuilder($relation['table']);
 				$filter = null;
 				foreach ($relation['clauses'] as $parentField => $childField) {

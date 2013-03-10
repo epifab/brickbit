@@ -16,6 +16,7 @@ class Page extends Node {
 	}
 	
 	public function runNotFound() {
+		$this->setPageTitle(\t('Page not found'));
 		$this->setMainTemplate('page-not-found');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}

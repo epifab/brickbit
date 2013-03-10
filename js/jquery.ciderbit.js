@@ -15,7 +15,7 @@
 				var node = $(document);
 				ciderbit.waitDialogInit();
 
-				$('.system-panel-form', node).each(function() {
+				$('.system-block-form', node).each(function() {
 					formId = $(this).attr("id");
 					formName = $(this).attr("name");
 					ciderbit.addComponentForm(formId, formName);
@@ -190,8 +190,6 @@
 				'id': $(componentResponse).attr("id"),
 
 				'editFormId': $(componentResponse).attr("editFormId"),
-				'panelFormId': $(componentResponse).attr("panelFormId"),
-				'panelFormName': $(componentResponse).attr("panelFormName"),
 
 				// Indirizzo del componente
 				'url': $(componentResponse).attr("url"),
@@ -328,14 +326,17 @@
 						ciderbit.dialogNotify(dialog, ciderbitResponse.title, 400);
 					}
 					else {
-						// Reload every panel
-						$('div.system-panel.' + formName).each(function() {
-							var id = $(this).attr('id');
-							$(this).children().remove();
-							$(this).append(
-								$(id, $(data)).children()
-							);
-						});
+						console.log(data);
+						$('#' + formName).children().remove();
+						$('#' + formName).append($(data));
+//						// Reload every block
+//						$('div.system-block.' + formName).each(function() {
+//							var id = $(this).attr('id');
+//							$(this).children().remove();
+//							$(this).append(
+//								$(id, $(data)).children()
+//							);
+//						});
 						ciderbit.init(ciderbitResponse.javascript);
 					}
 				}
@@ -343,7 +344,7 @@
 		},
 
 		"reloadComponents": function() {
-			$("form.system-panel-form").each(function() {
+			$("form.system-block-form").each(function() {
 				$(this).submit();
 			});
 		},

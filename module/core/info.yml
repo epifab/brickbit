@@ -8,6 +8,15 @@ viewClass: Api
 templatesPath: view/templates
 componentsNs: components
 components:
+  blocks:
+    class: Block
+    pages:
+      - url: system/block/main-menu
+        action: MainMenu
+      - url: system/block/admin-menu
+        action: AdminMenu
+      - url: system/block/login-control
+        action: LoginControl
   role:
     class: Role
     pages:
@@ -29,11 +38,11 @@ components:
       - url: user/list
         action: List
       - url: user/add
-        action: Create
+        action: Add
       - url: user/([0-9]+)
         action: Read
       - url: user/([0-9]+)/edit
-        action: Update
+        action: Edit
       - url: user/([0-9]+)/delete
         action: Delete
       - url: user/([0-9]+)/add-role/([0-9]+)

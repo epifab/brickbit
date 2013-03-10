@@ -19,7 +19,7 @@ use system\ValidationException;
 abstract class Component {
 	//  components stack
 	private static $components = array();
-	private static $componentsCount = 0;
+	private static $mainComponent = null;
 	
 	private $name = null;
 	private $module = null;
@@ -78,23 +78,26 @@ abstract class Component {
 	 * @return Component
 	 */
 	public static function getMainComponent() {
-		return (self::$componentsCount > 0) ? self::$components[0] : null;
+		return self::$mainComponent;
 	}
 	/**
 	 * @return Component
 	 */
 	public static function getCurrentComponent() {
-		return (self::$componentsCount > 0) ? self::$components[self::$componentsCount] : null;
+		return \current(self::$components);
 	}
 
 	private static function pushComponent(Component $component) {
-		self::$components[self::$componentsCount++] = $component;
+		if (empty(self::$components)) {
+			self::$mainComponent = $component;
+		}
+		\array_push(self::$components, $component);
 	}
 	/**
 	 * @return Component
 	 */
 	private static function popComponent() {
-		return (self::$componentsCount > 0) ? self::$components[--self::$componentsCount] : null;
+		return \array_pop(self::$components);
 	}
 
 	/**
@@ -162,6 +165,8 @@ abstract class Component {
 				}
 				$dm =& $dm[$k1];
 			} while ($k2);
+		} else {
+			$this->datamodel[$key] = $value;
 		}
 	}
 	
@@ -180,10 +185,14 @@ abstract class Component {
 		$this->loadRequestType();
 		$this->nested = \is_null(self::getCurrentComponent());
 		$this->alias = $this->name;
-		if (!\is_null(self::getCurrentComponent())) {
+		if (self::getCurrentComponent()) {
 			$this->alias = self::getCurrentComponent()->alias . '__' . $this->alias;
 		}
+		// initializing the view layer
 		$this->initView();
+		// setting the default outline and outline wrapper templates
+		$this->setOutlineWrapperTemplate($this->getOutlineWrapperTemplate());
+		$this->setOutlineTemplate($this->getOutlineTemplate());
 	}
 	
 	public function getRequestId() {
@@ -219,21 +228,24 @@ abstract class Component {
 	private function loadRequestType() {
 		if (\array_key_exists('system', $this->requestData)) {
 			if (\array_key_exists('requestType', $this->requestData['system'])) {
-				switch ((string)$this->requestData['system']['requestType']) {
-					case 'PAGE':
-					case 'MAIN':
-					case 'PAGE-PANELS':
-					case 'MAIN-PANELS':
-						$this->requestType = $this->requestData['system']['requestType'];
+				switch (strtoupper((string)$this->requestData['system']['requestType'])) {
+					case 'AJAX':
+						$this->requestType = 'AJAX';
 						break;
+					case 'MAIN':
+						$this->requestType = 'MAIN';
+						break;
+					case 'HTML':
+					default:
+						$this->requestType = 'HTML';
 				}
 			}
 		}
 		if (!$this->requestType) {
 			$this->requestType = 
 				HTMLHelpers::isAjaxRequest()
-					? 'MAIN'
-					: 'PAGE';
+					? 'AJAX'
+					: 'HTML';
 		}
 	}
 	
@@ -290,8 +302,6 @@ abstract class Component {
 				'langs' => \config\settings()->LANGUAGES,
 				'theme' => Theme::getTheme(),
 				'themes' => \config\settings()->THEMES,
-//				'panelName' => \system\Utils::getParam('system_panel_name', $this->requestData, array('default' => 'main')),
-//				'panelClass' => \system\Utils::getParam('system_panel_class', $this->requestData, array('default' => null)),
 			),
 			'user' => Login::getLoggedUser(),
 			'website' => $this->getWebsiteInfo(),
@@ -302,11 +312,6 @@ abstract class Component {
 				'js' => array(),
 				'css' => array(),
 			)
-		);
-		
-		\system\view\Panels::getInstance(
-			\system\Utils::getParam('system_panel_name', $this->requestData, array('default' => 'main')),
-			\system\Utils::getParam('system_panel_class', $this->requestData, array('default' => null))
 		);
 	}
 	
@@ -571,6 +576,22 @@ abstract class Component {
 		}
 		
 		self::popComponent();
+	}
+	
+	public function getOutlineWrapperTemplate() {
+		if (!$this->isNested() && $this->requestType == 'AJAX') {
+			return 'outline-wrapper';
+		} else {
+			return null;
+		}
+	}
+	
+	public function getOutlineTemplate() {
+		if (!$this->isNested() && $this->requestType == 'HTML') {
+			return 'outline';
+		} else {
+			return null;
+		}
 	}
 }
 ?>

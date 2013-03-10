@@ -11,6 +11,7 @@ use \system\model\SortClause;
 use \system\model\SortClauseGroup;	
 
 class Node extends \system\logic\Component {
+	
 	public static function accessAdd($urlArgs, $request, $user) {
 		$nodeTypes = \module\core\Utils::getNodeTypes();
 		

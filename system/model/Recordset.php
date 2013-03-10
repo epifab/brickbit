@@ -296,9 +296,13 @@ class Recordset implements RecordsetInterface {
 		$q2 = "";
 
 		foreach ($this->builder->getMetaTypeList() as $name => $metaType) {
-			if (\array_key_exists($name, $this->modifiedFields)) {
+			if (\array_key_exists($name, $this->fields)) {
+				$value = $metaType->prog2Db(\array_key_exists($name, $this->modifiedFields)
+					? $this->modifiedFields[$name]
+					: $this->fields[$name]
+				);
 				$q1 .= ($q1 === "" ? "" : ", ") . $name;
-				$q2 .= ($q2 === "" ? "" : ", ") . $metaType->prog2Db($this->modifiedFields[$name]);
+				$q2 .= ($q2 === "" ? "" : ", ") . $value;
 			}
 		}
 		

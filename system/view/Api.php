@@ -11,6 +11,10 @@ class Api {
 	private $blocks = array();
 	private $javascript = array();
 
+	
+	/**
+	 * @return \system\view\Api
+	 */
 	public static function getInstance() {
 		if (\is_null(self::$instance)) {
 			self::$instance = new self();
@@ -34,6 +38,10 @@ class Api {
 			}
 		}
 		return $cache[$method];
+	}
+	
+	public static function __callStatic($method, $args) {
+		self::getInstance()->__call($method, $args);
 	}
 
 	public function __call($method, $args) {
@@ -80,12 +88,73 @@ class Api {
 	public function lang_path($lang) {
 		return \system\Lang::langPath($lang);
 	}
-
-	public function load($path, $args = array()) {
-		if ($path == "notify") {
-			echo "<b>" . $path . "</b>";
-			print_r(\system\view\Template::current()->getVars());
+	
+	private static function params2input($key, $val, &$input, $prefix='') {
+		if (\is_array($val)) {
+			foreach ($val as $k1 => $v1) {
+				self::params2input($k1, $v1, $input, (empty($prefix) ? $key : $prefix . '[' . $key . ']'));
+			}
 		}
+		else {
+			$input .= 
+				'<input'
+				. ' type="hidden"'
+				. ' name="' . (empty($prefix) ? $key : $prefix . '[' . $key . ']') . '"'
+				. ' value="' . \htmlentities($val) . '"/>';
+		}
+	}
+
+	public function load($name, $url, $args = array()) {
+		static $ids = array();
+		
+		$url = $this->path($url);
+		
+		$blockId = $name;
+		if (!\array_key_exists($name, $ids)) {
+			$ids[$name] = 1;
+		} else {
+			$ids[$name]++;
+			$blockId .= '-' . $ids[$name];
+		}
+
+		$vars = \system\view\Template::current()->getVars();
+
+		// system array is reserved
+		// make sure it isn't overridden
+		$args['system'] = array(
+			'url' => $vars['system']['mainComponent']['url'],
+			'requestType' => 'MAIN',
+			'blockId' => $blockId
+		);
+		
+		\ob_start();
+		\system\Main::run($url, $args);
+		$componentOut = \ob_get_clean();
+		
+		$args['system']['requestType'] = 'AJAX';
+		
+		$content =
+			'<form'
+			. ' action="' . $url . '"'
+			. ' method="POST"' 
+			. ' name="' . $blockId . '"'
+			. ' class="system-block-form"'
+			. ' id="system-block-form-' . $blockId . '">';
+		
+		foreach ($args as $key => $val) {
+			self::params2input($key, $val, $content);
+		}
+		
+		$content .=
+			'</form>'
+			. '<div class="system-block" id="' . $blockId . '">'
+			. $componentOut
+			. '</div>';
+		
+		echo $content;
+	}
+	
+	public function import($path, $args = array()) {
 		$a = $args + \system\view\Template::current()->getVars();
 		$tpl = new \system\view\Template($path, $a);
 		$tpl->render();
@@ -98,7 +167,7 @@ class Api {
 			\asort($vars['system']['templates']['regions'][$region]);
 			foreach ($vars['system']['templates']['regions'][$region] as $templates) {
 				foreach ($templates as $tpl) {
-					$this->load($tpl);
+					$this->import($tpl);
 				}
 			}
 		}
