@@ -423,8 +423,7 @@ class Main {
 	}
 	
 	public static function urlExists($url) {
-		$c = self::configuration();
-		return \array_key_exists($url, $c['urls']);
+		return !\is_null(self::getComponent($url));
 	}
 	
 	public static function getComponent($url) {

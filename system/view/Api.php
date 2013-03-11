@@ -103,11 +103,14 @@ class Api {
 				. ' value="' . \htmlentities($val) . '"/>';
 		}
 	}
-
-	public function load($name, $url, $args = array()) {
-		static $ids = array();
-		
+	
+	public function load_block($name, $url, $args=array()) {
 		$url = $this->path($url);
+		echo self::print_block($name, $url, null, $args);
+	}
+
+	private function print_block($name, $url, $content, $args=array()) {
+		static $ids = array();
 		
 		$blockId = $name;
 		if (!\array_key_exists($name, $ids)) {
@@ -123,17 +126,11 @@ class Api {
 		// make sure it isn't overridden
 		$args['system'] = array(
 			'url' => $vars['system']['mainComponent']['url'],
-			'requestType' => 'MAIN',
+			'requestType' => 'AJAX',
 			'blockId' => $blockId
 		);
 		
-		\ob_start();
-		\system\Main::run($url, $args);
-		$componentOut = \ob_get_clean();
-		
-		$args['system']['requestType'] = 'AJAX';
-		
-		$content =
+		echo
 			'<form'
 			. ' action="' . $url . '"'
 			. ' method="POST"' 
@@ -142,16 +139,27 @@ class Api {
 			. ' id="system-block-form-' . $blockId . '">';
 		
 		foreach ($args as $key => $val) {
-			self::params2input($key, $val, $content);
+			self::params2input($key, $val, $out);
+		}
+
+		echo
+			'</form>'
+			. '<div class="system-block" id="' . $blockId . '">';
+	
+		if (\is_null($content)) {
+			\system\Main::run($url, $args);
+		} else {
+			echo $content;
 		}
 		
-		$content .=
-			'</form>'
-			. '<div class="system-block" id="' . $blockId . '">'
-			. $componentOut
-			. '</div>';
-		
-		echo $content;
+		echo '</div>';
+	}
+	
+	public function block($content, $params) {
+		$name = \system\Utils::getParam('name', $params, array('required' => true));
+		$url = \system\Utils::getParam('url', $params, array('required' => true));
+		$args = \system\Utils::getParam('args', $params, array('default' => array()));
+		echo self::print_block($name, $url, $content, $args);
 	}
 	
 	public function import($path, $args = array()) {

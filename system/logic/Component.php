@@ -178,18 +178,25 @@ abstract class Component {
 		$this->name = $name;
 		$this->module = $module;
 		$this->action = $action;
+		
 		$this->url = $url;
 		$this->urlArgs = $urlArgs;
 		$this->requestData = \is_null($request) ? $_REQUEST : (array)$request;
+		
 		$this->loadRequestId();
 		$this->loadRequestType();
-		$this->nested = \is_null(self::getCurrentComponent());
+		
+		$this->nested = (bool)self::getCurrentComponent();
+		self::pushComponent($this);
+		
 		$this->alias = $this->name;
 		if (self::getCurrentComponent()) {
 			$this->alias = self::getCurrentComponent()->alias . '__' . $this->alias;
 		}
+		
 		// initializing the view layer
 		$this->initView();
+		
 		// setting the default outline and outline wrapper templates
 		$this->setOutlineWrapperTemplate($this->getOutlineWrapperTemplate());
 		$this->setOutlineTemplate($this->getOutlineTemplate());
@@ -513,9 +520,6 @@ abstract class Component {
 	///</editor-fold>
 
 	final public function process() {
-		
-		// adding the component to the stack
-		self::pushComponent($this);
 		
 		// initializing request time
 		$this->microTime = \microtime(true);

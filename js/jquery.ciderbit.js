@@ -326,17 +326,8 @@
 						ciderbit.dialogNotify(dialog, ciderbitResponse.title, 400);
 					}
 					else {
-						console.log(data);
 						$('#' + formName).children().remove();
-						$('#' + formName).append($(data));
-//						// Reload every block
-//						$('div.system-block.' + formName).each(function() {
-//							var id = $(this).attr('id');
-//							$(this).children().remove();
-//							$(this).append(
-//								$(id, $(data)).children()
-//							);
-//						});
+						$('#' + formName).append(ciderbitResponse.content);
 						ciderbit.init(ciderbitResponse.javascript);
 					}
 				}

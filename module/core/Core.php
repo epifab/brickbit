@@ -119,21 +119,8 @@ class Core extends \system\logic\Module {
 	}
 	
 	public static function onRun(\system\logic\Component $component) {
-		switch ($component->getRequestType()) {
-			case "AJAX":
-				$component->setOutlineWrapperTemplate('outline-wrapper');
-				$component->setOutlineTemplate(null);
-				break;
-			case "HTML":
-				$component->setOutlineWrapperTemplate(null);
-				$component->setOutlineTemplate('outline');
-				break;
-			case "MAIN":
-				$component->setOutlineWrapperTemplate(null);
-				$component->setOutlineTemplate(null);
-				break;
-		}
 		$component->addTemplate('website-logo', 'header');
+		$component->addTemplate('langs-control', 'header-sidebar');
 		$component->addTemplate('footer', 'footer');
 //		$component->addTemplate('sidebar', 'sidebar');
 		

@@ -23,24 +23,26 @@
 	
 	<body>
 		<div id="container">
-			<?php $this->api->load('admin-menu-wrapper', 'system/block/admin-menu'); ?>
+			<?php $this->api->load_block('admin-menu-wrapper', 'system/block/admin-menu'); ?>
 			
 			<div id="header-wrapper">
 				<div id="header">
 					<?php $this->api->region('header'); ?>
 
 					<div id="header-sidebar">
-						<?php $this->api->load('login-control-wrapper', 'system/block/login-control'); ?>
+						<?php $this->api->load_block('login-control-wrapper', 'system/block/login-control'); ?>
 						<?php $this->api->region('header-sidebar'); ?>
 					</div>
 				</div>
 			</div>
 			
-			<?php $this->api->load('main-menu-wrapper', 'system/block/main-menu'); ?>
+			<?php $this->api->load_block('main-menu-wrapper', 'system/block/main-menu'); ?>
 
 			<div id="main-wrapper">
 				<div id="main">
-					<?php $this->api->import($system['templates']['main']); ?>
+					<?php $this->api->open('block', array('url' => $system['mainComponent']['url'], 'name' => 'main-column')); ?>
+						<?php $this->api->import($system['templates']['main']); ?>
+					<?php $this->api->close(); // block ?>
 					<?php $this->api->region('sidebar'); ?>
 				</div>
 			</div>
