@@ -110,8 +110,10 @@ components:
   node_image:
     class: NodeImage
     pages:
-      - url: content/image/([0-9]+)x([0-9]+)/([0-9]+)\.(jpe?g|png|gif)
-        action: GetResized
+# content/123/img-type/images/testing-image.jpg
+      # content/123/img-thumb/gallery/about-me.jpg
+      - url: content/([0-9]+)/img-(@strid)/(@strid)/(@strid)\.(jpe?g|png|gif)
+        action: GetVersion
       - url: content/image/([0-9]+)\.(jpe?g|png|gif)
         action: Get
 #      - url: content/([0-9]+)/image/add

@@ -506,6 +506,12 @@ tables:
           4: Registered
           5: Anyone
     virtuals:
+      real_path:
+        dependencies: [file.path]
+        handle: |
+          function(\system\model\Recordset $rs) {
+            return $rs->file->path;
+          }
       read_url:
         dependencies: [virtual_name, node_index, node_id, file_id, file.extension]
         handle: |

@@ -92,6 +92,14 @@ class File {
 	 * @param int $maxHeight Massima altezza dell'immagine
 	 */
 	public static function uploadImage($inputName, $destinationPath, $maxWidth=0, $maxHeight=0) {
+		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
+			throw new ValidationException("Nessun file caricato");
+		}
+    self::saveImage($_FILES[$inputName]['tmp_name'], $destinationPath. $maxWidth, $maxHeight);
+  }
+  
+  
+  public static function saveImage($sourcePath, $destinationPath, $maxWidth=0, $maxHeight=0) {
 
 		$maxWidth = (int)$maxWidth;
 		if ($maxWidth < 0) {
@@ -101,17 +109,8 @@ class File {
 		if ($maxHeight < 0) {
 			throw new InternalErrorException("Parametro maxHeight non valido");
 		}
-
-		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new ValidationException("Nessun file caricato");
-		}
 		
-		$name = $_FILES[$inputName]['name'];
-		$tmp = $_FILES[$inputName]['tmp_name'];
-		$size = $_FILES[$inputName]['size'];
-		$type = $_FILES[$inputName]['type'];
-
-		if (!\copy($tmp, $destinationPath)) {
+		if (!\copy($sourcePath, $destinationPath)) {
 			throw new InternalErrorException("Impossibile copiare il file caricato");
 		}
 		\chmod($destinationPath, octdec('0666'));
@@ -205,13 +204,13 @@ class File {
 			throw new InternalErrorException("Nessun file caricato");
 		}
 
-		
-		$name = $_FILES[$inputName]['name'];
-		$tmp = $_FILES[$inputName]['tmp_name'];
-		$size = $_FILES[$inputName]['size'];
-		$type = $_FILES[$inputName]['type'];
+		self::createImageFixedSize($_FILES[$inputName]['tmp_name'], $destinationPath, $fixedWidth, $fixedHeight);
+  }
+  
+  
+  public static function createImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
 
-		if (!\copy($tmp, $destinationPath)) {
+		if (!\copy($sourcePath, $destinationPath)) {
 			throw new InternalErrorException("Impossibile copiare il file caricato");
 		}
 		\chmod($destinationPath, octdec('0666'));

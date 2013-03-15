@@ -519,6 +519,41 @@ class Main {
 			die();
 		}
 	}
+  
+  public static function moduleConfigArray($eventName) {
+    $results = \system\Utils::get('module-config-' . $eventName, null);
+    if (\is_null($results)) {
+      $results = array();
+      $v = self::raiseEvent($eventName);
+      foreach ($v as $m) {
+        if (!\is_array($m)) {
+          // skipping all non-array values
+          continue;
+        }
+        $results = $m + $results;
+      }
+      \system\Utils::set('module-config-' . $eventName, $results);
+    }
+    return $results;
+  }
+  
+  public static function moduleConfig($eventName) {
+    $results = \system\Utils::get('module-config-' . $eventName, null);
+    if (\is_null($results)) {
+      $results = \end(self::raiseEvent($eventName)); // last element of the array
+      \system\Utils::set('module-config-' . $eventName, $results);
+    }
+    return $results;
+  }
+  
+  public static function moduleConfigAll($eventName) {
+    $results = \system\Utils::get('module-config-' . $eventName, null);
+    if (\is_null($results)) {
+      $results = self::raiseEvent($eventName); // last element of the array
+      \system\Utils::set('module-config-' . $eventName, $results);
+    }
+    return $results;
+  }
 
 	public static function raiseEvent($eventName) {
 		$configuration = self::configuration();
