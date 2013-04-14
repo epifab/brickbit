@@ -279,6 +279,18 @@ class DataLayerCore {
 		}
 		return $res;
 	}
+	
+	public function executeQueryArray($query, $file, $line) {
+		$result = $this->executeQuery($query, $file, $line);
+		$x = array();
+		\system\Utils::log('DataLayer', print_r($x, TRUE));
+		while ($arr = $this->sqlFetchArray($result)) {
+			\system\Utils::log('DataLayer', print_r($x, TRUE));
+			$x[] = $arr;
+		}
+		\system\Utils::log('DataLayer', print_r($x, TRUE));
+		return $x;
+	}
 
 	/**
 	 * Esegue la query di aggiornamento (INSERT, UPDATE o DELETE)

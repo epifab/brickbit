@@ -119,9 +119,17 @@ abstract class Component {
 		return true;
 	}
 	
+	/**
+	 * This method is called whenever  
+	 */
 	protected function onInit() {
+		
 	}
 	
+	/**
+	 * Error handler
+	 * @param \Exception $exception Exception to handle with
+	 */
 	protected function onError($exception) {
 
 		\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
@@ -151,6 +159,11 @@ abstract class Component {
 		return self::RESPONSE_TYPE_READ;
 	}
 	
+	/**
+	 * Set a value to the datamodel.
+	 * @param mixed $key Key string or array representing the path to the key
+	 * @param mixed $value Value to add to the datamodel
+	 */
 	public function setData($key, $value) {
 		if (\is_array($key)) {
 			$dm =& $this->datamodel;
@@ -170,6 +183,10 @@ abstract class Component {
 		}
 	}
 	
+	/**
+	 * Get the full datamodel
+	 * @return array Datamodel
+	 */
 	public function getDataModel() {
 		return $this->datamodel;
 	}
@@ -202,10 +219,18 @@ abstract class Component {
 		$this->setOutlineTemplate($this->getOutlineTemplate());
 	}
 	
+	/**
+	 * Get the request ID
+	 * @return string Request id
+	 */
 	public function getRequestId() {
 		return $this->requestId;
 	}
 	
+	/**
+	 * Get the request type
+	 * @return string Request type
+	 */
 	public function getRequestType() {
 		return $this->requestType;
 	}
@@ -322,34 +347,64 @@ abstract class Component {
 		);
 	}
 	
+	/**
+	 * Add a js file
+	 * @param string $js Path to the js file
+	 */
 	public function addJs($js) {
 		if (!\in_array($js, $this->datamodel['page']['js'])) {
 			$this->datamodel['page']['js'][] = $js;
 		}
 	}
 	
+	/**
+	 * Add a css file
+	 * @param string $css Path to the css file
+	 */
 	public function addCss($css) {
 		if (!\in_array($css, $this->datamodel['page']['css'])) {
 			$this->datamodel['page']['css'][] = $css;
 		}
 	}
 	
+	/**
+	 * Add a meta tag
+	 * @param string $meta Meta tag
+	 */
 	public function addMeta($meta) {
 		$this->datamodel['page']['meta'][] = $meta;
 	}
 	
+	/**
+	 * Set the main template
+	 * @param string $template Template name
+	 */
 	public function setMainTemplate($template) {
 		$this->tplManager->setMainTemplate($template);
 	}
 	
+	/**
+	 * Set the outline template
+	 * @param string $template Template name
+	 */
 	public function setOutlineTemplate($template) {
 		$this->tplManager->setOutlineTemplate($template);
 	}
 	
+	/**
+	 * Set a template
+	 * @param string $template Template name
+	 * @param string $region Region where to add the template
+	 * @param int $weight Templates of a region are sorted by weight (ascending)
+	 */
 	public function addTemplate($template, $region, $weight=0) {
 		$this->tplManager->addTemplate($template, $region, $weight);
 	}
 	
+	/**
+	 * Set an outline wrapper template
+	 * @param string $template Template name
+	 */
 	public function setOutlineWrapperTemplate($template) {
 		$this->tplManager->setOutlineWrapperTemplate($template);
 	}
@@ -358,42 +413,84 @@ abstract class Component {
 		$this->datamodel['system']['responseType'] = $responseType;
 	}
 	
+	/**
+	 * Set the page title
+	 * @param string $pageTitle Page title
+	 * @param boolean $adding Whether to add the $pageTitle to the page title or to replace it
+	 */
 	public function setPageTitle($pageTitle, $adding=false) {
 		$this->datamodel['page']['title'] = ($adding && !empty($this->datamodel['page']['title']) ? $this->datamodel['system']['title'] . ' | ' : '') . $pageTitle;
 	}
 	
+	/**
+	 * Get module name
+	 * @return string Module name
+	 */
 	final public function getModule() {
 		return $this->module;
 	}
 	
+	/**
+	 * Get component name
+	 * @return string Component name
+	 */
 	final public function getName() {
 		return $this->name;
 	}
 	
+	/**
+	 * Get component alias
+	 * @return string Alias
+	 */
 	final public function getAlias() {
 		return $this->alias;
 	}
 
+	/**
+	 * Get component action
+	 * @return string Action
+	 */
 	final public function getAction() {
 		return $this->action;
 	}
 	
+	/**
+	 * Get action URL
+	 * @return string Action URL
+	 */
 	final public function getUrl() {
 		return $this->url;
 	}
 	
+	/**
+	 * Get URL parameters
+	 * @return array URL parameters
+	 */
 	final public function getUrlArgs() {
 		return $this->urlArgs;
 	}
 	
+	/**
+	 * Get URL parameter
+	 * @param int $index URL parameter index (starting from 0)
+	 * @return mixed URL parameter corrisponding to index or null if it does not exist
+	 */
 	final public function getUrlArg($index) {
 		return \array_key_exists($index, $this->urlArgs) ? $this->urlArgs[$index] : null;
 	}
 	
+	/**
+	 * Get data attached to the request (usually $_REQUEST)
+	 * @return array Data attached to the request
+	 */
 	final public function getRequestData() {
 		return $this->requestData;
 	}
 	
+	/**
+	 * Check if the component is nested
+	 * @return boolean True if the component is nested
+	 */
 	final public function isNested() {
 		return $this->nested;
 	}
@@ -519,6 +616,15 @@ abstract class Component {
 	}
 	///</editor-fold>
 
+	/**
+	 * Processes the component.
+	 * 1) Calls the onInit event
+	 * 2) Checks permissions
+	 * 2) Executes the "run action" method if defined in the derived class
+	 * 3) Displays a template according to the value returned by the "run action" method
+	 * *) If an error occurs the onError method is executed
+	 * Remove the current component from the components stack.
+	 */
 	final public function process() {
 		
 		// initializing request time
@@ -582,6 +688,11 @@ abstract class Component {
 		self::popComponent();
 	}
 	
+	/**
+	 * Returns the outline wrapper template (if defined)
+	 * This may be overriden to specify a default custom outline wrapper template
+	 * @return string|null Outline wrapper template
+	 */
 	public function getOutlineWrapperTemplate() {
 		if (!$this->isNested() && $this->requestType == 'AJAX') {
 			return 'outline-wrapper';
@@ -590,6 +701,11 @@ abstract class Component {
 		}
 	}
 	
+	/**
+	 * Returns the outline template (if defined)
+	 * This may be overriden to specify a default custom outline template
+	 * @return string|null Outline template
+	 */
 	public function getOutlineTemplate() {
 		if (!$this->isNested() && $this->requestType == 'HTML') {
 			return 'outline';

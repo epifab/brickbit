@@ -78,7 +78,7 @@ class Api {
 	}
 
 	public function module_path($module, $url) {
-		return \system\logic\Module::getPath($module) . $url;
+		return \system\logic\Module::getAbsPath($module) . $url;
 	}
 
 	public function theme_path($url) {

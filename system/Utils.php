@@ -2,6 +2,126 @@
 namespace system;
 
 class Utils {
+	const LOG_ERROR = 1;
+	const LOG_WARNING = 2;
+	const LOG_INFO = 3;
+	const LOG_DEBUG = 4;
+	
+	public static function log($key, $message, $type=self::LOG_INFO) {
+		$logs = self::get('system-logs', array());
+		$logsByKey = self::get('system-logs-by-key', array());
+		$logsByType = self::get('system-logs-by-type', array());
+
+		// because of the reverse array order
+		// the first element key is the greatest one
+		$index = 1 + \key($logs);
+
+		$traceDesc = '<ol>';
+		$trace = \debug_backtrace();
+		$i = count($trace);
+		foreach ($trace as $t) {
+			$traceDesc .= '<li value="' . $i . '"><p><code>';
+
+			$i--;
+
+			if (array_key_exists('class', $t) && !empty($t['class'])) {
+				$traceDesc .= $t['class'] . '->';
+			}
+			$traceDesc .= '<b>' . $t['function'] . '</b>(';
+
+			$first = true;
+
+			if (\array_key_exists("args", $t)) {
+				foreach ($t['args'] as $arg) {
+					$first ? $first = false : $traceDesc .= ', ';
+					$traceDesc .= self::varDump($arg);
+				}
+			}
+			$traceDesc .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
+		}
+		$traceDesc .= '</ol>';
+		
+		$logs[$index] = array(
+			'id' => $index,
+			'time' => \time(),
+			'key' => $key,
+			'message' => $message,
+			'type' => $type,
+			'trace' => $traceDesc
+		);
+		
+		$logsByKey[$key][] = $index;
+		$logsByType[$type][] = $index;
+		
+		\arsort($logs);
+		\arsort($logsByKey[$key]);
+		\arsort($logsByType[$type]);
+		
+		self::set('system-logs', $logs);
+		self::set('system-logs-by-key', $logsByKey);
+		self::set('system-logs-by-type', $logsByType);
+	}
+	
+	public static function varDump($arg) {
+		$msg = '';
+		if (\is_array($arg)) {
+			$msg .= 'array(';
+			$first = true;
+			foreach ($arg as $k => $v) {
+				$first ? $first = false : $msg .= ", ";
+				$msg .= self::varDump($k) . " => " . self::varDump($v);
+			}
+			$msg .= ')';
+		} else if (\is_object($arg)) {
+			$msg .= '[object ' . get_class($arg) . ']';
+		} else if (\is_null($arg)) {
+			$msg .= 'null';
+		} else if (\is_string($arg)) {
+			$msg .= '"' . $arg . '"';
+		} else {
+			$msg .= $arg;
+		}
+		return $msg;
+	}
+	
+	public static function getLogs() {
+		return self::get('system-logs', array());
+	}
+	
+	public static function getLogsByKey($key) {
+		$logs = self::get('system-logs', array());
+		$logsByKey = self::get('system-logs-by-key', array());
+		
+		$return = array();
+		
+		if (isset($logsByKey[$key])) {
+			foreach ($logsByKey[$key] as $index) {
+				$return[] = $logs[$index];
+			}
+		}
+		return $return;
+	}
+	
+	public static function getLogsByType($type) {
+		$logs = self::get('system-logs', array());
+		$logsByType = self::get('system-logs-by-type', array());
+		
+		$return = array();
+		
+		if (isset($logsByType[$type])) {
+			foreach ($logsByType[$type] as $index) {
+				$return[] = $logs[$index];
+			}
+		}
+		return $return;
+	}
+	
+	public static function resetLogs() {
+		self::set('system-logs', array());
+		self::set('system-logs-by-key', array());
+		self::set('system-logs-by-type', array());
+	}
+		
 	public static function get($name, $default=null) {
 		if (file_exists("config/vars/" . $name . ".var")) {
 			$fp = fopen("config/vars/" . $name . ".var", "r");

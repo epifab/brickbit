@@ -24,7 +24,7 @@ class File {
 	public static function getSafeFilename($x) {
 		$ext = self::getExtension($x);
 		$name = self::stripExtension($x);
-		$replace = "_";
+		$replace = "-";
 		$pattern = "/([[:alnum:]_-]*)/";
 		$name = \str_replace(\str_split(\preg_replace($pattern,$replace,$name)),$replace,$name);
 		return "$name.$ext";

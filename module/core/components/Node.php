@@ -107,6 +107,12 @@ class Node extends \system\logic\Component {
 		$this->datamodel['recordset'] = $node;
 		$this->datamodel['errors'] = $errors;
 		$this->setMainTemplate('edit-node-form');
+		// plupload
+		$this->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/plupload.full.js');
+		$this->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/jquery.plupload.queue.js');
+		// css
+//		$this->addCss(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css');
+		$this->addCss(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css');
 		return \system\logic\Component::RESPONSE_TYPE_FORM;
 	}
 	

@@ -6,19 +6,16 @@ tables:
         label: Id
       path:
         type: plaintext
-        label: Dir path
+        label: Path
         maxlength: 32
-        regexp: /^[a-zA-Z0-9-]+$/
     keys:
       primary:
         fields: [id]
         autoIncrement: 1
     relations:
-      files:
-        table: file
-        clauses: [id: dir_id]
-        type: 1-N
-        onDelete: CASCADE
+      table: file
+      clauses: [id: dir_id]
+      type: 1-N
   file:
     fields:
       id:
@@ -26,15 +23,18 @@ tables:
         label: Id
       dir_id:
         type: integer
-        label: Dir id
+        label: Dir Id
       name:
         type: plaintext
         label: File name
         maxlength: 32
         regexp: /^[a-zA-Z0-9._-]+$/
+      size:
+        type: integer
+        label: Bytes
     virtuals:
       path:
-        dependencies: [dir.path]
+        dependencies: [dir.path, name]
         label: File path
         handle: |
           function(\system\model\Recordset $file) {
@@ -207,6 +207,47 @@ tables:
         type: N-1
         table: node
         clauses: [node_id: id]
+  menu:
+    fields:
+      id:
+        type: integer
+        label: Id
+      name:
+        type: string
+        size: 32
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      items:
+        table: menu_item
+        type: 1-N
+        onDelete: CASCADE
+  menu_item:
+    fields:
+      id:
+        type: integer
+        label: Id
+      menu_id:
+        type: integer
+        label: Menu Id
+      url:
+        type: string
+        size: 32
+      title:
+        type: string
+        size: 64
+      sort_index:
+        type: integer
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      menu:
+        table: menu
+        type: N-1
   node:
     fields:
       id:

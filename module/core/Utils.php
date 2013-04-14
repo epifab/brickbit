@@ -1,7 +1,13 @@
 <?php
 namespace module\core;
 
+define('LOG_ERROR', 1);
+define('LOG_WARNING', 2);
+define('LOG_INFO', 3);
+define('LOG_DEBUG', 4);
+
 class Utils {
+	
 	public static function getNodeTypes() {
 		static $nodeTypes = null;
 		if (\is_null($nodeTypes)) {

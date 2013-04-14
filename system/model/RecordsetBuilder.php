@@ -1154,17 +1154,19 @@ class RecordsetBuilder {
 	 * @return RecordsetInterface
 	 */
 	public function selectFirstBy($fieldPath, $value) {
-		$newFilter = new FilterClause($this->searchMetaType($fieldPath, true), (\is_null($value) ? "IS_NULL" : "="), $value);
+		$oldFilter = $this->filterClauses;
 		
-		if (\is_null($this->filterClauses)) {
-			$oldFilter = null;
-			$this->filterClauses = $newFilter;
-		} else {
-			$oldFilter = $this->filterClauses;
-			$this->filterClauses = new FilterClauseGroup($newFilter, "AND", $oldFilter);
+		for ($i = 0; $i < \func_num_args(); $i++) {
+			$fieldPath = \func_get_arg($i);
+			$value = \func_get_arg($i+1);
+			$this->addFilter(new FilterClause($this->searchMetaType($fieldPath, true), (\is_null($value) ? "IS_NULL" : "="), $value));
+			$i += 2;
 		}
+		
 		$result = $this->selectFirst();
+		
 		$this->filterClauses = $oldFilter;
+		
 		return $result;
 	}
 	

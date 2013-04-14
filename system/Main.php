@@ -623,5 +623,13 @@ class Main {
 		}
 		return $tpl;
 	}
+	
+	public static function tempPath() {
+		return \config\settings()->BASE_DIR_ABS . 'temp/';
+	}
+	
+	public static function dataPath() {
+		return \config\settings()->BASE_DIR_ABS . 'data/';
+	}
 }
 ?>

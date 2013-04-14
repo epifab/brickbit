@@ -49,28 +49,6 @@ class HTMLHelpers {
 				 (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) && (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'));
 	}
 
-	private static function printVar($arg) {
-		$msg = '';
-		if (\is_array($arg)) {
-			$msg .= 'array(';
-			$first = true;
-			foreach ($arg as $k => $v) {
-				$first ? $first = false : $msg .= ", ";
-				$msg .= self::printVar($k) . " => " . self::printVar($v);
-			}
-			$msg .= ')';
-		} else if (\is_object($arg)) {
-			$msg .= '[object ' . get_class($arg) . ']';
-		} else if (\is_null($arg)) {
-			$msg .= 'null';
-		} else if (\is_string($arg)) {
-			$msg .= '"' . $arg . '"';
-		} else {
-			$msg .= $arg;
-		}
-		return $msg;
-	}
-	
 	/**
 	 * Genera una pagina HTML di errore, con un messaggio specificato dall'utente
 	 * @param tpl Template manager
@@ -114,7 +92,7 @@ class HTMLHelpers {
 							if (\array_key_exists("args", $t)) {
 								foreach ($t['args'] as $arg) {
 									$first ? $first = false : $msg .= ', ';
-									$msg .= self::printVar($arg);
+									$msg .= \system\Utils::varDump($arg);
 								}
 							}
 							$msg .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
@@ -151,6 +129,8 @@ class HTMLHelpers {
 			'body' => $msg
 		);
 		$datamodel['system']['responseType'] = 'ERROR';
+		
+		\system\Utils::log('ciderbit', $msg, \system\Utils::LOG_ERROR);
 
 		try {
 			

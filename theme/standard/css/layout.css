@@ -324,6 +324,9 @@ a img {
 	border: 0px;
 }
 
+.plupload_header_content {
+	display: none;
+}
 
 
 

@@ -2,8 +2,8 @@
 namespace module\core\components;
 
 class File extends \system\logic\Component {
-	public static function access($action, $urlArgs, $request, $userId) {
-		return $userId;
+	public static function access($action, $urlArgs, $request, \system\Login $user) {
+		return $user && $user->logged;
 	}
 	
 	public function onError($exception) {

@@ -1,4 +1,4 @@
-<?php if ($node): ?>
+	<?php if ($node): ?>
 	<div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?>">
 
 		<?php if ($this->api->access($node->edit_url)): ?>
@@ -7,12 +7,14 @@
 					'ajax' => false,
 					'url' => $node->edit_url,
 					'width' => 800,
+					'class' => 'button',
 					'height' => 420,
 					'title' => $this->api->t('Edit @name', array('@name' => $node->type))
 				)); ?><?php echo $this->api->t('Edit @name', array('@name' => $node->type)); ?><?php echo $this->api->close(); ?>
 				<?php $this->api->open('link', array(
 					'url' => $node->delete_url,
 					'confirm' => true,
+					'class' => 'button',
 					'confirmTitle' => $this->api->t('The @name will be deleted', array('@name' => $node->type)),
 					'title' => $this->api->t('Delete @name', array('@name' => $node->type))
 				)); ?><?php echo $this->api->t('Delete @name', array('@name' => $node->type)); ?><?php echo $this->api->close(); ?>

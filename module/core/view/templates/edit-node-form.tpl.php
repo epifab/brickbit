@@ -1,6 +1,6 @@
 <?php 
-echo $recordset->id;
-echo $recordset->type;
+//echo $recordset->id . ' - ' . $recordset->type;
+
 /*
 <form class="dataedit" id="fileupload" action="<{path url="file/upload"}>" method="POST" enctype="multipart/form-data">
 	<fieldset>
@@ -50,6 +50,51 @@ echo $recordset->type;
 </form>
 */ ?>
 
+<script type="text/javascript">
+ciderbit.setBehavior('plupload', function() {
+	$('#<?php echo $system['component']['requestId']; ?>-plupload-image').each(function() {
+		var id = $(this).attr('id');
+		var title = $(this).attr('title');
+		
+		$('#' + id).pluploadQueue({
+			// General settings
+			runtimes : 'html5,flash',
+			url : '/content/<?php echo $recordset->id; ?>/file/' + title + '/upload',
+			max_file_size : '50mb',
+			chunk_size : '1mb',
+			unique_names : true,
+
+			// Resize images on clientside if we can
+			//resize : {width : 320, height : 240, quality : 90},
+
+			// Specify what files to browse for
+	//		filters : [
+	//			{title : "Image files", extensions : "jpg,gif,png"},
+	//			{title : "Pdf files", extensions : "pdf"},
+	//			{title : "Audio files", extensions : "mp3"},
+	//			{title : "Video files", extensions : "avi,wmv"},
+	//			{title : "Zip files", extensions : "zip"}
+	//		],
+//			init : {
+//				FilesAdded: function(up, files) {
+//				},
+//				FilesRemoved: function(up, files) {
+//				}
+//			},
+	//		multi_selection: false,
+			// Flash settings
+			flash_swf_url : '<?php echo $this->api->module_path('core', 'js/plupload/js/plupload.flash.swf'); ?>',
+
+			// Silverlight settings
+			silverlight_xap_url : '<?php echo $this->api->module_path('core', 'js/plupload/js/plupload.silverlight.xap'); ?>'
+		})
+	});
+});
+</script>
+
+<div id="<?php echo $system['component']['requestId']; ?>-plupload-image" class="plupload" title="image"></div>
+
+<?php /*
 <form class="dataedit" id="fileupload" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
 	<fieldset>
 		<legend><?php echo $this->api->t("Image"); ?></legend>
@@ -173,7 +218,7 @@ echo $recordset->type;
 <script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-ui.js"); ?>"></script>
 <!-- The File Upload jQuery UI plugin -->
 <script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-jui.js"); ?>"></script>
-
+*/ ?>
 
 <?php $this->api->open('de_form'); ?>
 	<div class="dataedit">

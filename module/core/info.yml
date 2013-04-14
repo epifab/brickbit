@@ -17,6 +17,17 @@ components:
         action: AdminMenu
       - url: system/block/login-control
         action: LoginControl
+  admin:
+    class: Admin
+    pages:
+      - url: admin/logs
+        action: Logs
+      - url: admin/logs/reset
+        action: LogsReset
+      - url: admin/logs/type/(@strid)
+        action: LogsByType
+      - url: admin/logs/key/(@strid)
+        action: LogsByKey
   role:
     class: Role
     pages:
@@ -91,18 +102,16 @@ components:
     class: NodeFile
     pages:
       # content/123/file/images/about-me.jpg
-      - url: content/([0-9]+)/file/(@strid)/(@strid)\.(@strid)
-        action: Get
-      - url: content/file/([0-9]+)\.(@strid)
-        action: Get
-      - url: content/([0-9]+)/file/add
-        action: Add2Node
+      - url: content/([0-9]+)/file/(@strid)/(@strid\.@strid)
+        action: Download
+      - url: content/([0-9]+)/image/(@strid)/(@strid\.@strid)
+        action: DownloadImage
+      - url: content/([0-9]+)/file/(@strid)/upload
+        action: Upload
 #      - url: content/([0-9]+)/file/replace
 #        action: ReplaceNode
 #      - url: content/([0-9]+)/file/delete
 #        action: DeleteNode
-      - url: content/file/add
-        action: Add
       - url: content/file/([0-9]+)/replace
         action: Replace
       - url: content/file/([0-9]+)/delete
