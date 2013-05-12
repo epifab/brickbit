@@ -26,15 +26,15 @@ class SortClause implements SelectClauseInterface {
 	/**
 	 * Informazioni sul campo per l'ordinamento
 	 */
-	private $metaType;
+	private $field;
 
 	/**
 	 * Costruisce una clausola SORT BY
-	 * @param metaType Informazioni sul del campo
+	 * @param field Informazioni sul del campo
 	 * @param type Operatore di ordinamento
 	 */
-	public function __construct(MetaType $metaType, $type) {
-		$this->metaType = $metaType;
+	public function __construct(Field $field, $type) {
+		$this->field = $field;
 
 		if (is_string($type)) {
 			switch (strtoupper($type)) {
@@ -73,7 +73,7 @@ class SortClause implements SelectClauseInterface {
 		if ($this->type == SortClause::STYPE_RAND) {
 			return "RAND()";
 		} else {
-			return $this->metaType->getAlias() . " " . (($this->type == SortClause::STYPE_ASC) ? "ASC" : "DESC");
+			return $this->field->getAlias() . " " . (($this->type == SortClause::STYPE_ASC) ? "ASC" : "DESC");
 		}
 	}
 }

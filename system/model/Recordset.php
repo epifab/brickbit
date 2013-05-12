@@ -20,18 +20,18 @@ class Recordset implements RecordsetInterface {
 		$this->stored = !\is_null($data);
 		
 		// Inizializzo i valori dei campi
-		foreach ($this->builder->getMetaTypeList() as $name => $metaType) {
-			if ($metaType instanceof MetaVirtual) {
+		foreach ($this->builder->getFieldList() as $name => $field) {
+			if ($field->isVirtual()) {
 				continue;
 			}
 			
 			// inizializzo il campo
 			$this->fields[$name] = null;
 			
-			if (!\is_null($data) && \array_key_exists($metaType->getAlias(), $data)) {
-				$this->setDb($name, $data[$metaType->getAlias()]);
+			if (!\is_null($data) && \array_key_exists($field->getAlias(), $data)) {
+				$this->setDb($name, $data[$field->getAlias()]);
 			} else {
-				$this->setDb($name, $metaType->getDefaultValue());
+				$this->setDb($name, $field->getDefaultValue());
 			}
 			
 //			if ($name == "path_file1")
@@ -49,12 +49,12 @@ class Recordset implements RecordsetInterface {
 		return $this->stored;
 	}
 	
-	public function searchMetaType($path) {
-		return $this->builder->searchMetaType($path);
+	public function searchField($path) {
+		return $this->builder->searchField($path);
 	}
 	
-	public function getMetaTypeList() {
-		return $this->builder->getMetaTypeList();
+	public function getFieldList() {
+		return $this->builder->getFieldList();
 	}
 	
 	/**
@@ -109,8 +109,8 @@ class Recordset implements RecordsetInterface {
 			foreach ($builder->getClauses() as $clause) {
 				$parentField = \key($clause);
 				$childField = \current($clause);
-				$metaType = $builder->searchMetaType($childField);
-				$filter = new FilterClause($metaType, "=", $this->fields[$parentField]);
+				$field = $builder->searchField($childField);
+				$filter = new FilterClause($field, "=", $this->fields[$parentField]);
 				if (\is_null($newFilter)) {
 					$newFilter = new FilterClauseGroup($filter);
 				} else {
@@ -148,6 +148,29 @@ class Recordset implements RecordsetInterface {
 		}
 	}
 	
+	public function getPrimaryKey() {
+		$fields = $this->builder->getPrimaryKey()->getFields();
+		$fieldsVal = array();
+		foreach ($fields as $field) {
+			$fieldsVal[$field->getName()] = $this->getProg($field->getName());
+		}
+		return $fieldsVal;
+	}
+	
+	public function getKey($keyName) {
+		$key = $this->builder->getKey($keyName);
+		if (!$key) {
+			return null;
+		} else {
+			$fields = $key->getFields();
+			$fieldsVal = array();
+			foreach ($fields as $field) {
+				$fieldsVal[$field->getName()] = $this->getProg($field->getName());
+			}
+			return $fieldsVal;
+		}
+	}
+	
 	public function search($path) {
 		if (empty($path)) {
 			return $this;
@@ -172,7 +195,7 @@ class Recordset implements RecordsetInterface {
 	public function searchParent($path, $required=false) {
 		if (empty($path)) {
 			if ($required) {
-				throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path)));
+				throw new \system\InternalErrorException('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path));
 			} else {
 				return null;
 			}
@@ -186,7 +209,7 @@ class Recordset implements RecordsetInterface {
 				if ($first instanceof RecordsetInterface) {
 					return $first->searchParent(substr($path, $dotPosition+1), $required);
 				} else if ($required) {
-					throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path)));
+					throw new \system\InternalErrorException('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $path));
 				} else {
 					return null;
 				}
@@ -199,12 +222,12 @@ class Recordset implements RecordsetInterface {
 	public function setProg($path, $value) {
 		list($rs, $name) = $this->searchParent($path, true);
 		if (\array_key_exists($name, $rs->fields)) {
-			if (!$this->getBuilder()->searchMetaType($name)->isVirtual()) {
+			if (!$rs->builder->searchField($name, true)->isVirtual()) {
 				$rs->modifiedFields[$name] = $value;
 			}
 			$rs->fields[$name] = $value;
 		} else {
-			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $name)));
+			throw new \system\InternalErrorException('Field or relation <em>@path</em> does not exist or is not used.', array('@path' => $name));
 		}
 	}
 	
@@ -215,57 +238,28 @@ class Recordset implements RecordsetInterface {
 		} else if (\array_key_exists($name, $rs->fields)) {
 			return $rs->fields[$name];
 		} else {
-			$mt = $rs->builder->searchMetaType($name);
-			if ($mt && $mt instanceof MetaVirtual) {
-				return \call_user_func($mt->getHandler(), $rs);
+			$f = $rs->builder->searchField($name);
+			if ($f->isVirtual()) {
+				return \call_user_func($f->getHandler(), $rs);
 			}
-			throw new \system\InternalErrorException(\system\Lang::translate('Field, relation or key <em>@path</em> not found.', array("@path" => $name)));
+			throw new \system\InternalErrorException('Field, relation or key <em>@path</em> not found.', array("@path" => $name));
 		}
 	}
 	
 	public function setDb($path, $value) {
 		list($rs, $name) = $this->searchParent($path, true);
 		if (\array_key_exists($name, $rs->fields)) {
-			$metaType = $rs->builder->searchMetaType($name);
-			$rs->fields[$name] = $metaType->db2Prog($value);
+			$field = $rs->builder->searchField($name);
+			$rs->fields[$name] = $field->db2Prog($value);
 		}
 	}
 	
 	public function getDb($path) {
 		$progValue = $this->getProg($path);
-		$metaType = $this->builder->searchMetaType($path);
-		return $metaType->prog2Db($progValue);
+		$field = $this->builder->searchField($path);
+		return $field->prog2Db($progValue);
 	}
 
-	public function setEdit($path, $value) {
-		list($rs, $name) = $this->searchParent($path, true);
-		$rs->setProg($name, $value);
-		$rs->modifiedFields[$name] = $value;
-		
-//		list($rs, $name) = $this->searchParent($path, true);
-//		if (\array_key_exists($name, $rs->fieslds)) {
-//			$metaType = $rs->builder->searchMetaType($name);
-//			if ($metaType instanceof MetaVirtual) {
-//				throw new \system\InternalErrorException(\system\Lang::translate('Cannot set <em>@path</em> value (virtual field).', array("@path" => $name)));
-//			}
-//			$rs->modifiedFields[$name] = $metaType->edit2Prog($value);
-//		} else {
-//			throw new \system\InternalErrorException(\system\Lang::translate('Field or relation <em>@path</em> not found.', array("@path" => $name)));
-//		}
-	}
-	
-//	public function getEdit($path) {
-//		$progValue = $rs->getProg($path);
-//		$metaType = $rs->builder->searchMetaType($path);
-//		return $metaType->prog2Edit($progValue);
-//	}
-//	
-//	public function getRead($path) {
-//		$progValue = $this->getProg($path);
-//		$metaType = $this->builder->searchMetaType($path);
-//		return $metaType->prog2Read($progValue);
-//	}
-	
 	public function save($readMode=null, $editMode=null, $deleteMode=null) {
 		if (!$this->isStored()) {
 			return $this->create($readMode, $editMode, $deleteMode);
@@ -295,9 +289,9 @@ class Recordset implements RecordsetInterface {
 		$q1 = "";
 		$q2 = "";
 
-		foreach ($this->builder->getMetaTypeList() as $name => $metaType) {
+		foreach ($this->builder->getFieldList() as $name => $field) {
 			if (\array_key_exists($name, $this->fields)) {
-				$value = $metaType->prog2Db(\array_key_exists($name, $this->modifiedFields)
+				$value = $field->prog2Db(\array_key_exists($name, $this->modifiedFields)
 					? $this->modifiedFields[$name]
 					: $this->fields[$name]
 				);
@@ -307,7 +301,7 @@ class Recordset implements RecordsetInterface {
 		}
 		
 		if ($q1 === "") {
-			throw new \system\InternalErrorException(\system\Lang::translate('Cannot create a record with no field values.'));
+			throw new \system\InternalErrorException('Cannot create a record with no field values.');
 		}
 
 		$query = "INSERT INTO " . $this->builder->getTableName() . " (" . $q1 . ") VALUES (" . $q2 . ")";
@@ -321,8 +315,8 @@ class Recordset implements RecordsetInterface {
 		$this->modifiedFields = array();
 		
 		if ($this->builder->isAutoIncrement()) {
-			$primaryMetaTypeList = $this->builder->getPrimaryKey()->getMetaTypes();
-			$this->fields[current($primaryMetaTypeList)->getName()] = $dataAccess->sqlLastInsertId();
+			$primaryFieldList = $this->builder->getPrimaryKey()->getFields();
+			$this->fields[current($primaryFieldList)->getName()] = $dataAccess->sqlLastInsertId();
 		}
 
 		$this->stored = true;
@@ -339,7 +333,7 @@ class Recordset implements RecordsetInterface {
 		\system\Main::raiseModelEvent("onUpdate", $this);
 
 		if (!$this->isStored()) {
-			throw new \system\InternalErrorException(\system\Lang::translate('Recordset does not exist.'));
+			throw new \system\InternalErrorException('Recordset does not exist.');
 		}
 		
 		// Controllo i permessi dell'utente per l'aggiornamento del record
@@ -349,8 +343,8 @@ class Recordset implements RecordsetInterface {
 
 		if (\count($this->modifiedFields) > 0) {
 			foreach ($this->modifiedFields as $name => $value) {
-				$metaType = $this->builder->searchMetaType($name);
-				$q1 .= ($q1 === "" ? "" : ", ") . $name . " = " . $metaType->prog2Db($this->modifiedFields[$name]);
+				$field = $this->builder->searchField($name);
+				$q1 .= ($q1 === "" ? "" : ", ") . $name . " = " . $field->prog2Db($this->modifiedFields[$name]);
 			}
 
 			$query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE " . $this->filterByPrimaryClause();
@@ -382,12 +376,12 @@ class Recordset implements RecordsetInterface {
 		}
 		$first = true;
 		$query = "";
-		foreach ($this->builder->getPrimaryKey()->getMetaTypes() as $metaType) {
-			if (!\array_key_exists($metaType->getName(), $this->fields) || \is_null($this->fields[$metaType->getName()])) {
-				throw new \system\InternalErrorException(\system\Lang::translate('Primary key fields not imported or invalid.'));
+		foreach ($this->builder->getPrimaryKey()->getFields() as $field) {
+			if (!\array_key_exists($field->getName(), $this->fields) || \is_null($this->fields[$field->getName()])) {
+				throw new \system\InternalErrorException('Primary key fields not imported or invalid.');
 			}
 			$first ? $first = false : $query .= " AND ";
-			$query .= $metaType->getName() . " = " . $metaType->prog2Db($this->fields[$metaType->getName()]);
+			$query .= $field->getName() . " = " . $field->prog2Db($this->fields[$field->getName()]);
 		}
 		return $query;
 	}
@@ -551,13 +545,13 @@ class Recordset implements RecordsetInterface {
 	public function checkKey($keyName, &$errors) {
 		$key = $this->builder->searchKey($keyName, true);
 		if (is_null($key)) {
-			throw new InternalErrorException("Chiave $keyName non trovata");
+			throw new InternalErrorException('Key @name not found', array('@name' => $keyName));
 		}
 		
 		$newFilter = null;
-		foreach ($key->getMetaTypes() as $metaType) {
-			$fieldValue = $this->getEdit($metaType->getName());
-			$filterClause = new FilterClause($metaType, "=", $fieldValue);
+		foreach ($key->getFields() as $field) {
+			$fieldValue = $this->getEdit($field->getName());
+			$filterClause = new FilterClause($field, "=", $fieldValue);
 			if (is_null($newFilter)) {
 				$newFilter = new FilterClauseGroup($filterClause);
 			} else {
@@ -568,9 +562,9 @@ class Recordset implements RecordsetInterface {
 		if ($this->isStored()) {
 			// taglio il record corrispondente a quello che sto modificando
 			$primary = $this->builder->getPrimaryKey();
-			foreach ($primary as $metaType) {
-				$fieldValue = $this->getEdit($metaType->getName());
-				$filterClaue = new FilterClause($metaType, "<>", $fieldValue);
+			foreach ($primary as $field) {
+				$fieldValue = $this->getEdit($field->getName());
+				$filterClaue = new FilterClause($field, "<>", $fieldValue);
 				$newFilter->addClauses("AND", $filterClaue);
 			}
 		}
@@ -583,8 +577,8 @@ class Recordset implements RecordsetInterface {
 		if ($numRecords == 0) {
 			return true;
 		} else {
-			foreach ($key as $metaType) {
-				$errors[$metaType->getAbsolutePath()] = "Chiave duplicata";
+			foreach ($key as $field) {
+				$errors[$field->getAbsolutePath()] = "Chiave duplicata";
 			}
 			return false;
 		}
@@ -604,7 +598,7 @@ class Recordset implements RecordsetInterface {
 						// due possibilita':
 						// 1 la relazione e' obbligatoria
 						// 2 ci sono campi del join che sono stati specificati mentre questo e' nullo
-						throw new \system\ValidationException("Alcuni campi della relazione $relationName sono nulli");
+						throw new \system\ValidationException('Some fields Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
 					} else {
 						// relazione non obbligatoria e campo (fin'ora) tutti nulli
 						$nullRelation = true;
@@ -612,12 +606,12 @@ class Recordset implements RecordsetInterface {
 				} else {
 					if ($nullRelation) {
 						// i campi fin'ora erano tutti nulli
-						throw new \system\ValidationException("Alcuni campi della relazione $relationName sono nulli");
+						throw new \system\ValidationException('Some fields Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
 					}
 				}
 
-				$metaType = $relationBuilder->getMetaType($childFieldName);
-				$filterClause = new FilterClause($metaType, "=", $fieldValue);
+				$field = $relationBuilder->getField($childFieldName);
+				$filterClause = new FilterClause($field, "=", $fieldValue);
 				if (\is_null($newFilter)) {
 					$newFilter = new FilterClauseGroup($filterClause);
 				} else {
@@ -635,14 +629,14 @@ class Recordset implements RecordsetInterface {
 			$relationBuilder->setFilter($oldFilter);
 
 			if ($numRecords == 0) {
-				throw new ValidationException("I campi non identificano alcuna relazione");
+				throw new ValidationException('No relation found');
 			}
 			
 			return true;
 			
 		} catch (\system\ValidationException $ex) {
 			foreach ($relationBuilder->getClauses() as $parentField => $childField) {
-				$errors[$this->builder->getMetaType($parentField)->getAbsolutePath()] = $ex->getMessage();
+				$errors[$this->builder->getField($parentField)->getAbsolutePath()] = $ex->getMessage();
 			}
 			return false;
 		}
@@ -664,6 +658,26 @@ class Recordset implements RecordsetInterface {
 		else if (\array_key_exists($name, $this->hasOneRelations)) {
 			unset($this->hasOneRelations[$name]);
 		}
+	}
+	
+	public function toArray() {
+		$array = array();
+		foreach ($this->fields as $name => $value) {
+			$array[$name] = $value;
+		}
+		foreach ($this->modifiedFields as $name => $value) {
+			$array[$name] = $value;
+		}
+		foreach ($this->hasOneRelations as $name => $builder) {
+			$array[$name] = $builder->toArray();
+		}
+		foreach ($this->hasManyRelations as $name => $relations) {
+			$array[$name] = array();
+			foreach ($relations as $relation) {
+				$array[$name][] = $relation->toArray();
+			}
+		}
+		return $array;
 	}
 }
 ?>

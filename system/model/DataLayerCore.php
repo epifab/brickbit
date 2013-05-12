@@ -197,7 +197,7 @@ class DataLayerCore {
 				$this->dbmsType = $dbms;
 				break;
 			default:
-				throw new Exception("DBMS specificato non valido o non supportato.");
+				throw new \system\InternalErrorException('Invalid DBMS.');
 				break;
 		}
 	}

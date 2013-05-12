@@ -110,10 +110,10 @@ abstract class Component {
 	 * @return boolean true if 
 	 */
 	public static function access($class, $action, $urlArgs, $request, $user) {
-		if (\method_exists($class, "access" . $action)) {
+		if (\is_callable(array($class, "access" . $action))) {
 			return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $user);
 		} 
-//		else if (\method_exists($class, "access")) {
+//		else if (\is_callable(array($class, "access"))) {
 //			return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
 //		}
 		return true;
@@ -528,18 +528,18 @@ abstract class Component {
 					$lastLop = $filter["lop"];
 				}
 				
-				$metaType = $builder->searchMetaType($path);
-				if (\is_null($metaType)) {
-					throw new InternalErrorException("Parametro per il filtro non valido (campo $path non trovato)");
+				$field = $builder->searchField($path);
+				if (\is_null($field)) {
+					throw new InternalErrorException('Invalid filter parameter (field @path has not been imported)', array('@path' => $path));
 				}
-				$metaType instanceof MetaType;
+				$field instanceof Field;
 				try {
-					$progValue = $metaType->edit2Prog($value);
+					$progValue = $field->edit2Prog($value);
 				} catch (system\ValidationException $ex) {
 					throw $ex;
 				}
 
-				$filter = new FilterClause($metaType, $rop, $progValue);
+				$filter = new FilterClause($field, $rop, $progValue);
 
 				if (\is_null($filterGroup)) {
 					$filterGroup = new FilterClauseGroup($filter);
@@ -565,14 +565,14 @@ abstract class Component {
 				
 				$args = @\explode("|", $sort);
 				if (\count($args) != 2) {
-					throw new InternalErrorException("Parametro per l'ordinamento non valido");
+					throw new InternalErrorException('Invalid sort parameter.');
 				}
-				$metaType = $builder->searchMetaType($args[0]);
-				if (\is_null($metaType)) {
-					throw new InternalErrorException("Parametro per il filtro non valido (campo '{$args[0]}' non trovato)");
+				$field = $builder->searchField($args[0]);
+				if (\is_null($field)) {
+					throw new InternalErrorException('Invalid filter parameter (field @path has not been imported)', array('@path' => $args[0]));
 				}
 
-				$sc = new SortClause($metaType, $args[1]);
+				$sc = new SortClause($field, $args[1]);
 				if (\is_null($sorts)) {
 					$sorts = new SortClauseGroup($sc);
 				} else {
@@ -600,10 +600,10 @@ abstract class Component {
 		}
 		
 		if (!\is_numeric($this->requestData[$index]["page"]) || ((int)$this->requestData[$index]["page"]) < 0) {
-			throw new InternalErrorException("Parametro per la paginazione non valido");
+			throw new InternalErrorException('Invalid page parameter');
 		}
 		if (!\is_numeric($this->requestData[$index]["size"]) || ((int)$this->requestData[$index]["size"]) < 0) {
-			throw new InternalErrorException("Parametro per la paginazione non valido");
+			throw new InternalErrorException('Invalid page parameter');
 		}
 		
 		if ($this->requestData[$index]["size"] == 0) {
@@ -641,14 +641,33 @@ abstract class Component {
 			
 			// checking permission
 			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\Login::getLoggedUser())) {
-				throw new AuthorizationException(\t('Sorry, you are not authorized to access this resource.'));
+				throw new AuthorizationException('Sorry, you are not authorized to access this resource.');
 			}
+
+			$runMethod = null;
+			$runArgs = array();
+			
+//			if (!$this->isNested() && \system\view\Form::checkFormSubmission()) {
+//				$recordset = null;
+//				$formErrors = array();
+//				if (\system\view\Form::formSubmission($recordset, $formErrors)) {
+//					if (\is_callable(array($this, 'submit' . $this->action))) {
+//						$runMethod = array($this, 'submit' . $this->action);
+//						$runArgs = array($recordset, $formErrors);
+//					}
+//				}
+//			}
 			
 			// onProcess event
-			if (\method_exists($this, "run" . $this->action)) {
-				$responseType = \call_user_func(array($this, "run" . $this->action));
-			} else {
+			if (\is_null($runMethod) && \is_callable(array($this, 'run' . $this->action))) {
+				$runMethod = array($this, 'run' . $this->action);
+				$runArgs = array();
+			}
+			
+			if (\is_null($runMethod)) {
 				$responseType = $this->onProcess();
+			} else {
+				$responseType = \call_user_func_array($runMethod, $runArgs);
 			}
 
 			switch ($responseType) {
@@ -661,7 +680,11 @@ abstract class Component {
 				case null:
 					break;
 				default:
-					throw new InternalErrorException(Lang::translate("Invalid action <em>@action</em> response in module <em>@module</em> component <em>@component</em>.", array('@action' => $this->action, '@component' => $this->name, '@module' => $this->module)));
+					throw new InternalErrorException('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
+						'@action' => $this->action, 
+						'@component' => $this->name,
+						'@module' => $this->module
+					));
 			}
 
 			if (!\is_null($responseType)) {

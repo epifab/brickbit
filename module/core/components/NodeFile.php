@@ -60,7 +60,7 @@ class NodeFile extends \system\logic\Component {
 			$rsb = new \system\model\RecordsetBuilder('dir');
 			$rsb->using('*');
 			
-			$rs = $rsb->selectFirstBy('path', self::getDirPath());
+			$rs = $rsb->selectFirstBy(array('path' => self::getDirPath()));
 			if (!$rs) {
 				$rs = $rsb->newRecordset();
 				$rs->path = self::getDirPath();
@@ -222,11 +222,11 @@ class NodeFile extends \system\logic\Component {
 		$rsb = new \system\model\RecordsetBuilder('node_file');
 		$rsb->using('*', 'file.path');
 		
-		$nodeFile = $rsb->selectFirstBy(
-			'node_id', $nodeId,
-			'node_index', $nodeIndex,
-			'virtual_name', $virtualName
-		);
+		$nodeFile = $rsb->selectFirstBy(array(
+			'node_id' => $nodeId,
+			'node_index' => $nodeIndex,
+			'virtual_name' => $virtualName
+		));
 
 		while (\ob_get_clean());
 		

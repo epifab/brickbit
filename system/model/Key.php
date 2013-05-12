@@ -2,7 +2,7 @@
 namespace system\model;
 
 class Key {
-	private $metaTypes = array();
+	private $fields = array();
 	private $autoIncrement;
 	private $primary;
 	private $builder;
@@ -23,16 +23,16 @@ class Key {
 		$this->autoIncrement = $autoIncrement;
 	}
 	
-	public function addMetaType(MetaType $metaType) {
-		$this->metaTypes[$metaType->getName()] = $metaType;
+	public function addField(Field $field) {
+		$this->fields[$field->getName()] = $field;
 	}
 	
 	public function setDesc($desc) {
 		$this->desc = (string)$desc;
 	}
 	
-	public function getMetaTypes() {
-		return $this->metaTypes;
+	public function getFields() {
+		return $this->fields;
 	}
 	
 	public function getDesc() {

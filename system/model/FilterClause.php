@@ -58,20 +58,20 @@ class FilterClause implements SelectClauseInterface {
 	/**
 	 * Informazioni sul campo
 	 */
-	private $metaType = null;
+	private $field = null;
 	/**
 	 * Espressione da confrontare
 	 */
 	private $expression = null;
 
-	public function __construct(MetaType $metaType, $type, $expression=null) {
+	public function __construct(Field $field, $type, $expression=null) {
 		$this->setType($type);
 //		if (($expression == null && $type != FilterClause::OP_IS_NULL && $type != FilterClause::OP_IS_NOT_NULL) ||
 //			($expression != null && ($type == FilterClause::OP_IS_NULL || $type == FilterClause::OP_IS_NOT_NULL))) {
 //			throw new \system\InternalErrorException("Parametri type o expression non validi");
 //		}
 		$this->expression = $expression;
-		$this->metaType = $metaType;
+		$this->field = $field;
 	}
 
 	private function setType($type) {
@@ -158,15 +158,15 @@ class FilterClause implements SelectClauseInterface {
 	 * @return Clausola WHERE da inserire nella query sql
 	 */
 	public function getQuery() {
-		if ($this->metaType instanceof VirtualMetaType) {
-			$clause = $this->metaType->getExpression();
+		if ($this->field->isVirtual()) {
+			$clause = $this->field->getExpression();
 		} else {
-			$clause = $this->metaType->getTableAlias() . "." . $this->metaType->getName();
+			$clause = $this->field->getTableAlias() . "." . $this->field->getName();
 		}
 		
 			switch ($this->type) {
 				case FilterClause::OP_EQ:
-					$x = $this->metaType->prog2Db($this->expression);
+					$x = $this->field->prog2Db($this->expression);
 					if ($x == "NULL") {
 						$clause .= " IS NULL";
 					} else {
@@ -174,7 +174,7 @@ class FilterClause implements SelectClauseInterface {
 					}
 					break;
 				case FilterClause::OP_NEQ:
-					$x = $this->metaType->prog2Db($this->expression);
+					$x = $this->field->prog2Db($this->expression);
 					if ($x == "NULL") {
 						$clause .= " IS NOT NULL";
 					} else {
@@ -182,16 +182,16 @@ class FilterClause implements SelectClauseInterface {
 					}
 					break;
 				case FilterClause::OP_LT:
-					$clause .= " < " . $this->metaType->prog2Db($this->expression);
+					$clause .= " < " . $this->field->prog2Db($this->expression);
 					break;
 				case FilterClause::OP_GT:
-					$clause .= " > " . $this->metaType->prog2Db($this->expression);
+					$clause .= " > " . $this->field->prog2Db($this->expression);
 					break;
 				case FilterClause::OP_LTEQ:
-					$clause .= " <= " . $this->metaType->prog2Db($this->expression);
+					$clause .= " <= " . $this->field->prog2Db($this->expression);
 					break;
 				case FilterClause::OP_GTEQ:
-					$clause .= " >= " . $this->metaType->prog2Db($this->expression);
+					$clause .= " >= " . $this->field->prog2Db($this->expression);
 					break;
 				case FilterClause::OP_CONTAINS:
 					$clause .= " LIKE '%" . DataLayerCore::getInstance()->sqlRealEscapeStrings($this->expression) . "%'";

@@ -16,18 +16,20 @@ interface RecordsetInterface {
 	
 	public function isStored();
 	
-	public function getProg($name);
-	public function setProg($name, $value);
-	public function getDb($name);
-	public function setDb($name, $value);
-//	public function getEdit($name);
-	public function setEdit($name, $value);
-//	public function getRead($name);
+	public function getPrimaryKey();
+	public function getKey($keyName);
+	
+	public function getProg($path);
+	public function setProg($path, $value);
+	public function getDb($path);
+	public function setDb($path, $value);
 	
 	public function setRelation($name, $value);
 	public function unsetRelation($name);
 	
-	public function searchMetaType($path);
-	public function getMetaTypeList();
+	public function searchField($path);
+	public function getFieldList();
+	
+	public function toArray();
 }
 ?>

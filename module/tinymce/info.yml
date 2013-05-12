@@ -1,0 +1,9 @@
+class: TinyMCE
+weight: 1
+enabled: 1
+#modelNs: model
+#modelClass: Model
+#viewNs: view
+#viewClass: Api
+#templatesPath: view/templates
+#componentsNs: components

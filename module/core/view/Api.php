@@ -60,9 +60,9 @@ class Api {
 	}
 
 	public static function textbox(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 
 		return 
 			'<input type="' . (\system\Utils::getParam('password', $params, array('default' => false)) ? 'password' : 'text') . '"'
@@ -76,9 +76,9 @@ class Api {
 	}
 	
 	public static function textarea(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 		
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 		
 		return
 			'<textarea'
@@ -91,9 +91,9 @@ class Api {
 	}
 
 	public static function selectbox(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 
 		$return = 
 			'<select'
@@ -127,9 +127,9 @@ class Api {
 	}
 
 	public static function radiobuttons(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 
 		$options = \system\Utils::getParam('options', $params, array('default' => array()));
 		
@@ -155,9 +155,9 @@ class Api {
 	}
 	
 	public static function checkboxes(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 
 		$options = \system\Utils::getParam('options', $params, array('default' => array()));
 		
@@ -192,9 +192,9 @@ class Api {
 	}
 	
 	public static function checkbox(\system\model\Recordset $recordset, $path, $params = array()) {
-		$mt = $recordset->getBuilder()->searchMetaType($path, true);
+		$f = $recordset->getBuilder()->searchField($path, true);
 
-		$params += $mt->getAttributes();
+		$params += $f->getAttributes();
 
 		return
 			'<input'

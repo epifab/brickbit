@@ -2,9 +2,9 @@ class: Core
 weight: 1
 enabled: 1
 modelNs: model
-modelClass: Model
+modelClass: CoreModel
 viewNs: view
-viewClass: Api
+viewClass: CoreApi
 templatesPath: view/templates
 componentsNs: components
 components:

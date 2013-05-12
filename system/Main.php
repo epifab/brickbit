@@ -42,85 +42,85 @@ class Main {
 					$moduleInfo = \system\yaml\Yaml::parse($moduleDir . "info.yml");
 						
 					if (!\is_array($moduleInfo)) {
-						throw new \system\InternalErrorException(\system\Lang::translate('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName)));
+						throw new \system\InternalErrorException('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName));
 					}
 					
-					$enabled = \system\Utils::getParam("enabled", $moduleInfo, array('default' => true));
+					$enabled = \cb\array_item("enabled", $moduleInfo, array('default' => true));
 					
 					if (!$enabled) {
 						// just ignore the module
 						continue;
 					}
 					
-					$moduleClass = $moduleNs . \system\Utils::getParam('class', $moduleInfo, array('required' => true));
+					$moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
 					
 					if (!\class_exists($moduleClass)) {
-						throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $moduleClass)));
+						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
 					}
 					
-					$weight = (int)\system\Utils::getParam('weight', $moduleInfo, array('default' => 0));
+					$weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
 					
 					// model class
-					$modelNs = Module::getNamespace($moduleName, \system\Utils::getParam('modelNs', $moduleInfo, array('default' => null)));
-					$modelClass = \system\Utils::getParam('modelClass', $moduleInfo, array(
+					$modelNs = Module::getNamespace($moduleName, \cb\array_item('modelNs', $moduleInfo, array('default' => null)));
+					$modelClass = \cb\array_item('modelClass', $moduleInfo, array(
 						 'default' => null,
 						 'prefix' => $modelNs
 					));
 					if (!\is_null($modelClass) && !\class_exists($modelClass)) {
-						throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $modelClass)));
+						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
 					}
 					// templates class (API)
-					$viewNs = Module::getNamespace($moduleName, \system\Utils::getParam('viewNs', $moduleInfo, array('default' => null)));
-					$viewClass = \system\Utils::getParam('viewClass', $moduleInfo, array(
+					$viewNs = Module::getNamespace($moduleName, \cb\array_item('viewNs', $moduleInfo, array('default' => null)));
+					$viewClass = \cb\array_item('viewClass', $moduleInfo, array(
 						 'default' => null,
 						 'prefix' => $viewNs
 					));
 					if (!\is_null($viewClass) && !\class_exists($viewClass)) {
-						throw new \system\InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $viewClass)));
+						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
 					}
 					
-					$templatesPath = \system\Utils::getParam('templatesPath', $moduleInfo, array(
+					$templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
 						'default' => null,
 						'prefix' => $moduleDir
 					));
 					if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
-						throw new \system\InternalErrorException(\system\Lang::translate('Directory <em>@path</em> not found', array('@path' => $templatesPath)));
+						throw new \system\InternalErrorException('Directory <em>@path</em> not found', array('@path' => $templatesPath));
 					}
 					
 					// components namespace
 					$componentsNs = Module::getNamespace(
 						$moduleName,
-						\system\Utils::getParam('componentsNs', $moduleInfo)
+						\cb\array_item('componentsNs', $moduleInfo)
 					);
 					
-					$events = \system\Utils::getParam('events', $moduleInfo, array('default' => array()));
+					$events = \cb\array_item('events', $moduleInfo, array('default' => array()));
 					foreach ($events as $eventName) {
-						if (!\method_exists($moduleClass, $eventName)) {
-							throw new \system\InternalErrorException(\system\Lang::translate('Method <em>@class::@name</em> does not exist.', array('@class' => $moduleClass, '@name' => $eventName)));
+						if (!\is_callable(array($moduleClass, $eventName))) {
+							throw new \system\InternalErrorException('Method <em>@class::@name</em> does not exist.', array('@class' => $moduleClass, '@name' => $eventName));
 						}
 					}
 					
-					$components = \system\Utils::getParam('components', $moduleInfo, array('default' => array()));
+					$components = \cb\array_item('components', $moduleInfo, array('default' => array()));
 					foreach ($components as $componentName => $component) {
-						$componentClass = \system\Utils::getParam('class', $component, array(
+						$componentClass = \cb\array_item('class', $component, array(
 							 'required' => true, 
 							 'prefix' => $componentsNs
 						));
 						if (!\class_exists($componentClass)) {
-							throw new InternalErrorException(\system\Lang::translate('Class <em>@name</em> does not exist.', array('@name' => $componentClass)));
+							throw new InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
 							unset($components[$componentName]);
 							continue;
 						}
 						$components[$componentName] = array(
 							'name' => $componentName,
 							'class' => $componentClass,
-							'pages' => \system\Utils::getParam('pages', $component, array('default' => array()))
+							'pages' => \cb\array_item('pages', $component, array('default' => array()))
 						);
 						foreach ($component['pages'] as $i => $page) {
 							$components[$componentName]['pages'][$i] = array(
-								'url' => \system\Utils::getParam('url', $page, array('required' => true)),
+								'url' => \cb\array_item('url', $page, array('required' => true)),
 								'name' => $componentName,
-								'action' => \system\Utils::getParam('action', $page, array('required' => true))
+								'action' => \cb\array_item('action', $page, array('required' => true))
 							);
 
 							$rules = array(
@@ -221,19 +221,19 @@ class Main {
 					'virtuals' => array()
 				);
 			}
-			$fields = \system\Utils::getParam('fields', $table, array('default' => array()));
+			$fields = \cb\array_item('fields', $table, array('default' => array()));
 			foreach ($fields as $fieldName => $field) {
 				$TABLES[$tableName]['fields'][$fieldName] = $field;
 			}
-			$keys = \system\Utils::getParam('keys', $table, array('default' => array()));
+			$keys = \cb\array_item('keys', $table, array('default' => array()));
 			foreach ($keys as $keyName => $key) {
 				$TABLES[$tableName]['keys'][$keyName] = $key;
 			}
-			$relations = \system\Utils::getParam('relations', $table, array('default' => array()));
+			$relations = \cb\array_item('relations', $table, array('default' => array()));
 			foreach ($relations as $relationName => $relation) {
 				$TABLES[$tableName]['relations'][$relationName] = $relation;
 			}
-			$virtuals = \system\Utils::getParam('virtuals', $table, array('default' => array()));
+			$virtuals = \cb\array_item('virtuals', $table, array('default' => array()));
 			foreach ($virtuals as $virtualName => $virtual) {
 				$TABLES[$tableName]['virtuals'][$virtualName] = $virtual;
 			}
@@ -254,7 +254,7 @@ class Main {
 		try {
 			$model = \system\yaml\Yaml::parse($baseModel);
 			self::setTables(
-				\system\Utils::getParam('tables', $model, array('required' => true)),
+				\cb\array_item('tables', $model, array('required' => true)),
 				$TABLES
 			);
 		} catch (\Exception $ex) {
@@ -267,7 +267,7 @@ class Main {
 				try {
 					$model = \system\yaml\Yaml::parse($module['path'] . "model.yml");
 					self::setTables(
-						\system\Utils::getParam('tables', $model, array('required' => true)),
+						\cb\array_item('tables', $model, array('required' => true)),
 						$TABLES
 					);
 				} catch (\Exception $ex) {
@@ -316,6 +316,7 @@ class Main {
 	}
 
 	/**
+	 * NB. modules are sorted by weight ascending
 	 * <code>
 	 *		'modules' :
 	 *			[module name] :
@@ -404,7 +405,7 @@ class Main {
 			return $c['templates'][$templateName];
 		} else {
 			$c = self::configuration();
-			throw new \system\InternalErrorException(\t('Template <em>@name</em> not found.', array('@name' => $templateName)));
+			throw new \system\InternalErrorException('Template <em>@name</em> not found.', array('@name' => $templateName));
 		}
 	}
 
@@ -418,7 +419,7 @@ class Main {
 			$c = self::configuration();
 			return $c['tables'][$tableName];
 		} else {
-			throw new \system\InternalErrorException(\t('Table <em>@name</em> not found.', array('@name' => $tableName)));
+			throw new \system\InternalErrorException('Table <em>@name</em> not found.', array('@name' => $tableName));
 		}
 	}
 	
@@ -524,7 +525,7 @@ class Main {
     $results = \system\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
       $results = array();
-      $v = self::raiseEvent($eventName);
+      $v = self::invokeMethodAll($eventName);
       foreach ($v as $m) {
         if (!\is_array($m)) {
           // skipping all non-array values
@@ -540,7 +541,7 @@ class Main {
   public static function moduleConfig($eventName) {
     $results = \system\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
-      $results = \end(self::raiseEvent($eventName)); // last element of the array
+      $results = \end(self::invokeMethod($eventName));
       \system\Utils::set('module-config-' . $eventName, $results);
     }
     return $results;
@@ -549,13 +550,21 @@ class Main {
   public static function moduleConfigAll($eventName) {
     $results = \system\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
-      $results = self::raiseEvent($eventName); // last element of the array
+      $results = self::invokeMethodAll($eventName); // last element of the array
       \system\Utils::set('module-config-' . $eventName, $results);
     }
     return $results;
   }
 
+	/**
+	 * Alias of invokeMethodAll
+	 * @param string $eventName Method name
+	 */
 	public static function raiseEvent($eventName) {
+	  return \call_user_func_array(array('self', 'invokeMethodAll'), \func_get_args());
+	}
+	
+	public static function invokeMethodAll($methodName) {
 		$configuration = self::configuration();
 		$result = array();
 		
@@ -567,10 +576,10 @@ class Main {
 		
 		foreach ($configuration['modules'] as $module) {
 			$class = $module['class'];
-			if (\method_exists($class, $eventName)) {
+			if (\is_callable(array($class, $methodName))) {
 				$x = \is_null($args)
-					? \call_user_func(array($class, $eventName))
-					: \call_user_func_array(array($class, $eventName), $args);
+					? \call_user_func(array($class, $methodName))
+					: \call_user_func_array(array($class, $methodName), $args);
 				if (\is_null($x)) {
 					// do nothing
 				} else {
@@ -579,6 +588,27 @@ class Main {
 			}
 		}
 		return $result;
+	}
+	
+	public static function invokeMethod($methodName) {
+		$configuration = self::configuration();
+		$result = array();
+		
+		$args = null;
+		if (\func_num_args() > 1) {
+			$args = \func_get_args();
+			\array_shift($args);
+		}
+		
+		foreach ($configuration['modules'] as $module) {
+			$class = $module['class'];
+			if (\is_callable(array($class, $methodName))) {
+				return \is_null($args)
+					? \call_user_func(array($class, $methodName))
+					: \call_user_func_array(array($class, $methodName), $args);
+			}
+		}
+		return null;
 	}
 	
 	public static function raiseModelEvent($eventName) {
@@ -592,7 +622,7 @@ class Main {
 		}
 		
 		foreach ($c['modelClasses'] as $class) {
-			if (\method_exists($class, $eventName)) {
+			if (\is_callable(array($class, $eventName))) {
 				$x = \is_null($args)
 					? \call_user_func(array($class, $eventName))
 					: \call_user_func_array(array($class, $eventName), $args);

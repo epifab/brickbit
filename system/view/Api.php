@@ -9,7 +9,6 @@ class Api {
 	 */
 	private static $instance;
 	private $blocks = array();
-	private $javascript = array();
 
 	
 	/**
@@ -31,7 +30,7 @@ class Api {
 			}
 			$cache[$method] = null;
 			foreach ($viewClasses as $c) {
-				if (\method_exists($c, $method)) {
+				if (\is_callable(array($c, $method))) {
 					$cache[$method] = array($c, $method);
 					break;
 				}
@@ -41,7 +40,7 @@ class Api {
 	}
 	
 	public static function __callStatic($method, $args) {
-		self::getInstance()->__call($method, $args);
+		return self::getInstance()->__call($method, $args);
 	}
 
 	public function __call($method, $args) {
@@ -49,25 +48,24 @@ class Api {
 		if (!\is_null($api)) {
 			return \call_user_func_array($api, $args);
 		} else {
-			throw new \system\InternalErrorException(\system\Lang::translate('Template API <em>@name</em> not found.', array('@name' => $method)));
+			throw new \system\InternalErrorException('Template API <em>@name</em> not found.', array('@name' => $method));
 		}
 	}
 
 	public function open($callback, $args = array()) {
-		if ($callback == "open" || $callback == "close") {
-			throw new \system\InternalErrorException(\t('"open" and "close" APIs are not valid callback for the open statement.'));
-		}
+		$callback = 'block_' . $callback;
+		$x = \call_user_func(array($this, $callback), null, $args, true);
 		\array_push($this->blocks, array($callback, $args));
 		\ob_start();
 	}
 
 	public function close() {
 		if (empty($this->blocks)) {
-			throw new \system\InternalErrorException(\t('Syntax error. No block has been open.'));
+			throw new \system\InternalErrorException('Syntax error. No block has been open.');
 		}
 		list($callback, $args) = \array_pop($this->blocks);
 		$content = \ob_get_clean();
-		$x = \call_user_func(array($this, $callback), $content, $args);
+		$x = \call_user_func(array($this, $callback), $content, $args, false);
 		if (!\is_null($x)) {
 			echo $x;
 		}
@@ -155,16 +153,18 @@ class Api {
 		echo '</div>';
 	}
 	
-	public function block($content, $params) {
-		$name = \system\Utils::getParam('name', $params, array('required' => true));
-		$url = \system\Utils::getParam('url', $params, array('required' => true));
-		$args = \system\Utils::getParam('args', $params, array('default' => array()));
-		echo self::print_block($name, $url, $content, $args);
+	public function block_block($content, $params, $open) {
+		if (!$open) {
+			$name = \cb\array_item('name', $params, array('required' => true));
+			$url = \cb\array_item('url', $params, array('required' => true));
+			$args = \cb\array_item('args', $params, array('default' => array()));
+			echo self::print_block($name, $url, $content, $args);
+		}
 	}
 	
-	public function import($path, $args = array()) {
+	public function import($name, $args = array()) {
 		$a = $args + \system\view\Template::current()->getVars();
-		$tpl = new \system\view\Template($path, $a);
+		$tpl = new \system\view\Template($name, $a);
 		$tpl->render();
 	}
 
@@ -184,19 +184,6 @@ class Api {
 	public function t($sentence, $args = null) {
 		return \system\Lang::translate($sentence, $args);
 	}
-
-	public function javascript($code) {
-		$this->javascript .= "\n" . $code;
-	}
-
-	public function jss() {
-		$jss = "";
-		foreach ($this->javascript as $js) {
-			$jss .= $js . "\n";
-		}
-		return $jss;
-	}
-
 }
 
 ?>

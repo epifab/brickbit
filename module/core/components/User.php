@@ -96,37 +96,37 @@ class User extends Page {
 	}
 	
 	public function runRegister() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runList() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runAdd() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runRead() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runEdit() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runDelete() {
-		$this->setPageTitle(\t('Under development'));
+		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
 		return \system\logic\Component::RESPONSE_TYPE_READ;
 	}

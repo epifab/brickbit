@@ -32,19 +32,19 @@ class Core extends \system\logic\Module {
 				'page'
 			),
 			'profile' => array(
-				'label' => \t('User profile'),
+				'label' => \cb\t('User profile'),
 				'file' => array('avatar'),
 				'children' => array() // no children
 			),
 			'page' => array(
-				'label' => \t('Page'),
+				'label' => \cb\t('Page'),
 				'children' => array(
 					'article'
 				),
 				'files' => array() // no files allowed for pages
 			),
 			'article' => array(
-				'label' => \t('Article'),
+				'label' => \cb\t('Article'),
 				'children' => array(
 					'gallery',
 					'audioplayer',
@@ -57,7 +57,7 @@ class Core extends \system\logic\Module {
 				)
 			),
 			'photogallery' => array(
-				'label' => \t('Photo gallery'),
+				'label' => \cb\t('Photo gallery'),
 				'children' => array(
 					'photo',
 					'comment'
@@ -65,7 +65,7 @@ class Core extends \system\logic\Module {
 				'files' => array()
 			),
 			'photo' => array(
-				'label' => \t('Photo'),
+				'label' => \cb\t('Photo'),
 				'children' => array(
 					'comment'
 				),
@@ -74,7 +74,7 @@ class Core extends \system\logic\Module {
 				)
 			),
 			'audioplayer' => array(
-				'label' => \t('Audio player'),
+				'label' => \cb\t('Audio player'),
 				'children' => array(
 					'audiotrack',
 					'comment'
@@ -84,7 +84,7 @@ class Core extends \system\logic\Module {
 				)
 			),
 			'audiotrack' => array(
-				'label' => \t('Audio track'),
+				'label' => \cb\t('Audio track'),
 				'children' => array(
 					'comment'
 				),
@@ -94,7 +94,7 @@ class Core extends \system\logic\Module {
 				)
 			),
 			'videoplayer' => array(
-				'label' => \t('Video player'),
+				'label' => \cb\t('Video player'),
 				'children' => array(
 					'comment'
 				),
@@ -104,7 +104,7 @@ class Core extends \system\logic\Module {
 				)
 			),
 			'comment' => array(
-				'label' => \t('Comment'),
+				'label' => \cb\t('Comment'),
 				'children' => array(
 					'comment'
 				),

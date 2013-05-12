@@ -5,7 +5,7 @@ class ErrorCodes {
 	/**
 	 * Errore dovuto agli argomenti inviati al server
 	 */
-	const REQUEST_ARGUMENT = 1;
+	const INPUT = 1;
 	/**
 	 * Errore dovuto al livello di sicurezza
 	 */
@@ -22,5 +22,9 @@ class ErrorCodes {
 	 * Errore interno generico dello script
 	 */
 	const INTERNAL = 5;
+	/**
+	 * General error 
+	 */
+	const GENERAL = 99;
 }
 ?>

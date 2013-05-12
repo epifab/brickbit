@@ -114,15 +114,12 @@ class Login {
 	}
 	
 	public static function getUser($uid, $reset=false) {
-		if (\is_object($uid)) {
-			throw new \Exception('Cazza mi piss?');
-		}
 		if (!$reset && \array_key_exists($uid, self::$users)) {
 			return self::$users[$uid];
 		} else {
 			$rsb = new model\RecordsetBuilder('user');
 			$rsb->usingAll();
-			self::$users[$uid] = $rsb->selectFirstBy("id", $uid);
+			self::$users[$uid] = $rsb->selectFirstBy(array('id' => $uid));
 			if (self::$users[$uid]) {
 				self::$usersByEmail[self::$users[$uid]->email] = self::$users[$uid];
 			}
@@ -186,7 +183,7 @@ class Login {
 
 		if (\array_key_exists("login", $_SESSION)) {
 			if (@$_SESSION["login"]["ip"] != HTMLHelpers::getIpAddress()) {
-				throw new LoginException(\system\Lang::translate('You seem to be logged in from an other ip address. Please try to log in again later.'));
+				throw new LoginException('You seem to be logged in from an other ip address. Please try to log in again later.');
 			} else {
 				return self::getUserByLoginData(@$_SESSION["login"]["username"], @$_SESSION["login"]["userpass"]);
 			}
@@ -221,16 +218,15 @@ class Login {
 		
 		if (!self::isAnonymous()) {
 			return self::getInstance()->user;
-//			throw new LoginException(\system\Lang::translate('You are already logged in.'));
 		}
 		else if (!isset($_COOKIE['PHPSESSID'])) { // Per il login i cookie devono essere abilitati.
-			throw new LoginException(\system\Lang::translate('Your browser does not support cookies. Please enable cookies in order to log in.'));
+			throw new LoginException('Your browser does not support cookies. Please enable cookies in order to log in.');
 		}
 		else if (!\array_key_exists("username", $_POST) || $_POST["username"] == "") {
-			throw new LoginException(\system\Lang::translate("Email not sent."));
+			throw new LoginException('Email not sent.');
 		}
 		else if (!\array_key_exists("userpass", $_POST) || $_POST["userpass"] == "") {
-			throw new LoginException(\system\Lang::translate("Password not sent."));
+			throw new LoginException('Password not sent.');
 		}
 		
 		else {
@@ -247,7 +243,7 @@ class Login {
 				return self::getInstance()->user;
 			}
 			else {
-				throw new LoginException(\system\Lang::translate('Wrong username or password.'));
+				throw new LoginException('Wrong username or password.');
 			}
 		}
 	}

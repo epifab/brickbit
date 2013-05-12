@@ -14,7 +14,7 @@ class TemplateManager implements TemplateManagerInterface {
 	}
 	
 	public function setOutlineWrapperTemplate($tpl) {
-		$this->outlineWrapperTemplate = \system\Main::getTemplate($tpl);
+		$this->outlineWrapperTemplate = $tpl;
 	}
 	
 	public function getOutlineTemplate() {
@@ -22,7 +22,7 @@ class TemplateManager implements TemplateManagerInterface {
 	}
 	
 	public function setOutlineTemplate($tpl) {
-		$this->outlineTemplate = \system\Main::getTemplate($tpl);
+		$this->outlineTemplate = $tpl;
 	}
 	
 	public function getMainTemplate() {
@@ -30,7 +30,7 @@ class TemplateManager implements TemplateManagerInterface {
 	}
 	
 	public function setMainTemplate($tpl) {
-		$this->mainTemplate = \system\Main::getTemplate($tpl);
+		$this->mainTemplate = $tpl;
 	}
 	
 	public function addTemplate($tpl, $region, $weight=0) {
@@ -40,20 +40,20 @@ class TemplateManager implements TemplateManagerInterface {
 		if (!\array_key_exists($weight, $this->regions[$region])) {
 			$this->regions[$region][$weight] = array();
 		}
-		$this->regions[$region][$weight][] = \system\Main::getTemplate($tpl);
+		$this->regions[$region][$weight][] = $tpl;
 	}
 
 	public function addTemplateDir($dir) {
 		if (\is_array($dir)) {
 			foreach ($dir as $d) {
 				if (!\is_dir($d)) {
-					throw new \system\InternalErrorException(\t('Folder <em>@name</em> not found.', array('@name' => $d)));
+					throw new \system\InternalErrorException('Folder <em>@name</em> not found.', array('@name' => $d));
 				}
 				$this->templateDirs[] = $d;
 			}
 		} else {
 			if (!\is_dir($dir)) {
-				throw new \system\InternalErrorException(\t('Folder <em>@name</em> not found.', array('@name' => $dir)));
+				throw new \system\InternalErrorException('Folder <em>@name</em> not found.', array('@name' => $dir));
 			}
 			$this->templateDirs[] = $dir;
 		}

@@ -147,7 +147,7 @@ class Config {
 				if (\array_key_exists($name, $this->data)) {
 					return $this->data[$name];
 				}
-				throw new \system\InternalErrorException("No entry $name in config");
+				throw new \system\InternalErrorException('No entry @name in config', array('@name' => $name));
 				break;
 		}
 	}

@@ -61,7 +61,7 @@ class HTMLHelpers {
 		
 		if ($exception->getCode() != ErrorCodes::AUTHORIZATION) {
 			while ($exception != null) {
-				if (\method_exists($exception, "getHtmlMessage")) {
+				if (\is_callable(array($exception, "getHtmlMessage"))) {
 					$msg .= $exception->getHtmlMessage();
 				}
 				else {

@@ -8,14 +8,24 @@ class Template {
 	private $api;
 	
 	/**
+	 * @return \system\view\Api
+	 */
+	public static function getApi() {
+		return self::current()->api;
+	}
+	
+	/**
 	 * @return Template
 	 */
 	public static function current() {
 		return \end(self::$templates);
 	}
 	
-	public function __construct($tplPath, $vars) {
-		$this->templatePath = $tplPath;
+	public function __construct($tplName, $vars) {
+		$this->templatePath = \system\Main::getTemplate($tplName);
+		if (!$this->templatePath) {
+			throw new \system\InternalErrorException('Template @name not found.', array('@name' => $tplName));
+		}
 //		print_r(array_keys($vars));
 		$this->vars = $vars;
 		$this->api = Api::getInstance();

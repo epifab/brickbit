@@ -9,11 +9,11 @@ class NodeImage extends \system\logic\Component {
     
     $nodeFileVersions = \system\Main::moduleConfigArray('nodeFileVersions');
     if (!\array_key_exists($version, $nodeFileVersions)) {
-      throw new \system\InternalErrorException(\t('Invalid image version.'));
+      throw new \system\InternalErrorException('Invalid image version.');
     } else {
       $versionHandler = $nodeFileVersions[$version];
       if (!\is_callable($versionHandler)) {
-        throw new \system\InternalErrorException(\t('Invalid image version handler.'));
+        throw new \system\InternalErrorException('Invalid image version handler.');
       }
     }
     

@@ -2,8 +2,8 @@
 namespace system;
 
 class ConversionException extends \Exception {
-	function __construct($message, $previous=null) {
-		parent::__construct($message, ErrorCodes::INTERNAL, $previous);
+	public function __construct($message, $arguments = array(), $previous=null) {
+		parent::__construct(\cb\t($message, $arguments), ErrorCodes::GENERAL, $previous);
 	}
 }
 ?>

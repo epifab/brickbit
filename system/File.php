@@ -43,25 +43,29 @@ class File {
 	public static function validateFile($inputName, $maxFileSize=0, $exts=null) {
 
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new ValidationException("Nessun file caricato");
+			throw new ValidationException('File not uploaded');
 		}
 
 		if (empty($_FILES[$inputName]['size'])) {
 			// File 0 Byte!
-			throw new ValidationException("Il file caricato è vuoto");
+			throw new ValidationException('File not uploaded');
 		}
 		
 		if ($maxFileSize > 0) {
 			if ($_FILES[$inputName]['size'] > $maxFileSize) {
-				$error = "Il file supera le dimensioni massime consentite: ";
+				$size = $maxFileSize;
+				$unit = 'B';
 				if ($maxFileSize > 1024*1024) {
-					$error .= (round($maxFileSize/(1024*1024))) ." MB";
+					$size = round($maxFileSize/(1024*1024));
+					$unit = 'MB';
 				} else if ($maxFileSize > 1024) {
-					$error .= (round($maxFileSize/1024)) ." KB";
-				} else {
-					$error .= ($maxFileSize) ." Byte";
+					$size = round($maxFileSize/(1024));
+					$unit = 'KB';
 				}
-				throw new ValidationException($error);
+				throw new ValidationException('File too large. Max file isze: @size @unit', array(
+					'@size' => $size,
+					'@unit' => $unit
+				));
 			}
 		}
 
@@ -79,7 +83,7 @@ class File {
 				}
 			}
 			if (!$ok) { // il file ha un estensione non riconosciuta
-				throw new ValidationException("Estensione del file non valida");
+				throw new ValidationException('Invalid file extension');
 			}
 		}
 	}
@@ -93,7 +97,7 @@ class File {
 	 */
 	public static function uploadImage($inputName, $destinationPath, $maxWidth=0, $maxHeight=0) {
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new ValidationException("Nessun file caricato");
+			throw new ValidationException('File not uploaded');
 		}
     self::saveImage($_FILES[$inputName]['tmp_name'], $destinationPath. $maxWidth, $maxHeight);
   }
@@ -103,15 +107,15 @@ class File {
 
 		$maxWidth = (int)$maxWidth;
 		if ($maxWidth < 0) {
-			throw new InternalErrorException("Parametro maxWidth non valido");
+			throw new InternalErrorException('Invalid parameter @name', array('@name' => 'maxWidth'));
 		}
 		$maxHeight = (int)$maxHeight;
 		if ($maxHeight < 0) {
-			throw new InternalErrorException("Parametro maxHeight non valido");
+			throw new InternalErrorException('Invalid parameter @name', array('@name' => 'maxHeight'));
 		}
 		
 		if (!\copy($sourcePath, $destinationPath)) {
-			throw new InternalErrorException("Impossibile copiare il file caricato");
+			throw new InternalErrorException('Unable to create the file');
 		}
 		\chmod($destinationPath, octdec('0666'));
 
@@ -130,7 +134,7 @@ class File {
 			}
 
 			if (!($destImg = imagecreatetruecolor($width, $height))) {
-				throw new InternalErrorException("Errore durante la creazione dell'immagine");
+				throw new InternalErrorException('Unable to create a new image');
 			}
 
 			$ext = self::getExtension($destinationPath);
@@ -149,21 +153,21 @@ class File {
 					break;
 				
 				default:
-					throw new ValidationException("Estensione immagine non riconosciuta");				
+					throw new ValidationException('Invalid file estension');
 			}
 
 			if (!$newImg) {
-				throw new InternalErrorException("Errore durante il caricamento dell'immagine");
+				throw new InternalErrorException('Unable to create the image');
 			}
 
 			if (\function_exists('imagecopyresampled')) {
 				if (!\imagecopyresampled($destImg, $newImg, 0, 0, 0, 0, $width, $height, \imagesx($newImg), \imagesy($newImg))) {
-					throw new InternalErrorException("Errore durante il ridimensionamento dell'immagine");
+					throw new InternalErrorException('Unable to resize the image');
 				}
 			}
 			else {
 				if (!\imagecopyresized($destImg, $newImg, 0, 0, 0, 0, $width, $height, \imagesx($newImg), \imagesy($newImg))) {
-					throw new InternalErrorException("Errore durante il ridimensionamento dell'immagine");
+					throw new InternalErrorException('Unable to resize the image');
 				}
 			}
 
@@ -183,7 +187,7 @@ class File {
 			}
 
 			if (!$result) {
-				throw new InternalErrorException("Impossibile salvare l'immagine caricata");
+				throw new InternalErrorException('Unable to save the image');
 			}
 
 			\imagedestroy($newImg);
@@ -201,7 +205,7 @@ class File {
 	public static function uploadImageFixedSize($inputName, $destinationPath, $fixedWidth, $fixedHeight) {
 
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new InternalErrorException("Nessun file caricato");
+			throw new InternalErrorException("File not uploaded");
 		}
 
 		self::createImageFixedSize($_FILES[$inputName]['tmp_name'], $destinationPath, $fixedWidth, $fixedHeight);
@@ -211,7 +215,7 @@ class File {
   public static function createImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
 
 		if (!\copy($sourcePath, $destinationPath)) {
-			throw new InternalErrorException("Impossibile copiare il file caricato");
+			throw new InternalErrorException("Unable to copy the file");
 		}
 		\chmod($destinationPath, octdec('0666'));
 
@@ -270,11 +274,11 @@ class File {
 				break;
 
 			default:
-				throw new ValidationException("Estensione immagine non riconosciuta");				
+				throw new ValidationException('Invalid file extension');
 		}
 
 		if (!$originalImg) {
-			throw new InternalErrorException("Errore durante il caricamento dell'immagine");
+			throw new InternalErrorException('File not uploaded');
 		}
 
 		/**
@@ -316,7 +320,7 @@ class File {
 		}
 
 		if (!$result) {
-			throw new InternalErrorException("Impossibile salvare l'immagine caricata");
+			throw new InternalErrorException('Unable to save the image');
 		}
 
 		\imagedestroy($originalImg);
