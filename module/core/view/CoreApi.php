@@ -51,10 +51,10 @@ class CoreApi {
 		$id = $formId . '-' . $vars['system']['component']['requestId'];
 
 		if ($open) {
-			\system\view\Form::startForm($formId, $recordset);
+			Form::startForm($formId, $recordset);
 		} 
 		else {
-			\system\view\Form::closeForm();
+			Form::closeForm();
 
 			$form = "\n"
 				. '<form id="' . $id . '" name="' . $formId . '" method="post" enctype="multipart/form-data" action="' . $vars['system']['component']['url'] . '">'
@@ -74,259 +74,43 @@ class CoreApi {
 	}
 	
 	public static function input($params) {
-		return '<input' . \cb\xml_arguments($params, array('type', 'name')) . ' />';
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public static function hidden($params = array()) {
-		Form::addControl($params, $widget);
-	}
-	
-	
-	public static function de_hidden($path, $params = array()) {
-		$recordset = \system\view\Form::getRecordset();
+		$formId = Form::getActiveForm();
 		
-		$input = array(
-			'type' => 'hidden',
-			'id' => Api::generate_input_id($path),
-			'name' => Api::generate_input_name($path),
-			'class' => 'de-input' . \cb\array_item('class', $params, array('default' => '', 'prefix' => ' ')),
-			'value' => $recordset->getProg($path)
-		);
+		$options = \cb\array_item('options', $params, array('default' => array(), 'type' => 'array'));
 		
-		\system\view\Form::addRecordsetField($input['name'], $path, 'hidden', $params);
-		
-		return Api::input($input);
-	}
-
-	public static function de_textbox($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
 		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
+			$recordset = Form::getRecordset();
 			
-			$f = $recordset->getBuilder()->searchField($path, true);
+			if ($recordset && isset($params['path'])) {
+				$path = $params['path'];
+				
+				$f = $recordset->getBuilder()->searchField($path, true);
 
-			$params += $f->getAttributes();
+				$widget = isset($params['widget']) ? $params['widget'] : $f->getEditWidget();
 
-			$input = array(
-				'type' => (\cb\array_item('password', $params, array('default' => false)) ? 'password' : 'text'),
-				'name' => $formId . '[' . $path . ']',
-				'id' => \system\view\Api::generate_input_id($path),
-				'class' => 'de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')),
-				'value' => $recordset->getProg($path)
-			);
-			
-			$allowed = array('size', 'maxlength', 'placeholder');
-			foreach ($allowed as $k) {
-				if (\array_key_exists($k, $params)) {
-					$input[$k] = $params[$k];
-				}
+				$id = Form::getActiveForm() . '__recordset__' . \cb\plaintext(\str_replace('.', '__', $path));
+				$name = Form::getActiveForm() . '[recordset][' . \cb\plaintext($path) . ']';
+				$value = $recordset->getProg($path);
+				
+				$inputOptions = 
+					$options
+					+ array('id' => $id, 'name' => $name, 'value' => $value)
+					+ $f->getAttributes();
+				
+				Form::addInput($widget, $name, $value, $inputOptions);
+				
+				Form::addRsField($path, $name);
+				
+				echo \system\view\Widget::getWidget($widget)->render($inputOptions);
 			}
 			
-			\system\view\Form::addRecordsetField($input['name'], $path, 'textbox', $attributes);
-
-			return \system\view\Api::input($input);
-		}
-	}
-	
-	public static function de_textarea($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
-			\system\view\Form::addInput($path, __FUNCTION__);
-
-			$f = $recordset->getBuilder()->searchField($path, true);
-
-			$params += $f->getAttributes();
-
-			return
-				'<textarea'
-				. ' class="de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
-				. ' id="' . \system\view\Api::generate_input_id($path) . '"'
-				. ' name="' . $formId . '[' . $path . ']"'
-				. ' rows="' . \cb\array_item('rows', $params, array('default' => 5)) . '"'
-				. ' cols="' . \cb\array_item('cols', $params, array('default' => 35)) . '"'
-				. '>' . \htmlentities($recordset->getProg($path)) . '</textarea>';
-		}
-	}
-
-	public static function de_selectbox($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
-			\system\view\Form::addInput($path, __FUNCTION__);
-
-			$f = $recordset->getBuilder()->searchField($path, true);
-
-			$params += $f->getAttributes();
-
-			$return = 
-				'<select'
-				. ' name="' . $formId . '[' . $path . ']"'
-				. ' id="' . \system\view\Api::generate_input_id($path) . '"'
-				. (\cb\array_item('multiple', $params, array('default' => false)) ? ' multiple="multiple"' : '')
-				. ' size="' . (\cb\array_item('multiple', $params, array('default' => false)) ? '5' : '1') . '"'
-				. ' class="de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')) . '">';
-
-			$values = $recordset->getProg($path);
-			if (!\is_array($values)) {
-				if (\is_null($values)) {
-					$values = array();
-				} else {
-					$values = array($values);
-				}
+			else {
+//				$widget = \cb\array_item('widget', $params, array('required' => true));
+//				
+//				Form::addInput($widget, $name, $value, $inputOptions);
+//				
+//				\system\view\Widget::getWidget($widget)->render($options);
 			}
-
-			$options = \cb\array_item('options', $params, array('default' => array()));
-
-			if (\is_array($options)) {
-				foreach ($options as $key => $val) {
-					$return .= 
-						'<option value="' . \htmlentities($key) . '"'
-						. ($key == $recordset->getProg($path) ? ' selected="selected"' : '') . '>'
-						. \system\Lang::translate($val) . '</option>';
-				}
-			}
-			$return .= '</select>';
-			return $return;
-		}
-	}
-	
-	public static function radiobutton($args) {
-		return \system\Api::input(array('type' => 'radio') + $args);
-	}
-
-	public static function de_radiobuttons($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
-			\system\view\Form::addInput($path, __FUNCTION__);
-
-			$f = $recordset->getBuilder()->searchField($path, true);
-
-			$params += $f->getAttributes();
-
-			$options = \cb\array_item('options', $params, array('default' => array()));
-
-			$id = \system\view\Api::generate_input_id($path);
-
-			$return = '';
-			if (\is_array($options)) {
-				foreach ($options as $key => $val) {
-					$return .=
-						'<div class="de-radio">'
-						. \system\Api::radiobutton(array(
-							'name' => $formId . '[' . $path . '][' . \cb\text_plain($key) . ']',
-							'id' => $id . '-' . \cb\text_plain($key),
-							'class' => 'de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')),
-							'checked' => $recordset->getProg($path) == $key,
-							'value' => \htmlentities($key)
-						))
-						. '<label for="' . $id . '-' . \cb\text_plain($key) . '">' . \cb\t($val) . '</label>'
-						. '</div>';
-				}
-			}
-			return $return;
-		}
-	}
-	
-	public static function checkboxes($name, $params) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-
-			$return = '';
-		}
-		
-		return $return;
-	}
-	
-	public static function de_checkboxes($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
-			\system\view\Form::addInput($path, 'checkboxes', $params);
-
-			$f = $recordset->getBuilder()->searchField($path, true);
-
-			// Extend params with the meta type attributes
-			$params += $f->getAttributes();
-
-			$options = \cb\array_item('options', $params, array('required' => true, 'type' => 'array'));
-
-			$id = \system\view\Api::generate_input_id($path);
-
-			$values = $recordset->getProg($path);
-			if (!\is_array($values)) {
-				if (\is_null($values)) {
-					$values = array();
-				} else {
-					$values = array($values);
-				}
-			}
-
-			$return = '';
-			$return .= '<div class="de-checkboxes">';
-			
-			foreach ($options as $key => $val) {
-				$input = array(
-					'type' => 'checkbox',
-					'name' => $name . '[' . \cb\text_plain($key) . ']',
-					'id' => $id . '-' . \cb\text_plain($key),
-					'value' => 1,
-					'class' => 'de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')),
-				);
-				if (\in_array($key, $values)) {
-					$input['checked'] = 'checked';
-				}
-			
-				$return .=
-					'<div class="de-checkbox">'
-					. \system\Api::input($input)
-					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\Lang::translate($val) . '</label>'
-					. '</div>';
-			}
-			$return .= '</div>';
-			return $return;
-		}
-	}
-	
-	public static function de_checkbox($path, $params = array()) {
-		$formId = \system\view\Form::getActiveForm();
-		if ($formId) {
-			$recordset = \system\view\Form::getRecordset();
-			
-			$input = array(
-				'type' => 'checkbox',
-				'name' => $formId . '[' . $path . ']',
-				'id' => \system\view\Api::generate_input_id($path),
-				'class' => 'de-input' . \cb\array_item('class', $params, array('defalt' => '', 'prefix' => ' ')),
-				'value' => 1
-			);
-			if ($recordset->getProg($path)) {
-				$input['checked'] = 'checked';
-			}
-
-			\system\view\Form::addRecordsetField($input['name'], $path, 'checkbox');
-
-			$f = $recordset->getBuilder()->searchField($path, true);
-
-			$params += $f->getAttributes();
-			return \system\view\Api::input($input);
 		}
 	}
 	

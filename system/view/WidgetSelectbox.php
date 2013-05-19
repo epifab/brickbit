@@ -8,7 +8,7 @@ class WidgetSelectbox implements WidgetInterface {
 		$options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
 		
 		// list of selected items (option keys)
-		$selected = \cb\array_item('selected', $input, array('default' => array(), 'type' => 'array'));
+		$input['value'] = (array)$input['value'];
 		
 		// input optional attributes
 		$attributes = \cb\array_item('attributes', $input, array('default' => array(), 'type' => 'array'));
@@ -16,23 +16,23 @@ class WidgetSelectbox implements WidgetInterface {
 		// select element attributes
 		$args = array(
 			'id' => \cb\array_item('id', $input, array('required' => true)),
-			'name' => \cb\array_item('name', $input, array('required' => true)),
-			'class' => 'de-input selectbox' . \cb\array_item('class', $attributes, array('default' => '', 'prefix' => ' '))
+			'name' => $input['name'],
+			'class' => 'de-input selectbox' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
 		) + $attributes;
 		
 		$output = 
 			'<div'
 			. ' class="de-input-wrapper selectbox"' 
-			. ' id="' . \cb\text_plain($baseId) . '-wrapper">'
+			. ' id="' . \cb\plaintext($args['id']) . '-wrapper">'
 			. '<select' . \cb\xml_arguments($args) . '>';
 		
 		// option elements
 		foreach ($options as $k => $v) {
 			$output .= 
 				'<option'
-				. ' value="' . \cb\text_plain($k) . '"'
-				. (\in_array($k, $selected) ? ' selected="selected"' : '')
-				. '>' . \cb\text_plain($v) . '</option>';
+				. ' value="' . \cb\plaintext($k) . '"'
+				. (\in_array($k, $input['value']) ? ' selected="selected"' : '')
+				. '>' . \cb\plaintext($v) . '</option>';
 		}
 		
 		return $output . '</select></div>';

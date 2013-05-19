@@ -13,9 +13,9 @@ class WidgetRadiobutton implements WidgetInterface {
 		$args = array(
 			'id' => $id,
 			'type' => 'radio',
-			'name' => \cb\array_item('name', $input, array('required' => true)),
-			'value' => \cb\array_item('name', $input, array('required' => true)),
-			'class' => 'de-input radio' . \cb\array_item('class', $attributes, array('default' => '', 'prefix' => ' '))
+			'name' => $input['name'],
+			'value' => $input['value'],
+			'class' => 'de-input radio' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
 		) + $attributes;
 		
 		if (!empty($input['checked'])) {
@@ -24,14 +24,20 @@ class WidgetRadiobutton implements WidgetInterface {
 		
 		return
 			'<div'
-			. ' id="' . \cb\text_plain($id) . '-wrapper"'
+			. ' id="' . \cb\plaintext($id) . '-wrapper"'
 			. ' class="de-input-wrapper radio">'
 			. '<input' . \cb\xml_arguments($args) . ' />'
-			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\text_plain($input['label']) . '</label>' : '')
+			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '')
 			. '</div>';
 	}
 
 	public function fetch($value, array $input) {
+		$value = (array)$value;
+		foreach ($value as $k => $v) {
+			if (!\in_array($k, $input['options'])) {
+				unset($value[$k]);
+			}
+		}
 		return $value;
 	}
 }

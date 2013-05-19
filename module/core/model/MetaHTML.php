@@ -1,10 +1,11 @@
 <?php
 namespace module\core\model;
 
-class MetaHTML extends \system\model\MetaString {
+class MetaHTML extends \system\metatypes\MetaString {
 	public function getEditWidgetDefault() {
-		return 'wysiwyg';
+		return 'textarea';
 	}
+	
 	protected function validateSingle($x) {
 		parent::validateSingle($x);
 		$tags = $this->getAttr('tags');

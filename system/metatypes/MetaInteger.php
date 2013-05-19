@@ -119,6 +119,9 @@ class MetaInteger extends MetaType {
 				return 0;
 			}
 		} else {
+			if (!\is_numeric($x)) {
+				throw new \system\ValidationException('Invalid number');
+			}
 			return \intval($x);
 		}
 	}

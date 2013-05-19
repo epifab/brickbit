@@ -14,7 +14,7 @@ class NodeFile extends \system\logic\Component {
 		$nodeIndexQuery = 'SELECT MAX(sort_index) + 1'
 			. ' FROM node_file'
 			. ' WHERE node_id = ' . $nodeId
-			. ' AND node_index = ' . \system\model\MetaString::stdProg2Db($nodeIndex);
+			. ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex);
 		
 		$virtualName = \system\File::getSafeFilename($originalFileName);
 		
@@ -24,8 +24,8 @@ class NodeFile extends \system\logic\Component {
 		$virtualNamesQuery = 'SELECT virtual_name'
 			. ' FROM node_file'
 			. ' WHERE node_id = ' . $nodeId
-			. ' AND node_index = ' . \system\model\MetaString::stdProg2Db($nodeIndex)
-			. ' AND virtual_name LIKE ' . \system\model\MetaString::stdProg2Db($name . '%');
+			. ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex)
+			. ' AND virtual_name LIKE ' . \system\metatypes\MetaString::stdProg2Db($name . '%');
 		
 		$virtualNames = $dataAccess->executeQueryArray($virtualNamesQuery, __FILE__, __LINE__);
 		

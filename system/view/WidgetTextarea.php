@@ -8,12 +8,12 @@ class WidgetTextarea implements WidgetInterface {
 
 		$args = array(
 			'id' => \cb\array_item('id', $input, array('required' => true)),
-			'name' => \cb\array_item('name', $input, array('required' => true)),
-			'class' => 'de-input textarea' . \cb\array_item('class', $attributes, array('default' => '', 'prefix' => ' '))
+			'name' => $input['name'],
+			'class' => 'de-input textarea' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
 		) + $attributes + array('rows' => 10, 'cols' => 70);
 		
 		return '<textarea' . \cb\xml_arguments($args) . '>' 
-			. \cb\text_plain(\cb\array_item('value', $input, array('required' => true)))
+			. \cb\plaintext($input['value'])
 			. '</textarea>';
 	}
 

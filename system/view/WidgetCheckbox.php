@@ -13,9 +13,9 @@ class WidgetCheckbox implements WidgetInterface {
 		$args = array(
 			'id' => $id,
 			'type' => 'checkbox',
-			'name' => \cb\array_item('name', $input, array('required' => true)),
-			'value' => \cb\array_item('name', $input, array('required' => true)),
-			'class' => 'de-input checkbox' . \cb\array_item('class', $attributes, array('default' => '', 'prefix' => ' '))
+			'name' => $input['name'],
+			'value' => $input['value'],
+			'class' => 'de-input checkbox' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
 		) + $attributes;
 		
 		if (!empty($input['checked'])) {
@@ -24,10 +24,10 @@ class WidgetCheckbox implements WidgetInterface {
 		
 		return
 			'<div'
-			. ' id="' . \cb\text_plain($id) . '-wrapper"'
+			. ' id="' . \cb\plaintext($id) . '-wrapper"'
 			. ' class="de-input-wrapper checkbox">'
 			. '<input' . \cb\xml_arguments($args) . ' />'
-			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\text_plain($input['label']) . '</label>' : '')
+			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '')
 			. '</div>';
 	}
 

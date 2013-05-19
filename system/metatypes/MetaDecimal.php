@@ -118,6 +118,9 @@ class MetaDecimal extends MetaType {
 				return 0.0;
 			} 
 		} else {
+			if (!\is_numeric($x)) {
+				throw new \system\ValidationException('Invalid number');
+			}
 			return \floatval($x);
 		}
 	}

@@ -11,38 +11,43 @@ class WidgetCheckboxes implements WidgetInterface {
 		$options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
 		
 		// list of active checkboxes (option keys)
-		$checked = \cb\array_item('checked', $input, array('default' => array(), 'type' => 'array'));
+		$input['value'] = (array)$input['value']; // just to make sure
 		
 		// input optional attributes
 		$attributes = \cb\array_item('attributes', $input, array('default' => array(), 'type' => 'array'));
 		
 		// name and id (they need to be changed while rendering each checkbox)
-		$baseName = \cb\array_item('name', $input, array('required' => true));
 		$baseId = \cb\array_item('id', $input, array('required' => true));
 		
 		$output = 
 			'<div'
 			. ' class="de-group-input-wrapper checkboxes"' 
-			. ' id="' . \cb\text_plain($baseId) . '-wrapper">';
+			. ' id="' . \cb\plaintext($baseId) . '-wrapper">';
 		
 		// checkbox elements
 		foreach ($options as $k => $v) {
-			$args = array(
-				'id' => $baseId . '-option-' . \cb\text_plain($k),
-				'name' => $baseName . '[' . \cb\text_plain($k) . ']',
+			$inp2 = array(
+				'name' => $input['name'] . '[' . \cb\plaintext($k) . ']',
 				'value' => $k,
+				'id' => $baseId . '-option-' . \cb\plaintext($k),
 				'label' => $v, // defining a label
-				'checked' => \in_array($k, $checked),
+				'checked' => \in_array($k, $input['value']),
 				'attributes' => $attributes
 			);
-			$output .= $checkboxWidget->render($args);
+			$output .= $checkboxWidget->render($inp2);
 		}
 		
 		return $output . '</div>';
 	}
 
 	public function fetch($value, array $input) {
-		return $value;
+		$v = array();
+		foreach ($value as $k => $v) {
+			if (\in_array($k, $input['options'])) {
+				$v[] = $k;
+			}
+		}
+		return $v;
 	}
 }
 ?>

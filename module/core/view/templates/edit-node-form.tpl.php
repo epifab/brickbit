@@ -220,7 +220,7 @@ ciderbit.setBehavior('plupload', function() {
 <script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-jui.js"); ?>"></script>
 */ ?>
 
-<?php $this->api->open('de_form'); ?>
+<?php $this->api->open('form', array('id' => 'edit-node', 'recordset' => $recordset)); ?>
 	<div class="dataedit">
 		<fieldset>
 			<legend>
@@ -250,7 +250,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php echo $this->api->textbox($recordset, 'text_' . $lang . '.urn', array('class' => 'xl')); ?>
+							<?php echo $this->api->input(array(
+								'path' => 'text_' . $lang . '.urn',
+								// 'widget' => 'textbox', 
+								'options' => array('class' => 'xl')
+							)); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("Once you choose a URN you shouldn't change it anymore."); ?><br/>
@@ -269,7 +273,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-description"><?php print $this->api->t('Description'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.description', array('class' => 'xxl')); ?>
+							<?php print $this->api->input(array(
+								'path' => 'text_' . $lang . '.description',
+//								'widget' => 'textbox',
+								'options' => array('class' => 'xxl')
+							)); ?>
 							<div class="de-info">
 								<p>
 									<?php print $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
@@ -283,7 +291,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-title"><?php print $this->api->t('Title'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.title', array('class' => 'l')); ?>
+							<?php print $this->api->input(array(
+								'path' => 'text_' . $lang . '.title',
+								'widget' => 'textbox',
+								'options' => array('class' => 'l')
+							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.title'); ?>
 						</div>
 					</div>
@@ -292,7 +304,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-subtitle"><?php print $this->api->t('Subtitle'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textbox($recordset, 'text_' . $lang . '.subtitle', array('class' => 'xl')); ?>
+							<?php print $this->api->input(array(
+								'path' => 'text_' . $lang . '.subtitle',
+//								'widget' => 'textbox',
+								'options' => array('class' => 'xl')
+							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.subtitle'); ?>
 						</div>
 					</div>
@@ -301,7 +317,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-body"><?php print $this->api->t('Body'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textarea($recordset, 'text_' . $lang . '.body', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->input(array(
+								'path' => 'text_' . $lang . '.body',
+//								'widget' => 'textarea',
+								'options' => array('class' => 'xxl richtext')
+							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.body'); ?>
 						</div>
 					</div>
@@ -310,7 +330,11 @@ ciderbit.setBehavior('plupload', function() {
 							<label class="de-label" for="edit-node-text_<?php print $lang; ?>-preview"><?php print $this->api->t('Preview'); ?></label>
 						</div>
 						<div class="de-input-wrapper">
-							<?php print $this->api->textarea($recordset, 'text_' . $lang . '.preview', array('class' => 'xxl richtext')); ?>
+							<?php print $this->api->input(array(
+								'path' => 'text_' . $lang . '.preview',
+								'widget' => 'textarea',
+								'options' => array('class' => 'xxl richtext')
+							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.preview'); ?>
 						</div>
 					</div>
@@ -348,7 +372,11 @@ ciderbit.setBehavior('plupload', function() {
 					<label class="de-label" for="edit-node-record_mode-read_mode"><?php print $this->api->t('Read access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($recordset, 'record_mode.read_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->input(array(
+						'path' => 'record_mode.read_mode',
+						'widget' => 'selectbox',
+						'options' => array('class' => 'l')
+					)); ?>
 					<?php print $this->api->de_error("record_mode.read_mode"); ?>
 				</div>
 			</div>
@@ -357,7 +385,11 @@ ciderbit.setBehavior('plupload', function() {
 					<label class="de-label" for="edit-node-record_mode-edit_mode"><?php print $this->api->t('Edit access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($recordset, 'record_mode.edit_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->input(array(
+						'path' => 'record_mode.edit_mode',
+						'widget' => 'checkboxes',
+						'options' => array('class' => 'l')
+					)); ?>
 					<?php print $this->api->de_error("record_mode.edit_mode"); ?>
 				</div>
 			</div>
@@ -366,7 +398,11 @@ ciderbit.setBehavior('plupload', function() {
 					<label class="de-label" for="edit-node-record_mode-delete_mode"><?php print $this->api->t('Delete access'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
-					<?php echo $this->api->selectbox($recordset, 'record_mode.delete_mode', array('class' => 'l')); ?>
+					<?php echo $this->api->input(array(
+						'path' => 'record_mode.delete_mode',
+						'widget' => 'selectbox',
+						'options' => array('class' => 'l')
+					)); ?>
 					<?php print $this->api->de_error("record_mode.delete_mode"); ?>
 				</div>
 			</div>

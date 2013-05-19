@@ -1,7 +1,7 @@
 <?php
 namespace system\metatypes;
 
-abstract class MetaType implements Serializable {
+abstract class MetaType implements \Serializable {
 
 	protected $name;
 	protected $type;
@@ -25,7 +25,7 @@ abstract class MetaType implements Serializable {
 		return self::newMetaType($data['name'], $data['type'], $data['attributes']);
 	}
 	
-	private static function getMetaTypesMap() {
+	public static function getMetaTypesMap() {
 		static $map = null;
 		if (\is_null($map)) {
 			if (\config\settings()->CORE_CACHE) {
@@ -37,13 +37,13 @@ abstract class MetaType implements Serializable {
 			$map = array();
 			
 			// default overridable values
-			$map['integer'] = '\\system\\model\\MetaInteger';
-			$map['decimal'] = '\\system\\model\\MetaDecimal';
-			$map['string'] = '\\system\\model\\MetaString';
-			$map['boolean'] = '\\system\\model\\MetaBoolean';
-			$map['date'] = '\\system\\model\\MetaDate';
-			$map['datetime'] = '\\system\\model\\MetaDateTime';
-			$map['virtual'] = '\\system\\model\\MetaString';
+			$map['integer'] = '\\system\\metatypes\\MetaInteger';
+			$map['decimal'] = '\\system\\metatypes\\MetaDecimal';
+			$map['string'] = '\\system\\metatypes\\MetaString';
+			$map['boolean'] = '\\system\\metatypes\\MetaBoolean';
+			$map['date'] = '\\system\\metatypes\\MetaDate';
+			$map['datetime'] = '\\system\\metatypes\\MetaDateTime';
+			$map['virtual'] = '\\system\\metatypes\\MetaString';
 			
 			$conf = \system\Main::raiseModelEvent('metaTypesMap');
 
@@ -125,7 +125,7 @@ abstract class MetaType implements Serializable {
 	public function prog2Edit($x) {
 		return $x;
 	}
-
+	
 	public function validate($x) {
 		
 	}

@@ -11,7 +11,7 @@ class CoreModel {
 	public static function metaTypesMap() {
 		return array(
 			'html' => '\module\core\model\MetaHTML',
-			'plaintext' => '\system\model\MetaString'
+			'plaintext' => '\system\metatypes\MetaString'
 		);
 	}
 	public static function ancestors(Recordset $child, RecordsetBuilder $ancestors) {

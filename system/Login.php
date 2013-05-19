@@ -99,7 +99,7 @@ class Login {
 			$rsb->setFilter(new model\FilterClauseGroup(
 				new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
 				"AND",
-				new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\model\MetaString::stdProg2Db($cryptedEmail))
+				new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\metatypes\MetaString::stdProg2Db($cryptedEmail))
 			));
 
 			$user = $rsb->selectFirst();

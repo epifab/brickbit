@@ -18,17 +18,7 @@ class Field {
 	public function __construct($name, $type, RecordsetBuilder $builder, array $attributes) {
 		$this->builder = $builder;
 		
-		$fmap = \system\model\RecordsetBuilder::getMetaTypesMap();
-		if (!\array_key_exists($type, $fmap)) {
-			throw new \system\InternalErrorException('Unknown metatype <em>@name</em>', array('@name' => $type));
-		}
-		$metaTypeClass = $fmap[$type];
-		
-		$this->metaType = new $metaTypeClass(
-			$name,
-			$type,
-			$attributes
-		);
+		$this->metaType = \system\metatypes\MetaType::newMetaType($name, $type, $attributes);
 	}
 	
 	/**
@@ -40,17 +30,17 @@ class Field {
 			throw new \system\InternalErrorException('Unable to retrieve the select expression.');
 		}
 		if (empty($this->selectExpression)) {
-			return $this->builder->getTableAlias() . "." . $this->name;
+			return $this->builder->getTableAlias() . "." . $this->getName();
 		}
 		return $this->selectExpression;
 	}
 
 	public function getAlias() {
-		return $this->builder->getTableAlias() . "__" . $this->name;
+		return $this->builder->getTableAlias() . "__" . $this->getName();
 	}
 
 	public function getAbsolutePath() {
-		return ($this->builder->getAbsolutePath() != '' ? $this->builder->getAbsolutePath() . "." . $this->name : $this->name);
+		return ($this->builder->getAbsolutePath() != '' ? $this->builder->getAbsolutePath() . "." . $this->getName() : $this->getName());
 	}
 
 	public function getTableName() {
@@ -70,6 +60,10 @@ class Field {
 	 */
 	public function getMetaType() {
 		return $this->metaType;
+	}
+	
+	public function isVirtual() {
+		return false;
 	}
 
 //	/*
@@ -108,7 +102,7 @@ class Field {
 	}
 	
 	public final function getEditWidget() {
-		$this->metaType->getEditWidget();
+		return $this->metaType->getEditWidget();
 	}
 
 	public final function db2Prog($x) {

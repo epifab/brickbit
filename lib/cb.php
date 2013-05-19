@@ -28,6 +28,10 @@ function type($value, $type) {
 			return (bool)$value;
 			break;
 		case 'string':
+			return (string)$value;
+			break;
+		case 'plaintext':
+			return \cb\plaintext($value);
 			break;
 		case 'time':
 			if (\is_int($value)) {
@@ -116,7 +120,7 @@ function array_item($needle, array $haystack, $options = array()) {
 }
 
 function xml_arguments(array $arguments, $required = array(), $allowed = null) {
-	$allowAll = !\is_null($allowed);
+	$allowAll = !\is_array($allowed);
 	foreach ($required as $req) {
 		array_item($req, $arguments, array('required' => true, '!empty' => true));
 		if (!$allowAll && !in_array($req, $allowed)) {
@@ -132,11 +136,11 @@ function xml_arguments(array $arguments, $required = array(), $allowed = null) {
 	}
 	$str = '';
 	foreach ($arguments as $key => $value) {
-		$str .= ' ' . $key . '="' . \text_plain($text) . '"';
+		$str .= ' ' . $key . '="' . plaintext($value) . '"';
 	}
 	return $str;
 }
 
-function text_plain($text) {
+function plaintext($text) {
   return \htmlspecialchars($text, \ENT_QUOTES, 'UTF-8');
 }

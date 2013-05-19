@@ -8,7 +8,7 @@ class Widget {
 		static $map = null;
 		if (\is_null($map)) {
 			if (\config\settings()->CORE_CACHE) {
-				$map = \system\Utils::get('system-widgetsmap', null);
+				$map = \system\Utils::get('system-widgets-map', null);
 				if (!\is_null($map)) {
 					return $map;
 				}
@@ -35,7 +35,7 @@ class Widget {
 				}
 			}
 			if (\config\settings()->CORE_CACHE) {
-				\system\Utils::set('system-widgetsmap', $map);
+				\system\Utils::set('system-widgets-map', $map);
 			}
 		}
 		return $map;
