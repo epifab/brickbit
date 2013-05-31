@@ -34,9 +34,9 @@ class Node extends \system\logic\Component {
 
 	///<editor-fold defaultstate="collapsed" desc="Access methods">
 	public static function accessAdd($urlArgs, $request, $user) {
-		$nodeTypes = \module\core\Utils::getNodeTypes();
+		$nodeTypes = \system\Cache::nodeTypes();
 		
-		if (\module\core\Utils::nodeTypeExists($urlArgs[0])) {
+		if (isset($nodeTypes[$urlArgs[0]])) {
 			throw new \system\InternalErrorException('Invalid node type.');
 		}
 		if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
@@ -48,9 +48,9 @@ class Node extends \system\logic\Component {
 	}
 	
 	public static function accessAdd2Node($urlArgs, $request, $user) {
-		$nodeTypes = \module\core\Utils::getNodeTypes();
+		$nodeTypes = \system\Cache::nodeTypes();
 		
-		if (\module\core\Utils::nodeTypeExists($urlArgs[1])) {
+		if (isset($nodeTypes[$urlArgs[1]])) {
 			throw new \system\InternalErrorException('Invalid node type.');
 		}
 		
@@ -105,7 +105,7 @@ class Node extends \system\logic\Component {
 	}
 
 	protected function form($recordset, $errors=array()) {
-		$nodeTypes = \module\core\Utils::getNodeTypes();
+		$nodeTypes = \system\Cache::nodeTypes();
 		
 		$this->datamodel['fileKeys'] = $nodeTypes[$recordset->type]['files'];
 		$this->datamodel['recordset'] = $recordset;

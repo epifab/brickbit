@@ -647,16 +647,10 @@ abstract class Component {
 			$runMethod = null;
 			$runArgs = array();
 			
-//			if (!$this->isNested() && \system\view\Form::checkFormSubmission()) {
-//				$recordset = null;
-//				$formErrors = array();
-//				if (\system\view\Form::formSubmission($recordset, $formErrors)) {
-//					if (\is_callable(array($this, 'submit' . $this->action))) {
-//						$runMethod = array($this, 'submit' . $this->action);
-//						$runArgs = array($recordset, $formErrors);
-//					}
-//				}
-//			}
+			if (!$this->isNested() && \system\view\Form::checkFormSubmission()) {
+				$form = \system\view\Form::formSubmission();
+				var_dump($form);
+			}
 			
 			// onProcess event
 			if (\is_null($runMethod) && \is_callable(array($this, 'run' . $this->action))) {

@@ -20,9 +20,7 @@ class WidgetCheckboxes implements WidgetInterface {
 		$baseId = \cb\array_item('id', $input, array('required' => true));
 		
 		$output = 
-			'<div'
-			. ' class="de-group-input-wrapper checkboxes"' 
-			. ' id="' . \cb\plaintext($baseId) . '-wrapper">';
+			'<div class="checkboxes" id="' . \cb\plaintext($baseId) . '">';
 		
 		// checkbox elements
 		foreach ($options as $k => $v) {
@@ -34,7 +32,7 @@ class WidgetCheckboxes implements WidgetInterface {
 				'checked' => \in_array($k, $input['value']),
 				'attributes' => $attributes
 			);
-			$output .= $checkboxWidget->render($inp2);
+			$output .= '<div class="checkbox">' . $checkboxWidget->render($inp2) . '</div>';
 		}
 		
 		return $output . '</div>';

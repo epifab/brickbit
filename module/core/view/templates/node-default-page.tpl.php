@@ -1,4 +1,4 @@
-	<?php if ($node): ?>
+f	<?php if ($node): ?>
 	<div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?>">
 
 		<?php if ($this->api->access($node->edit_url)): ?>

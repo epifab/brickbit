@@ -63,8 +63,8 @@ class Main {
 					// model class
 					$modelNs = Module::getNamespace($moduleName, \cb\array_item('modelNs', $moduleInfo, array('default' => null)));
 					$modelClass = \cb\array_item('modelClass', $moduleInfo, array(
-						 'default' => null,
-						 'prefix' => $modelNs
+						'default' => null,
+						'prefix' => $modelNs
 					));
 					if (!\is_null($modelClass) && !\class_exists($modelClass)) {
 						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
@@ -72,8 +72,8 @@ class Main {
 					// templates class (API)
 					$viewNs = Module::getNamespace($moduleName, \cb\array_item('viewNs', $moduleInfo, array('default' => null)));
 					$viewClass = \cb\array_item('viewClass', $moduleInfo, array(
-						 'default' => null,
-						 'prefix' => $viewNs
+						'default' => null,
+						'prefix' => $viewNs
 					));
 					if (!\is_null($viewClass) && !\class_exists($viewClass)) {
 						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $viewClass));

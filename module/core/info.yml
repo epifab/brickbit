@@ -123,20 +123,6 @@ components:
       # content/123/img-thumb/gallery/about-me.jpg
       - url: content/([0-9]+)/img-(@strid)/(@strid)/(@strid)\.(jpe?g|png|gif)
         action: GetVersion
-      - url: content/image/([0-9]+)\.(jpe?g|png|gif)
-        action: Get
-#      - url: content/([0-9]+)/image/add
-#        action: AddNode
-#      - url: content/([0-9]+)/image/replace
-#        action: ReplaceNode
-#      - url: content/([0-9]+)/image/delete
-#        action: DeleteNode
-      - url: content/image/add
-        action: Add
-      - url: content/image/([0-9]+)/replace
-        action: Replace
-      - url: content/image/([0-9]+)/delete
-        action: Delete
 #  comment:
 #    class: Comment
 #    pages:

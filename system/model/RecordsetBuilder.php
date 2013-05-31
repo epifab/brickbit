@@ -152,6 +152,8 @@ class RecordsetBuilder {
 	 */
 	private $limitClause = null;
 	
+	private $selectKey = null;
+	
 	public function getTableInfo() {
 		return $this->tableInfo;
 	}
@@ -254,6 +256,9 @@ class RecordsetBuilder {
 			$builder->setOnUpdate(\array_key_exists("onUpdate", $info) ? $info["onUpdate"] : "NO_ACTION");
 			$builder->setOnDelete(\array_key_exists("onDelete", $info) ? $info["onDelete"] : "NO_ACTION");
 			$builder->setJoinType(\array_key_exists("join", $info) ? $info["join"] : "LEFT");
+			if (isset($info['selectKey'])) {
+				$builder->setSelectKey($info['selectKey']);
+			}
 			$this->relationBuilderList[$name] = $builder;
 			$builder->hasMany()
 				? $this->hasManyRelationBuilderList[$name] = $builder
@@ -558,7 +563,7 @@ class RecordsetBuilder {
 			return null;
 		}
 		if (!$rel->hasMany()) {
-			throw new \system\InternalErrorException('Has-many Relation @path not found.', array('@path' => $path));
+			throw new \system\InternalErrorException('Has-many relation @path not found.', array('@path' => $path));
 		}
 		return $rel;
 	}
@@ -772,6 +777,14 @@ class RecordsetBuilder {
 		}
 	}
 	
+	public function getSelectKey() {
+		return $this->selectKey;
+	}
+	
+	public function setSelectKey($path) {
+		$this->using($path);
+		$this->selectKey = $path;
+	}
 	
 	private function evalSelectExpression($expression) {
 		// Analizzo l'espressione selezionando tutti i percorsi dei campi 
@@ -1140,7 +1153,7 @@ class RecordsetBuilder {
 //	}
 
 	
-	public function selectBy($fields, $firstResult=false) {
+	public function selectBy(array $fields, $firstResult=false) {
 		$newFilter = new FilterClauseGroup();
 		foreach ($fields as $name => $value) {
 			$newFilter->addClauses(new FilterClause($this->searchField($name, true), '=', $value));
@@ -1175,7 +1188,10 @@ class RecordsetBuilder {
 		$recordsets = array();
 		
 		while (($data = $dataAccess->sqlFetchArray($result))) {
-			$recordsets[] = $this->newRecordset($data);
+			$rs = $this->newRecordset($data);
+			$this->selectKey
+				? $recordsets[$rs->getProg($this->selectKey)] = $rs
+				: $recordsets[] = $rs;
 		}
 		
 		$dataAccess->sqlFreeResult($result);

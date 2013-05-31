@@ -97,19 +97,21 @@ class CoreApi {
 					+ array('id' => $id, 'name' => $name, 'value' => $value)
 					+ $f->getAttributes();
 				
-				Form::addInput($widget, $name, $value, $inputOptions);
+				$inputOptions['value'] = Form::addInput($widget, $name, $value, $inputOptions);
 				
 				Form::addRsField($path, $name);
 				
-				echo \system\view\Widget::getWidget($widget)->render($inputOptions);
+				return \system\view\Widget::getWidget($widget)->render($inputOptions);
 			}
 			
 			else {
-//				$widget = \cb\array_item('widget', $params, array('required' => true));
-//				
-//				Form::addInput($widget, $name, $value, $inputOptions);
-//				
-//				\system\view\Widget::getWidget($widget)->render($options);
+				$widget = \cb\array_item('widget', $params, array('required' => true));
+				$name = \cb\array_item('name', $params, array('required' => true));
+				$value = \cb\array_item('value', $params, array('required' => true));
+				
+				Form::addInput($widget, $name, $value, $params);
+				
+				return \system\view\Widget::getWidget($widget)->render($params);
 			}
 		}
 	}

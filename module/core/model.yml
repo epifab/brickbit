@@ -32,21 +32,6 @@ tables:
       size:
         type: integer
         label: Bytes
-    virtuals:
-      path:
-        dependencies: [dir.path, name]
-        label: File path
-        handle: |
-          function(\system\model\Recordset $file) {
-            return $file->dir->path . $file->name;
-          }
-      extension:
-        dependencies: [name]
-        label: File extension
-        handle: |
-          function(\system\model\Recordset $file) {
-            return \system\File::getExtension($file->name);
-          }
     keys:
       primary:
         fields: [id]
@@ -60,6 +45,28 @@ tables:
         table: node_file
         clauses: [id: file_id]
         type: 1-1
+    virtuals:
+      path:
+        dependencies: [dir.path, name]
+        label: File path
+        handle: |
+          function(\system\model\RecordsetInterface $file) {
+            return $file->dir->path . $file->name;
+          }
+      extension:
+        dependencies: [name]
+        label: File extension
+        handle: |
+          function(\system\model\RecordsetInterface $file) {
+            return \system\File::getExtension($file->name);
+          }
+      last_update:
+        dependencies: [path]
+        label: Last update
+        handle: |
+          function(\system\model\RecordsetInterface $file) {
+            return \filetime($file->path);
+          }
   vocabulary:
     fields:
       id:
@@ -123,21 +130,23 @@ tables:
         type: 1-N
         clauses: [id: parent_id]
         onDelete: CASCADE
+        selectKey: id
       ancestors:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Callbacks::termAncestors
+        filterHandle: \module\core\model\Tree::ancestorsFilter
       descendants:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Callbacks::termDescendants
+        filterHandle: \module\core\model\Tree::descendantsFilter
       nodes:
         table: node_term
         type: 1-N
         clauses: [id: term_id]
         onDelete: CASCADE
+        selectKey: node_id
   node_term:
     fields:
       node_id:
@@ -207,47 +216,47 @@ tables:
         type: N-1
         table: node
         clauses: [node_id: id]
-  menu:
-    fields:
-      id:
-        type: integer
-        label: Id
-      name:
-        type: string
-        size: 32
-    keys:
-      primary:
-        fields: [id]
-        autoIncrement: 1
-    relations:
-      items:
-        table: menu_item
-        type: 1-N
-        onDelete: CASCADE
-  menu_item:
-    fields:
-      id:
-        type: integer
-        label: Id
-      menu_id:
-        type: integer
-        label: Menu Id
-      url:
-        type: string
-        size: 32
-      title:
-        type: string
-        size: 64
-      sort_index:
-        type: integer
-    keys:
-      primary:
-        fields: [id]
-        autoIncrement: 1
-    relations:
-      menu:
-        table: menu
-        type: N-1
+#  menu:
+#    fields:
+#      id:
+#        type: integer
+#        label: Id
+#      name:
+#        type: string
+#        size: 32
+#    keys:
+#      primary:
+#        fields: [id]
+#        autoIncrement: 1
+#    relations:
+#      items:
+#        table: menu_item
+#        type: 1-N
+#        onDelete: CASCADE
+#  menu_item:
+#    fields:
+#      id:
+#        type: integer
+#        label: Id
+#      menu_id:
+#        type: integer
+#        label: Menu Id
+#      url:
+#        type: string
+#        size: 32
+#      title:
+#        type: string
+#        size: 64
+#      sort_index:
+#        type: integer
+#    keys:
+#      primary:
+#        fields: [id]
+#        autoIncrement: 1
+#    relations:
+#      menu:
+#        table: menu
+#        type: N-1
   node:
     fields:
       id:
@@ -279,60 +288,6 @@ tables:
       temp:
         type: boolean
         label: Temp content
-    virtuals:
-      title:
-        label: Title
-        dependencies: [text.title, text_und.title, type]
-        handle: |
-          function(\system\model\Recordset $recordset) {
-            if ($recordset->text->title) {
-              return $recordset->text->title;
-            } else if ($recordset->text_und->title) {
-              return $recordset->text_und->title;
-            } else {
-              return 'Untitled ' . $recordset->type;
-            }
-          }
-      read_url:
-        label: Node URL
-        dependencies: [id, text.urn, text_und.urn]
-        handle: [\module\core\Core, getNodeUrn]
-#        handle: |
-#          function(\system\model\Recordset $node) {
-#            \module\core\Core::getNodeUrn($node);
-#          }
-      edit_url:
-        label: Edit URL
-        dependencies: [id]
-        handle: [\module\core\Core, getEditNodeUrn]
-#        handle: |
-#          function(\system\model\Recordset $node) {
-#            \module\core\Core::getEditNodeUrn($node);
-#          }
-      delete_url:
-        label: Delete URL
-        dependencies: [id]
-        handle: |
-          function(\system\model\Recordset $node) {
-            \module\core\Core::getDeleteNodeUrn($node);
-          }
-      content:
-        label: Content
-        dependencies: [id, type]
-        handle: |
-          function(\system\model\Recordset $node) {
-            static $r = false;
-            if ($r === false) {
-              try {
-                $rsb = new \system\RecordsetBuilder('content_' . $node->type);
-                $rsb->using('*');
-                $r = $rsb->selectFirstBy('node_id', $node->id);
-              } catch (\Exception $ex) {
-                $r = null;
-              }
-            }
-            return $r;
-          }
     keys:
       primary_key:
         fields: [id]
@@ -342,7 +297,6 @@ tables:
         table: record_mode
         type: 1-1
         clauses: [record_mode_id: id]
-  # ancestors/descendants
       parent:
         table: node
         type: N-1
@@ -356,170 +310,81 @@ tables:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Callbacks::ancestors
+        filterHandle: \module\core\model\Tree::ancestorsFilter
       descendants:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Callbacks::descendants
+        filterHandle: \module\core\model\Tree::descendantsFilter
   # TERMS
       terms:
         table: node_term
         type: 1-N
         clauses: [id: node_id]
         onDelete: CASCADE
+        selectKey: term_id
   # TRANSLATIONS
       texts:
         table: node_text
         type: 1-N
         clauses: [id: node_id]
         onDelete: CASCADE
-      text:
-        table: node_text
-        type: 1-1
-        clauses: [id: node_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-            $text->addFilter(new \system\model\FilterClause(
-              $text->lang, '=', \system\Lang::getLang()
-            ));
-          }
-      text_und:
-        table: node_text
-        type: 1-1
-        clauses: [id: node_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-            $text->addFilter(new \system\model\FilterClause(
-              $text->lang, 'IS_NULL'
-            ));
-          }
-      text_en:
-        table: node_text
-        type: 1-1
-        clauses: [id: node_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-            $text->addFilter(new \system\model\FilterClause(
-              $text->lang, '=', 'en'
-            ));
-          }
-      text_it:
-        table: node_text
-        type: 1-1
-        clauses: [id: node_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-            $text->addFilter(new \system\model\FilterClause(
-              $text->lang, '=', 'it'
-            ));
-          }
-      text_de:
-        table: node_text
-        type: 1-1
-        clauses: [id: node_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $node, \system\model\RecordsetBuilder $text) {
-            $text->addFilter(new \system\model\FilterClause(
-              $text->lang, '=', 'de'
-            ));
-          }
+        selectKey: lang
   # FILES
       files:
         table: node_file
         type: 1-N
         clauses: [id: node_id]
         onDelete: CASCADE
-  # VIRTUALS - PAGE
-      page_header:
-        table: node
-        type: 1-1
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'page',
-              $child->type, '=', 'header'
-            ));
-          }
-      page_footer:
-        table: node
-        type: 1-1
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\RecordsetBuilder $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'page',
-              $child->type, '=', 'footer'
-            ));
-          }
-      page_banners:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'page',
-              $child->subtype, '=', 'banner'
-            ));
-          }
-      page_articles:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'article',
-              $child->subtype, 'IS_NULL'
-            ));
-          }
-  # VIRTUALS - ARTICLES
-      article_attachements:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'article',
-              $child->subtype, '=', 'attachement'
-            ));
-          }
-      article_images:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'article',
-              $child->subtype, '=', 'image'
-            ));
-          }
-      article_mp3s:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'article',
-              $child->subtype, '=', 'mp3'
-            ));
-          }
-      article_videos:
-        table: node
-        type: 1-N
-        clauses: [id: parent_id]
-        filterHandle: |
-          function(\system\model\Recordset $parent, \system\model\RecordsetBuilder $child) {
-            $child->addFilter(new \system\model\FilterClause(
-              $child->type, '=', 'article',
-              $child->subtype, '=', 'video'
-            ));
-          }
+        selectKey: file_id
+    virtuals:
+      children_groups:
+        table: Node
+        dependencies: [children]
+        handle: \module\core\model\Node::children_by_type
+      # urns
+      urn:
+        label: Text (undeterminate)
+        dependencies: [id, text_urn]
+        handle: \module\core\model\Node::urn
+      edit_urn:
+        label: Text (undeterminate)
+        dependencies: [id]
+        handle: \module\core\model\Node::edit_urn
+      delete_urn:
+        label: Text (undeterminate)
+        dependencies: [id]
+        handle: \module\core\model\Node::delete_urn
+      # texts
+      text:
+        label: Text (undeterminate)
+        dependencies: [texts]
+        handle: \module\core\model\Node::text
+      text_und:
+        label: Text (undeterminate)
+        dependencies: [texts]
+        handle: \module\core\model\Node::text_und
+      text_en:
+        label: Text (undeterminate)
+        dependencies: [texts]
+        handle: \module\core\model\Node::text_en
+      text_it:
+        label: Text (undeterminate)
+        dependencies: [texts]
+        handle: \module\core\model\Node::text_it
+      text_de:
+        label: Text (undeterminate)
+        dependencies: [texts]
+        handle: \module\core\model\Node::text_de
+      title:
+        label: Title
+        dependencies: [text.title]
+        handle: \module\core\model\Node::title
+      # content
+      content:
+        label: Content
+        dependencies: [id, type]
+        handle: [\module\core\Core, getNodeContent]
   node_file:
     fields:
       node_id:
@@ -540,46 +405,12 @@ tables:
       download_mode:
         type: integer
         options:
-  #        0: Nobody
-  #        1: Superuser
+#          0: Nobody
+#          1: Superuser
           2: Node owner only
           3: Node admins
           4: Registered
           5: Anyone
-    virtuals:
-      real_path:
-        dependencies: [file.path]
-        handle: |
-          function(\system\model\Recordset $rs) {
-            return $rs->file->path;
-          }
-      read_url:
-        dependencies: [virtual_name, node_index, node_id, file_id, file.extension]
-        handle: |
-          function(\system\model\Recordset $rs) {
-            if (!$rs->node_id) {
-              return 'content/file/' . $rs->file_id . '.' . $rs->file->extension;
-            } else {
-              return 'content/' . $rs->node_id . '/file/' . $rs->node_index . '/' . $rs->virtual_name;
-            }
-          }
-      edit_url:
-        dependencies: [file_id]
-        handle: |
-          function(\system\model\Recordset $rs) {
-            return 'content/file/' . $rs->file_id . '/edit';
-          }
-      delete_url:
-        dependencies: [file_id]
-        handle: |
-          function(\system\model\Recordset $rs) {
-            return 'content/file/' . $rs->file_id . '/delete';
-          }
-      download_path:
-        handle: |
-          function($recordset) {
-            return $recordset->virtual_name;
-          }
     keys:
       primary:
         fields: [file_id]
@@ -595,6 +426,28 @@ tables:
         table: file
         clauses: [file_id: id]
         onDelete: CASCADE
+    virtuals:
+      urn:
+        label: Text (undeterminate)
+        dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
+        handle: \module\core\model\NodeFile::urn
+      edit_urn:
+        label: Text (undeterminate)
+        dependencies: [id]
+        handle: \module\core\model\NodeFile::edit_urn
+      delete_urn:
+        label: Text (undeterminate)
+        dependencies: [id]
+        handle: \module\core\model\NodeFile::delete_urn
+      download_path:
+        handle: |
+          function($recordset) {
+            return $recordset->virtual_name;
+          }
+      images:
+        label: Images
+        dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
+        handle: \module\core\model\NodeFile::images
   user:
     virtuals:
       superuser:

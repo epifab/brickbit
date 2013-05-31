@@ -237,6 +237,13 @@ ciderbit.setBehavior('plupload', function() {
 						
 					</div>
 					<div class="de-input-wrapper">
+						<?php echo $this->api->input(array(
+							'widget' => 'checkbox',
+							'name' => 'text_' . $lang . '.enable',
+							'id' => 'text_' . $lang . '_enable',
+							'label' => $this->api->t('Enable for this lang'),
+							'value' => (bool)$recordset->__get('text_' . $lang)->lang
+						)); ?>
 						<input type="checkbox"
 							class="de-input show-hide-class" 
 							name="node[text_<?php print $lang; ?>.enable]"<?php if ($recordset->__get('text_' . $lang)->lang): ?> checked="checked"<?php endif; ?>
@@ -364,6 +371,14 @@ ciderbit.setBehavior('plupload', function() {
 				</div>
 				<div class="de-input-wrapper">
 					<input class="de-input xl" type="text" name="node[record_mode.users]" id="edit-node-record_mode-users" value=""/>
+					<?php echo $this->api->input(array(
+						'widget' => 'autocomplete',
+						'value' => array(),
+						'url' => 'autocomplete/user',
+						'item' => '<div><img src="@[image.url]"/>@[name]</div>',
+						'value' => array(),
+						'name' => 'users'
+					)); ?>
 					<?php print $this->api->de_error("record_mode.users"); ?>
 				</div>
 			</div>
@@ -387,8 +402,8 @@ ciderbit.setBehavior('plupload', function() {
 				<div class="de-input-wrapper">
 					<?php echo $this->api->input(array(
 						'path' => 'record_mode.edit_mode',
-						'widget' => 'checkboxes',
-						'options' => array('class' => 'l')
+						'widget' => 'selectbox',
+						'options' => array('class' => 'l', 'rows')
 					)); ?>
 					<?php print $this->api->de_error("record_mode.edit_mode"); ?>
 				</div>

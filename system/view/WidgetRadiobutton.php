@@ -22,13 +22,9 @@ class WidgetRadiobutton implements WidgetInterface {
 			$args['checked'] = 'checked';
 		}
 		
-		return
-			'<div'
-			. ' id="' . \cb\plaintext($id) . '-wrapper"'
-			. ' class="de-input-wrapper radio">'
-			. '<input' . \cb\xml_arguments($args) . ' />'
-			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '')
-			. '</div>';
+		return 
+			'<input' . \cb\xml_arguments($args) . ' />'
+			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '');
 	}
 
 	public function fetch($value, array $input) {

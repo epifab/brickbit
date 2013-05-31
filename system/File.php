@@ -208,11 +208,11 @@ class File {
 			throw new InternalErrorException("File not uploaded");
 		}
 
-		self::createImageFixedSize($_FILES[$inputName]['tmp_name'], $destinationPath, $fixedWidth, $fixedHeight);
+		self::saveImageFixedSize($_FILES[$inputName]['tmp_name'], $destinationPath, $fixedWidth, $fixedHeight);
   }
   
   
-  public static function createImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
+  public static function saveImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
 
 		if (!\copy($sourcePath, $destinationPath)) {
 			throw new InternalErrorException("Unable to copy the file");

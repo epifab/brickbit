@@ -41,15 +41,24 @@ class Form {
 	
 	public static function addInput($widget, $name, $value, array $input = array(), $metaType = null) {
 		if (self::$activeForm) {
+			$form = &$_SESSION['system']['forms'][self::$activeForm];
+			
 			$input['name'] = $name;
 			$input['value'] = $value;
-			$_SESSION['system']['forms'][self::$activeForm]['input'][$input['name']] = array(
+			
+			$return = (isset($form['input'][$input['name']]))
+				? $form['input'][$input['name']]['value']
+				: $value;
+			
+			$form['input'][$input['name']] = array(
 				'name' => $name,
 				'value' => $value,
 				'widget' => $widget,
 				'input' => $input,
 				'metaType' => $metaType
 			);
+			
+			return $return;
 		}
 	}
 	
@@ -109,7 +118,21 @@ class Form {
 	
 	private static function fetchInputValues(array &$form) {
 		foreach ($form['input'] as $input) {
-			$form['input'][$input['name']]['value'] = self::getInputPostedValue($input['name']);
+			$input = &$form['input'][$input['name']];
+			
+			$input['value'] = self::getInputPostedValue($input['name']);
+			$input['error'] = null;
+			
+			$form['errors'][$input['name']] = null;
+
+			$mt = $input['metaType'];
+			if ($mt) {
+				try {
+					$mt->validate($input['value']);
+				} catch (\system\ValidationException $ex) {
+					$form['errors'][$input['name']] = $ex->getMessage();
+				}
+			}
 		}
 	}
 	

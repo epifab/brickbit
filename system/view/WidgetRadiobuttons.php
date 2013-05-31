@@ -19,10 +19,7 @@ class WidgetRadiobuttons implements WidgetInterface {
 		// the id needs to be changed while rendering each radio
 		$baseId = \cb\array_item('id', $input, array('required' => true));
 		
-		$output = 
-			'<div'
-			. ' class="de-group-input-wrapper radiobuttons"' 
-			. ' id="' . \cb\plaintext($baseId) . '-wrapper">';
+		$output = '<div class="radiobuttons" id="' . \cb\plaintext($baseId) . '">';
 		
 		// radio elements
 		foreach ($options as $k => $v) {
@@ -34,7 +31,7 @@ class WidgetRadiobuttons implements WidgetInterface {
 				'checked' => \in_array($k, $input['value']),
 				'attributes' => $attributes
 			);
-			$output .= $radioWidget->render($inp2);
+			$output .= '<div class="radiobutton">' . $radioWidget->render($inp2) . '</div>';
 		}
 		
 		return $output . '</div>';

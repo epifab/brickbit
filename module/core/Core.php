@@ -2,25 +2,6 @@
 namespace module\core;
 
 class Core extends \system\logic\Module {
-	public static function getNodeUrn(\system\model\RecordsetInterface $recordset) {
-		if ($recordset->text->urn) {
-			if ($recordset->type == 'page') {
-				return $recordset->text->urn . '.html';
-			} else {
-				return 'content/' . $recordset->text->urn . '.html';
-			}
-		} else {
-			return \config\settings()->BASE_DIR . 'content/' . $recordset->id;
-		}
-	}
-	
-	public static function getEditNodeUrn(\system\model\RecordsetInterface $recordset) {
-		return 'content/' . $recordset->id . '/edit';
-	}
-	
-	public static function getDeleteNodeUrn(\system\model\RecordsetInterface $recordset) {
-		return 'content/' . $recordset->id . '/delete';
-	}
 	
 	/**
 	 * Define node types and variables allowed files / node children
@@ -113,6 +94,72 @@ class Core extends \system\logic\Module {
 		);
 	}
 
+	public static function imageVersion($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+		switch ($version) {
+			case 'thumb':
+				return self::imageVersionFixedSizes('60x60', $fileName, $nodeFile);
+				break;
+			case 's':
+				return self::imageVersionFixedW('120-Y', $fileName, $nodeFile);
+				break;
+			case 'm':
+				return self::imageVersionFixedW('240-Y', $fileName, $nodeFile);
+				break;
+			case 'l':
+				return self::imageVersionFixedW('480-Y', $fileName, $nodeFile);
+				break;
+			case 'xl':
+				return self::imageVersionFixedW('960-Y', $fileName, $nodeFile);
+				break;
+		}
+	}
+	
+	public static function imageVersionFixedSizes($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+		list($x, $y) = \explode('x', $version);
+		\system\File::saveImageFixedSize($nodeFile->file->path, $fileName, $x, $y);
+	}
+	
+	public static function imageVersionFixedWidth($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+		list($x, ) = \explode('-', $version);
+		\system\File::saveImage($nodeFile->file->path, $fileName, $x);
+	}
+	
+	public static function imageVersionFixedHeight($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+		list(, $y) = \explode('-', $version);
+		\system\File::saveImage($nodeFile->file->path, $fileName, 0, $y);
+	}
+	
+	public static function imageVersionMakers() {
+		return array(
+			'thumb' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
+			's' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
+			'm' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
+			'l' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
+			'xl' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
+		);
+		
+//		$makers = array();
+//		$sizes = array(
+//			'50x50',
+//			'100x100',
+//			'200x200',
+//			'300x300',
+//			'150x50',
+//			'300x100',
+//			'600x200',
+//			'900x300',
+//		);
+//		foreach ($sizes as $s) {
+//			$makers[$s] = array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersionFixedSizes');
+//		}
+//		$a = array(50, 100, 200, 300, 600, 900);
+//		foreach ($a as $x) {
+//			$makers[$x . '-Y'] = array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersionFixedWidth');
+//		}
+//		foreach ($a as $y) {
+//			$makers['X-' . $y] = array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersionFixedHeight');
+//		}
+	}
 	
 	public static function cron() {
 

@@ -1,0 +1,17 @@
+class: Autocomplete
+weight: 1
+enabled: 1
+#modelNs: model
+#modelClass: Model
+#viewNs: view
+#viewClass: Api
+#templatesPath: view/templates
+componentsNs: components
+components:
+  autocomplete:
+    class: Autocomplete
+    pages:
+      - url: autocomplete/nodes/(@strid)
+        action: Users
+      - url: autocomplete/users/(@strid)
+        action: Nodes

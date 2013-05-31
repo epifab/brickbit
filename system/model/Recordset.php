@@ -644,7 +644,7 @@ class Recordset implements RecordsetInterface {
 	
 	public function setRelation($name, $value) {
 		if (\array_key_exists($name, $this->hasManyRelations)) {
-			$this->hasManyRelations[$name] = $value;
+			$this->hasManyRelations[$name] = (array)$value;
 		}
 		else if (\array_key_exists($name, $this->hasOneRelations)) {
 			$this->hasOneRelations[$name] = $value;

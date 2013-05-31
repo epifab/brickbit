@@ -23,12 +23,8 @@ class WidgetCheckbox implements WidgetInterface {
 		}
 		
 		return
-			'<div'
-			. ' id="' . \cb\plaintext($id) . '-wrapper"'
-			. ' class="de-input-wrapper checkbox">'
-			. '<input' . \cb\xml_arguments($args) . ' />'
-			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '')
-			. '</div>';
+			'<input' . \cb\xml_arguments($args) . ' />'
+			. (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '');
 	}
 
 	public function fetch($value, array $input) {

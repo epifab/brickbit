@@ -20,11 +20,7 @@ class WidgetSelectbox implements WidgetInterface {
 			'class' => 'de-input selectbox' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
 		) + $attributes;
 		
-		$output = 
-			'<div'
-			. ' class="de-input-wrapper selectbox"' 
-			. ' id="' . \cb\plaintext($args['id']) . '-wrapper">'
-			. '<select' . \cb\xml_arguments($args) . '>';
+		$output = '<select' . \cb\xml_arguments($args) . '>';
 		
 		// option elements
 		foreach ($options as $k => $v) {
@@ -35,7 +31,7 @@ class WidgetSelectbox implements WidgetInterface {
 				. '>' . \cb\plaintext($v) . '</option>';
 		}
 		
-		return $output . '</select></div>';
+		return $output . '</select>';
 	}
 
 	public function fetch($value, array $input) {
