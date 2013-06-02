@@ -7,7 +7,7 @@ class File extends \system\logic\Component {
 	}
 	
 	public function onError($exception) {
-		if ($exception instanceof \system\AuthorizationException) {
+		if ($exception instanceof \system\error\AuthorizationError) {
 			\header('HTTP/1.1 403 Forbidden');
 		} else {
 			\header('HTTP/1.1 500 Internal Server Error');

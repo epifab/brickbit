@@ -47,13 +47,13 @@ class TemplateManager implements TemplateManagerInterface {
 		if (\is_array($dir)) {
 			foreach ($dir as $d) {
 				if (!\is_dir($d)) {
-					throw new \system\InternalErrorException('Folder <em>@name</em> not found.', array('@name' => $d));
+					throw new \system\error\InternalError('Folder <em>@name</em> not found.', array('@name' => $d));
 				}
 				$this->templateDirs[] = $d;
 			}
 		} else {
 			if (!\is_dir($dir)) {
-				throw new \system\InternalErrorException('Folder <em>@name</em> not found.', array('@name' => $dir));
+				throw new \system\error\InternalError('Folder <em>@name</em> not found.', array('@name' => $dir));
 			}
 			$this->templateDirs[] = $dir;
 		}

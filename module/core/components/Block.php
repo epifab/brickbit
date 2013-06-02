@@ -15,9 +15,9 @@ class Block extends \system\logic\Component {
 	public function runMainMenu() {
 		$mm = array();
 		
-		$rsb = new \system\model\RecordsetBuilder("node");
+		$rsb = new \system\model\RecordsetBuilder('node');
 		$rsb->using(
-			'id', 'type', 'read_url', 'text.title'
+			'id', 'type', 'url', 'text.title'
 		);
 		$rsb->addFilter(new \system\model\FilterClause($rsb->type, '=', 'page'));
 		$rsb->addFilter(new \system\model\FilterClause($rsb->text->title, 'IS_NOT_NULL'));
@@ -27,7 +27,7 @@ class Block extends \system\logic\Component {
 		foreach ($rs as $r) {
 			$mm[] = array(
 				'id' => $r->id,
-				'url' => $r->read_url,
+				'url' => $r->url,
 				'title' => $r->text->title
 			);
 		}

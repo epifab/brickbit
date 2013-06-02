@@ -27,7 +27,7 @@ class NodeFile extends \system\logic\Component {
 			. ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex)
 			. ' AND virtual_name LIKE ' . \system\metatypes\MetaString::stdProg2Db($name . '%');
 		
-		$virtualNames = $dataAccess->executeQueryArray($virtualNamesQuery, __FILE__, __LINE__);
+		$virtualNames = $dataAccess->executeQueryArray($virtualNamesQuery);
 		
 		if (\in_array($virtualName, $virtualNames)) {
 			for ($i = 2; \in_array($name . $i . '.' . $ext, $virtualNames); $i++);
@@ -49,7 +49,7 @@ class NodeFile extends \system\logic\Component {
 		$rs->file_id = $rs->file->id;
 		$rs->node_id = $nodeId;
 		$rs->node_index = $nodeIndex;
-		$rs->sort_index = 1 + \intval($dataAccess->executeScalar($nodeIndexQuery, __FILE__, __LINE__));
+		$rs->sort_index = 1 + \intval($dataAccess->executeScalar($nodeIndexQuery));
 		$rs->virtual_name = $virtualName;
 		$rs->save();
 	}

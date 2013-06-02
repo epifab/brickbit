@@ -39,12 +39,12 @@ class MetaDateTime extends MetaType {
 			$i = intval(\cb\array_item('minutes', array('default' => -1)));
 			$s = intval(\cb\array_item('seconds', array('default' => -1)));
 			if ($h < 0 || $h > 23 || $i < 0 || $i > 59 || $s < 0 || $s > 59) {
-				throw new \system\ValidationException('Invalid date');
+				throw new \system\error\ValidationError('Invalid date');
 			}
 			if (\checkdate($m, $d, $y)) {
 				$x = \mktime($h,$i,$s,$m,$d,$y);
 			} else {
-				throw new \system\ValidationException('Invalid date.');
+				throw new \system\error\ValidationError('Invalid date.');
 			}
 		} else if (\is_string($x)) {
 			if (\preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}$/', $x)) {
@@ -55,12 +55,12 @@ class MetaDateTime extends MetaType {
 				$i = \substr($x,14,2);
 				$s = \substr($x,17,2);
 				if ($h < 0 || $h > 23 || $i < 0 || $i > 59 || $s < 0 || $s > 59) {
-					throw new \system\ValidationException('Invalid date');
+					throw new \system\error\ValidationError('Invalid date');
 				}
 				if (\checkdate($m, $d, $y)) {
 					$x = \mktime($h,$i,$s,$m,$d,$y);
 				} else {
-					throw new \system\ValidationException('Invalid date.');
+					throw new \system\error\ValidationError('Invalid date.');
 				}
 			}
 		} else {
@@ -74,7 +74,7 @@ class MetaDateTime extends MetaType {
 		$options = $this->getAttr('options');
 		if ($options) {
 			if (!\array_key_exists($x, $options)) {
-				throw new \system\ValidationException('Invalid value for <me>@name</em> field.', array(
+				throw new \system\error\ValidationError('Invalid value for <me>@name</em> field.', array(
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}

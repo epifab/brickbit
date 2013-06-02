@@ -882,7 +882,7 @@ var firebug = {
           d.console.scroll();
         }
       },
-      printException: function(_exception){
+      printError: function(_exception){
         with(firebug){
           var message = _exception.description||_exception.message||_exception;
           if(_exception.fileName){
@@ -909,7 +909,7 @@ var firebug = {
             }
           } catch(e){
             d.console.addLine().attribute.addClass("Arrow").update(">>> "+_cmd);
-            d.console.printException(e);
+            d.console.printError(e);
           }
           d.console.scroll();
         }

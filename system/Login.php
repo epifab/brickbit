@@ -1,6 +1,8 @@
 <?php
 namespace system;
 
+use system\error\LoginError;
+
 define("LOGIN_COOKIE_TIME", (time()+(3600*24*5))); // 5 giorni
 
 
@@ -183,7 +185,7 @@ class Login {
 
 		if (\array_key_exists("login", $_SESSION)) {
 			if (@$_SESSION["login"]["ip"] != HTMLHelpers::getIpAddress()) {
-				throw new LoginException('You seem to be logged in from an other ip address. Please try to log in again later.');
+				throw new \system\error\LoginError('You seem to be logged in from an other ip address. Please try to log in again later.');
 			} else {
 				return self::getUserByLoginData(@$_SESSION["login"]["username"], @$_SESSION["login"]["userpass"]);
 			}
@@ -220,13 +222,13 @@ class Login {
 			return self::getInstance()->user;
 		}
 		else if (!isset($_COOKIE['PHPSESSID'])) { // Per il login i cookie devono essere abilitati.
-			throw new LoginException('Your browser does not support cookies. Please enable cookies in order to log in.');
+			throw new LoginError('Your browser does not support cookies. Please enable cookies in order to log in.');
 		}
 		else if (!\array_key_exists("username", $_POST) || $_POST["username"] == "") {
-			throw new LoginException('Email not sent.');
+			throw new LoginError('Email not sent.');
 		}
 		else if (!\array_key_exists("userpass", $_POST) || $_POST["userpass"] == "") {
-			throw new LoginException('Password not sent.');
+			throw new LoginError('Password not sent.');
 		}
 		
 		else {
@@ -243,7 +245,7 @@ class Login {
 				return self::getInstance()->user;
 			}
 			else {
-				throw new LoginException('Wrong username or password.');
+				throw new LoginError('Wrong username or password.');
 			}
 		}
 	}

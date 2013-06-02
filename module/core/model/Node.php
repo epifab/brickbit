@@ -52,7 +52,7 @@ class Node {
 //		return $texts[$node->id];
 //	}
 	
-	public static function urn(\system\model\RecordsetInterface $recordset) {
+	public static function url(\system\model\RecordsetInterface $recordset) {
 		if ($recordset->text->urn) {
 			if ($recordset->type == 'page') {
 				return $recordset->text->urn . '.html';
@@ -64,11 +64,11 @@ class Node {
 		}
 	}
 	
-	public static function edit_urn(\system\model\RecordsetInterface $recordset) {
+	public static function edit_url(\system\model\RecordsetInterface $recordset) {
 		return 'content/' . $recordset->id . '/edit';
 	}
 	
-	public static function delete_urn(\system\model\RecordsetInterface $recordset) {
+	public static function delete_url(\system\model\RecordsetInterface $recordset) {
 		return 'content/' . $recordset->id . '/delete';
 	}
 	
@@ -80,32 +80,42 @@ class Node {
 		}
 	}
 	
-	public static function text(RecordsetInterface $node) {
-		if (isset($node->texts[\system\Lang::getLang()])) {
-			return $node->texts[\system\Lang::getLang()];
-		} else if (isset($node->texts[null])) {
-			return $node->texts[null];
-		} else {
-			$first = \current($node->texts);
-			!empty($first) ? $first : null;
-		}
+//	public static function text(RecordsetInterface $node) {
+//		if (isset($node->texts[\system\Lang::getLang()])) {
+//			return $node->texts[\system\Lang::getLang()];
+//		} else if (isset($node->texts[null])) {
+//			return $node->texts[null];
+//		} else {
+//			$first = \current($node->texts);
+//			!empty($first) ? $first : null;
+//		}
+//	}
+	
+	public static function textFilter(RecordsetInterface $node, RecordsetBuilder $textBuilder) {
+		$textBuilder->addFilter(new FilterClauseGroup(
+			new FilterClause($textBuilder->lang, 'IS_NULL'),
+			'OR',
+			new FilterClause($textBuilder->lang, '=', \system\Lang::getLang())
+		));
+		$textBuilder->setSort(new SortClause($textBuilder->lang, 'DESC'));
+		$textBuilder->setLimit(1);
 	}
 	
 	public static function text_und(RecordsetInterface $node) {
 		return $node->texts[null];
 	}
 	
-	public static function text_en(RecordsetInterface $node) {
-		return $node->texts['en'];
-	}
-	
-	public static function text_it(RecordsetInterface $node) {
-		return $node->texts['it'];
-	}
-	
-	public static function text_de(RecordsetInterface $node) {
-		return $node->texts['de'];
-	}
+//	public static function text_en(RecordsetInterface $node) {
+//		return $node->texts['en'];
+//	}
+//	
+//	public static function text_it(RecordsetInterface $node) {
+//		return $node->texts['it'];
+//	}
+//	
+//	public static function text_de(RecordsetInterface $node) {
+//		return $node->texts['de'];
+//	}
 	
 //	public static function textUndFilter(RecordsetInterface $node, RecordsetBuilder $textBuilder) {
 //		$textBuilder->addFilter(new \system\model\FilterClause(

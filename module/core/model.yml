@@ -135,12 +135,12 @@ tables:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Tree::ancestorsFilter
+        filterHandle: [\module\core\model\Tree, ancestorsFilter]
       descendants:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Tree::descendantsFilter
+        filterHandle: [\module\core\model\Tree, descendantsFilter]
       nodes:
         table: node_term
         type: 1-N
@@ -310,12 +310,12 @@ tables:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Tree::ancestorsFilter
+        filterHandle: [\module\core\model\Tree, ancestorsFilter]
       descendants:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: \module\core\model\Tree::descendantsFilter
+        filterHandle: [\module\core\model\Tree, descendantsFilter]
   # TERMS
       terms:
         table: node_term
@@ -330,6 +330,11 @@ tables:
         clauses: [id: node_id]
         onDelete: CASCADE
         selectKey: lang
+      text:
+        table: node_text
+        type: 1-1
+        clauses: [id: node_id]
+        filterHandler: [\module\core\model\Node, textFilter]
   # FILES
       files:
         table: node_file
@@ -341,50 +346,38 @@ tables:
       children_groups:
         table: Node
         dependencies: [children]
-        handle: \module\core\model\Node::children_by_type
-      # urns
-      urn:
+        handle: [\module\core\model\Node, children_groups]
+      # urls
+      url:
         label: Text (undeterminate)
-        dependencies: [id, text_urn]
-        handle: \module\core\model\Node::urn
-      edit_urn:
-        label: Text (undeterminate)
-        dependencies: [id]
-        handle: \module\core\model\Node::edit_urn
-      delete_urn:
+        dependencies: [id, text]
+        handle: [\module\core\model\Node, url]
+      edit_url:
         label: Text (undeterminate)
         dependencies: [id]
-        handle: \module\core\model\Node::delete_urn
+        handle: [\module\core\model\Node, edit_url]
+      delete_url:
+        label: Text (undeterminate)
+        dependencies: [id]
+        handle: [\module\core\model\Node, delete_url]
       # texts
-      text:
-        label: Text (undeterminate)
-        dependencies: [texts]
-        handle: \module\core\model\Node::text
-      text_und:
-        label: Text (undeterminate)
-        dependencies: [texts]
-        handle: \module\core\model\Node::text_und
-      text_en:
-        label: Text (undeterminate)
-        dependencies: [texts]
-        handle: \module\core\model\Node::text_en
-      text_it:
-        label: Text (undeterminate)
-        dependencies: [texts]
-        handle: \module\core\model\Node::text_it
-      text_de:
-        label: Text (undeterminate)
-        dependencies: [texts]
-        handle: \module\core\model\Node::text_de
+#      text:
+#        label: Text (undeterminate)
+#        dependencies: [texts]
+#        handle: [\module\core\model\Node, text]
+#      text_und:
+#        label: Text (undeterminate)
+#        dependencies: [texts]
+#        handle: [\module\core\model\Node, text_und]
       title:
         label: Title
         dependencies: [text.title]
-        handle: \module\core\model\Node::title
+        handle: [\module\core\model\Node, title]
       # content
       content:
         label: Content
         dependencies: [id, type]
-        handle: [\module\core\Core, getNodeContent]
+        handle: [\module\core\model\Node, content]
   node_file:
     fields:
       node_id:
@@ -430,15 +423,15 @@ tables:
       urn:
         label: Text (undeterminate)
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handle: \module\core\model\NodeFile::urn
+        handle: [\module\core\model\NodeFile, urn]
       edit_urn:
         label: Text (undeterminate)
-        dependencies: [id]
-        handle: \module\core\model\NodeFile::edit_urn
+        dependencies: [file_id]
+        handle: [\module\core\model\NodeFile, edit_urn]
       delete_urn:
         label: Text (undeterminate)
-        dependencies: [id]
-        handle: \module\core\model\NodeFile::delete_urn
+        dependencies: [file_id]
+        handle: [\module\core\model\NodeFile, delete_urn]
       download_path:
         handle: |
           function($recordset) {
@@ -447,7 +440,7 @@ tables:
       images:
         label: Images
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handle: \module\core\model\NodeFile::images
+        handle: [\module\core\model\NodeFile, images]
   user:
     virtuals:
       superuser:

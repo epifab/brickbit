@@ -1,6 +1,8 @@
 <?php
 namespace system\model;
 
+use system\error\SqlQueryError;
+
 /**
  * Classe per l'accesso ai dati.
  * E' possibile utilizzarla per interfacciarsi in maniera totalmente trasparente con mysql o sqlserver
@@ -50,13 +52,13 @@ class DataLayerCore {
 			}
 		}
 		if (!$this->connection) {
-			throw new DataLayerException(__FILE__, __LINE__, null, $this->sqlError(), DataLayerException::ACTION_CONNECTION);
+			throw new SqlQueryError(null, $this->sqlError(), SqlQueryError::ACTION_CONNECTION);
 		}
 		if ($this->dbmsType == \config\Config::DBMS_MYSQL && $this->sqlQuery("SET NAMES 'utf8'") === false) {
-			throw new DataLayerException(__FILE__, __LINE__, "SET NAMES 'utf8'", $this->connection);
+			throw new SqlQueryError("SET NAMES 'utf8'", $this->connection);
 		}
 		if ($this->sqlSelectDb($dbName) === false) {
-			throw new DataLayerException(__FILE__, __LINE__, null, $this->sqlError(), DataLayerException::ACTION_DB_SELECTION);
+			throw new SqlQueryError(null, $this->sqlError(), SqlQueryError::ACTION_DB_SELECTION);
 		}
 	}
 
@@ -177,7 +179,7 @@ class DataLayerCore {
 		if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
 			return \mysql_insert_id($this->connection);
 		} else {
-			throw new DataLayerException(__FILE__, __LINE__, null, "Impossibile recuperare l'ultimo ID generato su DBMS SqlServer");
+			throw new SqlQueryError(null, "Impossibile recuperare l'ultimo ID generato su DBMS SqlServer");
 		}
 	}
 	
@@ -197,7 +199,7 @@ class DataLayerCore {
 				$this->dbmsType = $dbms;
 				break;
 			default:
-				throw new \system\InternalErrorException('Invalid DBMS.');
+				throw new \system\error\InternalError('Invalid DBMS.');
 				break;
 		}
 	}
@@ -209,18 +211,16 @@ class DataLayerCore {
 	/**
 	 * Esegue la query e restituisce il valore della prima colonna della prima riga
 	 * o null nel caso la query non abbia prodotto alcun risultato.
-	 * <p>Solleva l'eccezione DataLayerException
+	 * <p>Solleva l'eccezione SqlQueryError
 	 * se l'esecuzione della query non va a buon fine.</p>
 	 * @param string $query Query sql SELECT
-	 * @param string $file costante __FILE__
-	 * @param int $line costante __LINE__
 	 * @return mixed Risultato scalare
-	 * @throws DataLayerException
+	 * @throws SqlQueryError
 	 */
-	public function executeScalar($query, $file, $line) {
+	public function executeScalar($query) {
 		$res = $this->sqlQuery($query);
 		if (!$res) {
-			throw new DataLayerException($file, $line, $query, $this->sqlError());
+			throw new SqlQueryError($query, $this->sqlError());
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr || empty($arr[0])) {
@@ -237,18 +237,16 @@ class DataLayerCore {
 	/**
 	 * Esegue la query e restituisce la prima prima riga restituita
 	 * o null nel caso la query non abbia prodotto alcun risultato.
-	 * <p>Solleva l'eccezione DataLayerException
+	 * <p>Solleva l'eccezione SqlQueryError
 	 * se l'esecuzione della query non va a buon fine.</p>
 	 * @param string $query Query sql SELECT
-	 * @param string $file costante __FILE__
-	 * @param int $line costante __LINE__
 	 * @return array Risultato scalare
-	 * @throws DataLayerException
+	 * @throws SqlQueryError
 	 */
-	public function executeRow($query, $file, $line) {
+	public function executeRow($query) {
 		$res = $this->sqlQuery($query);
 		if (!$res) {
-			throw new DataLayerException($file, $line, $query, $this->sqlError());
+			throw new SqlQueryError($query, $this->sqlError());
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr) {
@@ -264,24 +262,22 @@ class DataLayerCore {
 
 	/**
 	 * Esegue la query e ne restituisce il risultato.
-	 * <p>Solleva l'eccezione DataLayerException
+	 * <p>Solleva l'eccezione SqlQueryError
 	 * se l'esecuzione della query non va a buon fine.</p>
 	 * @param string $query Query sql SELECT
-	 * @param string $file costante __FILE__
-	 * @param int $line costante __LINE__
 	 * @return resource Sql resource
-	 * @throws DataLayerException
+	 * @throws SqlQueryError
 	 */
-	public function executeQuery($query, $file, $line) {
+	public function executeQuery($query) {
 		$res = $this->sqlQuery($query);
 		if (!$res) {
-			throw new DataLayerException($file, $line, $query, $this->sqlError());
+			throw new SqlQueryError($query, $this->sqlError());
 		}
 		return $res;
 	}
 	
-	public function executeQueryArray($query, $file, $line) {
-		$result = $this->executeQuery($query, $file, $line);
+	public function executeQueryArray($query) {
+		$result = $this->executeQuery($query);
 		$x = array();
 		\system\Utils::log('DataLayer', print_r($x, TRUE));
 		while ($arr = $this->sqlFetchArray($result)) {
@@ -295,18 +291,16 @@ class DataLayerCore {
 	/**
 	 * Esegue la query di aggiornamento (INSERT, UPDATE o DELETE)
 	 * e restituisce il numero di righe interessate dall'aggiornamento.
-	 * <p>Solleva l'eccezione DataLayerException
+	 * <p>Solleva l'eccezione SqlQueryError
 	 * se l'esecuzione della query non va a buon fine.</p>
 	 * @param string $query Query sql SELECT
-	 * @param string $file costante __FILE__
-	 * @param int $line costante __LINE__
 	 * @return int Numero di righe interessate dall'aggiornamento
-	 * @throws DataLayerException
+	 * @throws SqlQueryError
 	 */
-	public function executeUpdate($query, $file, $line) {
+	public function executeUpdate($query) {
 		$res = $this->sqlQuery($query);
 		if (!$res) {
-			throw new DataLayerException($file, $line, $query, $this->sqlError());
+			throw new SqlQueryError($query, $this->sqlError());
 		}
 		$nRows = $this->sqlAffectedRows();
 		return $nRows;
@@ -315,9 +309,9 @@ class DataLayerCore {
 	public function beginTransaction() {
 		if (!$this->transactionActive) {
 			if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
-				$this->executeQuery("BEGIN", __FILE__, __LINE__);
+				$this->executeQuery("BEGIN");
 			} else {
-				$this->executeQuery("BEGIN TRANSACTION", __FILE__, __LINE__);
+				$this->executeQuery("BEGIN TRANSACTION");
 			}
 			$this->transactionActive = true;
 		}
@@ -326,9 +320,9 @@ class DataLayerCore {
 	public function commitTransaction() {
 		if ($this->transactionActive) {
 			if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
-				$this->executeQuery("COMMIT", __FILE__, __LINE__);
+				$this->executeQuery("COMMIT");
 			} else {
-				$this->executeQuery("COMMIT TRANSACTION", __FILE__, __LINE__);
+				$this->executeQuery("COMMIT TRANSACTION");
 			}
 			$this->transactionActive = false;
 		}
@@ -337,9 +331,9 @@ class DataLayerCore {
 	public function rollbackTransaction() {
 		if ($this->transactionActive) {
 			if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
-				$this->executeQuery("ROLLBACK", __FILE__, __LINE__);
+				$this->executeQuery("ROLLBACK");
 			} else {
-				$this->executeQuery("ROLLBACK TRANSACTION", __FILE__, __LINE__);
+				$this->executeQuery("ROLLBACK TRANSACTION");
 			}
 			$this->transactionActive = false;
 		}

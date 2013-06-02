@@ -130,7 +130,7 @@ class Core extends \system\logic\Module {
 	}
 	
 	public static function imageVersionMakers() {
-		return array(
+		$makers = array(
 			'thumb' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
 			's' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
 			'm' => array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersion'),
@@ -159,6 +159,8 @@ class Core extends \system\logic\Module {
 //		foreach ($a as $y) {
 //			$makers['X-' . $y] = array(\system\logic\Module::getNamespace('core') . 'Core', 'imageVersionFixedHeight');
 //		}
+		
+		return $makers;
 	}
 	
 	public static function cron() {

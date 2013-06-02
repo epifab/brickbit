@@ -1,6 +1,8 @@
 <?php
 namespace system;
 
+use system\error\ConversionError;
+
 /**
  * Classe di metodi utili per il data layer
  * @author fab
@@ -17,7 +19,7 @@ class Conversion {
 		 if (\array_key_exists($x, $set)) {
 			 return $set[$x];
 		 } else {
-			 throw new ConversionException("Valore fuori dal range");
+			 throw new ConversionError("Valore fuori dal range");
 		 }
 	 }
 
@@ -27,7 +29,7 @@ class Conversion {
 				 return $k;
 			 }
 		 }
-		 throw new ConversionException("Valore fuori dal range");
+		 throw new ConversionError("Valore fuori dal range");
 	 }
 
 	/* -------------------
@@ -40,7 +42,7 @@ class Conversion {
 		} else if (preg_match('/^[0-9]+$/', $x) == 1) {
 			return (int)$x;
 		} else {
-			throw new ConversionException("Impossibile convertire la stringa in un numero");
+			throw new ConversionError("Impossibile convertire la stringa in un numero");
 		}
 	}
 	// to DATAVIEW - to DATAEDIT
@@ -71,7 +73,7 @@ class Conversion {
 		} else if (preg_match('/^[0-9]+(?:\\.[0-9]+)?$/', $x) == 1) {
 			return (double)$x;
 		} else {
-			throw new ConversionException("Impossibile convertire la stringa in un numero");
+			throw new ConversionError("Impossibile convertire la stringa in un numero");
 		}
 	}
 	// to DATAVIEW - to DATAEDIT
@@ -85,7 +87,7 @@ class Conversion {
 		} else if (preg_match('/^[0-9]+(?:\\.[0-9]+)?$/', $x) == 1) {
 			return (double)$x;
 		} else {
-			throw new ConversionException("Impossibile convertire la stringa in un numero");
+			throw new ConversionError("Impossibile convertire la stringa in un numero");
 		}
 	}
 	// conversione da PROG a DB
@@ -137,7 +139,7 @@ class Conversion {
 			return null;
 		}
 		if (!preg_match("/^[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]$/", $x)) {
-			throw new ConversionException("Impossibile convertire la stringa in una data");
+			throw new ConversionError("Impossibile convertire la stringa in una data");
 		}
 		$y = substr($x,0,4);
 		$m = substr($x,5,2);
@@ -157,7 +159,7 @@ class Conversion {
 			return null;
 		}
 		if (!preg_match("/^[0-3][0-9]\\/[0-1][0-9]\\/[1-2][0-9]{3}$/", $x)) {
-			throw new ConversionException("Impossibile convertire la stringa in una data");
+			throw new ConversionError("Impossibile convertire la stringa in una data");
 		}
 		$y = substr($x,6,4);
 		$m = substr($x,3,2);
@@ -188,7 +190,7 @@ class Conversion {
 			return null;
 		}
 		if (!preg_match("/^[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", $x)) {
-			throw new ConversionException("Impossibile convertire la stringa in una data");
+			throw new ConversionError("Impossibile convertire la stringa in una data");
 		}
 		$y = substr($x,0,4);
 		$m = substr($x,5,2);
@@ -211,7 +213,7 @@ class Conversion {
 			return null;
 		}
 		if (!preg_match("/^[0-3][0-9]\\/[0-1][0-9]\\/[1-2][0-9]{3} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", $x)) {
-			throw new ConversionException("Impossibile convertire la stringa in una data");
+			throw new ConversionError("Impossibile convertire la stringa in una data");
 		}
 		$y = substr($x,6,4);
 		$m = substr($x,3,2);
@@ -246,7 +248,7 @@ class Conversion {
 			return null;
 		}
 		if (!preg_match("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", $x)) {
-			throw new ConversionException("Impossibile convertire la stringa in una data");
+			throw new ConversionError("Impossibile convertire la stringa in una data");
 		}
 		$h = substr($x,0,2);
 		$i = substr($x,3,2);

@@ -8489,9 +8489,9 @@ if ( jQuery.support.ajax ) {
 									}
 								}
 							}
-						} catch( firefoxAccessException ) {
+						} catch( firefoxAccessError ) {
 							if ( !isAbort ) {
-								complete( -1, firefoxAccessException );
+								complete( -1, firefoxAccessError );
 							}
 						}
 

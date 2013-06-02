@@ -10,7 +10,7 @@ class Form {
 	
 	public static function startForm($formId, $recordset = null) {
 		if (self::$activeForm) {
-			throw new system\InternalErrorException('Illegal nested form.');
+			throw new \system\error\InternalError('Illegal nested form.');
 		}
 		
 		self::$activeForm = $formId;
@@ -129,7 +129,7 @@ class Form {
 			if ($mt) {
 				try {
 					$mt->validate($input['value']);
-				} catch (\system\ValidationException $ex) {
+				} catch (\system\error\InternalError $ex) {
 					$form['errors'][$input['name']] = $ex->getMessage();
 				}
 			}
@@ -147,7 +147,7 @@ class Form {
 				if (!empty($form['recordset']['key'])) {
 					$rs = $rsb->selectFirstBy($form['recordset']['key']);
 					if (!$rs) {
-						throw new \system\InternalErrorException('The resource you tried to edit does no longer exists.');
+						throw new \system\error\InternalError('The resource you tried to edit does no longer exists.');
 					}
 				} else {
 					$rs = $rsb->newRecordset();

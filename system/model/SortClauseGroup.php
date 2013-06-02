@@ -13,13 +13,13 @@ class SortClauseGroup implements SelectClauseInterface {
 
 	public function __construct() {
 		if (func_num_args() == 0) {
-			throw new \system\InternalErrorException("Parametri non validi per la clausola Sort");
+			throw new \system\error\InternalError("Parametri non validi per la clausola Sort");
 		}
 		foreach (func_get_args() as $arg) {
 			if ($arg instanceof SortClause) {
 				$this->clauses[] = $arg;
 			} else {
-				throw new \system\InternalErrorException("Parametri non validi per la clausola Sort");
+				throw new \system\error\InternalError("Parametri non validi per la clausola Sort");
 			}
 		}
 	}
@@ -29,7 +29,7 @@ class SortClauseGroup implements SelectClauseInterface {
 			if ($arg instanceof SortClause) {
 				$this->clauses[] = $arg;
 			} else {
-				throw new \system\InternalErrorException("Parametri non validi per la clausola Sort");
+				throw new \system\error\InternalError("Parametri non validi per la clausola Sort");
 			}
 		}
 	}

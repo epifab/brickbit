@@ -12,9 +12,9 @@ use system\Theme;
 use system\TemplateManager;
 use system\Utils;
 
-use system\AuthorizationException;
-use system\InternalErrorException;
-use system\ValidationException;
+use system\error\InternalError;
+use system\error\AuthorizationError;
+use system\error\ValidationError;
 
 abstract class Component {
 	//  components stack
@@ -144,7 +144,7 @@ abstract class Component {
 //			$id = \module\core\model\ciderbitLog::saveLog($this->name, $pageOutput);
 //		} catch (\Exception $ex) {
 //			echo "<h1>" . $ex->getMessage() . "</h1>";
-//			if ($ex instanceof DataLayerException) {
+//			if ($ex instanceof SqlQueryError) {
 //				echo $ex->getHtmlMessage();
 //			}
 //		}
@@ -530,12 +530,12 @@ abstract class Component {
 				
 				$field = $builder->searchField($path);
 				if (\is_null($field)) {
-					throw new InternalErrorException('Invalid filter parameter (field @path has not been imported)', array('@path' => $path));
+					throw new InternalError('Invalid filter parameter (field @path has not been imported)', array('@path' => $path));
 				}
 				$field instanceof Field;
 				try {
 					$progValue = $field->edit2Prog($value);
-				} catch (system\ValidationException $ex) {
+				} catch (ValidationError $ex) {
 					throw $ex;
 				}
 
@@ -565,11 +565,11 @@ abstract class Component {
 				
 				$args = @\explode("|", $sort);
 				if (\count($args) != 2) {
-					throw new InternalErrorException('Invalid sort parameter.');
+					throw new InternalError('Invalid sort parameter.');
 				}
 				$field = $builder->searchField($args[0]);
 				if (\is_null($field)) {
-					throw new InternalErrorException('Invalid filter parameter (field @path has not been imported)', array('@path' => $args[0]));
+					throw new InternalError('Invalid filter parameter (field @path has not been imported)', array('@path' => $args[0]));
 				}
 
 				$sc = new SortClause($field, $args[1]);
@@ -600,10 +600,10 @@ abstract class Component {
 		}
 		
 		if (!\is_numeric($this->requestData[$index]["page"]) || ((int)$this->requestData[$index]["page"]) < 0) {
-			throw new InternalErrorException('Invalid page parameter');
+			throw new InternalError('Invalid page parameter');
 		}
 		if (!\is_numeric($this->requestData[$index]["size"]) || ((int)$this->requestData[$index]["size"]) < 0) {
-			throw new InternalErrorException('Invalid page parameter');
+			throw new InternalError('Invalid page parameter');
 		}
 		
 		if ($this->requestData[$index]["size"] == 0) {
@@ -641,7 +641,7 @@ abstract class Component {
 			
 			// checking permission
 			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\Login::getLoggedUser())) {
-				throw new AuthorizationException('Sorry, you are not authorized to access this resource.');
+				throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
 			}
 
 			$runMethod = null;
@@ -674,7 +674,7 @@ abstract class Component {
 				case null:
 					break;
 				default:
-					throw new InternalErrorException('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
+					throw new InternalError('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
 						'@action' => $this->action, 
 						'@component' => $this->name,
 						'@module' => $this->module

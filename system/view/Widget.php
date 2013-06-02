@@ -45,7 +45,7 @@ class Widget {
 	 * Retrieves the widget class
 	 * @param string $name Name of the widget
 	 * @return \system\view\WidgetInterface
-	 * @throws \system\InternalErrorException 
+	 * @throws systemerror$1Error 
 	 */
 	public static function getWidget($name) {
 		if (isset(self::$widgets[$name])) {
@@ -55,7 +55,7 @@ class Widget {
 		$wmap = self::getWidgetsMap();
 		
 		if (!\array_key_exists($name, $wmap)) {
-			throw new \system\InternalErrorException('Unknown widget <em>@name</em>', array('@name' => $name));
+			throw new \system\error\InternalError('Unknown widget <em>@name</em>', array('@name' => $name));
 		}
 		$widgetClass = $wmap[$name];
 		

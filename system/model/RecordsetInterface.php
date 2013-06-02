@@ -12,7 +12,7 @@ interface RecordsetInterface {
 	public function save();
 	public function delete();
 	
-	public function search($path);
+	public function search($path, $required=false);
 	
 	public function isStored();
 	
@@ -27,7 +27,7 @@ interface RecordsetInterface {
 	public function setRelation($name, $value);
 	public function unsetRelation($name);
 	
-	public function searchField($path);
+	public function searchField($path, $required=false);
 	public function getFieldList();
 	
 	public function toArray();

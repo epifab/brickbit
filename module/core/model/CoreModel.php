@@ -46,7 +46,7 @@ class CoreModel {
 					$q .= $childField . " = " . $rs->getDb($parentField);
 				}
 				$da = \system\model\DataLayerCore::getInstance();
-				$da->executeQuery($q, __FILE__, __LINE__);
+				$da->executeQuery($q);
 				$rs->unsetRelation($relationName);
 			}
 		}

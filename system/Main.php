@@ -42,7 +42,7 @@ class Main {
 					$moduleInfo = \system\yaml\Yaml::parse($moduleDir . "info.yml");
 						
 					if (!\is_array($moduleInfo)) {
-						throw new \system\InternalErrorException('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName));
+						throw new \system\error\InternalError('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName));
 					}
 					
 					$enabled = \cb\array_item("enabled", $moduleInfo, array('default' => true));
@@ -55,7 +55,7 @@ class Main {
 					$moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
 					
 					if (!\class_exists($moduleClass)) {
-						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
+						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
 					}
 					
 					$weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
@@ -67,7 +67,7 @@ class Main {
 						'prefix' => $modelNs
 					));
 					if (!\is_null($modelClass) && !\class_exists($modelClass)) {
-						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
+						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
 					}
 					// templates class (API)
 					$viewNs = Module::getNamespace($moduleName, \cb\array_item('viewNs', $moduleInfo, array('default' => null)));
@@ -76,7 +76,7 @@ class Main {
 						'prefix' => $viewNs
 					));
 					if (!\is_null($viewClass) && !\class_exists($viewClass)) {
-						throw new \system\InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
+						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
 					}
 					
 					$templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
@@ -84,7 +84,7 @@ class Main {
 						'prefix' => $moduleDir
 					));
 					if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
-						throw new \system\InternalErrorException('Directory <em>@path</em> not found', array('@path' => $templatesPath));
+						throw new \system\error\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
 					}
 					
 					// components namespace
@@ -96,7 +96,7 @@ class Main {
 					$events = \cb\array_item('events', $moduleInfo, array('default' => array()));
 					foreach ($events as $eventName) {
 						if (!\is_callable(array($moduleClass, $eventName))) {
-							throw new \system\InternalErrorException('Method <em>@class::@name</em> does not exist.', array('@class' => $moduleClass, '@name' => $eventName));
+							throw new \system\error\InternalError('Method <em>@class::@name</em> does not exist.', array('@class' => $moduleClass, '@name' => $eventName));
 						}
 					}
 					
@@ -107,7 +107,7 @@ class Main {
 							 'prefix' => $componentsNs
 						));
 						if (!\class_exists($componentClass)) {
-							throw new InternalErrorException('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
+							throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
 							unset($components[$componentName]);
 							continue;
 						}
@@ -405,7 +405,7 @@ class Main {
 			return $c['templates'][$templateName];
 		} else {
 			$c = self::configuration();
-			throw new \system\InternalErrorException('Template <em>@name</em> not found.', array('@name' => $templateName));
+			throw new \system\error\InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
 		}
 	}
 
@@ -419,7 +419,7 @@ class Main {
 			$c = self::configuration();
 			return $c['tables'][$tableName];
 		} else {
-			throw new \system\InternalErrorException('Table <em>@name</em> not found.', array('@name' => $tableName));
+			throw new \system\error\InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
 		}
 	}
 	

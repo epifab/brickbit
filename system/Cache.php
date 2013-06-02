@@ -4,7 +4,7 @@ namespace system;
 class Cache {
 	private static $cache = array();
 	
-	public static function __callStatic($hook) {
+	public static function __callStatic($hook, $arguments) {
 		if (!\array_key_exists($hook, self::$cache)) {
 			self::$cache[$hook] = array();
 			$x = \system\Main::raiseEvent($hook);

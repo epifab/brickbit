@@ -55,72 +55,65 @@ class HTMLHelpers {
 	 * @param message Messaggio di errore
 	 * @param out Print writer
 	 */
-	public static function makeErrorPage(\system\view\TemplateManager $templateManager, $datamodel, $mainException, $executionTime=0) {
+	public static function makeErrorPage(\system\view\TemplateManager $templateManager, array $datamodel, \system\error\Error $mainError, $executionTime=0) {
 		$msg = "";
-		$exception = $mainException;
-		
-		if ($exception->getCode() != ErrorCodes::AUTHORIZATION) {
-			while ($exception != null) {
-				if (\is_callable(array($exception, "getHtmlMessage"))) {
-					$msg .= $exception->getHtmlMessage();
-				}
-				else {
-					$msg .=
-						'<h3>' . $exception->getMessage() . '</h3>'
-						. '<h4>' . \system\Lang::translate('Exception details') . '</h4>'
-						. '<p>' . $exception->getFile() . ' ' . $exception->getLine() . '</p>';
+		$exception = $mainError;
 
-					$trace = $exception->getTrace();
+		while ($exception != null) {
+			$msg .=
+				'<h3>' . $exception->getMessage() . '</h3>'
+				. '<h4>' . \system\Lang::translate('Exception details') . '</h4>'
+				. '<p>' . $exception->getFile() . ' ' . $exception->getLine() . '</p>';
+			
+			if ($exception instanceof \system\error\Error) {
+				$msg .= $exception->getDetails();
+			}
 
-					if (count($trace) > 0) {
-						$msg .= '<ol>';
+			$trace = $exception->getTrace();
 
-						$i = count($trace);
+			if (count($trace) > 0) {
+				$msg .= '<ol>';
 
-						foreach ($trace as $t) {
-							$msg .= '<li value="' . $i . '"><p><code>';
+				$i = count($trace);
+				foreach ($trace as $t) {
+					$msg .= '<li value="' . $i . '"><p><code>';
 
-							$i--;
+					$i--;
 
-							if (array_key_exists('class', $t) && !empty($t['class'])) {
-								$msg .= $t['class'] . '->';
-							}
-							$msg .= '<b>' . $t['function'] . '</b>(';
-
-							$first = true;
-
-							if (\array_key_exists("args", $t)) {
-								foreach ($t['args'] as $arg) {
-									$first ? $first = false : $msg .= ', ';
-									$msg .= \system\Utils::varDump($arg);
-								}
-							}
-							$msg .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
-						}
-						$msg .= '</ol>';
+					if (array_key_exists('class', $t) && !empty($t['class'])) {
+						$msg .= $t['class'] . '->';
 					}
+					$msg .= '<b>' . $t['function'] . '</b>(';
+
+					$first = true;
+
+					if (\array_key_exists("args", $t)) {
+						foreach ($t['args'] as $arg) {
+							$first ? $first = false : $msg .= ', ';
+							$msg .= \system\Utils::varDump($arg);
+						}
+					}
+					$msg .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
 				}
-				$exception = $exception->getPrevious();
+				$msg .= '</ol>';
 			}
-			if ($executionTime > 0) {
-				$msg .= '<p>' . Lang::translate('Execution time: @time', array(
-					'@time' => ($executionTime < 1)
-						? (round($executionTime * 1000, 0) . ' ms.')
-						: ($executionTime . ' sec.')
-				)) . '</p>';
-			}
+			$exception = $exception->getPrevious();
 		}
 		
-		switch ($mainException->getCode()) {
-			case ErrorCodes::AUTHORIZATION:
-				$title = \system\Lang::translate("Forbidden");
-				$msg = \system\Lang::translate("You don't have sufficient permission to access this resource.");
-				break;
-			
-			default:
-				$title = \system\Lang::translate("Fatal error");
-				$msg .= \system\Log::get();
-				break;
+		if ($executionTime > 0) {
+			$msg .= '<p>' . Lang::translate('Execution time: @time', array(
+				'@time' => ($executionTime < 1)
+					? (round($executionTime * 1000, 0) . ' ms.')
+					: ($executionTime . ' sec.')
+			)) . '</p>';
+		}
+		
+		if ($mainError instanceof \system\error\AuthorizationError) {
+			$title = \system\Lang::translate('Forbidden');
+			$msg = \system\Lang::translate("You don't have sufficient permission to access this resource.");
+		} else {
+			$title = \system\Lang::translate('Fatal error');
+			$msg .= \system\Log::get();
 		}
 		
 		$datamodel['page']['title'] = $title;
@@ -138,7 +131,7 @@ class HTMLHelpers {
 			
 			$templateManager->process($datamodel);
 			
-		} catch (TemplateManagerException $ex) {
+		} catch (TemplateManagerError $ex) {
 			
 			// Non e' stato trovato il template di errore
 			
@@ -155,7 +148,7 @@ class HTMLHelpers {
 			}
 		}
 	}
-	
+//	
 //	public static function makeValidationErrorPage(TemplateManager $templateManager, $datamodel) {
 //		
 //		$datamodel["url"] = "Error";
@@ -164,7 +157,7 @@ class HTMLHelpers {
 //			
 //			$templateManager->process("layout/Forbidden", $datamodel);
 //			
-//		} catch (TemplateManagerException $ex) {
+//		} catch (TemplateManagerError $ex) {
 //			
 //			// Non e' stato trovato il template di errore
 //			

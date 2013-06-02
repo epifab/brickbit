@@ -29,10 +29,10 @@ class Autocomplete extends \system\logic\Module {
 					'id' => $recordset->id,
 					'title' => $recordset->title,
 					'data' => 
-						'<div><img src="' . $recordset->image->read_url . '"'
+						'<div><img src="' . $recordset->image->url . '"'
 						. ' alt="' . \cb\plaintext($recordset->title) . '"/>'
 						. $recordset->title
-						. '</div>';
+						. '</div>'
 				);
 			}
 		}

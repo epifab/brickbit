@@ -48,7 +48,7 @@ class Api {
 		if (!\is_null($api)) {
 			return \call_user_func_array($api, $args);
 		} else {
-			throw new \system\InternalErrorException('Template API <em>@name</em> not found.', array('@name' => $method));
+			throw new \system\error\InternalError('Template API <em>@name</em> not found.', array('@name' => $method));
 		}
 	}
 
@@ -61,7 +61,7 @@ class Api {
 
 	public function close() {
 		if (empty($this->blocks)) {
-			throw new \system\InternalErrorException('Syntax error. No block has been open.');
+			throw new \system\error\InternalError('Syntax error. No block has been open.');
 		}
 		list($callback, $args) = \array_pop($this->blocks);
 		$content = \ob_get_clean();

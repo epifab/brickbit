@@ -15,7 +15,7 @@ class Theme {
 		if (\in_array($theme, \config\settings()->THEMES)) {
 			self::$theme = $theme;
 		} else {
-			throw new \system\InternalErrorException('Theme <em>@name</em> not found.', array('@name' => $theme));
+			throw new \system\error\InternalError('Theme <em>@name</em> not found.', array('@name' => $theme));
 		}
 	}
 	

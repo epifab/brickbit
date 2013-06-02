@@ -10,8 +10,8 @@
 
 namespace system\yaml;
 
-use system\yaml\exception\ParseException;
-use system\yaml\exception\DumpException;
+use system\yaml\exception\ParseError;
+use system\yaml\exception\DumpError;
 
 /**
  * Inline implements a YAML parser/dumper for the YAML inline syntax.
@@ -55,7 +55,7 @@ class Inline
 
                 // some comment can end the scalar
                 if (preg_replace('/\s+#.*$/A', '', substr($value, $i))) {
-                    throw new ParseException(sprintf('Unexpected characters near "%s".', substr($value, $i)));
+                    throw new ParseError(sprintf('Unexpected characters near "%s".', substr($value, $i)));
                 }
         }
 
@@ -73,13 +73,13 @@ class Inline
      *
      * @return string The YAML string representing the PHP array
      *
-     * @throws DumpException When trying to dump PHP resource
+     * @throws DumpError When trying to dump PHP resource
      */
     public static function dump($value)
     {
         switch (true) {
             case is_resource($value):
-                throw new DumpException(sprintf('Unable to dump PHP resources in a YAML file ("%s").', get_resource_type($value)));
+                throw new DumpError(sprintf('Unable to dump PHP resources in a YAML file ("%s").', get_resource_type($value)));
             case is_object($value):
                 return '!!php/object:'.serialize($value);
             case is_array($value):
@@ -160,7 +160,7 @@ class Inline
      *
      * @return string A YAML string
      *
-     * @throws ParseException When malformed inline YAML string is parsed
+     * @throws ParseError When malformed inline YAML string is parsed
      */
     public static function parseScalar($scalar, $delimiters = null, $stringDelimiters = array('"', "'"), &$i = 0, $evaluate = true)
     {
@@ -171,7 +171,7 @@ class Inline
             if (null !== $delimiters) {
                 $tmp = ltrim(substr($scalar, $i), ' ');
                 if (!in_array($tmp[0], $delimiters)) {
-                    throw new ParseException(sprintf('Unexpected characters (%s).', substr($scalar, $i)));
+                    throw new ParseError(sprintf('Unexpected characters (%s).', substr($scalar, $i)));
                 }
             }
         } else {
@@ -188,7 +188,7 @@ class Inline
                 $output = $match[1];
                 $i += strlen($output);
             } else {
-                throw new ParseException(sprintf('Malformed inline YAML string (%s).', $scalar));
+                throw new ParseError(sprintf('Malformed inline YAML string (%s).', $scalar));
             }
 
             $output = $evaluate ? self::evaluateScalar($output) : $output;
@@ -205,7 +205,7 @@ class Inline
      *
      * @return string A YAML string
      *
-     * @throws ParseException When malformed inline YAML string is parsed
+     * @throws ParseError When malformed inline YAML string is parsed
      */
     private static function parseQuotedScalar($scalar, &$i)
     {
@@ -215,7 +215,7 @@ class Inline
         $subject = substr($subject, 0, strlen($items[0]) + 1);
 
         if (!preg_match('/'.self::REGEX_QUOTED_STRING.'/Au', substr($scalar, $i), $match)) {
-            throw new ParseException(sprintf('Malformed inline YAML string (%s).', substr($scalar, $i)));
+            throw new ParseError(sprintf('Malformed inline YAML string (%s).', substr($scalar, $i)));
         }
 
         $output = substr($match[0], 1, strlen($match[0]) - 2);
@@ -240,7 +240,7 @@ class Inline
      *
      * @return string A YAML string
      *
-     * @throws ParseException When malformed inline YAML string is parsed
+     * @throws ParseError When malformed inline YAML string is parsed
      */
     private static function parseSequence($sequence, &$i = 0)
     {
@@ -272,7 +272,7 @@ class Inline
                         // embedded mapping?
                         try {
                             $value = self::parseMapping('{'.$value.'}');
-                        } catch (\InvalidArgumentException $e) {
+                        } catch (\InvalidArgumentError $e) {
                             // no, it's not
                         }
                     }
@@ -285,7 +285,7 @@ class Inline
             ++$i;
         }
 
-        throw new ParseException(sprintf('Malformed inline YAML string %s', $sequence));
+        throw new ParseError(sprintf('Malformed inline YAML string %s', $sequence));
     }
 
     /**
@@ -296,7 +296,7 @@ class Inline
      *
      * @return string A YAML string
      *
-     * @throws ParseException When malformed inline YAML string is parsed
+     * @throws ParseError When malformed inline YAML string is parsed
      */
     private static function parseMapping($mapping, &$i = 0)
     {
@@ -349,7 +349,7 @@ class Inline
             }
         }
 
-        throw new ParseException(sprintf('Malformed inline YAML string %s', $mapping));
+        throw new ParseError(sprintf('Malformed inline YAML string %s', $mapping));
     }
 
     /**

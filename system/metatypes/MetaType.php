@@ -65,7 +65,7 @@ abstract class MetaType implements \Serializable {
 		$fmap = self::getMetaTypesMap();
 		
 		if (!\array_key_exists($type, $fmap)) {
-			throw new \system\InternalErrorException('Unknown metatype <em>@name</em>', array('@name' => $type));
+			throw new \system\error\InternalError('Unknown metatype <em>@name</em>', array('@name' => $type));
 		}
 		$metaTypeClass = $fmap[$type];
 		

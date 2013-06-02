@@ -24,7 +24,7 @@ class Template {
 	public function __construct($tplName, $vars) {
 		$this->templatePath = \system\Main::getTemplate($tplName);
 		if (!$this->templatePath) {
-			throw new \system\InternalErrorException('Template @name not found.', array('@name' => $tplName));
+			throw new \system\error\InternalError('Template @name not found.', array('@name' => $tplName));
 		}
 //		print_r(array_keys($vars));
 		$this->vars = $vars;

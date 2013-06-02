@@ -39,17 +39,17 @@ function type($value, $type) {
 			} else if (\is_string($value)) {
 				$value = \strtotime($value);
 				if ($value === false) {
-					throw new \system\ConversionException('Unable to convert the variable');
+					throw new \system\error\ConversionError('Unable to convert the variable');
 				} else {
 					return $value;
 				}
 			} else {
-				throw new \system\ConversionException('Unable to convert the variable');
+				throw new \system\error\ConversionError('Unable to convert the variable');
 			}
 			break;
 		case 'object':
 			if (!\is_object($value)) {
-				throw new \system\ConversionException('Unable to convert the variable');
+				throw new \system\error\ConversionError('Unable to convert the variable');
 			} else {
 				return $value;
 			}
@@ -58,7 +58,7 @@ function type($value, $type) {
 				if (type($value, 'object') instanceof $type) {
 					return $type;
 				} else {
-					throw new \system\ConversionException('Unable to convert the variable');
+					throw new \system\error\ConversionError('Unable to convert the variable');
 				}
 			} else {
 				// unknown type
@@ -69,7 +69,7 @@ function type($value, $type) {
 function array_item($needle, array $haystack, $options = array()) {
 	if (!\array_key_exists($needle, $haystack)) {
 		if (\array_key_exists('required', $options) && (bool)$options['required']) {
-			throw new \system\InternalErrorException('Required arg @name.', array('@name' => $needle));
+			throw new \system\error\InternalError('Required arg @name.', array('@name' => $needle));
 		} else if (\array_key_exists('default', $options)) {
 			return $options['default'];
 		} else {
@@ -81,27 +81,27 @@ function array_item($needle, array $haystack, $options = array()) {
 		
 		if (empty($value)) {
 			if (!empty($options['!empty'])) {
-				throw new \system\InternalErrorException('@name cannot be empty', array('@name' => $needle));
+				throw new \system\error\InternalError('@name cannot be empty', array('@name' => $needle));
 			}
 		} else {
 			if (!empty($options['type'])) {
 				try {
 					$value = type($value, $options['type']);
 				} catch (\Exception $ex) {
-					throw new \system\InternalErrorException('Invalid param @name', array('@name' => $needle), $ex);
+					throw new \system\error\InternalError('Invalid param @name', array('@name' => $needle), $ex);
 				}
 			}
 		}
 		
 		if (\array_key_exists('options', $options) && \is_array($options['options'])) {
 			if (!\in_array($value, $options['options'])) {
-				throw new \system\InternalErrorException('Invalid param @name', array('@name' => $needle));
+				throw new \system\error\InternalError('Invalid param @name', array('@name' => $needle));
 			}
 		}
 		
 		if (!empty($options['regexp'])) {
 			if (!\preg_match($options['regexp'], (string)$value)) {
-				throw new \system\InternalErrorException('Invalid param @name', array('@name' => $needle));
+				throw new \system\error\InternalError('Invalid param @name', array('@name' => $needle));
 			}
 		}
 		

@@ -17,11 +17,11 @@ class NodeFile {
 	}
 	
 	public static function edit_urn(RecordsetInterface $recordset) {
-		return 'content/file/' . $recordset->id . '/edit';
+		return 'content/file/' . $recordset->file_id . '/edit';
 	}
 	
 	public static function delete_urn(RecordsetInterface $recordset) {
-		return 'content/file/' . $recordset->id . '/delete';
+		return 'content/file/' . $recordset->file_id . '/delete';
 	}
 	
 	public static function images(RecordsetInterface $rs) {

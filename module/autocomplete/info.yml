@@ -8,8 +8,8 @@ enabled: 1
 #templatesPath: view/templates
 componentsNs: components
 components:
-  autocomplete:
-    class: Autocomplete
+  node:
+    class: Node
     pages:
       - url: autocomplete/nodes/(@strid)
         action: Users

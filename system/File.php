@@ -1,6 +1,9 @@
 <?php
 namespace system;
 
+use system\error\InternalError;
+use system\error\ValidationError;
+
 class File {
 	public static function getExtension($fileName, $tolowercase=true) {
 		if (($posDot = \strrpos($fileName, ".")) === false ) {
@@ -43,12 +46,12 @@ class File {
 	public static function validateFile($inputName, $maxFileSize=0, $exts=null) {
 
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new ValidationException('File not uploaded');
+			throw new ValidationError('File not uploaded');
 		}
 
 		if (empty($_FILES[$inputName]['size'])) {
 			// File 0 Byte!
-			throw new ValidationException('File not uploaded');
+			throw new ValidationError('File not uploaded');
 		}
 		
 		if ($maxFileSize > 0) {
@@ -62,7 +65,7 @@ class File {
 					$size = round($maxFileSize/(1024));
 					$unit = 'KB';
 				}
-				throw new ValidationException('File too large. Max file isze: @size @unit', array(
+				throw new ValidationError('File too large. Max file isze: @size @unit', array(
 					'@size' => $size,
 					'@unit' => $unit
 				));
@@ -83,7 +86,7 @@ class File {
 				}
 			}
 			if (!$ok) { // il file ha un estensione non riconosciuta
-				throw new ValidationException('Invalid file extension');
+				throw new ValidationError('Invalid file extension');
 			}
 		}
 	}
@@ -97,7 +100,7 @@ class File {
 	 */
 	public static function uploadImage($inputName, $destinationPath, $maxWidth=0, $maxHeight=0) {
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new ValidationException('File not uploaded');
+			throw new ValidationError('File not uploaded');
 		}
     self::saveImage($_FILES[$inputName]['tmp_name'], $destinationPath. $maxWidth, $maxHeight);
   }
@@ -107,15 +110,15 @@ class File {
 
 		$maxWidth = (int)$maxWidth;
 		if ($maxWidth < 0) {
-			throw new InternalErrorException('Invalid parameter @name', array('@name' => 'maxWidth'));
+			throw new InternalError('Invalid parameter @name', array('@name' => 'maxWidth'));
 		}
 		$maxHeight = (int)$maxHeight;
 		if ($maxHeight < 0) {
-			throw new InternalErrorException('Invalid parameter @name', array('@name' => 'maxHeight'));
+			throw new InternalError('Invalid parameter @name', array('@name' => 'maxHeight'));
 		}
 		
 		if (!\copy($sourcePath, $destinationPath)) {
-			throw new InternalErrorException('Unable to create the file');
+			throw new InternalError('Unable to create the file');
 		}
 		\chmod($destinationPath, octdec('0666'));
 
@@ -134,7 +137,7 @@ class File {
 			}
 
 			if (!($destImg = imagecreatetruecolor($width, $height))) {
-				throw new InternalErrorException('Unable to create a new image');
+				throw new InternalError('Unable to create a new image');
 			}
 
 			$ext = self::getExtension($destinationPath);
@@ -153,21 +156,21 @@ class File {
 					break;
 				
 				default:
-					throw new ValidationException('Invalid file estension');
+					throw new ValidationError('Invalid file estension');
 			}
 
 			if (!$newImg) {
-				throw new InternalErrorException('Unable to create the image');
+				throw new InternalError('Unable to create the image');
 			}
 
 			if (\function_exists('imagecopyresampled')) {
 				if (!\imagecopyresampled($destImg, $newImg, 0, 0, 0, 0, $width, $height, \imagesx($newImg), \imagesy($newImg))) {
-					throw new InternalErrorException('Unable to resize the image');
+					throw new InternalError('Unable to resize the image');
 				}
 			}
 			else {
 				if (!\imagecopyresized($destImg, $newImg, 0, 0, 0, 0, $width, $height, \imagesx($newImg), \imagesy($newImg))) {
-					throw new InternalErrorException('Unable to resize the image');
+					throw new InternalError('Unable to resize the image');
 				}
 			}
 
@@ -187,7 +190,7 @@ class File {
 			}
 
 			if (!$result) {
-				throw new InternalErrorException('Unable to save the image');
+				throw new InternalError('Unable to save the image');
 			}
 
 			\imagedestroy($newImg);
@@ -205,7 +208,7 @@ class File {
 	public static function uploadImageFixedSize($inputName, $destinationPath, $fixedWidth, $fixedHeight) {
 
 		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-			throw new InternalErrorException("File not uploaded");
+			throw new InternalError("File not uploaded");
 		}
 
 		self::saveImageFixedSize($_FILES[$inputName]['tmp_name'], $destinationPath, $fixedWidth, $fixedHeight);
@@ -215,7 +218,7 @@ class File {
   public static function saveImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
 
 		if (!\copy($sourcePath, $destinationPath)) {
-			throw new InternalErrorException("Unable to copy the file");
+			throw new InternalError("Unable to copy the file");
 		}
 		\chmod($destinationPath, octdec('0666'));
 
@@ -274,11 +277,11 @@ class File {
 				break;
 
 			default:
-				throw new ValidationException('Invalid file extension');
+				throw new ValidationError('Invalid file extension');
 		}
 
 		if (!$originalImg) {
-			throw new InternalErrorException('File not uploaded');
+			throw new InternalError('File not uploaded');
 		}
 
 		/**
@@ -320,7 +323,7 @@ class File {
 		}
 
 		if (!$result) {
-			throw new InternalErrorException('Unable to save the image');
+			throw new InternalError('Unable to save the image');
 		}
 
 		\imagedestroy($originalImg);
@@ -332,15 +335,15 @@ class File {
 //
 //		$maxWidth = (int)$maxWidth;
 //		if ($maxWidth <= 0) {
-//			throw new InternalErrorException("Parametro maxWidth non valido");
+//			throw new InternalError("Parametro maxWidth non valido");
 //		}
 //		$maxHeight = (int)$maxHeight;
 //		if ($maxHeight <= 0) {
-//			throw new InternalErrorException("Parametro maxHeight non valido");
+//			throw new InternalError("Parametro maxHeight non valido");
 //		}
 //
 //		if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-//			throw new InternalErrorException("Nessun file caricato");
+//			throw new InternalError("Nessun file caricato");
 //		}
 //		
 //		$name = $_FILES[$inputName]['name'];
@@ -349,7 +352,7 @@ class File {
 //		$type = $_FILES[$inputName]['type'];
 //
 //		if (!\copy($tmp, $destinationPath)) {
-//			throw new InternalErrorException("Impossibile copiare il file caricato");
+//			throw new InternalError("Impossibile copiare il file caricato");
 //		}
 //		\chmod($destinationPath, octdec('0666'));
 //
@@ -387,11 +390,11 @@ class File {
 //				break;
 //
 //			default:
-//				throw new InternalErrorException("Estensione immagine non riconosciuta");				
+//				throw new InternalError("Estensione immagine non riconosciuta");				
 //		}
 //
 //		if (!$originalImg) {
-//			throw new InternalErrorException("Errore durante il caricamento dell'immagine");
+//			throw new InternalError("Errore durante il caricamento dell'immagine");
 //		}
 //		
 //		$smallerImg = \imagecreatetruecolor($newWidth, $newHeight);
@@ -430,7 +433,7 @@ class File {
 //		}
 //
 //		if (!$result) {
-//			throw new InternalErrorException("Impossibile salvare l'immagine caricata");
+//			throw new InternalError("Impossibile salvare l'immagine caricata");
 //		}
 //
 //		\imagedestroy($originalImg);

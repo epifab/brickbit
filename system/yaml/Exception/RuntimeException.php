@@ -18,6 +18,6 @@ namespace system\yaml\exception;
  *
  * @api
  */
-class RuntimeException extends \RuntimeException implements ExceptionInterface
+class RuntimeError extends \RuntimeError implements ExceptionInterface
 {
 }

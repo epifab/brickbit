@@ -13,7 +13,8 @@ if (\count($domains) >= 3) {
 
 @\session_start();
 
-require "system/InternalErrorException.php";
+require 'system/error/Error.php';
+require 'system/error/InternalError.php';
 
 /**
  * @return Config
@@ -147,7 +148,7 @@ class Config {
 				if (\array_key_exists($name, $this->data)) {
 					return $this->data[$name];
 				}
-				throw new \system\InternalErrorException('No entry @name in config', array('@name' => $name));
+				throw new \system\error\InternalError('No entry @name in config', array('@name' => $name));
 				break;
 		}
 	}

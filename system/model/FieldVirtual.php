@@ -26,7 +26,7 @@ class FieldVirtual extends Field {
 			if (\is_callable($handle)) {
 				$this->handle = $handle;
 			} else {
-				throw new \system\InternalErrorException('Method @class::@method does not exist.', array(
+				throw new \system\error\InternalError('Method @class::@method does not exist.', array(
 					'@method' => $handle[1], 
 					'@class' => $handle[0]
 				));

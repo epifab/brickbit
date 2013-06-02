@@ -37,7 +37,7 @@ class Node extends \system\logic\Component {
 		$nodeTypes = \system\Cache::nodeTypes();
 		
 		if (isset($nodeTypes[$urlArgs[0]])) {
-			throw new \system\InternalErrorException('Invalid node type.');
+			throw new \system\error\InputOutputError('Invalid node type.');
 		}
 		if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
 			return false;
@@ -51,7 +51,7 @@ class Node extends \system\logic\Component {
 		$nodeTypes = \system\Cache::nodeTypes();
 		
 		if (isset($nodeTypes[$urlArgs[1]])) {
-			throw new \system\InternalErrorException('Invalid node type.');
+			throw new \system\error\InputOutputError('Invalid node type.');
 		}
 		
 		// get the parent node
@@ -204,7 +204,7 @@ class Node extends \system\logic\Component {
 			$prsb->using("*");
 			$parentNode = $prsb->selectFirstBy(array('id' => $parentId));
 			if (!$parentNode) {
-				throw new \system\InternalErrorException('The node you were looking for was not found.');
+				throw new \system\error\InputOutputError('The node you were looking for was not found.');
 			}
 		}
 		
@@ -239,7 +239,7 @@ class Node extends \system\logic\Component {
 
 				if (!$parentNode) {
 					$recordset->parent_id = null;
-					$recordset->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node", __FILE__, __LINE__);
+					$recordset->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node");
 				} else {
 					$recordset->parent_id = $parentNode->id;
 					$recordset->ldel = $parentNode->rdel;
@@ -248,14 +248,14 @@ class Node extends \system\logic\Component {
 
 				if ($parentNode) {
 					$offset = $recordset->rdel - $recordset->ldel + 1;
-					$da->executeUpdate("UPDATE node SET ldel = ldel + " . $offset . " WHERE ldel > " . $recordset->rdel, __FILE__, __LINE__);
-					$da->executeUpdate("UPDATE node SET rdel = rdel + " . $offset . " WHERE rdel >= " . $recordset->ldel, __FILE__, __LINE__);
+					$da->executeUpdate("UPDATE node SET ldel = ldel + " . $offset . " WHERE ldel > " . $recordset->rdel);
+					$da->executeUpdate("UPDATE node SET rdel = rdel + " . $offset . " WHERE rdel >= " . $recordset->ldel);
 				}
 
 				$recordset->sort_index = 1 + $da->executeScalar(
 					"SELECT MAX(sort_index) FROM node"
 					. " WHERE " . ($parentNode ? "parent_id = " . $parentNode->id : "parent_id IS NULL")
-						, __FILE__, __LINE__);
+						);
 
 				$recordset->save(
 					// default record mode options
@@ -330,7 +330,7 @@ class Node extends \system\logic\Component {
 //						$recordset->temp = false;
 //						if (!$parentNode) {
 //							$recordset->parent_id = null;
-//							$recordset->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node", __FILE__, __LINE__);
+//							$recordset->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node");
 //						} else {
 //							$recordset->parent_id = $parentNode->id;
 //							$recordset->ldel = $parentNode->rdel;
@@ -339,14 +339,14 @@ class Node extends \system\logic\Component {
 //					
 //						if ($parentNode) {
 //							$offset = $recordset->rdel - $recordset->ldel + 1;
-//							$da->executeUpdate("UPDATE node SET ldel = ldel + " . $offset . " WHERE ldel > " . $recordset->rdel, __FILE__, __LINE__);
-//							$da->executeUpdate("UPDATE node SET rdel = rdel + " . $offset . " WHERE rdel >= " . $recordset->ldel, __FILE__, __LINE__);
+//							$da->executeUpdate("UPDATE node SET ldel = ldel + " . $offset . " WHERE ldel > " . $recordset->rdel);
+//							$da->executeUpdate("UPDATE node SET rdel = rdel + " . $offset . " WHERE rdel >= " . $recordset->ldel);
 //						}
 //
 //						$recordset->sort_index = 1 + $da->executeScalar(
 //							"SELECT MAX(sort_index) FROM node"
 //							. " WHERE " . ($parentNode ? "parent_id = " . $parentNode->id : "parent_id IS NULL")
-//								, __FILE__, __LINE__);
+//								);
 //					}
 //					
 //					$request = $this->getRequestData();
@@ -448,7 +448,7 @@ class Node extends \system\logic\Component {
 		$rsb->usingAll();
 		$recordset = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
 		if (!$recordset) {
-			throw new \system\InternalErrorException('The content you were looking for was not found.');
+			throw new \system\error\PageNotFound();
 		}
 		
 		if ($recordset->text->title) {

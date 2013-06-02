@@ -18,6 +18,6 @@ namespace system\yaml\exception;
  *
  * @api
  */
-class DumpException extends RuntimeException
+class DumpError extends RuntimeError
 {
 }

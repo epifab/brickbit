@@ -35,7 +35,7 @@ class MetaDate extends MetaType {
 			if (\checkdate($m, $d, $y)) {
 				$x = \mktime(0,0,0,$m,$d,$y);
 			} else {
-				throw new \system\ValidationException('Invalid date.');
+				throw new \system\error\ValidationError('Invalid date.');
 			}
 		} else if (\is_string($x)) {
 			if (\preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $x)) {
@@ -45,7 +45,7 @@ class MetaDate extends MetaType {
 				if (\checkdate($m, $d, $y)) {
 					$x = \mktime(0,0,0,$m,$d,$y);
 				} else {
-					throw new \system\ValidationException('Invalid date.');
+					throw new \system\error\ValidationError('Invalid date.');
 				}
 			}
 		} else {
@@ -59,7 +59,7 @@ class MetaDate extends MetaType {
 		$options = $this->getAttr('options');
 		if ($options) {
 			if (!\array_key_exists($x, $options)) {
-				throw new \system\ValidationException('Invalid value for <me>@name</em> field.', array(
+				throw new \system\error\ValidationError('Invalid value for <me>@name</em> field.', array(
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}

@@ -53,13 +53,13 @@ class MetaInteger extends MetaType {
 			$minOccurrence = $this->getAttr('minOccurrence', array('default' => 0));
 			$maxOccurrence = $this->getAttr('maxOccurrence', array('default' => 0));
 			if (\count($x) < $minOccurrence) {
-				throw new \system\ValidationException('At least @n values should be entered in the <em>@name</em> field.', array(
+				throw new \system\error\ValidationError('At least @n values should be entered in the <em>@name</em> field.', array(
 					'@n' => $minOccurrence,
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}
 			if ($maxOccurrence > 0 && \count($x) > $maxOccurrence) {
-				throw new \system\ValidationException('No more than @n values can be entered in the <em>@name</em> field.', array(
+				throw new \system\error\ValidationError('No more than @n values can be entered in the <em>@name</em> field.', array(
 					'@n' => $minOccurrence,
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
@@ -76,7 +76,7 @@ class MetaInteger extends MetaType {
 		$options = $this->getAttr('options');
 		if ($options) {
 			if (!\array_key_exists($x, $options)) {
-				throw new \system\ValidationException('Invalid value for <me>@name</em> field.', array(
+				throw new \system\error\ValidationError('Invalid value for <me>@name</em> field.', array(
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}
@@ -84,7 +84,7 @@ class MetaInteger extends MetaType {
 		$minvalue = $this->getAttr('minvalue', array('default' => null));
 		if (!\is_null($minvalue)) {
 			if ($x > $minvalue) {
-				throw new \system\ValidationException('Number too small for <me>@name</em> field.', array(
+				throw new \system\error\ValidationError('Number too small for <me>@name</em> field.', array(
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}
@@ -92,7 +92,7 @@ class MetaInteger extends MetaType {
 		$maxvalue = $this->getAttr('maxvalue', array('default' => null));
 		if (!\is_null($maxvalue)) {
 			if ($x > $maxvalue) {
-				throw new \system\ValidationException('Number too big for <me>@name</em> field.', array(
+				throw new \system\error\ValidationError('Number too big for <me>@name</em> field.', array(
 					'@name' => $this->getAttr('label', array('default' => $this->getName()))
 				));
 			}
@@ -120,7 +120,7 @@ class MetaInteger extends MetaType {
 			}
 		} else {
 			if (!\is_numeric($x)) {
-				throw new \system\ValidationException('Invalid number');
+				throw new \system\error\ValidationError('Invalid number');
 			}
 			return \intval($x);
 		}

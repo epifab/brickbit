@@ -66,7 +66,7 @@ class User extends Page {
 		if ($user->anonymous && \array_key_exists("login_form", $_REQUEST)) {
 			try {
 				$user = \system\Login::login();
-			} catch (\system\LoginException $ex) {
+			} catch (\system\error\LoginError $ex) {
 				$this->datamodel['message'] = $ex->getMessage();
 			}
 		}

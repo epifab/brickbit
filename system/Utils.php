@@ -1,6 +1,8 @@
 <?php
 namespace system;
 
+use system\error\InternalError;
+
 class Utils {
 	const LOG_ERROR = 1;
 	const LOG_WARNING = 2;
@@ -233,7 +235,7 @@ class Utils {
 	public static function getParam($needle, $haystack, $options=array()) {
 		if (!\array_key_exists($needle, $haystack)) {
 			if (\array_key_exists('required', $options) && (bool)$options['required']) {
-				throw new InternalErrorException('Required arg @name.', array('@name' => $needle));
+				throw new InternalError('Required arg @name.', array('@name' => $needle));
 			} else if (\array_key_exists('default', $options)) {
 				return $options['default'];
 			} else {
@@ -243,7 +245,7 @@ class Utils {
 		else {
 			if (\array_key_exists('options', $options) && \is_array($options['options'])) {
 				if (!\in_array($haystack[$needle], $options['options'])) {
-					throw new InternalErrorException('Invalid param @name', array('@name' => $needle));
+					throw new InternalError('Invalid param @name', array('@name' => $needle));
 				}
 			}
 			if (\is_null($haystack[$needle])) {
