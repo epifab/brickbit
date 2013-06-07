@@ -46,9 +46,9 @@ class DataLayerCore {
 		$this->connection = $this->sqlConnect($dbHost, $dbUser, $dbPass);
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			if (ini_set('mssql.charset', 'utf-8') === false) {
-				\system\Log::add(\system\Lang::translate("Unable to set mssql.charset in php ini configuration file."));
+				\system\utils\Log::add(\system\utils\Lang::translate("Unable to set mssql.charset in php ini configuration file."));
 			} else {
-				\system\Log::add(\system\Lang::translate("mssql.charset has been set to @value", array('@value' => \ini_get('mssql.charset'))));
+				\system\utils\Log::add(\system\utils\Lang::translate("mssql.charset has been set to @value", array('@value' => \ini_get('mssql.charset'))));
 			}
 		}
 		if (!$this->connection) {
@@ -71,7 +71,7 @@ class DataLayerCore {
 	private function sqlConnect($dbHost, $dbUser, $dbPass) {
 		$this->dbHost = $dbHost;
 
-		\system\Log::add(\system\Lang::translate("Connection to @dbms server at @host. User: @user.", array(
+		\system\utils\Log::add(\system\utils\Lang::translate("Connection to @dbms server at @host. User: @user.", array(
 			'@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
 			'@host' => $dbHost,
 			'@user' => $dbUser
@@ -79,24 +79,24 @@ class DataLayerCore {
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_connect($dbHost, $dbUser, $dbPass) : \mssql_connect($dbHost, $dbUser, $dbPass));
 		if ($res) {
-			\system\Log::add("<p>Connessione stabilita correttamente</p>");
+			\system\utils\Log::add("<p>Connessione stabilita correttamente</p>");
 		}
 		return $res;
 	}
 	private function sqlClose() {
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_close($this->connection) : \mssql_close($this->connection));
 		if ($res) {
-			\system\Log::add("<p>Connessione con il DBMS chiusa correttamente</p>");
+			\system\utils\Log::add("<p>Connessione con il DBMS chiusa correttamente</p>");
 		}
 		return $res;
 	}
 	private function sqlSelectDb($dbName) {
 		$this->dbName = $dbName;
-		\system\Log::add("<p><strong>Tentativo di connessione a DB " . $dbName . "</strong></p>");
+		\system\utils\Log::add("<p><strong>Tentativo di connessione a DB " . $dbName . "</strong></p>");
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
 		if ($res) {
-			\system\Log::add("<p>Database <strong>" . $dbName . "</strong> selezionato</p>");
+			\system\utils\Log::add("<p>Database <strong>" . $dbName . "</strong> selezionato</p>");
 		}
 		return $res;
 	}
@@ -113,7 +113,7 @@ class DataLayerCore {
 	 * sqlQuery will also fail and return false if the user does not have permission to access the table(s) referenced by the query.
 	 */
 	protected function sqlQuery($query) {
-		\system\Log::add('<div><p><strong>Esecuzione Query SQL DB ' . $this->dbName . ' (' . $this->dbHost . ')</strong></p><textarea rows="10" cols="80">' . \htmlentities($query,ENT_NOQUOTES,'UTF-8') . '</textarea></div>');
+		\system\utils\Log::add('<div><p><strong>Esecuzione Query SQL DB ' . $this->dbName . ' (' . $this->dbHost . ')</strong></p><textarea rows="10" cols="80">' . \htmlentities($query,ENT_NOQUOTES,'UTF-8') . '</textarea></div>');
 
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			return \mssql_query($query, $this->connection);
@@ -224,12 +224,12 @@ class DataLayerCore {
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr || empty($arr[0])) {
-			\system\Log::add(\system\Lang::translate("No results for the previous query.") . "<br/>");
+			\system\utils\Log::add(\system\utils\Lang::translate("No results for the previous query.") . "<br/>");
 			return null;
 		}
 		$x = $arr[0];
 		$this->sqlFreeResult($res);
-		\system\Log::add(\system\Lang::translate("Query result: <em>@value</em>.", array('@value' => $x)) . "<br/>");
+		\system\utils\Log::add(\system\utils\Lang::translate("Query result: <em>@value</em>.", array('@value' => $x)) . "<br/>");
 	
 		return $x;
 	}
@@ -250,12 +250,12 @@ class DataLayerCore {
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr) {
-			\system\Log::add(\system\Lang::translate("No results for the previous query.") . "<br/>");
+			\system\utils\Log::add(\system\utils\Lang::translate("No results for the previous query.") . "<br/>");
 			return null;
 		}
 		$x = $arr;
 		$this->sqlFreeResult($res);
-		\system\Log::add(\system\Lang::translate("Query result: <em>@value</em>.", array('@value' => print_r($x, true))) . "<br/>");
+		\system\utils\Log::add(\system\utils\Lang::translate("Query result: <em>@value</em>.", array('@value' => print_r($x, true))) . "<br/>");
 	
 		return $x;
 	}
@@ -279,12 +279,12 @@ class DataLayerCore {
 	public function executeQueryArray($query) {
 		$result = $this->executeQuery($query);
 		$x = array();
-		\system\Utils::log('DataLayer', print_r($x, TRUE));
+		\system\utils\Utils::log('DataLayer', print_r($x, TRUE));
 		while ($arr = $this->sqlFetchArray($result)) {
-			\system\Utils::log('DataLayer', print_r($x, TRUE));
+			\system\utils\Utils::log('DataLayer', print_r($x, TRUE));
 			$x[] = $arr;
 		}
-		\system\Utils::log('DataLayer', print_r($x, TRUE));
+		\system\utils\Utils::log('DataLayer', print_r($x, TRUE));
 		return $x;
 	}
 

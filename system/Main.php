@@ -1,12 +1,32 @@
 <?php
 namespace system;
 
-use system\logic\Component;
-use system\logic\Module;
+use system\Component;
+use system\Module;
 
 class Main {
 	public static function setMessage($message, $type="error") {
 		echo "<p>$message</p>";
+	}
+	
+	private static function loadModuleInfo($moduleName, $moduleNs, $moduleDir) {
+		if (\is_dir($moduleDir)) {
+			$infoPath = $moduleDir . 'info.yml';
+			if (\file_exists($infoPath)) {
+				try {
+					$info = \system\yaml\Yaml::parse($infoPath);
+					return array(
+						'name' => $moduleName,
+						'dir' => $moduleDir,
+						'ns' => $moduleNs,
+						'info' => $info
+					);
+				} catch (\Exception $ex) {
+					// skip this module
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -19,143 +39,149 @@ class Main {
 		$WEIGHTS = array();
 		
 		$MODULES = array();
-//		$EVENTS = array();
 		$MODEL_CLASSES = array();
 		$VIEW_CLASSES = array();
+		$CONTROLLER_CLASSES = array();
 		$URLS = array();
-
-		$d = \opendir("module");
 		
-		while (($moduleName = \readdir($d))) {
-			
-			if (!\is_dir(Module::getPath($moduleName))) {
-				continue;
-			}
-			
-			$moduleDir = Module::getPath($moduleName);
-			$moduleNs = Module::getNamespace($moduleName);
-			
-			
-			if (\file_exists($moduleDir . "info.yml")) {
+		$modulesNs = 'module';
+		$modulesDir = 'module';
+		
+		$modules = array();
 
-				try {
-					$moduleInfo = \system\yaml\Yaml::parse($moduleDir . "info.yml");
-						
-					if (!\is_array($moduleInfo)) {
-						throw new \system\error\InternalError('Unable to parse <em>@name</em> module configuration.', array('@name' => $moduleName));
-					}
-					
-					$enabled = \cb\array_item("enabled", $moduleInfo, array('default' => true));
-					
-					if (!$enabled) {
-						// just ignore the module
+		$d = \opendir($modulesDir);
+		while (($moduleName = \readdir($d))) {
+			if ($moduleName != 'system') {
+				$module = self::loadModuleInfo(
+					$moduleName, 
+					$modulesNs . '\\' . $moduleName . '\\',
+					$modulesDir . '/' . $moduleName . '/'
+				);
+				if ($module) {
+					$modules[$moduleName] = $module;
+				}
+			}
+		}
+		
+		$modules['system'] = self::loadModuleInfo('system', 'system\\', 'system/');
+		
+		foreach ($modules as $module) {
+			$moduleName = $module['name'];
+			$moduleDir = $module['dir'];
+			$moduleNs = $module['ns'];
+			$moduleInfo = $module['info'];
+			
+			try {
+				if (!\is_array($moduleInfo)) {
+					throw new \system\error\InternalError('Unable to parse <em>@name</em> module info.', array('@name' => $moduleName));
+				}
+
+				$enabled = \cb\array_item('enabled', $moduleInfo, array('default' => true));
+
+				if (!$enabled) {
+					// just ignore the module
+					continue;
+				}
+
+				$moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
+
+				if (!\class_exists($moduleClass)) {
+					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
+				}
+
+				$weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
+
+				// model class
+				$modelNs = $moduleNs . (isset($moduleInfo['modelNs'])
+					? $moduleInfo['modelNs'] . '\\'
+					: '');
+				$modelClass = \cb\array_item('modelClass', $moduleInfo, array(
+					'default' => null,
+					'prefix' => $modelNs
+				));
+				if (!\is_null($modelClass) && !\class_exists($modelClass)) {
+					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
+				}
+				// templates class (API)
+				$viewNs = $moduleNs . (isset($moduleInfo['viewNs'])
+					? $moduleInfo['viewNs'] . '\\'
+					: '');
+				$viewClass = \cb\array_item('viewClass', $moduleInfo, array(
+					'default' => null,
+					'prefix' => $viewNs
+				));
+				if (!\is_null($viewClass) && !\class_exists($viewClass)) {
+					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
+				}
+
+				$templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
+					'default' => null,
+					'prefix' => $moduleDir
+				));
+				if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
+					throw new \system\error\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
+				}
+
+				// components namespace
+				$componentsNs = $moduleNs . (isset($moduleInfo['componentsNs'])
+					? $moduleInfo['componentsNs'] . '\\'
+					: '');
+
+				$components = \cb\array_item('components', $moduleInfo, array('default' => array()));
+				foreach ($components as $componentName => $component) {
+					$componentClass = \cb\array_item('class', $component, array(
+							'required' => true, 
+							'prefix' => $componentsNs
+					));
+					if (!\class_exists($componentClass)) {
+						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
+						unset($components[$componentName]);
 						continue;
 					}
-					
-					$moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
-					
-					if (!\class_exists($moduleClass)) {
-						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
-					}
-					
-					$weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
-					
-					// model class
-					$modelNs = Module::getNamespace($moduleName, \cb\array_item('modelNs', $moduleInfo, array('default' => null)));
-					$modelClass = \cb\array_item('modelClass', $moduleInfo, array(
-						'default' => null,
-						'prefix' => $modelNs
-					));
-					if (!\is_null($modelClass) && !\class_exists($modelClass)) {
-						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
-					}
-					// templates class (API)
-					$viewNs = Module::getNamespace($moduleName, \cb\array_item('viewNs', $moduleInfo, array('default' => null)));
-					$viewClass = \cb\array_item('viewClass', $moduleInfo, array(
-						'default' => null,
-						'prefix' => $viewNs
-					));
-					if (!\is_null($viewClass) && !\class_exists($viewClass)) {
-						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
-					}
-					
-					$templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
-						'default' => null,
-						'prefix' => $moduleDir
-					));
-					if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
-						throw new \system\error\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
-					}
-					
-					// components namespace
-					$componentsNs = Module::getNamespace(
-						$moduleName,
-						\cb\array_item('componentsNs', $moduleInfo)
+					$components[$componentName] = array(
+						'name' => $componentName,
+						'class' => $componentClass,
+						'pages' => \cb\array_item('pages', $component, array('default' => array()))
 					);
-					
-					$events = \cb\array_item('events', $moduleInfo, array('default' => array()));
-					foreach ($events as $eventName) {
-						if (!\is_callable(array($moduleClass, $eventName))) {
-							throw new \system\error\InternalError('Method <em>@class::@name</em> does not exist.', array('@class' => $moduleClass, '@name' => $eventName));
-						}
-					}
-					
-					$components = \cb\array_item('components', $moduleInfo, array('default' => array()));
-					foreach ($components as $componentName => $component) {
-						$componentClass = \cb\array_item('class', $component, array(
-							 'required' => true, 
-							 'prefix' => $componentsNs
-						));
-						if (!\class_exists($componentClass)) {
-							throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
-							unset($components[$componentName]);
-							continue;
-						}
-						$components[$componentName] = array(
+					foreach ($component['pages'] as $i => $page) {
+						$components[$componentName]['pages'][$i] = array(
+							'url' => \cb\array_item('url', $page, array('required' => true)),
 							'name' => $componentName,
-							'class' => $componentClass,
-							'pages' => \cb\array_item('pages', $component, array('default' => array()))
+							'action' => \cb\array_item('action', $page, array('required' => true))
 						);
-						foreach ($component['pages'] as $i => $page) {
-							$components[$componentName]['pages'][$i] = array(
-								'url' => \cb\array_item('url', $page, array('required' => true)),
-								'name' => $componentName,
-								'action' => \cb\array_item('action', $page, array('required' => true))
-							);
 
-							$rules = array(
-								"@strid" => "[a-zA-Z0-9\-_]+",
-								"@urlarg" => "[a-zA-Z0-9\-_.]+",
-							);
+						$rules = array(
+							"@strid" => "[a-zA-Z0-9\-_]+",
+							"@urlarg" => "[a-zA-Z0-9\-_.]+",
+						);
 
-							foreach ($rules as $ruleName => $replace) {
-								$components[$componentName]['pages'][$i]['url'] = \str_replace(
-									$ruleName,
-									$replace,
-									$components[$componentName]['pages'][$i]['url']
-								);
-							}
+						foreach ($rules as $ruleName => $replace) {
+							$components[$componentName]['pages'][$i]['url'] = \str_replace(
+								$ruleName,
+								$replace,
+								$components[$componentName]['pages'][$i]['url']
+							);
 						}
 					}
-					
-					$WEIGHTS[$weight][$moduleName] = array(
-						'name' => $moduleName,
-						'path' => $moduleDir,
-						'class' => $moduleClass,
-						'weight' => $weight,
-						'modelNs' => $modelNs,
-						'modelClass' => $modelClass,
-						'viewNs' => $viewNs,
-						'viewClass' => $viewClass,
-						'templatesPath' => $templatesPath,
-						'componentsNs' => $componentsNs,
-						'events' => $events,
-						'components' => $components
-					);
-					
-				} catch (\Exception $ex) {
-					throw $ex;
 				}
+
+				$WEIGHTS[$weight][$moduleName] = array(
+					'name' => $moduleName,
+					'path' => $moduleDir,
+					'ns' => $moduleNs,
+					'class' => $moduleClass,
+					'weight' => $weight,
+					'modelNs' => $modelNs,
+					'modelClass' => $modelClass,
+					'viewNs' => $viewNs,
+					'viewClass' => $viewClass,
+					'templatesPath' => $templatesPath,
+					'componentsNs' => $componentsNs,
+					'components' => $components
+				);
+
+			} catch (\Exception $ex) {
+				throw $ex;
 			}
 		}
 		\closedir($d);
@@ -181,11 +207,7 @@ class Main {
 						);
 					}
 				}
-//				foreach ($module['events'] as $eventName) {
-//					if (\array_key_exists($eventName, $EVENTS)) {
-//						$EVENTS[$eventName][] = $module['class'];
-//					}
-//				}
+				$CONTROLLER_CLASSES[] = $module['class'];
 				if ($module['modelClass']) {
 					$MODEL_CLASSES[] = $module['modelClass'];
 				}
@@ -203,7 +225,6 @@ class Main {
 		return array(
 			'modules' => $MODULES,
 			'urls' => $URLS,
-//			'events' => $EVENTS,
 			'tables' => self::loadModelCfg($MODULES),
 			'modelClasses' => $MODEL_CLASSES,
 			'templates' => self::loadViewCfg($MODULES),
@@ -250,17 +271,6 @@ class Main {
 	 */
 	private static function loadModelCfg($modules) {
 		$TABLES = array();
-		$baseModel = 'system/model/model.yml';
-		try {
-			$model = \system\yaml\Yaml::parse($baseModel);
-			self::setTables(
-				\cb\array_item('tables', $model, array('required' => true)),
-				$TABLES
-			);
-		} catch (\Exception $ex) {
-			throw $ex;
-		}
-		
 		
 		foreach ($modules as $module) {
 			if (\file_exists($module['path'] . 'model.yml')) {
@@ -375,12 +385,12 @@ class Main {
 		static $configuration = null;
 		
 		if (\is_null($configuration) && \config\settings()->CORE_CACHE) {
-			$configuration = \system\Utils::get('system-configuration', null);
+			$configuration = \system\utils\Utils::get('system-configuration', null);
 		}
 		if (\is_null($configuration)) {
 			$configuration = self::loadConfiguration();
 			if (\config\settings()->CORE_CACHE) {
-				\system\Utils::set('system-configuration', $configuration);
+				\system\utils\Utils::set('system-configuration', $configuration);
 			}
 		}
 		return $configuration;
@@ -391,6 +401,18 @@ class Main {
 		return \array_key_exists($moduleName, $c['modules']);
 	}
 	
+	public static function getModule($moduleName) {
+		if (\is_null($moduleName)) {
+			return null;
+		}
+		$config = self::configuration();
+		if (isset($config['modules'][$moduleName])) {
+			return $config['modules'][$moduleName];
+		} else {
+			throw new \system\error\InternalError('Module <em>@name</em> not found.', array('@name' => $moduleName));
+		}
+	}
+
 	public static function templateExists($templateName) {
 		$c = self::configuration();
 		return \array_key_exists($templateName, $c['templates']);
@@ -400,11 +422,10 @@ class Main {
 		if (\is_null($templateName)) {
 			return null;
 		}
-		if (self::templateExists($templateName)) {
-			$c = self::configuration();
-			return $c['templates'][$templateName];
+		$config = self::configuration();
+		if (isset($config['templates'][$templateName])) {
+			return $config['templates'][$templateName];
 		} else {
-			$c = self::configuration();
 			throw new \system\error\InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
 		}
 	}
@@ -446,7 +467,7 @@ class Main {
 		if (\is_null($urls)) {
 			if (\config\settings()->CORE_CACHE) {
 				// Url cache
-				$urls = \system\Utils::get("system-urls", array());
+				$urls = \system\utils\Utils::get("system-urls", array());
 			} else {
 				$urls = array();
 			}
@@ -465,7 +486,7 @@ class Main {
 						'urlArgs' => $m
 					);
 					if (\config\settings()->CORE_CACHE) {
-						\system\Utils::set("system-urls", $urls);
+						\system\utils\Utils::set("system-urls", $urls);
 					}
 					break;
 				}
@@ -476,7 +497,7 @@ class Main {
 	
 	public static function checkAccess($url, $request=array(), $user=false) {
 		if ($user === false) {
-			$user = \system\Login::getLoggedUser();
+			$user = \system\utils\Login::getLoggedUser();
 		}
 		if (self::urlExists($url)) {
 			$x = self::getComponent($url);
@@ -522,7 +543,7 @@ class Main {
 	}
   
   public static function moduleConfigArray($eventName) {
-    $results = \system\Utils::get('module-config-' . $eventName, null);
+    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
       $results = array();
       $v = self::invokeMethodAll($eventName);
@@ -533,25 +554,25 @@ class Main {
         }
         $results = $m + $results;
       }
-      \system\Utils::set('module-config-' . $eventName, $results);
+      \system\utils\Utils::set('module-config-' . $eventName, $results);
     }
     return $results;
   }
   
   public static function moduleConfig($eventName) {
-    $results = \system\Utils::get('module-config-' . $eventName, null);
+    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
       $results = \end(self::invokeMethod($eventName));
-      \system\Utils::set('module-config-' . $eventName, $results);
+      \system\utils\Utils::set('module-config-' . $eventName, $results);
     }
     return $results;
   }
   
   public static function moduleConfigAll($eventName) {
-    $results = \system\Utils::get('module-config-' . $eventName, null);
+    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
     if (\is_null($results)) {
       $results = self::invokeMethodAll($eventName); // last element of the array
-      \system\Utils::set('module-config-' . $eventName, $results);
+      \system\utils\Utils::set('module-config-' . $eventName, $results);
     }
     return $results;
   }

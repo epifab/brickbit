@@ -1,10 +1,10 @@
 <?php
 namespace module\core\components;
 
-class NodeFile extends \system\logic\Component {
+class NodeFile extends \system\Component {
 	
 	public function createFile($fileName) {
-		\system\Utils::log(__CLASS__, 'File upload complete - node id: ' . $this->getUrlArg(0) . ' index: ' . $this->getUrlArg(1));
+		\system\utils\Utils::log(__CLASS__, 'File upload complete - node id: ' . $this->getUrlArg(0) . ' index: ' . $this->getUrlArg(1));
 		
 		$nodeId = $this->getUrlArg(0);
 		$nodeIndex = $this->getUrlArg(1);
@@ -16,10 +16,10 @@ class NodeFile extends \system\logic\Component {
 			. ' WHERE node_id = ' . $nodeId
 			. ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex);
 		
-		$virtualName = \system\File::getSafeFilename($originalFileName);
+		$virtualName = \system\utils\File::getSafeFilename($originalFileName);
 		
-		$name = \system\File::stripExtension($virtualName);
-		$ext = \system\File::getExtension($virtualName);
+		$name = \system\utils\File::stripExtension($virtualName);
+		$ext = \system\utils\File::getExtension($virtualName);
 
 		$virtualNamesQuery = 'SELECT virtual_name'
 			. ' FROM node_file'
@@ -33,7 +33,7 @@ class NodeFile extends \system\logic\Component {
 			for ($i = 2; \in_array($name . $i . '.' . $ext, $virtualNames); $i++);
 			$virtualName = $name . $i . '.' . $ext;
 		}
-		\system\Utils::log(__CLASS__, 'Safe filename: ' . $virtualName);
+		\system\utils\Utils::log(__CLASS__, 'Safe filename: ' . $virtualName);
 		
 		$rsb = new \system\model\RecordsetBuilder('node_file');
 		$rsb->using('*', 'file.*');
@@ -55,7 +55,7 @@ class NodeFile extends \system\logic\Component {
 	}
 	
 	public static function getDirId() {
-		$dirId = \system\Utils::get('core-nodefile-dir-id', null);
+		$dirId = \system\utils\Utils::get('core-nodefile-dir-id', null);
 		if (!$dirId) {
 			$rsb = new \system\model\RecordsetBuilder('dir');
 			$rsb->using('*');
@@ -67,7 +67,7 @@ class NodeFile extends \system\logic\Component {
 				$rs->save();
 			}
 			$dirId = $rs->id;
-			\system\Utils::set('upload-dir-id', $rs->id);
+			\system\utils\Utils::set('upload-dir-id', $rs->id);
 		}
 		return $dirId;
 	}
@@ -91,7 +91,7 @@ class NodeFile extends \system\logic\Component {
 		* Contributing: http://www.plupload.com/contributing
 		*/
 
-		\system\Utils::log(__CLASS__, 'File upload', \system\Utils::LOG_DEBUG);
+		\system\utils\Utils::log(__CLASS__, 'File upload', \system\utils\Utils::LOG_DEBUG);
 		
 		// HTTP headers for no cache etc
 		\header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");

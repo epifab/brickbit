@@ -2,10 +2,10 @@
 namespace cb;
 
 function t($sentence, $args=null) {
-	return \system\Lang::translate($sentence, $args);
+	return \system\utils\Lang::translate($sentence, $args);
 }
-function set_log($key, $message, $type=\system\Utils::LOG_INFO) {
-	return \system\Utils::log($key, $message, $type);
+function set_log($key, $message, $type=\system\utils\Utils::LOG_INFO) {
+	return \system\utils\Utils::log($key, $message, $type);
 }
 
 function type($value, $type) {

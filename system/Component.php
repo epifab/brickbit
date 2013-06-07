@@ -1,16 +1,16 @@
 <?php
-namespace system\logic;
+namespace system;
 
 use system\model\RecordsetBuilder;
 use system\model\Recordset;
 use system\model\RecordsetInterface;
 
-use system\HTMLHelpers;
-use system\Lang;
-use system\Login;
+use system\utils\HTMLHelpers;
+use system\utils\Lang;
+use system\utils\Login;
 use system\Theme;
 use system\TemplateManager;
-use system\Utils;
+use system\utils\Utils;
 
 use system\error\InternalError;
 use system\error\AuthorizationError;
@@ -132,7 +132,7 @@ abstract class Component {
 	 */
 	protected function onError($exception) {
 
-		\system\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
+		\system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
 
 //			if ($this->nested) {
 //				$pageOutput = \ob_get_clean();
@@ -640,7 +640,7 @@ abstract class Component {
 			$this->onInit();
 			
 			// checking permission
-			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\Login::getLoggedUser())) {
+			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\utils\Login::getLoggedUser())) {
 				throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
 			}
 

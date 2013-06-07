@@ -117,7 +117,7 @@ class Config {
 	}
 
 	private function __construct() {
-		$this->data["IP_ADDRESS"] = \system\HTMLHelpers::getIpAddress();
+		$this->data["IP_ADDRESS"] = \system\utils\HTMLHelpers::getIpAddress();
 		$this->data["PRODUCTION"] = $this->data["IP_ADDRESS"] != "127.0.0.1";
 		if ($this->data["PRODUCTION"]) {
 			$dataExtension = $this->dataProd;
@@ -180,7 +180,7 @@ class Config {
 
 \spl_autoload_register('\config\Config::autoload');
 
-\system\Lang::setLang(\strpos($_SERVER["HTTP_HOST"], ".")
+\system\utils\Lang::setLang(\strpos($_SERVER["HTTP_HOST"], ".")
 	? substr($_SERVER["HTTP_HOST"], 0, \strpos($_SERVER["HTTP_HOST"], ".")) 
 	: $_SERVER["HTTP_HOST"]
 );

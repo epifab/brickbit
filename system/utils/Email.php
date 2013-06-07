@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 
 class Email {
 	private $from = array();

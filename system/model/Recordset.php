@@ -441,10 +441,10 @@ class Recordset implements RecordsetInterface {
 				break;
 		}
 		
-		$recordMode->owner_id = \system\Login::getLoggedUserId();
+		$recordMode->owner_id = \system\utils\Login::getLoggedUserId();
 		$recordMode->ins_date_time = \time();
 		$recordMode->last_upd_date_time = \time();
-		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
+		$recordMode->last_modifier_id = \system\utils\Login::getLoggedUserId();
 		
 		echo "EDIT MODE: " . $recordMode->edit_mode;
 		
@@ -519,7 +519,7 @@ class Recordset implements RecordsetInterface {
 			}
 		}
 
-		$recordMode->last_modifier_id = \system\Login::getLoggedUserId();
+		$recordMode->last_modifier_id = \system\utils\Login::getLoggedUserId();
 		$recordMode->last_upd_date_time = \time();
 		$recordMode->update();
 		

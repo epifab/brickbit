@@ -1,0 +1,16 @@
+class: System
+version: 1.0
+weight: 0
+enabled: 1
+modelNs: model
+modelClass: ModelEvents
+viewNs: view
+viewClass: SystemApi
+#templatesPath: view/templates
+#componentsNs: components
+#components:
+#  component1:
+#    class: Component1
+#    pages:
+#      - url: *
+#        action: Default

@@ -1,5 +1,4 @@
 <?php
-
 namespace system\view;
 
 class Api {
@@ -8,8 +7,6 @@ class Api {
 	 * @var \system\view\Api
 	 */
 	private static $instance;
-	private $blocks = array();
-
 	
 	/**
 	 * @return \system\view\Api
@@ -50,139 +47,6 @@ class Api {
 		} else {
 			throw new \system\error\InternalError('Template API <em>@name</em> not found.', array('@name' => $method));
 		}
-	}
-
-	public function open($callback, $args = array()) {
-		$callback = 'block_' . $callback;
-		$x = \call_user_func(array($this, $callback), null, $args, true);
-		\array_push($this->blocks, array($callback, $args));
-		\ob_start();
-	}
-
-	public function close() {
-		if (empty($this->blocks)) {
-			throw new \system\error\InternalError('Syntax error. No block has been open.');
-		}
-		list($callback, $args) = \array_pop($this->blocks);
-		$content = \ob_get_clean();
-		$x = \call_user_func(array($this, $callback), $content, $args, false);
-		if (!\is_null($x)) {
-			echo $x;
-		}
-	}
-
-	public function path($url) {
-		return \config\settings()->BASE_DIR . $url;
-	}
-
-	public function module_path($module, $url) {
-		return \system\logic\Module::getAbsPath($module) . $url;
-	}
-
-	public function theme_path($url) {
-		return \system\Theme::getThemePath() . $url;
-	}
-
-	public function lang_path($lang) {
-		return \system\Lang::langPath($lang);
-	}
-	
-	private static function params2input($key, $val, &$input, $prefix='') {
-		if (\is_array($val)) {
-			foreach ($val as $k1 => $v1) {
-				self::params2input($k1, $v1, $input, (empty($prefix) ? $key : $prefix . '[' . $key . ']'));
-			}
-		}
-		else {
-			$input .= 
-				'<input'
-				. ' type="hidden"'
-				. ' name="' . (empty($prefix) ? $key : $prefix . '[' . $key . ']') . '"'
-				. ' value="' . \htmlentities($val) . '"/>';
-		}
-	}
-	
-	public function load_block($name, $url, $args=array()) {
-		$url = $this->path($url);
-		echo self::print_block($name, $url, null, $args);
-	}
-
-	private function print_block($name, $url, $content, $args=array()) {
-		static $ids = array();
-		
-		$blockId = $name;
-		if (!\array_key_exists($name, $ids)) {
-			$ids[$name] = 1;
-		} else {
-			$ids[$name]++;
-			$blockId .= '-' . $ids[$name];
-		}
-
-		$vars = \system\view\Template::current()->getVars();
-
-		// system array is reserved
-		// make sure it isn't overridden
-		$args['system'] = array(
-			'url' => $vars['system']['mainComponent']['url'],
-			'requestType' => 'AJAX',
-			'blockId' => $blockId
-		);
-		
-		echo
-			'<form'
-			. ' action="' . $url . '"'
-			. ' method="POST"' 
-			. ' name="' . $blockId . '"'
-			. ' class="system-block-form"'
-			. ' id="system-block-form-' . $blockId . '">';
-		
-		foreach ($args as $key => $val) {
-			self::params2input($key, $val, $out);
-		}
-
-		echo
-			'</form>'
-			. '<div class="system-block" id="' . $blockId . '">';
-	
-		if (\is_null($content)) {
-			\system\Main::run($url, $args);
-		} else {
-			echo $content;
-		}
-		
-		echo '</div>';
-	}
-	
-	public function block_block($content, $params, $open) {
-		if (!$open) {
-			$name = \cb\array_item('name', $params, array('required' => true));
-			$url = \cb\array_item('url', $params, array('required' => true));
-			$args = \cb\array_item('args', $params, array('default' => array()));
-			echo self::print_block($name, $url, $content, $args);
-		}
-	}
-	
-	public function import($name, $args = array()) {
-		$a = $args + \system\view\Template::current()->getVars();
-		$tpl = new \system\view\Template($name, $a);
-		$tpl->render();
-	}
-
-	public function region($region) {
-		$vars = \system\view\Template::current()->getVars();
-
-		if (\array_key_exists($region, $vars['system']['templates']['regions'])) {
-			\asort($vars['system']['templates']['regions'][$region]);
-			foreach ($vars['system']['templates']['regions'][$region] as $templates) {
-				foreach ($templates as $tpl) {
-					$this->import($tpl);
-				}
-			}
-		}
-	}
-
-	public function t($sentence, $args = null) {
-		return \system\Lang::translate($sentence, $args);
 	}
 }
 

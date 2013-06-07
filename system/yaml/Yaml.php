@@ -11,7 +11,7 @@
 
 namespace system\yaml;
 
-use system\yaml\exception\ParseError;
+use system\yaml\exception\ParseException;
 
 /**
  * Yaml offers convenience methods to load and dump YAML.
@@ -45,7 +45,7 @@ class Yaml
      *
      * @return array The YAML converted to a PHP array
      *
-     * @throws ParseError If the YAML is not valid
+     * @throws ParseException If the YAML is not valid
      *
      * @api
      */
@@ -55,7 +55,7 @@ class Yaml
         $file = '';
         if (strpos($input, "\n") === false && is_file($input)) {
             if (false === is_readable($input)) {
-                throw new ParseError(sprintf('Unable to parse "%s" as the file is not readable.', $input));
+                throw new ParseException(sprintf('Unable to parse "%s" as the file is not readable.', $input));
             }
 
             $file = $input;
@@ -80,7 +80,7 @@ class Yaml
 
         try {
             return $yaml->parse($input);
-        } catch (ParseError $e) {
+        } catch (ParseException $e) {
             if ($file) {
                 $e->setParsedFile($file);
             }

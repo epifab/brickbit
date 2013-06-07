@@ -18,7 +18,7 @@ namespace system\yaml\exception;
  *
  * @api
  */
-class ParseError extends RuntimeError
+class ParseException extends RuntimeException
 {
     private $parsedFile;
     private $parsedLine;

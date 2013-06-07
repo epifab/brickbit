@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-use \system\logic\Component;
+use \system\Component;
 use \system\model\Recordset;
 use \system\model\RecordsetBuilder;
 use \system\model\FilterClause;
@@ -10,7 +10,7 @@ use \system\model\LimitClause;
 use \system\model\SortClause;
 use \system\model\SortClauseGroup;	
 
-class Node extends \system\logic\Component {
+class Node extends \system\Component {
 	private static function accessRED($action, $id, $user) {
 		$rsb = new RecordsetBuilder('node');
 		$rsb->addFilter(new FilterClause($rsb->id, '=', $id));
@@ -34,7 +34,7 @@ class Node extends \system\logic\Component {
 
 	///<editor-fold defaultstate="collapsed" desc="Access methods">
 	public static function accessAdd($urlArgs, $request, $user) {
-		$nodeTypes = \system\Cache::nodeTypes();
+		$nodeTypes = \system\utils\Cache::nodeTypes();
 		
 		if (isset($nodeTypes[$urlArgs[0]])) {
 			throw new \system\error\InputOutputError('Invalid node type.');
@@ -48,7 +48,7 @@ class Node extends \system\logic\Component {
 	}
 	
 	public static function accessAdd2Node($urlArgs, $request, $user) {
-		$nodeTypes = \system\Cache::nodeTypes();
+		$nodeTypes = \system\utils\Cache::nodeTypes();
 		
 		if (isset($nodeTypes[$urlArgs[1]])) {
 			throw new \system\error\InputOutputError('Invalid node type.');
@@ -105,19 +105,19 @@ class Node extends \system\logic\Component {
 	}
 
 	protected function form($recordset, $errors=array()) {
-		$nodeTypes = \system\Cache::nodeTypes();
+		$nodeTypes = \system\utils\Cache::nodeTypes();
 		
 		$this->datamodel['fileKeys'] = $nodeTypes[$recordset->type]['files'];
 		$this->datamodel['recordset'] = $recordset;
 		$this->datamodel['errors'] = $errors;
 		$this->setMainTemplate('edit-node-form');
 		// plupload
-		$this->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/plupload.full.js');
-		$this->addJs(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/jquery.plupload.queue.js');
+		$this->addJs(\system\Module::getAbsPath('core', 'js') . 'plupload/js/plupload.full.js');
+		$this->addJs(\system\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/jquery.plupload.queue.js');
 		// css
-//		$this->addCss(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css');
-		$this->addCss(\system\logic\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css');
-		return \system\logic\Component::RESPONSE_TYPE_FORM;
+//		$this->addCss(\system\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css');
+		$this->addCss(\system\Module::getAbsPath('core', 'js') . 'plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css');
+		return \system\Component::RESPONSE_TYPE_FORM;
 	}
 	
 	protected function submit($recordset) {
@@ -130,7 +130,7 @@ class Node extends \system\logic\Component {
 			$recordset->temp = false;
 
 			$request = $this->getRequestData();
-			if (\system\Login::getLoggedUser()->superuser) {
+			if (\system\utils\Login::getLoggedUser()->superuser) {
 				$read = \cb\array_item("record_mode.read_mode", $request['recordset'], array('default' => null));
 				$edit = \cb\array_item("record_mode.edit_mode", $request['recordset'], array('default' => null));
 				$delete = \cb\array_item("record_mode.delete_mode", $request['recordset'], array('default' => null));
@@ -158,7 +158,7 @@ class Node extends \system\logic\Component {
 			$da->commitTransaction();
 
 			if ($temp) {
-				\system\Utils::unsetSession('core', 'temp_node_id');
+				\system\utils\Utils::unsetSession('core', 'temp_node_id');
 			}
 
 			return $this->notify();
@@ -176,7 +176,7 @@ class Node extends \system\logic\Component {
 			'body' => $body
 		);
 		$this->setMainTemplate('notify');
-		return \system\logic\Component::RESPONSE_TYPE_NOTIFY;
+		return \system\Component::RESPONSE_TYPE_NOTIFY;
 	}
 	
 	protected function error($title="", $body="") {
@@ -185,7 +185,7 @@ class Node extends \system\logic\Component {
 			'body' => $body
 		);
 		$this->setMainTemplate('notify');
-		return \system\logic\Component::RESPONSE_TYPE_ERROR;
+		return \system\Component::RESPONSE_TYPE_ERROR;
 	}
 	
 	protected function read($rs) {
@@ -214,12 +214,12 @@ class Node extends \system\logic\Component {
 		$recordset = null;
 
 		// always handle with a temporary node
-		$node_id = \system\Utils::getSession('core', 'temp_node_id', null);
+		$node_id = \system\utils\Utils::getSession('core', 'temp_node_id', null);
 		if ($node_id) {
 			$recordset = $rsb->selectFirstBy(array('id' => $node_id));
 			if (!$recordset->temp) {
 				$recordset = null;
-			} else if ($recordset->record_mode->owner_id != \system\Login::getLoggedUserId()) {
+			} else if ($recordset->record_mode->owner_id != \system\utils\Login::getLoggedUserId()) {
 				$recordset = null;
 			} else if ($recordset->type != $type) {
 				// delete the previous temp content
@@ -266,7 +266,7 @@ class Node extends \system\logic\Component {
 				
 				$da->commitTransaction();
 				
-				\system\Utils::setSession('core', 'temp_node_id', $recordset->id);
+				\system\utils\Utils::setSession('core', 'temp_node_id', $recordset->id);
 			}
 			
 			catch (\Exception $ex) {
@@ -302,11 +302,11 @@ class Node extends \system\logic\Component {
 //					)) && $posted;
 //
 //					if (!$rs->urn) {
-//						$errors["text_" . $lang . ".urn"] = \system\Lang::translate("Please insert <em>@name</em>.", array('@name' => 'URN'));
+//						$errors["text_" . $lang . ".urn"] = \system\utils\Lang::translate("Please insert <em>@name</em>.", array('@name' => 'URN'));
 //						$posted = false;
 //					}
 //					if (!$rs->title) {
-//						$errors["text_" . $lang . ".title"] = \system\Lang::translate("Please insert <em>@name</em>.", array('@name' => 'title'));
+//						$errors["text_" . $lang . ".title"] = \system\utils\Lang::translate("Please insert <em>@name</em>.", array('@name' => 'title'));
 //						$posted = false;
 //					}
 //					$rs->lang = $lang;
@@ -350,7 +350,7 @@ class Node extends \system\logic\Component {
 //					}
 //					
 //					$request = $this->getRequestData();
-//					if (\system\Login::getLoggedUser()->superuser) {
+//					if (\system\utils\Login::getLoggedUser()->superuser) {
 //						$read = \cb\array_item("record_mode.read_mode", $request['recordset'], array('default' => null));
 //						$edit = \cb\array_item("record_mode.edit_mode", $request['recordset'], array('default' => null));
 //						$delete = \cb\array_item("record_mode.delete_mode", $request['recordset'], array('default' => null));
@@ -378,7 +378,7 @@ class Node extends \system\logic\Component {
 //					$da->commitTransaction();
 //					
 //					if ($temp) {
-//						\system\Utils::unsetSession('core', 'temp_node_id');
+//						\system\utils\Utils::unsetSession('core', 'temp_node_id');
 //					}
 //					
 //					return $this->notify();
@@ -419,9 +419,9 @@ class Node extends \system\logic\Component {
 	}
 
 	public function runNotFound() {
-		$this->setPageTitle(\system\Lang::translate('Page not found'));
+		$this->setPageTitle(\system\utils\Lang::translate('Page not found'));
 		$this->setMainTemplate('notify');
-		$this->datamodel['message'] = \system\Lang::translate('The page you were looking was not found.');
+		$this->datamodel['message'] = \system\utils\Lang::translate('The page you were looking was not found.');
 		return Component::RESPONSE_TYPE_NOTIFY;
 	}
 	
@@ -452,9 +452,9 @@ class Node extends \system\logic\Component {
 		}
 		
 		if ($recordset->text->title) {
-			$this->setPageTitle(\system\Lang::translate('@name | edit', array('@name' => $recordset->text->title)));
+			$this->setPageTitle(\system\utils\Lang::translate('@name | edit', array('@name' => $recordset->text->title)));
 		} else {
-			$this->setPageTitle(\system\Lang::translate('Edit content'));
+			$this->setPageTitle(\system\utils\Lang::translate('Edit content'));
 		}
 		
 		return $this->formEdit($recordset);

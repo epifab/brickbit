@@ -42,7 +42,7 @@ class Node {
 //			$rsb->setSort(new \system\model\SortClause($rsb->lang, 'DESC'));
 //			$rsb->setFilter(
 //				new \system\model\FilterClauseGroup(
-//					new \system\model\FilterClause($rsb->lang, '=', \system\Lang::getLang()),
+//					new \system\model\FilterClause($rsb->lang, '=', \system\utils\Lang::getLang()),
 //					'OR',
 //					new \system\model\FilterClause($rsb->lang, 'IS_NULL')
 //				)
@@ -81,8 +81,8 @@ class Node {
 	}
 	
 //	public static function text(RecordsetInterface $node) {
-//		if (isset($node->texts[\system\Lang::getLang()])) {
-//			return $node->texts[\system\Lang::getLang()];
+//		if (isset($node->texts[\system\utils\Lang::getLang()])) {
+//			return $node->texts[\system\utils\Lang::getLang()];
 //		} else if (isset($node->texts[null])) {
 //			return $node->texts[null];
 //		} else {
@@ -95,7 +95,7 @@ class Node {
 		$textBuilder->addFilter(new FilterClauseGroup(
 			new FilterClause($textBuilder->lang, 'IS_NULL'),
 			'OR',
-			new FilterClause($textBuilder->lang, '=', \system\Lang::getLang())
+			new FilterClause($textBuilder->lang, '=', \system\utils\Lang::getLang())
 		));
 		$textBuilder->setSort(new SortClause($textBuilder->lang, 'DESC'));
 		$textBuilder->setLimit(1);

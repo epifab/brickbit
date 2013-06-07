@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 
 class HTMLHelpers {
 	public static function getTagUrl($x) {
@@ -62,7 +62,7 @@ class HTMLHelpers {
 		while ($exception != null) {
 			$msg .=
 				'<h3>' . $exception->getMessage() . '</h3>'
-				. '<h4>' . \system\Lang::translate('Exception details') . '</h4>'
+				. '<h4>' . \system\utils\Lang::translate('Exception details') . '</h4>'
 				. '<p>' . $exception->getFile() . ' ' . $exception->getLine() . '</p>';
 			
 			if ($exception instanceof \system\error\Error) {
@@ -90,7 +90,7 @@ class HTMLHelpers {
 					if (\array_key_exists("args", $t)) {
 						foreach ($t['args'] as $arg) {
 							$first ? $first = false : $msg .= ', ';
-							$msg .= \system\Utils::varDump($arg);
+							$msg .= \system\utils\Utils::varDump($arg);
 						}
 					}
 					$msg .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
@@ -109,11 +109,11 @@ class HTMLHelpers {
 		}
 		
 		if ($mainError instanceof \system\error\AuthorizationError) {
-			$title = \system\Lang::translate('Forbidden');
-			$msg = \system\Lang::translate("You don't have sufficient permission to access this resource.");
+			$title = \system\utils\Lang::translate('Forbidden');
+			$msg = \system\utils\Lang::translate("You don't have sufficient permission to access this resource.");
 		} else {
-			$title = \system\Lang::translate('Fatal error');
-			$msg .= \system\Log::get();
+			$title = \system\utils\Lang::translate('Fatal error');
+			$msg .= \system\utils\Log::get();
 		}
 		
 		$datamodel['page']['title'] = $title;
@@ -123,7 +123,7 @@ class HTMLHelpers {
 		);
 		$datamodel['system']['responseType'] = 'ERROR';
 		
-		\system\Utils::log('ciderbit', $msg, \system\Utils::LOG_ERROR);
+		\system\utils\Utils::log('ciderbit', $msg, \system\utils\Utils::LOG_ERROR);
 
 		try {
 			

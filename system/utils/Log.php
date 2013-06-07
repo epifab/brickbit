@@ -1,15 +1,15 @@
 <?php
-namespace system;
+namespace system\utils;
 
 class Log {
 	private static $logs = "";
 	
-	public static function saveLog(\system\logic\Component $component, $output) {
+	public static function saveLog(\system\Component $component, $output) {
 		$builder = new \system\model\RecordsetBuilder('log');
 		$builder->using("*");
 		
 //		$rs = $builder->newRecordset();
-//		$rs->user_id = \system\Login::getLoggedUserId();
+//		$rs->user_id = \system\utils\Login::getLoggedUserId();
 //		$rs->url = $url;
 //		$rs->module = $component->getModule();
 //		$rs->component = $component->getName();
@@ -18,7 +18,7 @@ class Log {
 //		$rs->execution_time = $component->getExecutionTime();
 //		$rs->body = self::$logs;
 //		$rs->output = $output;
-//		$rs->ip_address = \system\HTMLHelpers::getIpAddress();
+//		$rs->ip_address = \system\utils\HTMLHelpers::getIpAddress();
 //		$rs->create();
 //		return $rs->getProg("id");
 	}

@@ -10,7 +10,7 @@
 
 namespace system\yaml;
 
-use system\yaml\exception\ParseError;
+use system\yaml\exception\ParseException;
 
 /**
  * Parser parses YAML strings to convert them to PHP arrays.
@@ -42,7 +42,7 @@ class Parser
      *
      * @return mixed  A PHP value
      *
-     * @throws ParseError If the YAML is not valid
+     * @throws ParseException If the YAML is not valid
      */
     public function parse($value)
     {
@@ -51,7 +51,7 @@ class Parser
         $this->lines = explode("\n", $this->cleanup($value));
 
         if (function_exists('mb_detect_encoding') && false === mb_detect_encoding($value, 'UTF-8', true)) {
-            throw new ParseError('The YAML value does not appear to be valid UTF-8.');
+            throw new ParseException('The YAML value does not appear to be valid UTF-8.');
         }
 
         if (function_exists('mb_internal_encoding') && ((int) ini_get('mbstring.func_overload')) & 2) {
@@ -68,13 +68,13 @@ class Parser
 
             // tab?
             if ("\t" === $this->currentLine[0]) {
-                throw new ParseError('A YAML file cannot contain tabs as indentation.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                throw new ParseException('A YAML file cannot contain tabs as indentation.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
             }
 
             $isRef = $isInPlace = $isProcessed = false;
             if (preg_match('#^\-((?P<leadspaces>\s+)(?P<value>.+?))?\s*$#u', $this->currentLine, $values)) {
                 if ($context && 'mapping' == $context) {
-                    throw new ParseError('You cannot define a sequence item when in a mapping');
+                    throw new ParseException('You cannot define a sequence item when in a mapping');
                 }
                 $context = 'sequence';
 
@@ -111,13 +111,13 @@ class Parser
                 }
             } elseif (preg_match('#^(?P<key>'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\[\{].*?) *\:(\s+(?P<value>.+?))?\s*$#u', $this->currentLine, $values)) {
                 if ($context && 'sequence' == $context) {
-                    throw new ParseError('You cannot define a mapping item when in a sequence');
+                    throw new ParseException('You cannot define a mapping item when in a sequence');
                 }
                 $context = 'mapping';
 
                 try {
                     $key = Inline::parseScalar($values['key']);
-                } catch (ParseError $e) {
+                } catch (ParseException $e) {
                     $e->setParsedLine($this->getRealCurrentLineNb() + 1);
                     $e->setSnippet($this->currentLine);
 
@@ -128,7 +128,7 @@ class Parser
                     if (isset($values['value']) && 0 === strpos($values['value'], '*')) {
                         $isInPlace = substr($values['value'], 1);
                         if (!array_key_exists($isInPlace, $this->refs)) {
-                            throw new ParseError(sprintf('Reference "%s" does not exist.', $isInPlace), $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                            throw new ParseException(sprintf('Reference "%s" does not exist.', $isInPlace), $this->getRealCurrentLineNb() + 1, $this->currentLine);
                         }
                     } else {
                         if (isset($values['value']) && $values['value'] !== '') {
@@ -143,12 +143,12 @@ class Parser
 
                         $merged = array();
                         if (!is_array($parsed)) {
-                            throw new ParseError('YAML merge keys used with a scalar value instead of an array.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                            throw new ParseException('YAML merge keys used with a scalar value instead of an array.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
                         } elseif (isset($parsed[0])) {
                             // Numeric array, merge individual elements
                             foreach (array_reverse($parsed) as $parsedItem) {
                                 if (!is_array($parsedItem)) {
-                                    throw new ParseError('Merge items must be arrays.', $this->getRealCurrentLineNb() + 1, $parsedItem);
+                                    throw new ParseException('Merge items must be arrays.', $this->getRealCurrentLineNb() + 1, $parsedItem);
                                 }
                                 $merged = array_merge($parsedItem, $merged);
                             }
@@ -190,7 +190,7 @@ class Parser
                 if (2 == count($this->lines) && empty($this->lines[1])) {
                     try {
                         $value = Inline::parse($this->lines[0]);
-                    } catch (ParseError $e) {
+                    } catch (ParseException $e) {
                         $e->setParsedLine($this->getRealCurrentLineNb() + 1);
                         $e->setSnippet($this->currentLine);
 
@@ -235,7 +235,7 @@ class Parser
                         $error = 'Unable to parse.';
                 }
 
-                throw new ParseError($error, $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                throw new ParseException($error, $this->getRealCurrentLineNb() + 1, $this->currentLine);
             }
 
             if ($isRef) {
@@ -277,7 +277,7 @@ class Parser
      *
      * @return string A YAML string
      *
-     * @throws ParseError When indentation problem are detected
+     * @throws ParseException When indentation problem are detected
      */
     private function getNextEmbedBlock($indentation = null)
     {
@@ -289,7 +289,7 @@ class Parser
             $unindentedEmbedBlock = $this->isStringUnIndentedCollectionItem($this->currentLine);
 
             if (!$this->isCurrentLineEmpty() && 0 === $newIndent && !$unindentedEmbedBlock) {
-                throw new ParseError('Indentation problem.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                throw new ParseException('Indentation problem.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
             }
         } else {
             $newIndent = $indentation;
@@ -326,7 +326,7 @@ class Parser
 
                 break;
             } else {
-                throw new ParseError('Indentation problem.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
+                throw new ParseException('Indentation problem.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
             }
         }
 
@@ -364,7 +364,7 @@ class Parser
      *
      * @return mixed  A PHP value
      *
-     * @throws ParseError When reference does not exist
+     * @throws ParseException When reference does not exist
      */
     private function parseValue($value)
     {
@@ -376,7 +376,7 @@ class Parser
             }
 
             if (!array_key_exists($value, $this->refs)) {
-                throw new ParseError(sprintf('Reference "%s" does not exist.', $value), $this->currentLine);
+                throw new ParseException(sprintf('Reference "%s" does not exist.', $value), $this->currentLine);
             }
 
             return $this->refs[$value];
@@ -390,7 +390,7 @@ class Parser
 
         try {
             return Inline::parse($value);
-        } catch (ParseError $e) {
+        } catch (ParseException $e) {
             $e->setParsedLine($this->getRealCurrentLineNb() + 1);
             $e->setSnippet($this->currentLine);
 

@@ -3,7 +3,7 @@ namespace module\core\lib;
 
 class CBUploaderHandler extends UploadHandler {
 	protected function get_user_dir() {
-		return \system\Login::getLoggedUserId();
+		return \system\utils\Login::getLoggedUserId();
 	}
 //	protected function set_file_delete_properties($file) {
 //		parent::set_file_delete_properties($file);

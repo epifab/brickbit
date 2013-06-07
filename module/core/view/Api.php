@@ -55,7 +55,7 @@ class Api {
 			. ' type="hidden"'
 			. ' id="' . self::generate_input_id($path) . '"'
 			. ' name="' . self::input_name($path) . '"'
-			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 			. ' value="' . \htmlentities($recordset->getProg($path)) . '"/>';
 	}
 
@@ -65,13 +65,13 @@ class Api {
 		$params += $f->getAttributes();
 
 		return 
-			'<input type="' . (\system\Utils::getParam('password', $params, array('default' => false)) ? 'password' : 'text') . '"'
+			'<input type="' . (\system\utils\Utils::getParam('password', $params, array('default' => false)) ? 'password' : 'text') . '"'
 			. ' name="' . self::input_name($path) . '"'
 			. ' id="' . self::generate_input_id($path) . '"'
-			. \system\Utils::getParam('size', $params, array('prefix' => ' size="', 'suffix' => '"', 'default' => ''))
-			. \system\Utils::getParam('maxlength', $params, array('prefix' => ' maxlength="', 'suffix' => '"', 'default' => ''))
-			. \system\Utils::getParam('placeholder', $params, array('prefix' => ' placeholder="', 'suffix' => '"', 'default' => ''))
-			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. \system\utils\Utils::getParam('size', $params, array('prefix' => ' size="', 'suffix' => '"', 'default' => ''))
+			. \system\utils\Utils::getParam('maxlength', $params, array('prefix' => ' maxlength="', 'suffix' => '"', 'default' => ''))
+			. \system\utils\Utils::getParam('placeholder', $params, array('prefix' => ' placeholder="', 'suffix' => '"', 'default' => ''))
+			. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 			. ' value="' . \htmlentities($recordset->getProg($path)) . '"/>';
 	}
 	
@@ -82,11 +82,11 @@ class Api {
 		
 		return
 			'<textarea'
-			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 			. ' id="' . self::generate_input_id($path) . '"'
 			. ' name="' . self::input_name($path) . '"'
-			. ' rows="' . \system\Utils::getParam('rows', $params, array('default' => 5)) . '"'
-			. ' cols="' . \system\Utils::getParam('cols', $params, array('default' => 35)) . '"'
+			. ' rows="' . \system\utils\Utils::getParam('rows', $params, array('default' => 5)) . '"'
+			. ' cols="' . \system\utils\Utils::getParam('cols', $params, array('default' => 35)) . '"'
 			. '>' . \htmlentities($recordset->getProg($path)) . '</textarea>';
 	}
 
@@ -99,9 +99,9 @@ class Api {
 			'<select'
 			. ' name="' . self::input_name($path) . '"'
 			. ' id="' . self::generate_input_id($path) . '"'
-			. (\system\Utils::getParam('multiple', $params, array('default' => false)) ? ' multiple="multiple"' : '')
-			. ' size="' . (\system\Utils::getParam('multiple', $params, array('default' => false)) ? '5' : '1') . '"'
-			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '">';
+			. (\system\utils\Utils::getParam('multiple', $params, array('default' => false)) ? ' multiple="multiple"' : '')
+			. ' size="' . (\system\utils\Utils::getParam('multiple', $params, array('default' => false)) ? '5' : '1') . '"'
+			. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '">';
 
 		$values = $recordset->getProg($path);
 		if (!\is_array($values)) {
@@ -112,14 +112,14 @@ class Api {
 			}
 		}
 
-		$options = \system\Utils::getParam('options', $params, array('default' => array()));
+		$options = \system\utils\Utils::getParam('options', $params, array('default' => array()));
 		
 		if (\is_array($options)) {
 			foreach ($options as $key => $val) {
 				$return .= 
 					'<option value="' . \htmlentities($key) . '"'
 					. ($key == $recordset->getProg($path) ? ' selected="selected"' : '') . '>'
-					. \system\Lang::translate($val) . '</option>';
+					. \system\utils\Lang::translate($val) . '</option>';
 			}
 		}
 		$return .= '</select>';
@@ -131,7 +131,7 @@ class Api {
 
 		$params += $f->getAttributes();
 
-		$options = \system\Utils::getParam('options', $params, array('default' => array()));
+		$options = \system\utils\Utils::getParam('options', $params, array('default' => array()));
 		
 		$id = self::generate_input_id($path);
 
@@ -144,10 +144,10 @@ class Api {
 					. ' type="radio"'
 					. ' name="' . self::input_name($path) . '"'
 					. ' id="' . $id . '-' . \htmlentities($key) . '"'
-					. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+					. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 					. ($recordset->getProg($path) == $key ? ' checked="checked"' : '')
 					. ' value="' . \htmlentities($key) . '"/>'
-					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\Lang::translate($val) . '</label>'
+					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\utils\Lang::translate($val) . '</label>'
 					. '</div>';
 			}
 		}
@@ -159,7 +159,7 @@ class Api {
 
 		$params += $f->getAttributes();
 
-		$options = \system\Utils::getParam('options', $params, array('default' => array()));
+		$options = \system\utils\Utils::getParam('options', $params, array('default' => array()));
 		
 		$id = self::generate_input_id($path);
 		
@@ -181,10 +181,10 @@ class Api {
 					. ' type="checkbox"'
 					. ' name="' . self::input_name($path) . '[' . \htmleentities($key) . ']"'
 					. ' id="' . $id . '-' . \htmlentities($key) . '"'
-					. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+					. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 					. (\in_array($key, $values) ? ' checked="checked"' : '')
 					. ' value="1"/>'
-					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\Lang::translate($val) . '</label>'
+					. '<label for="' . $id . '-' . \htmlentities($key) . '">' . \system\utils\Lang::translate($val) . '</label>'
 					. '</div>';
 			}
 		}
@@ -202,7 +202,7 @@ class Api {
 			. ' name="' . self::input_name($path) . ']"'
 			. ' id="' . self::generate_input_id($path) . '"'
 			. ($recordset->getProg($path) ? ' checked="checked"' : '')
-			. ' class="de-input' . \system\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
+			. ' class="de-input' . \system\utils\Utils::getParam('class', $params, array('defalt' => '', 'prefix' => ' ')) . '"'
 			. ' value="1"/>';
 	}
 	
@@ -217,22 +217,22 @@ class Api {
 	}
 
 	public static function link($content, $params) {
-		$params['url'] = \system\Utils::getParam('url', $params, array('required' => true, 'prefix' => \config\settings()->BASE_DIR));
+		$params['url'] = \system\utils\Utils::getParam('url', $params, array('required' => true, 'prefix' => \config\settings()->BASE_DIR));
 
 		$url = $params['url'];
-		$ajax = \system\Utils::getParam('ajax', $params, array('default' => true, 'options' => array(false, true)));
-		$class = \system\Utils::getParam('class', $params, array('default' => 'link'));
+		$ajax = \system\utils\Utils::getParam('ajax', $params, array('default' => true, 'options' => array(false, true)));
+		$class = \system\utils\Utils::getParam('class', $params, array('default' => 'link'));
 		$params['system'] = array(
 			 'requestType' => 'MAIN',
 //			'requestId' => null
 		);
-		$jsArgs = \system\Utils::php2Js($params); //array_merge(array('url' => $url), \system\Utils::getParam('args', $params, array('default' => array()))));
+		$jsArgs = \system\utils\Utils::php2Js($params); //array_merge(array('url' => $url), \system\utils\Utils::getParam('args', $params, array('default' => array()))));
 
 		if ($ajax) {
-			$confirm = \system\Utils::getParam('confirm', $params, array('default' => false, 'options' => array(false, true)));
+			$confirm = \system\utils\Utils::getParam('confirm', $params, array('default' => false, 'options' => array(false, true)));
 			if ($confirm) {
-				$confirmTitle = str_replace("'", "\\'", \system\Utils::getParam('confirmTitle', $params, array('default' => '')));
-				$confirmQuest = str_replace("'", "\\'", \system\Utils::getParam('confirmQuest', $params, array('default' => '')));
+				$confirmTitle = str_replace("'", "\\'", \system\utils\Utils::getParam('confirmTitle', $params, array('default' => '')));
+				$confirmQuest = str_replace("'", "\\'", \system\utils\Utils::getParam('confirmQuest', $params, array('default' => '')));
 				$action = "ciderbit.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
 			} else {
 				$action = "ciderbit.request(" . $jsArgs . "); return false;";

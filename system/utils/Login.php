@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 
 use system\error\LoginError;
 
@@ -95,10 +95,10 @@ class Login {
 				return null;
 			}
 		} else {
-			$rsb = new model\RecordsetBuilder('user');
+			$rsb = new \system\model\RecordsetBuilder('user');
 			$rsb->usingAll();
 
-			$rsb->setFilter(new model\FilterClauseGroup(
+			$rsb->setFilter(new \system\model\FilterClauseGroup(
 				new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
 				"AND",
 				new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\metatypes\MetaString::stdProg2Db($cryptedEmail))
@@ -119,7 +119,7 @@ class Login {
 		if (!$reset && \array_key_exists($uid, self::$users)) {
 			return self::$users[$uid];
 		} else {
-			$rsb = new model\RecordsetBuilder('user');
+			$rsb = new \system\model\RecordsetBuilder('user');
 			$rsb->usingAll();
 			self::$users[$uid] = $rsb->selectFirstBy(array('id' => $uid));
 			if (self::$users[$uid]) {
@@ -143,7 +143,7 @@ class Login {
 			'id' => $this->user->id,
 			'username' => \md5($this->user->email),
 			'userpass' => $this->user->password, // already crypted
-			'ip' => \system\HTMLHelpers::getIpAddress()
+			'ip' => \system\utils\HTMLHelpers::getIpAddress()
 		);
 	}
 

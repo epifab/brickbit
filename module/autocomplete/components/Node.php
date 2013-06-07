@@ -1,7 +1,7 @@
 <?php
 namespace module\autocomplete\components;
 
-class Node extends \system\logic\Component {
+class Node extends \system\Component {
 	public function runNodes() {
 		$q = $_REQUEST['q'];
 		$rsb = new \system\model\RecordsetBuilder('node');

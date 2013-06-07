@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-use \system\logic\Component;
+use \system\Component;
 use \system\model\Recordset;
 use \system\model\RecordsetBuilder;
 use \system\model\FilterClause;
@@ -59,13 +59,13 @@ class User extends Page {
 	public function runLogin() {
 		$this->setMainTemplate('login-form');
 
-		$this->setPageTitle(\system\Lang::translate("Login"));
+		$this->setPageTitle(\system\utils\Lang::translate("Login"));
 		
-		$user = \system\Login::getLoggedUser();
+		$user = \system\utils\Login::getLoggedUser();
 		
 		if ($user->anonymous && \array_key_exists("login_form", $_REQUEST)) {
 			try {
-				$user = \system\Login::login();
+				$user = \system\utils\Login::login();
 			} catch (\system\error\LoginError $ex) {
 				$this->datamodel['message'] = $ex->getMessage();
 			}
@@ -74,23 +74,23 @@ class User extends Page {
 		if (!$user->anonymous) {
 			$this->setMainTemplate('notify');
 			$this->datamodel['message'] = array(
-				'title' => \system\Lang::translate('Logged in'),
-				'body' => \system\Lang::translate('<p>Welcome @name!</p>', array('@name' => $user->full_name))
+				'title' => \system\utils\Lang::translate('Logged in'),
+				'body' => \system\utils\Lang::translate('<p>Welcome @name!</p>', array('@name' => $user->full_name))
 			);
-			return \system\logic\Component::RESPONSE_TYPE_NOTIFY;	
+			return \system\Component::RESPONSE_TYPE_NOTIFY;	
 		}
 		else {
-			return \system\logic\Component::RESPONSE_TYPE_FORM;
+			return \system\Component::RESPONSE_TYPE_FORM;
 		}
 	}
 	
 	public function runLogout() {
-		\system\Login::logout();
+		\system\utils\Login::logout();
 		
 		$this->setMainTemplate('notify');
 		$this->datamodel["message"] = array(
-			'title' => \system\Lang::translate('Logged out'),
-			'body' => \system\Lang::translate('You have been logged out.')
+			'title' => \system\utils\Lang::translate('Logged out'),
+			'body' => \system\utils\Lang::translate('You have been logged out.')
 		);
 		return Component::RESPONSE_TYPE_NOTIFY;
 	}
@@ -98,37 +98,37 @@ class User extends Page {
 	public function runRegister() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runList() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runAdd() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runRead() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runEdit() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runDelete() {
 		$this->setPageTitle(\cb\t('Under development'));
 		$this->setMainTemplate('developing');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 }
 ?>

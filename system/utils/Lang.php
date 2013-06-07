@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 /*
  * How the lang system work:
  *  

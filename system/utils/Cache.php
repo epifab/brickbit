@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 
 class Cache {
 	private static $cache = array();

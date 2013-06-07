@@ -1,8 +1,8 @@
 <?php
 namespace module\core\components;
 
-class File extends \system\logic\Component {
-	public static function access($action, $urlArgs, $request, \system\Login $user) {
+class File extends \system\Component {
+	public static function access($action, $urlArgs, $request, \system\utils\Login $user) {
 		return $user && $user->logged;
 	}
 	
@@ -28,7 +28,7 @@ class File extends \system\logic\Component {
 	}
 	
 	public function runThumbnail() {
-		switch (\strtolower(\system\File::getExtension($this->getUrlArg(1)))) {
+		switch (\strtolower(\system\utils\File::getExtension($this->getUrlArg(1)))) {
 			case "jpg":
 			case "jpeg":
 				$contentType = "jpeg";

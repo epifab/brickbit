@@ -137,7 +137,7 @@ class CoreApi {
 				'requestType' => 'MAIN',
 	//			'requestId' => null
 			);
-			$jsArgs = \system\Utils::php2Js($params); //array_merge(array('url' => $url), \cb\array_item('args', $params, array('default' => array()))));
+			$jsArgs = \system\utils\Utils::php2Js($params); //array_merge(array('url' => $url), \cb\array_item('args', $params, array('default' => array()))));
 
 			if ($ajax) {
 				$confirm = \cb\array_item('confirm', $params, array('default' => false, 'options' => array(false, true)));
@@ -159,8 +159,6 @@ class CoreApi {
 	}
 	
 	public static function display_node($node, $display = 'default') {
-		$api = \system\view\Api::getInstance();
-		
 		$templates = array(
 			'node-'. $display . '--' . $node->id,
 			'node-'. $display . '-' . $node->type,

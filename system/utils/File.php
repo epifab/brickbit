@@ -1,5 +1,5 @@
 <?php
-namespace system;
+namespace system\utils;
 
 use system\error\InternalError;
 use system\error\ValidationError;

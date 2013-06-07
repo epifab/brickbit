@@ -242,12 +242,8 @@ ciderbit.setBehavior('plupload', function() {
 							'name' => 'text_' . $lang . '.enable',
 							'id' => 'text_' . $lang . '_enable',
 							'label' => $this->api->t('Enable for this lang'),
-							'value' => (bool)$recordset->__get('text_' . $lang)->lang
+							'value' => isset($recordset->texts[$lang])
 						)); ?>
-						<input type="checkbox"
-							class="de-input show-hide-class" 
-							name="node[text_<?php print $lang; ?>.enable]"<?php if ($recordset->__get('text_' . $lang)->lang): ?> checked="checked"<?php endif; ?>
-							id="edit-node-text_<?php print $lang; ?>-enable"/>
 						<label for="edit-node-text_<?php print $lang; ?>-enable"><?php print $this->api->t("Content available for this language."); ?></label>
 					</div>
 				</div>

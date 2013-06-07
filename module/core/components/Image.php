@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-use \system\logic\Component;
+use \system\Component;
 use \system\model\Recordset;
 use \system\model\RecordsetBuilder;
 use \system\model\FilterClause;
@@ -14,7 +14,7 @@ class Image extends Component {
 	
 	public static function runVersion() {
 		list($version, $nodeId, $nodeIndex, $virtualName, $ext) = $this->getUrlArgs();
-		if (!\array_key_exists($version, \system\Cache::imageVersionMakers())) {
+		if (!\array_key_exists($version, \system\utils\Cache::imageVersionMakers())) {
 			throw new \system\error\PageNotFound();
 		}
 		$rsb = new RecordsetBuilder('node_file');
@@ -35,7 +35,7 @@ class Image extends Component {
 		
 		if (!\file_exists($fileName) || \filetime($fileName) < $nodeFile->file->last_update) {
 			// file version doesn't exist or outdated
-			$handler = \system\Cache::imageVersionMakers();
+			$handler = \system\utils\Cache::imageVersionMakers();
 			if (!isset($handler[$version])) {
 				throw new \system\error\PageNotFound();
 			} else {
@@ -67,19 +67,19 @@ class Image extends Component {
 	}
 	
 	public static function imageVersionMaker50x50($fileName, \system\model\RecordsetInterface $nodeFile) {
-		\system\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
+		\system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
 	}
 	
 	public static function imageVersionMaker100x100($fileName, \system\model\RecordsetInterface $nodeFile) {
-		\system\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
+		\system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
 	}
 	
 	public static function imageVersionMaker300x300($fileName, \system\model\RecordsetInterface $nodeFile) {
-		\system\File::createImageFixedSize($nodeFile->file->path, $fileName, 300, 300);
+		\system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 300, 300);
 	}
 	
 	public static function imageVersionMaker500x500($fileName, \system\model\RecordsetInterface $nodeFile) {
-		\system\File::createImageFixedSize($nodeFile->file->path, $fileName, 500, 500);
+		\system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 500, 500);
 	}
 }
 ?>

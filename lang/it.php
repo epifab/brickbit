@@ -5,8 +5,8 @@ class It {
 	public static function vocabulary() {
 		return array(
 			"HELLO EVERYONE!" => function() {
-				if (\system\Login::isLogged()) {
-					return "CIAO " . \system\Login::getLoggedUser()->email;
+				if (\system\utils\Login::isLogged()) {
+					return "CIAO " . \system\utils\Login::getLoggedUser()->email;
 				} else {
 					return "CIAO PORCODDIO";
 				}

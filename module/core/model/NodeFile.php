@@ -25,7 +25,7 @@ class NodeFile {
 	}
 	
 	public static function images(RecordsetInterface $rs) {
-		$imgVersions = \array_keys(\system\Cache::imageVersionMakers());
+		$imgVersions = \array_keys(\system\utils\Cache::imageVersionMakers());
 		$versions = array();
 		foreach ($imgVersions as $version) {
 			$versions[$version] = 'content/' . $rs->node_id . '/img-' . $version . '/' . $rs->node_index . '/' . $rs->virtual_name;

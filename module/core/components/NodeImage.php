@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-class NodeImage extends \system\logic\Component {
+class NodeImage extends \system\Component {
   
 	public function runGetVersion() {
     
@@ -33,7 +33,7 @@ class NodeImage extends \system\logic\Component {
         // read the cache
       } else {
         // create new version
-        \system\File::uploadImageFixedSize($inputName, $destinationPath, $fixedWidth, $fixedHeight);
+        \system\utils\File::uploadImageFixedSize($inputName, $destinationPath, $fixedWidth, $fixedHeight);
       }
     }
 	}

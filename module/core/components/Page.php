@@ -1,7 +1,7 @@
 <?php
 namespace module\core\components;
 
-use \system\logic\Component;
+use \system\Component;
 use \system\model\Recordset;
 use \system\model\RecordsetBuilder;
 use \system\model\FilterClause;
@@ -18,12 +18,12 @@ class Page extends Node {
 	public function runNotFound() {
 		$this->setPageTitle(\cb\t('Page not found'));
 		$this->setMainTemplate('page-not-found');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runHome() {
 		$this->setMainTemplate('home');
-		return \system\logic\Component::RESPONSE_TYPE_READ;
+		return \system\Component::RESPONSE_TYPE_READ;
 	}
 }
 ?>

@@ -29,7 +29,7 @@ abstract class MetaType implements \Serializable {
 		static $map = null;
 		if (\is_null($map)) {
 			if (\config\settings()->CORE_CACHE) {
-				$map = \system\Utils::get('system-mtmap', null);
+				$map = \system\utils\Utils::get('system-mtmap', null);
 				if (!\is_null($map)) {
 					return $map;
 				}
@@ -55,7 +55,7 @@ abstract class MetaType implements \Serializable {
 				}
 			}
 			if (\config\settings()->CORE_CACHE) {
-				\system\Utils::set('system-mtmap', $map);
+				\system\utils\Utils::set('system-mtmap', $map);
 			}
 		}
 		return $map;

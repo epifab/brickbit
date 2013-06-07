@@ -29,27 +29,27 @@ class SqlQueryError extends DataLayerError {
 //	public function getTxtMessage() {
 //		if (empty($this->message)) {
 //			$this->message =
-//				\system\Lang::translate("Data access error.") . "\r\n" .
+//				\system\utils\Lang::translate("Data access error.") . "\r\n" .
 //				"\r\nFile ". (!empty($this->file) ? $this->file : "?") .", Line ". (!empty($this->line) ? $this->line : "?") .".\r\n\r\n";
 //
 //			switch ($this->action) {
 //				case SqlQueryError::ACTION_CONNECTION:
-//					$this->message .= \system\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
+//					$this->message .= \system\utils\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
 //					break;
 //				case SqlQueryError::ACTION_DB_SELECTION:
-//					$this->message .= \system\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
+//					$this->message .= \system\utils\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
 //					break;
 //				case SqlQueryError::ACTION_RETRIEVE_ID:
-//					$this->message .= \system\Lang::translate("Unable to retrieve the last inserted id.") . "\r\n";
+//					$this->message .= \system\utils\Lang::translate("Unable to retrieve the last inserted id.") . "\r\n";
 //					break;
 //				default:
 //					break;
 //			}
 //			if (!empty($this->sqlError)) {
-//				$this->message .= \system\Lang::translate("Sql error details: @details", array('@details' => $this->sqlError)) . "\r\n\r\n";
+//				$this->message .= \system\utils\Lang::translate("Sql error details: @details", array('@details' => $this->sqlError)) . "\r\n\r\n";
 //			}
 //			if (!empty($this->query)) {
-//				$this->message .= \system\Lang::translate("Sql query: @query", array('@query' => $this->query)) . "\r\n\r\n";
+//				$this->message .= \system\utils\Lang::translate("Sql query: @query", array('@query' => $this->query)) . "\r\n\r\n";
 //			}
 //		}
 //		return $this->message;
