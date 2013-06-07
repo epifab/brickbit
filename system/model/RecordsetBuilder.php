@@ -1265,4 +1265,3 @@ class RecordsetBuilder {
 		return \ceil($numRecords / $pageSize);
 	}
 }
-?>

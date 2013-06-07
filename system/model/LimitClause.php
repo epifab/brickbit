@@ -34,4 +34,3 @@ class LimitClause implements SelectClauseInterface {
 		}
 	}
 }
-?>

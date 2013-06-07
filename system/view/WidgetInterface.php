@@ -11,4 +11,3 @@ interface WidgetInterface {
 	 */
 	public function fetch($value, array $input);
 }
-?>

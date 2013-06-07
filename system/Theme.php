@@ -27,4 +27,3 @@ class Theme {
 		return \config\settings()->BASE_DIR . "theme/" . self::getTheme() . "/" . (empty($subfolder) ? "" : $subfolder . "/");
 	}
 }
-?>

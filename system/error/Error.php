@@ -10,4 +10,3 @@ abstract class Error extends \Exception {
 		return '';
 	}
 }
-?>

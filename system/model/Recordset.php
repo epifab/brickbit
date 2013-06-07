@@ -680,4 +680,3 @@ class Recordset implements RecordsetInterface {
 		return $array;
 	}
 }
-?>

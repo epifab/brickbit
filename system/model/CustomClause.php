@@ -12,4 +12,3 @@ class CustomClause implements SelectClauseInterface {
 		return $this->query;
 	}
 }
-?>

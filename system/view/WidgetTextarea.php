@@ -21,4 +21,3 @@ class WidgetTextarea implements WidgetInterface {
 		return $value;
 	}
 }
-?>

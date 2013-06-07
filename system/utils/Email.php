@@ -44,4 +44,3 @@ class Email {
 		return @mail($this->to["email"], $this->subject, $mailBody, $mailHead);
 	}
 }
-?>

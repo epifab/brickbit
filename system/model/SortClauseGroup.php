@@ -48,4 +48,3 @@ class SortClauseGroup implements SelectClauseInterface {
 		return $query;
 	}
 }
-?>

@@ -125,4 +125,3 @@ class MetaDecimal extends MetaType {
 		}
 	}
 }
-?>

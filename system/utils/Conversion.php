@@ -327,4 +327,3 @@ class Conversion {
 		return Conversion::time2DateString_DataEdit($x);
 	}
 }
-?>

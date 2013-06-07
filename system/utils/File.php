@@ -441,4 +441,3 @@ class File {
 //		\imagedestroy($squareImg);
 //	}
 }
-?>

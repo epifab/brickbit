@@ -20,4 +20,3 @@ class WidgetHidden implements WidgetInterface {
 		return $input['value'];
 	}
 }
-?>

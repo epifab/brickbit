@@ -8,4 +8,3 @@ interface TemplateManagerInterface {
 	public function setOutlineWrapperTemplate($tpl);
 	public function addTemplateDir($dir);
 }
-?>

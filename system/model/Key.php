@@ -55,4 +55,3 @@ class Key {
 		return $this->primary;
 	}
 }
-?>

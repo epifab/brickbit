@@ -76,4 +76,3 @@ class FilterClauseGroup implements SelectClauseInterface {
 		return $query;
 	}
 }
-?>

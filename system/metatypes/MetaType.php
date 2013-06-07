@@ -143,4 +143,3 @@ abstract class MetaType implements \Serializable {
 	}
 }
 
-?>

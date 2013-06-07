@@ -31,4 +31,3 @@ class WidgetCheckbox implements WidgetInterface {
 		return $value;
 	}
 }
-?>

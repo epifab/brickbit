@@ -37,4 +37,3 @@ class WidgetRadiobutton implements WidgetInterface {
 		return $value;
 	}
 }
-?>

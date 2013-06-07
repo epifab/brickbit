@@ -97,4 +97,3 @@ class MetaDateTime extends MetaType {
 		}
 	}
 }
-?>

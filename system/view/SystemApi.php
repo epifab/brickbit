@@ -157,4 +157,3 @@ class SystemApi {
 		return \system\utils\Lang::translate($sentence, $args);
 	}
 }
-?>

@@ -21,4 +21,3 @@ class WidgetTextbox implements WidgetInterface {
 		return $value;
 	}
 }
-?>

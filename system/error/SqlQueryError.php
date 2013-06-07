@@ -80,4 +80,3 @@ class SqlQueryError extends DataLayerError {
 		return $message;
 	}
 }
-?>

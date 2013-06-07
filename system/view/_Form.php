@@ -3,19 +3,36 @@ namespace system\view;
 
 class Form {
 	private static $activeForm = null;
+	/**
+	 * @var \system\model\RecordsetInterface
+	 */
+	private static $recordset = null;
 	
-	public static function startForm($formId) {
+	public static function startForm($formId, $recordset = null) {
 		if (self::$activeForm) {
 			throw new \system\error\InternalError('Illegal nested form.');
 		}
 		
 		self::$activeForm = $formId;
+		self::$recordset = $recordset;
 		
 		$_SESSION['system']['forms'][$formId] = array(
 			'id' => $formId,
 			'input' => array(),
+			'recordset' => empty($recordset) ? null : array(
+				'masterTable' => $recordset->getBuilder()->getTableName(),
+				'fields' => array(),
+				'key' => ($recordset->isStored() ? $recordset->getPrimaryKey() : null)
+			),
 			'errors' => array(),
 		);
+	}
+	
+	/**
+	 * @return \system\model\RecordsetInterface
+	 */
+	public static function getRecordset() {
+		return self::$recordset;
 	}
 	
 	public static function closeForm() {
@@ -44,6 +61,23 @@ class Form {
 			return $return;
 		}
 	}
+	
+	public static function addRsField($path, $inputName) {
+		$_SESSION['system']['forms'][self::$activeForm]['recordset']['fields'][$path] = $inputName;
+	}
+	
+//	public static function addRecordsetField($path, $widget, array $input) {
+//		if (self::$activeForm && self::$recordset) {
+//			self::addInput(
+//				$widget, 
+//				self::$activeForm . '[recordset][' . \cb\plaintext($path) . ']',
+//				self::$recordset->getProg($path),
+//				$input,
+//				self::$recordset->getBuilder()->searchField($path, true)->getMetaType()
+//			);
+//			$_SESSION['system']['forms'][self::$activeForm]['recordset']['fields'][$path] = $input['name'];
+//		}
+//	}
 	
 	public static function getActiveForm() {
 		return self::$activeForm;

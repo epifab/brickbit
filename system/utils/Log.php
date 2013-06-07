@@ -31,4 +31,3 @@ class Log {
 		return self::$logs;
 	}
 }
-?>

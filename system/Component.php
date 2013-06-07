@@ -731,4 +731,3 @@ abstract class Component {
 		}
 	}
 }
-?>

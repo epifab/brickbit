@@ -48,4 +48,3 @@ class WidgetCheckboxes implements WidgetInterface {
 		return $v;
 	}
 }
-?>

@@ -38,4 +38,3 @@ class WidgetSelectbox implements WidgetInterface {
 		return $value;
 	}
 }
-?>

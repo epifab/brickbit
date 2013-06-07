@@ -40,4 +40,3 @@ class FieldVirtual extends Field {
 		return $this->handle;
 	}
 }
-?>

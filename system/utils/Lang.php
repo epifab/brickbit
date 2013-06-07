@@ -74,4 +74,3 @@ class Lang {
 		return $sentence;
 	}
 }
-?>

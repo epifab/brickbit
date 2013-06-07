@@ -26,4 +26,3 @@ class MetaBoolean extends MetaType {
 		}
 	}
 }
-?>

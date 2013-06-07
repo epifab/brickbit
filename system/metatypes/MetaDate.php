@@ -86,4 +86,3 @@ class MetaDate extends MetaType {
 		}
 	}
 }
-?>

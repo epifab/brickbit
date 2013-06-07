@@ -27,4 +27,3 @@ class Widget {
 		return self::$widgets[$name];
 	}
 }
-?>

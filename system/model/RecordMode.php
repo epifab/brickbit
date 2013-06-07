@@ -9,4 +9,3 @@ class RecordMode {
 	const MODE_REGISTERED = 4;
 	const MODE_ANYONE = 5;
 }
-?>

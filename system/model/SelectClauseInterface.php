@@ -8,4 +8,3 @@ namespace system\model;
 interface SelectClauseInterface {
 	public function getQuery();
 }
-?>

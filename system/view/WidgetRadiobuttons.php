@@ -44,4 +44,3 @@ class WidgetRadiobuttons implements WidgetInterface {
 		return null;
 	}
 }
-?>

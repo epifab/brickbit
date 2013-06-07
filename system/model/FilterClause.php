@@ -212,4 +212,3 @@ class FilterClause implements SelectClauseInterface {
 			return $clause;
 	}
 }
-?>

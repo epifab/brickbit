@@ -68,4 +68,3 @@ class Template {
 		\array_pop(self::$templates);
 	}
 }
-?>

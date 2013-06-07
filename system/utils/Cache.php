@@ -17,4 +17,3 @@ class Cache {
 		return self::$cache[$hook];
 	}
 }
-?>

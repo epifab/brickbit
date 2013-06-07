@@ -32,4 +32,4 @@ interface RecordsetInterface {
 	
 	public function toArray();
 }
-?>
+

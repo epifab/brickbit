@@ -280,4 +280,3 @@ class Login {
 //		return $username->Send();
 //	}
 }
-?>

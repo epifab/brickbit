@@ -34,4 +34,3 @@ abstract class Module {
 		return $path;
 	}
 }
-?>

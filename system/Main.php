@@ -683,4 +683,3 @@ class Main {
 		return \config\settings()->BASE_DIR_ABS . 'data/';
 	}
 }
-?>

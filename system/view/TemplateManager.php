@@ -88,4 +88,3 @@ class TemplateManager implements TemplateManagerInterface {
 	}	
 }
 
-?>
