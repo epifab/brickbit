@@ -17,7 +17,7 @@ class SystemApi {
 		}
 		list($callback, $args) = \array_pop(self::$blocks);
 		$content = \ob_get_clean();
-		$x = \system\view\Api::__callStatic($callback, array($content, $args, true));
+		$x = \system\view\Api::__callStatic($callback, array($content, $args, false));
 		if (!\is_null($x)) {
 			echo $x;
 		}
@@ -126,6 +126,9 @@ class SystemApi {
 	}
 	
 	public static function block_block($content, $params, $open) {
+//		echo $open 
+//			? "<h1 style=\"background-color: #FFF; color: #000;\">OPENING BLOCK</h1>"
+//			: "<h1 style=\"background-color: #FFF; color: #000;\">CLOSING BLOCK</h1>";
 		if (!$open) {
 			$name = \cb\array_item('name', $params, array('required' => true));
 			$url = \cb\array_item('url', $params, array('required' => true));
@@ -137,7 +140,9 @@ class SystemApi {
 	public static function import($name, $args = array()) {
 		$a = $args + \system\view\Template::current()->getVars();
 		$tpl = new \system\view\Template($name, $a);
+		echo "<h1>THIS IS AN IMPORT</h1>";
 		$tpl->render();
+		echo "</h1>END</h1>";
 	}
 
 	public static function region($region) {
