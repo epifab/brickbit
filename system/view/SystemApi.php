@@ -140,9 +140,7 @@ class SystemApi {
 	public static function import($name, $args = array()) {
 		$a = $args + \system\view\Template::current()->getVars();
 		$tpl = new \system\view\Template($name, $a);
-		echo "<h1>THIS IS AN IMPORT</h1>";
 		$tpl->render();
-		echo "</h1>END</h1>";
 	}
 
 	public static function region($region) {
