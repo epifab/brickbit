@@ -20,13 +20,13 @@ class SortClause implements SelectClauseInterface {
 	const STYPE_RAND = 3;
 
 	/**
-	 * Tipo dell'ordinamento
-	 */
-	private $type;
-	/**
 	 * Informazioni sul campo per l'ordinamento
 	 */
 	private $field;
+	/**
+	 * Tipo dell'ordinamento
+	 */
+	private $type;
 
 	/**
 	 * Costruisce una clausola SORT BY
@@ -75,5 +75,14 @@ class SortClause implements SelectClauseInterface {
 		} else {
 			return $this->field->getAlias() . " " . (($this->type == SortClause::STYPE_ASC) ? "ASC" : "DESC");
 		}
+	}
+
+	public function serialize() {
+		return \serialize(array($this->field, $this->type));
+	}
+
+	public function unserialize($serialized) {
+		list($field, $type) = \unserialize($serialized);
+		return new self($field, $type);
 	}
 }

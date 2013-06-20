@@ -1,18 +1,6 @@
 <?php
 namespace config;
 
-//if (\array_key_exists(\session_name(), $_REQUEST)) {
-//	@\session_id($_REQUEST[\session_name()]);
-//}
-
-$domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
-if (\count($domains) >= 3) {
-	\session_set_cookie_params(0, '/', '.' . $domains[1] . '.' . $domains[0]);
-//	\ini_set('session.cookie_domain', '.' . $domains[1] . '.' . $domains[0]);
-}
-
-@\session_start();
-
 require 'system/error/Error.php';
 require 'system/error/InternalError.php';
 
@@ -178,10 +166,21 @@ class Config {
 	}
 }
 
+//if (\array_key_exists(\session_name(), $_REQUEST)) {
+//	@\session_id($_REQUEST[\session_name()]);
+//}
+
 \spl_autoload_register('\config\Config::autoload');
 
 \system\utils\Lang::setLang(\strpos($_SERVER["HTTP_HOST"], ".")
 	? substr($_SERVER["HTTP_HOST"], 0, \strpos($_SERVER["HTTP_HOST"], ".")) 
 	: $_SERVER["HTTP_HOST"]
 );
-?>
+
+$domains = \array_reverse(\explode('.', $_SERVER['HTTP_HOST']));
+if (\count($domains) >= 3) {
+	\session_set_cookie_params(0, '/', '.' . $domains[1] . '.' . $domains[0]);
+//	\ini_set('session.cookie_domain', '.' . $domains[1] . '.' . $domains[0]);
+}
+
+@\session_start();

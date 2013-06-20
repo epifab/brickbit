@@ -7,8 +7,8 @@ namespace system\model;
  */
 class LimitClause implements SelectClauseInterface {
 
-	private $offset;
 	private $limit;
+	private $offset;
 
 	/**
 	 * Costruisce una clausola LIMIT
@@ -32,5 +32,14 @@ class LimitClause implements SelectClauseInterface {
 		} else {
 			return $this->limit;
 		}
+	}
+
+	public function serialize() {
+		return \serialize(array($this->limit, $this->offset));
+	}
+
+	public function unserialize($serialized) {
+		list($limit, $offset) = \unserialize($serialized);
+		return new self($limit, $offset);
 	}
 }

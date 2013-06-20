@@ -5,17 +5,14 @@ use system\view\Api as Api;
 use system\view\Form as Form;
 
 class CoreApi {
-
-	public function javascript($code) {
-		$this->javascript .= "\n" . $code;
+	private static $javascript;
+	
+	public static function javascript($code) {
+		self::$javascript .= "\n" . $code;
 	}
 
-	public function jss() {
-		$jss = "";
-		foreach ($this->javascript as $js) {
-			$jss .= $js . "\n";
-		}
-		return $jss;
+	public static function jss() {
+		return self::$javascript;
 	}
 
 	
@@ -66,6 +63,10 @@ class CoreApi {
 		}
 	}
 	
+	public static function block_recordset($content, $params, $open) {
+		
+	}
+
 	public static function de_error($path) {
 		$vars = \system\view\Template::current()->getVars();
 		if (\array_key_exists('errors', $vars) && \array_key_exists($path, $vars['errors'])) {
@@ -74,44 +75,49 @@ class CoreApi {
 	}
 	
 	public static function input($params) {
-		$formId = Form::getActiveForm();
-		
-		$options = \cb\array_item('options', $params, array('default' => array(), 'type' => 'array'));
-		
-		if ($formId) {
-			$recordset = Form::getRecordset();
-			
-			if ($recordset && isset($params['path'])) {
-				$path = $params['path'];
+		$widget = \cb\array_item('widget', $params, array('required' => true));
+		$name = \cb\array_item('name', $params, array('required' => true));
+		$value = \cb\array_item('value', $params, array('required' => true));
+
+		$form = Form::getCurrent();
+		if ($form) {
+			$form->addInput($widget, $name, $value, $params);
+			return $form->renderInput($name);
+		}
+	}
+	
+	public static function form_recordset($name, $recordset) {
+		$form = Form::getCurrent();
+		if ($form) {
+			$form->addRecordset($name, $recordset);
+		}
+	}
+	
+	public static function recordset_input($params) {
+		$recordsetName = \cb\array_item('recordset', $params, array('required' => true));
+		$path = \cb\array_item('path', $params, array('required' => true));
+
+		$form = Form::getCurrent();
+		if ($form) {
+			$recordset = $form->getRecordset($recordsetName);
+			if ($recordset) {
+				$field = $recordset->getBuilder()->searchField($path, true);
 				
-				$f = $recordset->getBuilder()->searchField($path, true);
-
-				$widget = isset($params['widget']) ? $params['widget'] : $f->getEditWidget();
-
-				$id = Form::getActiveForm() . '__recordset__' . \cb\plaintext(\str_replace('.', '__', $path));
-				$name = Form::getActiveForm() . '[recordset][' . \cb\plaintext($path) . ']';
+				$widget = isset($params['widget']) ? $params['widget'] : $field->getEditWidget();
+				
+				$id = $form->getName() . '__recordset__' . $recordsetName . '__' . \cb\plaintext(\str_replace('.', '__', $path));
+				$name = 'recordset[' . $recordsetName . '][' . $path . ']';
 				$value = $recordset->getProg($path);
 				
-				$inputOptions = 
-					$options
+				$input = 
+					$params
 					+ array('id' => $id, 'name' => $name, 'value' => $value)
-					+ $f->getAttributes();
-				
-				$inputOptions['value'] = Form::addInput($widget, $name, $value, $inputOptions);
-				
-				Form::addRsField($path, $name);
-				
-				return \system\view\Widget::getWidget($widget)->render($inputOptions);
-			}
-			
-			else {
-				$widget = \cb\array_item('widget', $params, array('required' => true));
-				$name = \cb\array_item('name', $params, array('required' => true));
-				$value = \cb\array_item('value', $params, array('required' => true));
-				
-				Form::addInput($widget, $name, $value, $params);
-				
-				return \system\view\Widget::getWidget($widget)->render($params);
+					+ $field->getAttributes();
+
+				$form->addInput($name, $widget, $value, $input);
+				$form->addRecordsetInput($recordsetName, $name, $path);
+
+				return $form->renderInput($name);
 			}
 		}
 	}

@@ -2,51 +2,100 @@
 namespace system\view;
 
 class Form {
-	private static $activeForm = null;
+	/**
+	 * @var \system\view\Form
+	 */
+	private static $instance;
+	/**
+	 * @var \system\view\Form
+	 */
+	private static $submitted;
 	
-	public static function startForm($formId) {
-		if (self::$activeForm) {
+	private $name;
+	private $input = array();
+	private $errors = array();
+	private $recordsets = array();
+	private $data = array();
+	private $timestamp;
+	
+	private function __construct($name) {
+		$this->timestamp = \time();
+		$this->name = $name;
+	}
+	
+	public static function startForm($name) {
+		if (!empty(self::$instance)) {
 			throw new \system\error\InternalError('Illegal nested form.');
 		}
-		
-		self::$activeForm = $formId;
-		
-		$_SESSION['system']['forms'][$formId] = array(
-			'id' => $formId,
-			'input' => array(),
-			'errors' => array(),
-		);
+		$form = self::getForm($name);
+		if (empty($form)) {
+			$form = new self($name);
+			$_SESSION['system']['forms'][$name] = \serialize($form);
+		}
+		self::$instance = $form;
+	}
+	
+	/**
+	 * Return the form (if exists)
+	 * @param string $name Form name
+	 * @return \system\view\Form
+	 */
+	public static function getForm($name) {
+		if (isset($_SESSION['system']['forms'][$name])) {
+			$form = \unserialize($_SESSION['system']['forms'][$name]);
+			return $form;
+		}
+		return null;
+	}
+	
+	/**
+	 * Return the form (if exists)
+	 * @return \system\view\Form
+	 */
+	public static function getCurrent() {
+		return self::$instance;
 	}
 	
 	public static function closeForm() {
-		self::$activeForm = null;
+		self::$instance = null;
 	}
 	
-	public static function addInput($widget, $name, $value, array $input = array(), $metaType = null) {
-		if (self::$activeForm) {
-			$form = &$_SESSION['system']['forms'][self::$activeForm];
-			
-			$input['name'] = $name;
-			$input['value'] = $value;
-			
-			$return = (isset($form['input'][$input['name']]))
-				? $form['input'][$input['name']]['value']
-				: $value;
-			
-			$form['input'][$input['name']] = array(
-				'name' => $name,
-				'value' => $value,
-				'widget' => $widget,
-				'input' => $input,
-				'metaType' => $metaType
-			);
-			
-			return $return;
+	public function attach($name, $vaule) {
+		$this->data[$name] = $value;
+	}
+	
+	public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
+		$this->recordsets[$name] = array(
+			'name' => $name,
+			'recordset' => $recordset,
+			'input' => array()
+		);
+	}
+	
+	public static function addRecordsetInput($recordsetName, $name, $path) {
+		if (isset($this->recordsets[$recordsetName])) {
+			$rs =& $this->recordsets[$recordsetName];
+			$rs['input'][$path] = $name;
 		}
 	}
 	
-	public static function getActiveForm() {
-		return self::$activeForm;
+	public function addInput($name, $widget, $defaultValue, array $input = array(), $metaType = null) {
+		if (!isset($this->input[$name])) {
+			$this->input[$name] = array(
+				'name' => $name,
+				'value' => $defaultValue,
+				'widget' => $widget,
+				'metaType' => $metaType
+			) + $input;
+		}
+		return $this->input[$name]['value'];
+	}
+	
+	public function renderInput($name) {
+		$input = @$this->input[$name];
+		if ($input) {
+			return \system\view\Widget::getWidget($input['widget'])->render($input);
+		}
 	}
 	
 	private static function getPostedFormId() {
@@ -56,6 +105,10 @@ class Form {
 		return null;
 	}
 	
+	/**
+	 * Checks whether a form has been submitted
+	 * @return boolean
+	 */
 	public static function checkFormSubmission() {
 		return
 			isset($_REQUEST['system'])
@@ -82,54 +135,71 @@ class Form {
 		}
 	}
 	
-	private static function fetchInputValues(array &$form) {
-		foreach ($form['input'] as $input) {
-			$input = &$form['input'][$input['name']];
-			
+	private function fetchInputValues() {
+		foreach ($this->input as &$input) {
 			$input['value'] = self::getInputPostedValue($input['name']);
 			$input['error'] = null;
 			
-			$form['errors'][$input['name']] = null;
+			$this->errors[$input['name']] = null;
 
 			$mt = $input['metaType'];
 			if ($mt) {
 				try {
 					$mt->validate($input['value']);
-				} catch (\system\error\InternalError $ex) {
-					$form['errors'][$input['name']] = $ex->getMessage();
+				} catch (\system\error\ValidationError $ex) {
+					$this->errors[$input['name']] = $ex->getMessage();
 				}
 			}
 		}
 	}
 	
-	public static function formSubmission() {
-		$formId = self::getPostedFormId();
-		if (!\is_null($formId)) {
-			$form = &$_SESSION['system']['forms'][$formId];
-			self::fetchInputValues($form);
-			if (!empty($form['recordset'])) {
-				$rsb = new \system\model\RecordsetBuilder($form['recordset']['masterTable']);
-				$rsb->usingAll();
-				if (!empty($form['recordset']['key'])) {
-					$rs = $rsb->selectFirstBy($form['recordset']['key']);
-					if (!$rs) {
-						throw new \system\error\InternalError('The resource you tried to edit does no longer exists.');
-					}
-				} else {
-					$rs = $rsb->newRecordset();
-				}
-				foreach ($form['recordset']['fields'] as $path => $name) {
-					$f = $rsb->searchField($path, true);
-					$f->validate($form['input'][$name]['value']);
-					$rs->setProg($form['input'][$name]['value']);
-				}
-				return array('recordset' => $rs) + $form;
+	private function fetchRecordsets() {
+		foreach ($this->recordsets as $recordset) {
+			$rsObj = $recordset['recordset'];
+			foreach ($recordset['input'] as $path => $name) {
+				$rsObj->setProg($path, $this->input[$name]['value']);
 			}
-			else {
-				return $form;
-			}
-		} else {
-			return null;
 		}
+	}
+	
+	public static function submittedForm() {
+		if (!isset(self::$submitted)) {
+			$name = self::getPostedFormId();
+			if (!\is_null($name)) {
+				$form = self::getForm($name);
+				if ($form) {
+					$form->fetchInputValues();
+					$form->fetchRecordsets();
+					self::$submitted = $form;
+				}
+			}
+		}
+		return self::$submitted;
+	}
+	
+	public function getRecordset($name) {
+		return isset($this->recordsets[$name])
+			? $this->recordsets[$name]['recordset']
+			: null;
+	}
+	
+	public function getName() {
+		return $this->name;
+	}
+	
+	public function getInput() {
+		return $this->input;
+	}
+	
+	public function getErrors() {
+		return $this->errors;
+	}
+	
+	public function getTimestamp() {
+		return $this->timestamp;
+	}
+	
+	public function getData() {
+		return $this->data;
 	}
 }

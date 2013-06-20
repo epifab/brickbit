@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-class FieldVirtual extends Field {
+class FieldVirtual extends Field implements \Serializable {
 	private $handle;
 	
 	public function __construct($name, $type, RecordsetBuilder $builder, array $attributes) {
@@ -38,5 +38,19 @@ class FieldVirtual extends Field {
 	
 	public function getHandler() {
 		return $this->handle;
+	}
+	
+	public function serialize() {
+		return \serialize(array(
+			$this->getName(),
+			$this->getType(),
+			$this->builder,
+			$this->getAttributes()
+		));
+	}
+	
+	public function unserialize($serialized) {
+		list($a, $b, $c, $d) = \unserialize($serialized);
+		return new self($a, $b, $c, $d);
 	}
 }
