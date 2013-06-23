@@ -105,6 +105,7 @@ class FilterClause implements SelectClauseInterface {
 					break;
 				case "NEQ":
 				case "NOT_EQUAL":
+				case "!=":
 				case "<>":
 					$this->type = FilterClause::OP_NEQ;
 					break;
@@ -212,16 +213,16 @@ class FilterClause implements SelectClauseInterface {
 			return $clause;
 	}
 
-	public function serialize() {
-		return \serialize(array(
-			$this->field,
-			$this->type,
-			$this->expression
-		));
-	}
-
-	public function unserialize($serialized) {
-		list($field, $type, $expression) = \unserialize($serialized);
-		return new self($field, $type, $expression);
-	}
+//	public function serialize() {
+//		return \serialize(array(
+//			$this->field,
+//			$this->type,
+//			$this->expression
+//		));
+//	}
+//
+//	public function unserialize($serialized) {
+//		list($field, $type, $expression) = \unserialize($serialized);
+//		return new self($field, $type, $expression);
+//	}
 }

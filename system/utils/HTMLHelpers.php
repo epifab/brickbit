@@ -45,7 +45,7 @@ class HTMLHelpers {
 	}
 
 	public static function isAjaxRequest() {
-		return @$_REQUEST["system"]["ajax"] ||
+		return (isset($_REQUEST['system']) && !empty($_REQUEST['system']['ajax'])) ||
 				 (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) && (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'));
 	}
 

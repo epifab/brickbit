@@ -1,6 +1,6 @@
 <?php 
 //echo $recordset->id . ' - ' . $recordset->type;
-
+//echo '<code>' . print_r($_SESSION['system']['forms']['edit-node']) . '</code>';
 /*
 <form class="dataedit" id="fileupload" action="<{path url="file/upload"}>" method="POST" enctype="multipart/form-data">
 	<fieldset>
@@ -221,7 +221,12 @@ ciderbit.setBehavior('plupload', function() {
 */ ?>
 
 <?php $this->api->open('form', array('id' => 'edit-node')); ?>
-	<?php $this->api->form_recordset('node', $recordset); ?>
+	<?php 
+	$this->api->form_recordset('node', $recordset); 
+	foreach ($recordset->texts as $lang => $textRs) {
+		$this->api->form_recordset('node_' . $lang, $textRs); 
+	}
+	?>
 	<div class="dataedit">
 		<fieldset>
 			<legend>
@@ -256,10 +261,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php echo $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.urn',
+								'recordset' => 'node_' . $lang,
+								'path' => 'urn',
 								// 'widget' => 'textbox', 
-								'options' => array('class' => 'xl')
+								'attributes' => array('class' => 'xl')
 							)); ?>
 							<div class="de-info">
 								<p>
@@ -280,10 +285,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php print $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.description',
+								'recordset' => 'node_' . $lang,
+								'path' => 'description',
 //								'widget' => 'textbox',
-								'options' => array('class' => 'xxl')
+								'attributes' => array('class' => 'xxl')
 							)); ?>
 							<div class="de-info">
 								<p>
@@ -299,10 +304,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php print $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.title',
+								'recordset' => 'node_' . $lang,
+								'path' => 'title',
 								'widget' => 'textbox',
-								'options' => array('class' => 'l')
+								'attributes' => array('class' => 'l')
 							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.title'); ?>
 						</div>
@@ -313,10 +318,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php print $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.subtitle',
+								'recordset' => 'node_' . $lang,
+								'path' => 'subtitle',
 								'widget' => 'textbox',
-								'options' => array('class' => 'xl')
+								'attributes' => array('class' => 'xl')
 							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.subtitle'); ?>
 						</div>
@@ -327,10 +332,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php print $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.body',
+								'recordset' => 'node_' . $lang,
+								'path' => 'body',
 //								'widget' => 'textarea',
-								'options' => array('class' => 'xxl richtext')
+								'attributes' => array('class' => 'xxl richtext')
 							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.body'); ?>
 						</div>
@@ -341,10 +346,10 @@ ciderbit.setBehavior('plupload', function() {
 						</div>
 						<div class="de-input-wrapper">
 							<?php print $this->api->recordset_input(array(
-								'recordset' => 'node',
-								'path' => 'text_' . $lang . '.preview',
+								'recordset' => 'node_' . $lang,
+								'path' => 'preview',
 								'widget' => 'textarea',
-								'options' => array('class' => 'xxl richtext')
+								'attributes' => array('class' => 'xxl richtext')
 							)); ?>
 							<?php print $this->api->de_error('text_' . $lang . '.preview'); ?>
 						</div>
@@ -380,7 +385,6 @@ ciderbit.setBehavior('plupload', function() {
 						'value' => array(),
 						'url' => 'autocomplete/user',
 						'item' => '<div><img src="@[image.url]"/>@[name]</div>',
-						'value' => array(),
 						'name' => 'users'
 					)); ?>
 					<?php print $this->api->de_error("record_mode.users"); ?>
@@ -395,7 +399,7 @@ ciderbit.setBehavior('plupload', function() {
 						'recordset' => 'node',
 						'path' => 'record_mode.read_mode',
 						'widget' => 'selectbox',
-						'options' => array('class' => 'l')
+						'attributes' => array('class' => 'l')
 					)); ?>
 					<?php print $this->api->de_error("record_mode.read_mode"); ?>
 				</div>
@@ -409,7 +413,7 @@ ciderbit.setBehavior('plupload', function() {
 						'recordset' => 'node',
 						'path' => 'record_mode.edit_mode',
 						'widget' => 'selectbox',
-						'options' => array('class' => 'l', 'rows')
+						'attributes' => array('class' => 'l', 'rows')
 					)); ?>
 					<?php print $this->api->de_error("record_mode.edit_mode"); ?>
 				</div>
@@ -423,7 +427,7 @@ ciderbit.setBehavior('plupload', function() {
 						'recordset' => 'node',
 						'path' => 'record_mode.delete_mode',
 						'widget' => 'selectbox',
-						'options' => array('class' => 'l')
+						'attributes' => array('class' => 'l')
 					)); ?>
 					<?php print $this->api->de_error("record_mode.delete_mode"); ?>
 				</div>

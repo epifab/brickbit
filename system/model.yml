@@ -1,4 +1,38 @@
 tables:
+  session:
+    fields:
+      id:
+        type: integer
+      user_id:
+        desc: User id
+        type: integer
+      session_id:
+        desc: Session id
+        type: string
+        size: 32
+      create_time:
+        desc: Last session
+        type: datetime
+      update_time:
+        desc: Last session
+        type: datetime
+      expire_time:
+        desc: Expire date
+        type: datetime
+      data:
+        desc: Session data
+        type: blob
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+      user_session:
+        fields: [user_id, session_id]
+    relations:
+      user:
+        table: user
+        type: N-1
+        clauses: [user_id: id]
   module:
     fields:
       id:
@@ -309,18 +343,18 @@ tables:
     fields:
       id:
         type: integer
-      module:
-        type: string
-        size: 32
-      component:
-        type: string
-        size: 32
-      action:
-        type: string
-        size: 32
       url:
         type: string
+        size: 1024
+      level:
+        type: integer
+      code:
+        type: string
         size: 64
+      body:
+        type: string
+      trace:
+        type: string
       date_time_request:
         type: datetime
       user_id:
@@ -328,10 +362,6 @@ tables:
       ip_address:
         type: string
         size: 16
-      body:
-        type: string
-      output:
-        type: string
     keys:
       primary:
         fields: [id]

@@ -34,12 +34,12 @@ class LimitClause implements SelectClauseInterface {
 		}
 	}
 
-	public function serialize() {
-		return \serialize(array($this->limit, $this->offset));
-	}
-
-	public function unserialize($serialized) {
-		list($limit, $offset) = \unserialize($serialized);
-		return new self($limit, $offset);
-	}
+//	public function serialize() {
+//		return \serialize(array($this->limit, $this->offset));
+//	}
+//
+//	public function unserialize($serialized) {
+//		list($limit, $offset) = \unserialize($serialized);
+//		return new self($limit, $offset);
+//	}
 }

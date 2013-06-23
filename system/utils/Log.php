@@ -2,32 +2,29 @@
 namespace system\utils;
 
 class Log {
-	private static $logs = "";
-	
-	public static function saveLog(\system\Component $component, $output) {
+	/**
+	 * Create a log
+	 * @param string $code
+	 * @param string $body
+	 * @param array $args
+	 * @param int $level
+	 * @return int Log id
+	 */
+	public static function create($code, $body, $args = array(), $level = \system\LOG_WARNING) {
 		$builder = new \system\model\RecordsetBuilder('log');
 		$builder->using("*");
+		$rs = $builder->newRecordset();
 		
-//		$rs = $builder->newRecordset();
-//		$rs->user_id = \system\utils\Login::getLoggedUserId();
-//		$rs->url = $url;
-//		$rs->module = $component->getModule();
-//		$rs->component = $component->getName();
-//		$rs->action = $component->getAction();
-//		$rs->date_time_request = $component->getRequestTime();
-//		$rs->execution_time = $component->getExecutionTime();
-//		$rs->body = self::$logs;
-//		$rs->output = $output;
-//		$rs->ip_address = \system\utils\HTMLHelpers::getIpAddress();
-//		$rs->create();
-//		return $rs->getProg("id");
-	}
-	
-	public static function add($log) {
-		self::$logs = (empty(self::$logs) ? "" : "\n") . $log;
-	}
-	
-	public static function get() {
-		return self::$logs;
+		$rs->url = $_SERVER['REQUEST_URI'];
+		$rs->code = $code;
+		$rs->body = \cb\t($body, $args);
+		$rs->level = $level;
+		$rs->trace = \system\utils\Utils::backtraceInfo(\array_slice(\debug_backtrace(), 0, -1));
+		$rs->date_time_request = \time();
+		$rs->user_id = \system\utils\Login::getLoggedUserId();
+		$rs->ip_address = \system\utils\HTMLHelpers::getIpAddress();
+		
+		$rs->create();
+		return $rs->id;
 	}
 }

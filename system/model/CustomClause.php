@@ -12,11 +12,11 @@ class CustomClause implements SelectClauseInterface {
 		return $this->query;
 	}
 
-	public function serialize() {
-		return $this->query;
-	}
-
-	public function unserialize($serialized) {
-		return new CustomClause($serialized);
-	}
+//	public function serialize() {
+//		return $this->query;
+//	}
+//
+//	public function unserialize($serialized) {
+//		return new CustomClause($serialized);
+//	}
 }

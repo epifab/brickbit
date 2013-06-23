@@ -77,12 +77,12 @@ class SortClause implements SelectClauseInterface {
 		}
 	}
 
-	public function serialize() {
-		return \serialize(array($this->field, $this->type));
-	}
-
-	public function unserialize($serialized) {
-		list($field, $type) = \unserialize($serialized);
-		return new self($field, $type);
-	}
+//	public function serialize() {
+//		return \serialize(array($this->field, $this->type));
+//	}
+//
+//	public function unserialize($serialized) {
+//		list($field, $type) = \unserialize($serialized);
+//		return new self($field, $type);
+//	}
 }

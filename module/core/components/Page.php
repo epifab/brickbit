@@ -11,9 +11,9 @@ use \system\model\SortClause;
 use \system\model\SortClauseGroup;
 
 class Page extends Node {
-	public static function access() {
-		return true;
-	}
+//	public static function access() {
+//		return true;
+//	}
 	
 	public function runNotFound() {
 		$this->setPageTitle(\cb\t('Page not found'));

@@ -4,6 +4,10 @@ namespace system\view;
 class WidgetSelectbox implements WidgetInterface {
 	
 	public function render(array $input) {
+		if (!isset($input['attributes'])) {
+			$input['attributes'] = array();
+		}
+		
 		// select options
 		$options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
 		
@@ -17,7 +21,7 @@ class WidgetSelectbox implements WidgetInterface {
 		$args = array(
 			'id' => \cb\array_item('id', $input, array('required' => true)),
 			'name' => $input['name'],
-			'class' => 'de-input selectbox' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
+			'class' => 'de-input selectbox' . \cb\array_item('class', $input['attributes'], array('default' => '', 'prefix' => ' '))
 		) + $attributes;
 		
 		$output = '<select' . \cb\xml_arguments($args) . '>';

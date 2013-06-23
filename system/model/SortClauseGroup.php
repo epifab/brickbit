@@ -48,13 +48,13 @@ class SortClauseGroup implements SelectClauseInterface {
 		return $query;
 	}
 	
-	public function serialize() {
-		return \serialize($this->clauses);
-	}
-
-	public function unserialize($serialized) {
-		$obj = new self();
-		$obj->clauses = \unserialize($serialized);
-		return $obj;
-	}
+//	public function serialize() {
+//		return \serialize($this->clauses);
+//	}
+//
+//	public function unserialize($serialized) {
+//		$obj = new self();
+//		$obj->clauses = \unserialize($serialized);
+//		return $obj;
+//	}
 }

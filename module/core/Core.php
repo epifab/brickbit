@@ -3,6 +3,13 @@ namespace module\core;
 
 class Core extends \system\Module {
 	
+	public static function metaTypesMap() {
+		return array(
+			'html' => '\module\core\model\MetaHTML',
+			'plaintext' => '\system\metatypes\MetaString'
+		);
+	}
+	
 	/**
 	 * Define node types and variables allowed files / node children
 	 * @return type 

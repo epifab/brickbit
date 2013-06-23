@@ -141,6 +141,59 @@ class Config {
 		}
 	}
 	
+	public static function exceptions(\Exception $ex) {
+		echo '<h3>' . $ex->getMessage() . '</h3>';
+//		var_dump($ex);
+//		echo \system\utils\Utils::backtraceInfo();
+		if ($ex instanceof \system\error\Error) {
+			echo '<div>' . $ex->getDetails() . '</div>';
+			echo '<div>' . \system\utils\Utils::backtraceInfo($ex->getTrace()) . '</div>';
+		}
+//		try {
+//			echo \system\utils\Utils::backtraceInfo();
+//		} catch (\Exception $e) {
+//			echo $e->getMessage();
+//		}
+		die();
+	}
+	
+	public static function errors($code, $description, $file, $line) {
+		$level = 0;
+		switch ($code) {
+			case E_NOTICE:
+			case E_USER_NOTICE:
+				$level = 'notice';
+				break;
+			case E_CORE_WARNING:
+			case E_DEPRECATED:
+			case E_USER_DEPRECATED:
+			case E_USER_WARNING:
+			case E_WARNING:
+				$level = 'warning';
+				break;
+			case E_COMPILE_ERROR:
+			case E_CORE_ERROR:
+			case E_ERROR:
+			case E_COMPILE_WARNING:
+			case E_USER_ERROR:
+			case E_PARSE:
+			case E_RECOVERABLE_ERROR:
+			case E_STRICT:
+			case E_ALL:
+				$level = 'error';
+				break;
+		}
+		
+		\system\utils\Utils::log($level, $description);
+
+		if ($level == 'error') {
+			echo '<h1>' . $description . '</h1>';
+			echo '<p>File: ' . $file . ' Line: ' . $line . '</p>';
+			echo \system\utils\Utils::backtraceInfo();
+			die();
+		}
+	}
+	
 	
 	// caricamento automatico di classi del framework ciderbit
 	public static function autoload($name) {
@@ -170,6 +223,8 @@ class Config {
 //	@\session_id($_REQUEST[\session_name()]);
 //}
 
+\set_error_handler('\config\Config::errors');
+\set_exception_handler('\config\Config::exceptions');
 \spl_autoload_register('\config\Config::autoload');
 
 \system\utils\Lang::setLang(\strpos($_SERVER["HTTP_HOST"], ".")
@@ -182,5 +237,3 @@ if (\count($domains) >= 3) {
 	\session_set_cookie_params(0, '/', '.' . $domains[1] . '.' . $domains[0]);
 //	\ini_set('session.cookie_domain', '.' . $domains[1] . '.' . $domains[0]);
 }
-
-@\session_start();

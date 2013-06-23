@@ -131,7 +131,9 @@ abstract class Component {
 	 * @param \Exception $exception Exception to handle with
 	 */
 	protected function onError($exception) {
-
+		if (!($exception instanceof \system\error\Error)) {
+			$exception = new InternalError($exception->getMessage());
+		}
 		\system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
 
 //			if ($this->nested) {
@@ -236,18 +238,18 @@ abstract class Component {
 	}
 	
 	private function loadRequestId() {
-		if (!\array_key_exists('system', $this->requestData) 
-			 || !\array_key_exists('requestId', $this->requestData['system'])
+		if (!isset($this->requestData['system'])
+			 || !isset($this->requestData['system']['requestId'])
 			 || !\preg_match('/^[a-zA-Z0-9_-]+$/', $this->requestData['system']['requestId'])) {
 			
-			if (!\array_key_exists('system', $_SESSION)) {
+			if (!isset($_SESSION['system'])) {
 				$_SESSION['system'] = array();
 			}
-			if (!\array_key_exists('requestIds', $_SESSION['system'])) {
+			if (!isset($_SESSION['system']['requestIds'])) {
 				$_SESSION['system']['requestIds'] = array();
 			}
 			$_SESSION['system']['requestIds'][$this->name] =
-				(\array_key_exists($this->name, $_SESSION['system']['requestIds']))
+				(isset($_SESSION['system']['requestIds'][$this->name]))
 					? $_SESSION['system']['requestIds'][$this->name] + 1
 					: 1;
 			

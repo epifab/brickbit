@@ -9,24 +9,18 @@ class Utils {
 	const LOG_INFO = 3;
 	const LOG_DEBUG = 4;
 	
-	public static function log($key, $message, $type=self::LOG_INFO) {
-		$logs = self::get('system-logs', array());
-		$logsByKey = self::get('system-logs-by-key', array());
-		$logsByType = self::get('system-logs-by-type', array());
-
-		// because of the reverse array order
-		// the first element key is the greatest one
-		$index = 1 + \key($logs);
-
+	public static function backtraceInfo($trace = null) {
 		$traceDesc = '<ol>';
-		$trace = \debug_backtrace();
+		if (empty($trace)) {
+			$trace = \debug_backtrace();
+		}
 		$i = count($trace);
 		foreach ($trace as $t) {
 			$traceDesc .= '<li value="' . $i . '"><p><code>';
 
 			$i--;
 
-			if (array_key_exists('class', $t) && !empty($t['class'])) {
+			if (\array_key_exists('class', $t) && !empty($t['class'])) {
 				$traceDesc .= $t['class'] . '->';
 			}
 			$traceDesc .= '<b>' . $t['function'] . '</b>(';
@@ -36,12 +30,27 @@ class Utils {
 			if (\array_key_exists("args", $t)) {
 				foreach ($t['args'] as $arg) {
 					$first ? $first = false : $traceDesc .= ', ';
-					$traceDesc .= self::varDump($arg);
+					$traceDesc .= self::lightVarDump($arg);
 				}
 			}
-			$traceDesc .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
+			$traceDesc .= '</code>)<br/> ' 
+				. ((isset($t['file'], $t['line'])) ? $t['file'] . ' ' . $t['line'] . '</p></li>' : '');
 		}
 		$traceDesc .= '</ol>';
+		
+		return $traceDesc;
+	}
+	
+	public static function log($key, $message, $type=self::LOG_INFO) {
+		$logs = self::get('system-logs', array());
+		$logsByKey = self::get('system-logs-by-key', array());
+		$logsByType = self::get('system-logs-by-type', array());
+
+		// because of the reverse array order
+		// the first element key is the greatest one
+		$index = 1 + \key($logs);
+
+		$traceDesc = self::backtraceInfo();
 		
 		$logs[$index] = array(
 			'id' => $index,
@@ -64,16 +73,20 @@ class Utils {
 		self::set('system-logs-by-type', $logsByType);
 	}
 	
-	public static function varDump($arg) {
+	public static function lightVarDump($arg, $maxLevel=-1) {
 		$msg = '';
 		if (\is_array($arg)) {
-			$msg .= 'array(';
-			$first = true;
-			foreach ($arg as $k => $v) {
-				$first ? $first = false : $msg .= ", ";
-				$msg .= self::varDump($k) . " => " . self::varDump($v);
+			if ($maxLevel == 0) {
+				$msg .= 'array';
+			} else {
+				$msg .= 'array(';
+				$first = true;
+				foreach ($arg as $k => $v) {
+					$first ? $first = false : $msg .= ", ";
+					$msg .= self::lightVarDump($k, 0) . " => " . self::lightVarDump($v, 0);
+				}
+				$msg .= ')';
 			}
-			$msg .= ')';
 		} else if (\is_object($arg)) {
 			$msg .= '[object ' . get_class($arg) . ']';
 		} else if (\is_null($arg)) {
@@ -85,9 +98,18 @@ class Utils {
 		}
 		return $msg;
 	}
+
+	public static function varDump($arg) {
+		\d($arg);
+	}
 	
-	public static function getLogs() {
-		return self::get('system-logs', array());
+	public static function getLogs($page=0, $size=10) {
+		$logs = self::get('system-logs', array());
+		if ($page < 0) {
+			return $logs;
+		} else {
+			return \array_slice($logs, ($page * $size), $size);
+		}
 	}
 	
 	public static function getLogsByKey($key) {

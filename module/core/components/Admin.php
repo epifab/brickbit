@@ -27,13 +27,21 @@ class Admin extends \system\Component {
 	
 	public function runLogs() {
 		$this->setMainTemplate('logs');
-		$this->setData('logs', \system\utils\Utils::getLogs());
+
+		$rsb = self::rsb();
+		$logs = $rsb->select();
+		$this->setData('logs', $logs);
+		
 		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
 	public function runLogsByKey() {
 		$this->setMainTemplate('logs');
-		$this->setData('logs', \system\utils\Utils::getLogsByKey($this->getUrlArg(0)));
+		
+		$rsb = self::rsb();
+		$logs = $rsb->selectBy(array('code' => $this->getUrlArg(0)));
+		$this->setData('logs', $logs);
+		
 		return \system\Component::RESPONSE_TYPE_READ;
 	}
 	
@@ -56,8 +64,26 @@ class Admin extends \system\Component {
 				return $this->runLogs();
 		}
 		$this->setMainTemplate('logs');
-		$this->setData('logs', \system\utils\Utils::getLogsByType($type));
+		
+		$rsb = self::rsb();
+		$logs = $rsb->selectBy(array('type' => $type));
+		$this->setData('logs', $logs);
+		
 		return \system\Component::RESPONSE_TYPE_READ;
+	}
+	
+	private static function rsb() {
+		$pageSize = 30;
+		
+		$rsb = new \system\model\RecordsetBuilder('log');
+		$rsb->using('*');
+		$pages = $rsb->countPages($pageSize);
+		$page = isset($_REQUEST['page']) && $_REQUEST['page'] > 0 && $_REQUEST['page'] < $pages
+			? intval($_REQUEST['page'])
+			: 0;
+		$rsb->setLimit(new \system\model\LimitClause($pageSize, ($pageSize * $page)));
+		$rsb->setSort(new \system\model\SortClause($rsb->date_time_request, 'DESC'));
+		return $rsb;
 	}
 }
 ?>

@@ -45,6 +45,10 @@
 			</div>
 		</div>
 		
+		<?php if ($this->api->access('/admin/logs')): ?>
+		<?php $this->api->open('block', array('url' => '/admin/logs', 'name' => 'logs')); ?>
+		<?php endif; ?>
+		
 		<script type="text/javascript"><?php $this->api->jss(); ?></script>
 	</body>
 </html>

@@ -34,6 +34,18 @@ USE cider;
 -- 	PRIMARY KEY (id)
 -- ) ENGINE=InnoDB;
 
+CREATE TABLE session (
+	id INT AUTO_INCREMENT,
+	user_id INT,
+	session_id VARCHAR(32),
+	create_time DATETIME,
+	update_time DATETIME,
+	expire_time DATETIME,
+	data BLOB,
+	PRIMARY KEY (id),
+	UNIQUE KEY (user_id, session_id)
+) ENGINE=InnoDB;
+
 CREATE TABLE module (
 	id INT AUTO_INCREMENT,
 	name VARCHAR(32),
@@ -132,12 +144,14 @@ CREATE TABLE record_mode_log (
 
 CREATE TABLE log (
 	id INT AUTO_INCREMENT,
-	user_id INT,
-	script_url VARCHAR(100),
-	date_time_request DATETIME,
-	ip_address VARCHAR(15),
+	url VARCHAR(100),
+	level INT,
+	code VARCHAR(100),
 	body TEXT,
-	output TEXT,
+	trace TEXT,
+	date_time_request DATETIME,
+	user_id INT,
+	ip_address VARCHAR(15),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 

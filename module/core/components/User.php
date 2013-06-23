@@ -12,7 +12,7 @@ use \system\model\SortClauseGroup;
 
 // Inherits onInit method
 class User extends Page {
-	public static function accessRED($userId, $loggedUser) {
+	private static function accessRED($action, $userId, $loggedUser) {
 		return $loggedUser->superuser || $loggedUser->id == $userId;
 	}
 	
@@ -21,15 +21,15 @@ class User extends Page {
 	}
 	
 	public static function accessRead($urlArgs, $request, $user) {
-		return self::accessRED($urlArgs[0], $user);
+		return self::accessRED('read', $urlArgs[0], $user);
 	}
 	
 	public static function accessEdit($urlArgs, $request, $user) {
-		return self::accessRED($urlArgs[0], $user);
+		return self::accessRED('edit', $urlArgs[0], $user);
 	}
 	
 	public static function accessDelete($urlArgs, $request, $user) {
-		return self::accessRED($urlArgs[0], $user);
+		return self::accessRED('delete', $urlArgs[0], $user);
 	}
 	
 	public static function accessLogin($urlArgs, $request, $user) {

@@ -1,14 +1,17 @@
 <?php
 namespace system\model;
 
-class FieldVirtual extends Field implements \Serializable {
-	private $handle;
+class FieldVirtual extends Field {
+	/**
+	 * @var \system\utils\Handler
+	 */
+	private $handler;
 	
 	public function __construct($name, $type, RecordsetBuilder $builder, array $attributes) {
 		parent::__construct($name, $type, $builder, $attributes);
 		
-		$handle = $this->getAttr('handle', array('required' => true));
-		$this->setHandler($handle);
+		$handler = $this->getAttr('handler', array('required' => true));
+		$this->setHandler($handler);
 		$dependencies = $this->getAttr('dependencies', array('default' => false));
 		if ($dependencies && \is_array($dependencies)) {
 			foreach ($dependencies as $d) {
@@ -21,36 +24,25 @@ class FieldVirtual extends Field implements \Serializable {
 		return true;
 	}
 	
-	public function setHandler($handle) {
-		if (\is_array($handle)) {
-			if (\is_callable($handle)) {
-				$this->handle = $handle;
-			} else {
-				throw new \system\error\InternalError('Method @class::@method does not exist.', array(
-					'@method' => $handle[1], 
-					'@class' => $handle[0]
-				));
-			}
-		} else {
-			eval('$this->handle = ' . $handle . ';');
-		}
+	public function setHandler($handler) {
+		$this->handler = new \system\utils\Handler($handler);
 	}
 	
 	public function getHandler() {
-		return $this->handle;
+		return $this->handler->getHandler();
 	}
-	
-	public function serialize() {
-		return \serialize(array(
-			$this->getName(),
-			$this->getType(),
-			$this->builder,
-			$this->getAttributes()
-		));
-	}
-	
-	public function unserialize($serialized) {
-		list($a, $b, $c, $d) = \unserialize($serialized);
-		return new self($a, $b, $c, $d);
-	}
+
+//	public function serialize() {
+//		return \serialize(array(
+//			$this->getName(),
+//			$this->getType(),
+//			$this->builder,
+//			$this->getAttributes()
+//		));
+//	}
+//	
+//	public function unserialize($serialized) {
+//		list($a, $b, $c, $d) = \unserialize($serialized);
+//		return new self($a, $b, $c, $d);
+//	}
 }

@@ -49,28 +49,28 @@ tables:
       text_en:
         dependencies: [texts]
         label: Text (english)
-        handle: |
+        handler: |
           function($node) {
             return $node['en'];
           }
       path:
         dependencies: [dir.path, name]
         label: File path
-        handle: |
+        handler: |
           function(\system\model\RecordsetInterface $file) {
             return $file->dir->path . $file->name;
           }
       extension:
         dependencies: [name]
         label: File extension
-        handle: |
+        handler: |
           function(\system\model\RecordsetInterface $file) {
             return \system\File::getExtension($file->name);
           }
       last_update:
         dependencies: [path]
         label: Last update
-        handle: |
+        handler: |
           function(\system\model\RecordsetInterface $file) {
             return \filetime($file->path);
           }
@@ -142,12 +142,12 @@ tables:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: [\module\core\model\Tree, ancestorsFilter]
+        filterHandler: [\module\core\model\Tree, ancestorsFilter]
       descendants:
         table: term
         clauses: []
         type: 1-N
-        filterHandle: [\module\core\model\Tree, descendantsFilter]
+        filterHandler: [\module\core\model\Tree, descendantsFilter]
       nodes:
         table: node_term
         type: 1-N
@@ -317,12 +317,12 @@ tables:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: [\module\core\model\Tree, ancestorsFilter]
+        filterHandler: [\module\core\model\Tree, ancestorsFilter]
       descendants:
         table: node
         clauses: []
         type: 1-N
-        filterHandle: [\module\core\model\Tree, descendantsFilter]
+        filterHandler: [\module\core\model\Tree, descendantsFilter]
   # TERMS
       terms:
         table: node_term
@@ -353,38 +353,38 @@ tables:
       children_groups:
         table: Node
         dependencies: [children]
-        handle: [\module\core\model\Node, children_groups]
+        handler: [\module\core\model\Node, children_groups]
       # urls
       url:
         label: Text (undeterminate)
         dependencies: [id, text]
-        handle: [\module\core\model\Node, url]
+        handler: [\module\core\model\Node, url]
       edit_url:
         label: Text (undeterminate)
         dependencies: [id]
-        handle: [\module\core\model\Node, edit_url]
+        handler: [\module\core\model\Node, edit_url]
       delete_url:
         label: Text (undeterminate)
         dependencies: [id]
-        handle: [\module\core\model\Node, delete_url]
+        handler: [\module\core\model\Node, delete_url]
       # texts
 #      text:
 #        label: Text (undeterminate)
 #        dependencies: [texts]
-#        handle: [\module\core\model\Node, text]
+#        handler: [\module\core\model\Node, text]
 #      text_und:
 #        label: Text (undeterminate)
 #        dependencies: [texts]
-#        handle: [\module\core\model\Node, text_und]
+#        handler: [\module\core\model\Node, text_und]
       title:
         label: Title
         dependencies: [text.title]
-        handle: [\module\core\model\Node, title]
+        handler: [\module\core\model\Node, title]
       # content
       content:
         label: Content
         dependencies: [id, type]
-        handle: [\module\core\model\Node, content]
+        handler: [\module\core\model\Node, content]
   node_file:
     fields:
       node_id:
@@ -430,33 +430,33 @@ tables:
       urn:
         label: Text (undeterminate)
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handle: [\module\core\model\NodeFile, urn]
+        handler: [\module\core\model\NodeFile, urn]
       edit_urn:
         label: Text (undeterminate)
         dependencies: [file_id]
-        handle: [\module\core\model\NodeFile, edit_urn]
+        handler: [\module\core\model\NodeFile, edit_urn]
       delete_urn:
         label: Text (undeterminate)
         dependencies: [file_id]
-        handle: [\module\core\model\NodeFile, delete_urn]
+        handler: [\module\core\model\NodeFile, delete_urn]
       download_path:
-        handle: |
+        handler: |
           function($recordset) {
             return $recordset->virtual_name;
           }
       images:
         label: Images
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handle: [\module\core\model\NodeFile, images]
+        handler: [\module\core\model\NodeFile, images]
   user:
     virtuals:
       superuser:
-        handle: |
+        handler: |
           function(\system\model\Recordset $user) {
             return $user->id == 1;
           }
       anonymous:
-        handle: |
+        handler: |
           function(\system\model\Recordset $user) {
             return $user->id == 0;
           }

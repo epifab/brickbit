@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-class Field implements \Serializable {
+class Field {
 	/**
 	 * @var \system\metatypes\MetaType
 	 */
@@ -125,17 +125,17 @@ class Field implements \Serializable {
 		return $this->metaType->validate($x);
 	}
 
-	public function serialize() {
-		return \serialize(array(
-			$this->getName(),
-			$this->getType(),
-			$this->builder,
-			$this->getAttributes()
-		));
-	}
-
-	public function unserialize($serialized) {
-		list($a, $b, $c, $d) = \unserialize($serialized);
-		return new self($a, $b, $c, $d);
-	}
+//	public function serialize() {
+//		return \serialize(array(
+//			$this->getName(),
+//			$this->getType(),
+//			$this->builder,
+//			$this->getAttributes()
+//		));
+//	}
+//
+//	public function unserialize($serialized) {
+//		list($a, $b, $c, $d) = \unserialize($serialized);
+//		return new self($a, $b, $c, $d);
+//	}
 }

@@ -1,6 +1,8 @@
 <?php
 namespace system\view;
 
+use system\session\Session;
+
 class Form {
 	/**
 	 * @var \system\view\Form
@@ -30,9 +32,13 @@ class Form {
 		$form = self::getForm($name);
 		if (empty($form)) {
 			$form = new self($name);
-			$_SESSION['system']['forms'][$name] = \serialize($form);
+			Session::getInstance()->set('forms', $name, $form);
 		}
 		self::$instance = $form;
+	}
+
+	public static function closeForm() {
+		self::$instance = null;
 	}
 	
 	/**
@@ -41,11 +47,7 @@ class Form {
 	 * @return \system\view\Form
 	 */
 	public static function getForm($name) {
-		if (isset($_SESSION['system']['forms'][$name])) {
-			$form = \unserialize($_SESSION['system']['forms'][$name]);
-			return $form;
-		}
-		return null;
+		return Session::getInstance()->get('forms', $name);
 	}
 	
 	/**
@@ -56,11 +58,7 @@ class Form {
 		return self::$instance;
 	}
 	
-	public static function closeForm() {
-		self::$instance = null;
-	}
-	
-	public function attach($name, $vaule) {
+	public function attach($name, $value) {
 		$this->data[$name] = $value;
 	}
 	
@@ -72,7 +70,7 @@ class Form {
 		);
 	}
 	
-	public static function addRecordsetInput($recordsetName, $name, $path) {
+	public function addRecordsetInput($recordsetName, $name, $path) {
 		if (isset($this->recordsets[$recordsetName])) {
 			$rs =& $this->recordsets[$recordsetName];
 			$rs['input'][$path] = $name;
@@ -113,8 +111,7 @@ class Form {
 		return
 			isset($_REQUEST['system'])
 			&& isset($_REQUEST['system']['formId'])
-			&& isset($_SESSION['system']['forms'])
-			&& isset($_SESSION['system']['forms'][$_REQUEST['system']['formId']]);
+			&& Session::getInstance()->exists('forms', $_REQUEST['system']['formId']);
 	}
 	
 	private static function getInputPostedValue(array $input) {
