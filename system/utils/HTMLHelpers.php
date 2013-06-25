@@ -113,7 +113,7 @@ class HTMLHelpers {
 			$msg = \system\utils\Lang::translate("You don't have sufficient permission to access this resource.");
 		} else {
 			$title = \system\utils\Lang::translate('Fatal error');
-			$msg .= \system\utils\Log::get();
+			$msg .= \system\utils\Log::getDebug();
 		}
 		
 		$datamodel['page']['title'] = $title;
@@ -123,11 +123,11 @@ class HTMLHelpers {
 		);
 		$datamodel['system']['responseType'] = 'ERROR';
 		
-		\system\utils\Utils::log('ciderbit', $msg, \system\utils\Utils::LOG_ERROR);
+		\system\utils\Log::create('system', $msg, array(), \system\LOG_ERROR);
 
 		try {
 			
-			$templateManager->setMainTemplate("notify");
+			$templateManager->setMainTemplate('notify');
 			
 			$templateManager->process($datamodel);
 			
@@ -136,15 +136,12 @@ class HTMLHelpers {
 			// Non e' stato trovato il template di errore
 			
 			if (HTMLHelpers::isAjaxRequest()) {
-
 				echo '<div class="fatal_error"><h2>' . $title . '</h2>'. $msg .'</div>';
-
-			} else {
-
+			}
+			else {
 				HTMLHelpers::printPageHeader("Errore");
 				echo '<div class="fatal_error"><h2>' . $title . '</h2>'. $msg .'</div>';
 				HTMLHelpers::printPageFooter();
-
 			}
 		}
 	}

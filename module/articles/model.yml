@@ -1,0 +1,36 @@
+tables:
+  node__article:
+    fields:
+      node_id:
+        desc: Node id
+        type: integer
+      layout:
+        desc: Layout type
+        type: options
+        options:
+          1: Layout 1
+          2: Layout 2
+          3: Layout 3
+      social_links:
+        desc: Social links
+        type: boolean
+      expandable:
+        desc: Expandable
+        type: boolean
+  node_text__article:
+    fields:
+      node_id:
+        desc: Node id
+        type: integer
+      lang:
+        desc: Language
+        type: string
+#        type: 
+#        widget: language
+      preview:
+        desc: Article preview
+        type: string
+    keys:
+      primary:
+        fields: [node_id, lang]
+      

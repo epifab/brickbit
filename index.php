@@ -1,6 +1,5 @@
 <?php
 require_once 'lib/cb.php';
-require_once 'lib/kint-master/Kint.class.php';
 
 require_once 'config/Config.php';
 require_once 'system/shortcuts.php';

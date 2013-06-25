@@ -349,7 +349,7 @@ class Recordset implements RecordsetInterface {
 
 			$query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE " . $this->filterByPrimaryClause();
 			
-			\system\utils\Utils::log('update-query', $query);
+			\system\utils\Log::debug('<p>Update recordset query</p><div><code>@query</code></div>', array('@query' => $query));
 
 			$dataAccess = DataLayerCore::getInstance();
 			$dataAccess->executeUpdate($query);

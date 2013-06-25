@@ -11,12 +11,10 @@ class Admin extends \system\Component {
 	}
 	
 	public static function accessLogsKey($urlArgs, $request, $user) {
-		\system\utils\Utils::log('test', 'This is a test log', \system\utils\Utils::LOG_ERROR);
 		return $user && $user->superuser;
 	}
 	
 	public static function accessLogsType($urlArgs, $request, $user) {
-		\system\utils\Utils::log('test', 'This is a test log', \system\utils\Utils::LOG_ERROR);
 		return $user && $user->superuser;
 	}
 	
@@ -86,4 +84,3 @@ class Admin extends \system\Component {
 		return $rsb;
 	}
 }
-?>

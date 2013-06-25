@@ -4,7 +4,7 @@ namespace module\core\components;
 class NodeFile extends \system\Component {
 	
 	public function createFile($fileName) {
-		\system\utils\Utils::log(__CLASS__, 'File upload complete - node id: ' . $this->getUrlArg(0) . ' index: ' . $this->getUrlArg(1));
+		\system\utils\Log::create(__CLASS__, 'File upload complete. Node id: <em>@id</em>, index: <em>@index</em>', array('@id' => $this->getUrlArg(0), '@index' => $this->getUrlArg(1)), \system\LOG_DEBUG);
 		
 		$nodeId = $this->getUrlArg(0);
 		$nodeIndex = $this->getUrlArg(1);
@@ -33,7 +33,6 @@ class NodeFile extends \system\Component {
 			for ($i = 2; \in_array($name . $i . '.' . $ext, $virtualNames); $i++);
 			$virtualName = $name . $i . '.' . $ext;
 		}
-		\system\utils\Utils::log(__CLASS__, 'Safe filename: ' . $virtualName);
 		
 		$rsb = new \system\model\RecordsetBuilder('node_file');
 		$rsb->using('*', 'file.*');
@@ -91,7 +90,7 @@ class NodeFile extends \system\Component {
 		* Contributing: http://www.plupload.com/contributing
 		*/
 
-		\system\utils\Utils::log(__CLASS__, 'File upload', \system\utils\Utils::LOG_DEBUG);
+		\system\utils\Log::create(__CLASS__, 'Uploading file', array(), \system\LOG_DEBUG);
 		
 		// HTTP headers for no cache etc
 		\header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");

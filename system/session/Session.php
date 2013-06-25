@@ -49,7 +49,6 @@ class Session {
 		else {
 			$this->session->update_time = \time();
 			$this->data = \unserialize($this->session->data);
-			\system\utils\Utils::log('data', $this->session->data);
 		}
 		$this->session->expire_time = \strtotime(($userId ? '+3 months' : '+2 days'), \time());
 	}
@@ -59,7 +58,6 @@ class Session {
 	}
 	
 	public function commit() {
-		print_r(\serialize($this->data));
 		$this->session->data = \serialize($this->data);
 		$this->session->save();
 	}
@@ -72,7 +70,7 @@ class Session {
 	}
 	
 	public function set($type, $key, $data) {
-		\system\utils\Utils::log(__FUNCTION__, \system\utils\Utils::backtraceInfo());
+		\system\utils\Log::create(__FUNCTION__, \system\utils\Utils::backtraceInfo());
 		if (!$this->data[$type]) {
 			$this->data[$type] = array();
 		}

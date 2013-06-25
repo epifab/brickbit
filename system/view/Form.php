@@ -65,7 +65,7 @@ class Form {
 	public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
 		$this->recordsets[$name] = array(
 			'name' => $name,
-			'recordset' => $recordset,
+			'recordset' => null,
 			'input' => array()
 		);
 	}

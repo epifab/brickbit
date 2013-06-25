@@ -190,7 +190,7 @@ class Node extends \system\Component {
 	
 	protected function read($rs) {
 		$this->datamodel['node'] = $rs;
-		$this->setMainTemplate('node');
+		$this->setMainTemplate('node-default');
 		if ($rs->text->title) {
 			$this->setPageTitle($rs->text->title);
 		}

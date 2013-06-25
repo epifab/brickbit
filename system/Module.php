@@ -27,10 +27,10 @@ abstract class Module {
 		$subpaths = func_get_args();
 		unset($subpaths[0]);
 		$module = \system\Main::getModule($moduleName);
-		$path = $module['path'];
+		$namespace = $module['ns'];
 		foreach ($subpaths as $subpath) {
-			$path .= $subpath . '\\';
+			$namespace .= $subpath . '\\';
 		}
-		return $path;
+		return $namespace;
 	}
 }

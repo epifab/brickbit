@@ -162,14 +162,14 @@ class Config {
 		switch ($code) {
 			case E_NOTICE:
 			case E_USER_NOTICE:
-				$level = 'notice';
+				$level = \system\LOG_NOTICE;
 				break;
 			case E_CORE_WARNING:
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 			case E_USER_WARNING:
 			case E_WARNING:
-				$level = 'warning';
+				$level = \system\LOG_WARNING;
 				break;
 			case E_COMPILE_ERROR:
 			case E_CORE_ERROR:
@@ -180,11 +180,15 @@ class Config {
 			case E_RECOVERABLE_ERROR:
 			case E_STRICT:
 			case E_ALL:
-				$level = 'error';
+				$level = \system\LOG_ERROR;
 				break;
 		}
 		
-		\system\utils\Utils::log($level, $description);
+		\system\utils\Log::create('system', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+			'@description' => $description, 
+			'@file' => $file, 
+			'@line' => $line
+		), $level);
 
 		if ($level == 'error') {
 			echo '<h1>' . $description . '</h1>';

@@ -81,7 +81,7 @@ class CoreApi {
 
 		$form = Form::getCurrent();
 		if ($form) {
-			$form->addInput($widget, $name, $value, $params);
+			$form->addInput($name, $widget, $value, $params);
 			return $form->renderInput($name);
 		}
 	}

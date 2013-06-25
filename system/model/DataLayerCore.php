@@ -46,7 +46,7 @@ class DataLayerCore {
 		$this->connection = $this->sqlConnect($dbHost, $dbUser, $dbPass);
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			if (ini_set('mssql.charset', 'utf-8') === false) {
-				\system\utils\Utils::log('data-access', 'Unable to set mssql.charset in php ini configuration file.', array(), \system\LOG_ERROR);
+				\system\utils\Log::debug('<p>Unable to set mssql.charset in php ini configuration file.</p>');
 			}
 		}
 		if (!$this->connection) {
@@ -69,11 +69,11 @@ class DataLayerCore {
 	private function sqlConnect($dbHost, $dbUser, $dbPass) {
 		$this->dbHost = $dbHost;
 
-		\system\utils\Utils::log('data-access', 'Connection to @dbms server at @host. User: @user.', array(
+		\system\utils\Log::debug('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em></p>.', array(
 			'@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
 			'@host' => $dbHost,
 			'@user' => $dbUser
-		), \system\LOG_NOTICE);
+		));
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_connect($dbHost, $dbUser, $dbPass) : \mssql_connect($dbHost, $dbUser, $dbPass));
 		return $res;
@@ -87,7 +87,7 @@ class DataLayerCore {
 
 		$res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
 		if ($res) {
-			\system\utils\Utils::log('data-access', '<p>Database <strong>@name</strong> has been selected</p>', array('@name' => $dbName), \system\LOG_NOTICE);
+			\system\utils\Log::debug('<p>Database <strong>@name</strong> has been selected</p>', array('@name' => $dbName));
 		}
 		return $res;
 	}
@@ -104,7 +104,7 @@ class DataLayerCore {
 	 * sqlQuery will also fail and return false if the user does not have permission to access the table(s) referenced by the query.
 	 */
 	protected function sqlQuery($query) {
-		\system\utils\Utils::log('data-access', '<div><p><strong>SQL Query</strong></p><textarea rows="10" cols="80">@query</textarea>', array('@name' => $this->dbName, '@hos	t' => $this->dbHost, '@query' => $query), \system\LOG_NOTICE);
+		\system\utils\Log::debug('<div><p><strong>SQL Query</strong></p><textarea rows="10" cols="80">@query</textarea>', array('@name' => $this->dbName, '@hos	t' => $this->dbHost, '@query' => $query));
 
 		if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
 			return \mssql_query($query, $this->connection);
@@ -215,12 +215,12 @@ class DataLayerCore {
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr || empty($arr[0])) {
-			\system\utils\Utils::log('data-access', 'No results for the previous query.', array(), \system\LOG_NOTICE);
+			\system\utils\Log::debug('<p>Query returned no results</p>');
 			return null;
 		}
 		$x = $arr[0];
 		$this->sqlFreeResult($res);
-		\system\utils\Utils::log('data-access', 'Query result: <em>@value</em>.', array('@value' => $x), \system\LOG_NOTICE);
+		\system\utils\Log::debug('<p>Query result: <em>@value</em></p>', array('@value' => $x));
 	
 		return $x;
 	}
@@ -241,12 +241,12 @@ class DataLayerCore {
 		}
 		$arr = $this->sqlFetchArray($res, true);
 		if (!$arr) {
-			\system\utils\Utils::log('data-access', 'No results for the previous query.', array(), \system\LOG_NOTICE);
+			\system\utils\Log::debug('<p>Query returned no results</p>');
 			return null;
 		}
 		$x = $arr;
 		$this->sqlFreeResult($res);
-		\system\utils\Utils::log('data-access', 'Query result: <em>@value</em>.', array('@value' => \print_r($x, true)), \system\LOG_NOTICE);
+		\system\utils\Log::debug('<p>Query result: <em>@value</em></p>', array('@value' => \print_r($x, true)));
 	
 		return $x;
 	}
@@ -270,12 +270,12 @@ class DataLayerCore {
 	public function executeQueryArray($query) {
 		$result = $this->executeQuery($query);
 		$x = array();
-		\system\utils\Utils::log('data-access', print_r($x, TRUE));
+		\system\utils\Log::debug(print_r($x, TRUE));
 		while ($arr = $this->sqlFetchArray($result)) {
-			\system\utils\Utils::log('data-access', print_r($x, TRUE));
+			\system\utils\Log::debug(print_r($x, TRUE));
 			$x[] = $arr;
 		}
-		\system\utils\Utils::log('data-access', print_r($x, TRUE));
+		\system\utils\Log::debug(print_r($x, TRUE));
 		return $x;
 	}
 

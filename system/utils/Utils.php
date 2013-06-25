@@ -41,37 +41,37 @@ class Utils {
 		return $traceDesc;
 	}
 	
-	public static function log($key, $message, $type=self::LOG_INFO) {
-		$logs = self::get('system-logs', array());
-		$logsByKey = self::get('system-logs-by-key', array());
-		$logsByType = self::get('system-logs-by-type', array());
-
-		// because of the reverse array order
-		// the first element key is the greatest one
-		$index = 1 + \key($logs);
-
-		$traceDesc = self::backtraceInfo();
-		
-		$logs[$index] = array(
-			'id' => $index,
-			'time' => \time(),
-			'key' => $key,
-			'message' => $message,
-			'type' => $type,
-			'trace' => $traceDesc
-		);
-		
-		$logsByKey[$key][] = $index;
-		$logsByType[$type][] = $index;
-		
-		\arsort($logs);
-		\arsort($logsByKey[$key]);
-		\arsort($logsByType[$type]);
-		
-		self::set('system-logs', $logs);
-		self::set('system-logs-by-key', $logsByKey);
-		self::set('system-logs-by-type', $logsByType);
-	}
+//	public static function log($key, $message, $type=self::LOG_INFO) {
+//		$logs = self::get('system-logs', array());
+//		$logsByKey = self::get('system-logs-by-key', array());
+//		$logsByType = self::get('system-logs-by-type', array());
+//
+//		// because of the reverse array order
+//		// the first element key is the greatest one
+//		$index = 1 + \key($logs);
+//
+//		$traceDesc = self::backtraceInfo();
+//		
+//		$logs[$index] = array(
+//			'id' => $index,
+//			'time' => \time(),
+//			'key' => $key,
+//			'message' => $message,
+//			'type' => $type,
+//			'trace' => $traceDesc
+//		);
+//		
+//		$logsByKey[$key][] = $index;
+//		$logsByType[$type][] = $index;
+//		
+//		\arsort($logs);
+//		\arsort($logsByKey[$key]);
+//		\arsort($logsByType[$type]);
+//		
+//		self::set('system-logs', $logs);
+//		self::set('system-logs-by-key', $logsByKey);
+//		self::set('system-logs-by-type', $logsByType);
+//	}
 	
 	public static function lightVarDump($arg, $maxLevel=-1) {
 		$msg = '';
@@ -100,7 +100,7 @@ class Utils {
 	}
 
 	public static function varDump($arg) {
-		\d($arg);
+		\var_dump($arg);
 	}
 	
 	public static function getLogs($page=0, $size=10) {

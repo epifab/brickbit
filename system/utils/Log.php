@@ -2,6 +2,8 @@
 namespace system\utils;
 
 class Log {
+	private static $debugInfo = array();
+	
 	/**
 	 * Create a log
 	 * @param string $code
@@ -26,5 +28,22 @@ class Log {
 		
 		$rs->create();
 		return $rs->id;
+	}
+	
+	/**
+	 * Add debug info
+	 * @param string $body Message
+	 * @param array $args Message arguments
+	 */
+	public static function debug($body, $args = array()) {
+		self::$debugInfo[] = \cb\t($body, $args);
+	}
+	
+	/**
+	 * Get debug info as a string
+	 * @return string Debug info
+	 */
+	public static function getDebug() {
+		return \implode("\n<br/>", self::$debugInfo);
 	}
 }

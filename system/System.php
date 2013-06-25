@@ -20,7 +20,7 @@ class System {
 			'integer' => '\system\metatypes\MetaInteger',
 			'decimal' => '\system\metatypes\MetaDecimal',
 			'string' => '\system\metatypes\MetaString',
-			'blob' => '\system\metatypes\MetaString',
+			'blob' => '\system\metatypes\MetaBlob',
 			'boolean' => '\system\metatypes\MetaBoolean',
 			'date' => '\system\metatypes\MetaDate',
 			'datetime' => '\system\metatypes\MetaDateTime',

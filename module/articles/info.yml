@@ -1,0 +1,19 @@
+class: Articles
+weight: 2
+enabled: 0
+#modelNs: model
+#modelClass: CoreModel
+#viewNs: view
+#viewClass: CoreApi
+templatesPath: templates
+#componentsNs: components
+#components:
+#  blocks:
+#    class: Block
+#    pages:
+#      - url: system/block/main-menu
+#        action: MainMenu
+#      - url: system/block/admin-menu
+#        action: AdminMenu
+#      - url: system/block/login-control
+#        action: LoginControl
