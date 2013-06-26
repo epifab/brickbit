@@ -65,7 +65,8 @@ class Form {
 	public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
 		$this->recordsets[$name] = array(
 			'name' => $name,
-			'recordset' => null,
+			'table' => $recordset->getBuilder()->getTableName(),
+			'key' => $recordset->getBuilder()->getPrimaryKey(),
 			'input' => array()
 		);
 	}
@@ -175,8 +176,20 @@ class Form {
 	}
 	
 	public function getRecordset($name) {
-		return isset($this->recordsets[$name])
-			? $this->recordsets[$name]['recordset']
+		static $rs = array();
+		if (!isset($rs[$name])) {
+			if (isset($this->recordsets[$name])) {
+				$rsb = new \system\model\RecordsetBuilder($this->recordsets[$name]['table']);
+				$rsb->usingAll();
+				if (empty($this->recordsets[$name]['key'])) {
+					$rs[$name] = $rsb->selectFirstBy($this->recordsets[$name]['key']);
+				} else {
+					$rs[$name] = $rsb->newRecordset();
+				}
+			}
+		}
+		return isset($rs[$name])
+			? $rs[$name]
 			: null;
 	}
 	

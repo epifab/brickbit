@@ -376,17 +376,18 @@ ciderbit.setBehavior('plupload', function() {
 			<legend><?php print $this->api->t('Content access'); ?></legend>
 			<div class="de-row">
 				<div class="de-label-wrapper">
-					<label class="de-label" for="edit-node-record_mode-users"><?php print $this->api->t('Content admininstrators'); ?></label>
+					<label class="de-label" for="edit-node-record_mode-users"><?php print $this->api->t('Content administrators'); ?></label>
 				</div>
 				<div class="de-input-wrapper">
 					<input class="de-input xl" type="text" name="node[record_mode.users]" id="edit-node-record_mode-users" value=""/>
-					<?php echo $this->api->input(array(
-						'widget' => 'autocomplete',
-						'value' => array(),
-						'url' => 'autocomplete/user',
-						'item' => '<div><img src="@[image.url]"/>@[name]</div>',
-						'name' => 'users'
-					)); ?>
+					<?php 
+//					echo $this->api->input(array(
+//						'widget' => 'autocomplete',
+//						'value' => array(),
+//						'url' => 'autocomplete/user',
+//						'item' => '<div><img src="@[image.url]"/>@[name]</div>',
+//						'name' => 'users'
+//					)); ?>
 					<?php print $this->api->de_error("record_mode.users"); ?>
 				</div>
 			</div>

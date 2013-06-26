@@ -2,12 +2,6 @@
 namespace system\model;
 
 class RecordsetBuilder {
-	const KEYS_NONE = 0;
-	const KEYS_PRIMARY = 1;
-	const KEYS_PRIMARY_RECURSIVE = 2;
-	const KEYS_ALL = 3;
-	const KEYS_ALL_RECURSIVE = 4;
-	
 	private static function getUniqueAlias($tableName) {
 		static $tableIds = array();
 		if (!\array_key_exists($tableName, $tableIds)) {
@@ -16,17 +10,6 @@ class RecordsetBuilder {
 			$tableIds[$tableName]++;
 		}
 		return $tableName . $tableIds[$tableName];
-	}
-	
-	public function printFields() {
-		$result = "";
-		foreach ($this->fieldList as $f) {
-			$result .= "<p>" . $f->getAbsolutePath() . "</p>";
-		}
-		foreach ($this->hasOneRelationBuilderList as $hor) {
-			$result .= $hor->printFields();
-		}	
-		return $result;
 	}
 	
 	private $paths = array();
@@ -38,7 +21,6 @@ class RecordsetBuilder {
 	private $absolutePath = "";
 
 	
-	private $importKeys = self::KEYS_ALL_RECURSIVE;
 	/**
 	 * Nome della tabella
 	 * @var string
@@ -72,7 +54,10 @@ class RecordsetBuilder {
 	 * @var string[]
 	 */
 	private $clauses = null;
-	
+	/**
+	 * Handler to add filters to the recordset builder
+	 * @var callable
+	 */
 	private $filterHandle = null;
 	/**
 	 * Tipo di relazione
@@ -106,6 +91,12 @@ class RecordsetBuilder {
 	 * @var string
 	 */
 	private $selectExpression = null;
+	
+	/**
+	 * Any imported property
+	 * @var string[]
+	 */
+	private $properties = array();
 	
 	/**
 	 * Lista di associazioni nome campo => Field campo appartenenti al nodo
@@ -204,6 +195,7 @@ class RecordsetBuilder {
 			);
 
 			$this->fieldList[$name] = $field;
+			$this->properties[$name] = $field;
 			return $field;
 		}
 	}
@@ -228,6 +220,7 @@ class RecordsetBuilder {
 			);
 
 			$this->fieldList[$name] = $field;
+			$this->properties[$name] = $field;
 			return $field;
 		}
 		else {
@@ -259,6 +252,7 @@ class RecordsetBuilder {
 			if (isset($info['selectKey'])) {
 				$builder->setSelectKey($info['selectKey']);
 			}
+			$this->properties[$name] = $builder;
 			$this->relationBuilderList[$name] = $builder;
 			$builder->hasMany()
 				? $this->hasManyRelationBuilderList[$name] = $builder
@@ -299,6 +293,7 @@ class RecordsetBuilder {
 		}
 		
 		$this->keyList[$name] = $key;
+		$this->properties[$name] = $key;
 		
 		return $key;
 	}
@@ -308,7 +303,7 @@ class RecordsetBuilder {
 		$this->tableInfo = \system\Main::getTable($tableName);
 		$this->tableAlias = self::getUniqueAlias($tableName);
 		
-		$this->useAllKeysRecursive();
+		$this->useAllKeys();
 		
 		// Automatically importing record mode
 		if ($this->isRecordModed()) {
@@ -365,65 +360,16 @@ class RecordsetBuilder {
 			$this->using(current($clause));
 		}
 		
-		if ($parentBuilder->importKeys == self::KEYS_PRIMARY_RECURSIVE) {
-			$this->usePrimaryKeyRecursive();
-		} else if ($parentBuilder->importKeys == self::KEYS_ALL_RECURSIVE) {
-			$this->useAllKeysRecursive();
-		}
+		$this->useAllKeys();
 		
 		$this->filterHandle = $filterHandle;
 	}
 	
 	private function useAllKeys() {
-		$this->importKeys = self::KEYS_ALL;
-
 		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
 			foreach ($this->tableInfo["keys"] as $name => $key) {
 				$this->loadKey($name);
 			}
-		}
-	}
-	
-	private function useAllKeysRecursive() {
-		$this->importKeys = self::KEYS_ALL_RECURSIVE;
-
-		$this->useAllKeys();
-		
-		foreach ($this->relationBuilderList as $builder) {
-			$builder->useAllKeysRecursive();
-		}
-	}
-
-	private function usePrimaryKey() {
-		$this->importKeys = self::KEYS_PRIMARY;
-
-		if (!\is_null($this->tableInfo["keys"]) && \count($this->tableInfo["keys"]) > 0) {
-			foreach ($this->tableInfo["keys"] as $name => $key) {
-				$this->loadKey($name);
-				break; // only the first key
-			}
-		}
-	}
-	
-	private function usePrimaryKeyRecursive() {
-		$this->usePrimaryKey();
-		
-		foreach ($this->relationBuilderList as $builder) {
-			$builder->usePrimaryKeyRecursive();
-		}
-		$this->importKeys = self::KEYS_PRIMARY_RECURSIVE;
-	}
-	
-	public function replaceAliasPrefix($prefix, $nchars=0) {
-		if ($nchars > 0) {
-			$suffix = substr($this->tableAlias, $nchars);
-		} else {
-			$suffix = $this->tableAlias;
-		}
-		$this->tableAlias = $prefix . $suffix;
-
-		foreach ($this->relationBuilderList as $rel) {
-			$rel->replaceAliasPrefix($prefix, $nchars);
 		}
 	}
 	
@@ -861,6 +807,7 @@ class RecordsetBuilder {
 
 		if ($dotPosition === false) {
 			if (\array_key_exists($path, $this->tableInfo['relations'])) {
+				$this->properties[$path] = $relation;
 				$this->relationBuilderList[$path] = $relation;
 			} else {
 				throw new \system\error\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
@@ -1264,4 +1211,25 @@ class RecordsetBuilder {
 		$numRecords = $dataAccess->executeScalar($query);
 		return \ceil($numRecords / $pageSize);
 	}
+
+//	public function serialize() {
+//		return \serialize($this->tableName);
+//	}
+//	
+//	public function unserialize($serialized) {
+//		$tableName = \unserialize($serialized);
+//		if (empty($tableName)) {
+//			throw new \system\error\InternalError('Unable to unserialize the recordset builder (unknown table)');
+//		}
+//		$rsb = new self($tableName);
+//		$rsb->usingAll();
+//		return $rsb;
+//	}
+	
+	
+//	private function fieldPathsAsArray(&$properties) {
+//		foreach ($this->fieldList as $name => $field) {
+//			$properties[] = $this->getAbsolutePath() . '.' . $name;
+//		}
+//	}
 }

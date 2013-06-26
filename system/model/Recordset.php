@@ -10,7 +10,6 @@ class Recordset implements RecordsetInterface {
 	private $modifiedFields = array();
 	private $hasOneRelations = array();
 	private $hasManyRelations = array();
-	// flag indicante la presenza del record nel DB
 	private $stored = false;
 	
 	public function __construct(RecordsetBuilder $builder, $data=null) {
@@ -33,9 +32,6 @@ class Recordset implements RecordsetInterface {
 			} else {
 				$this->setDb($name, $field->getDefaultValue());
 			}
-			
-//			if ($name == "path_file1")
-//				throw new \Exception(\array_key_exists("path_file1", $this->fields) ? "esiste" : "NONESISTE");
 		}
 
 		// Inizializzo le has one relations
@@ -680,5 +676,15 @@ class Recordset implements RecordsetInterface {
 			}
 		}
 		return $array;
+	}
+
+	public function serialize() {
+		return \serialize(array(
+			$this->builder->getTableName(),
+			$this->getPrimaryKey()
+		));
+	}
+
+	public static function unserialize($serialized) {
 	}
 }
