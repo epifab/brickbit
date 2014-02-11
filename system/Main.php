@@ -73,7 +73,7 @@ class Main {
 			
 			try {
 				if (!\is_array($moduleInfo)) {
-					throw new \system\error\InternalError('Unable to parse <em>@name</em> module info.', array('@name' => $moduleName));
+					throw new \system\exceptions\InternalError('Unable to parse <em>@name</em> module info.', array('@name' => $moduleName));
 				}
 
 				$enabled = \cb\array_item('enabled', $moduleInfo, array('default' => true));
@@ -86,7 +86,7 @@ class Main {
 				$moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
 
 				if (!\class_exists($moduleClass)) {
-					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
+					throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
 				}
 
 				$weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
@@ -100,7 +100,7 @@ class Main {
 					'prefix' => $modelNs
 				));
 				if (!\is_null($modelClass) && !\class_exists($modelClass)) {
-					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
+					throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
 				}
 				// templates class (API)
 				$viewNs = $moduleNs . (isset($moduleInfo['viewNs'])
@@ -111,7 +111,7 @@ class Main {
 					'prefix' => $viewNs
 				));
 				if (!\is_null($viewClass) && !\class_exists($viewClass)) {
-					throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
+					throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
 				}
 
 				$templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
@@ -119,7 +119,7 @@ class Main {
 					'prefix' => $moduleDir
 				));
 				if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
-					throw new \system\error\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
+					throw new \system\exceptions\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
 				}
 
 				// components namespace
@@ -134,7 +134,7 @@ class Main {
 							'prefix' => $componentsNs
 					));
 					if (!\class_exists($componentClass)) {
-						throw new \system\error\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
+						throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
 						unset($components[$componentName]);
 						continue;
 					}
@@ -303,21 +303,20 @@ class Main {
 				while (($fileName = \readdir($d))) {
 					if (\substr($fileName, -8) == '.tpl.php') {
 						$templateName = \substr($fileName, 0, -8);
-						$TEMPLATES[$templateName] = $module['templatesPath'] . DIRECTORY_SEPARATOR . $fileName;
+						$TEMPLATES[$templateName] = $module['templatesPath'] . $fileName;
 					}
 				}
 				\closedir($d);
 			}
 		}
 
-		$themeTplPath = \system\Theme::getThemePath('templates');
-		
+		$themeTplPath = \system\Theme::getAbsPath('templates');
 		if (!\is_null($themeTplPath) && \is_dir($themeTplPath)) {
 			$d = \opendir($themeTplPath);
 			while (($fileName = \readdir($d))) {
 				if (\substr($fileName, -8) == '.tpl.php') {
 					$templateName = \substr($fileName, 0, -8);
-					$TEMPLATES[$templateName] = $themeTplPath . DIRECTORY_SEPARATOR . $fileName;
+					$TEMPLATES[$templateName] = $themeTplPath . $fileName;
 				}
 			}
 			\closedir($d);
@@ -409,7 +408,7 @@ class Main {
 		if (isset($config['modules'][$moduleName])) {
 			return $config['modules'][$moduleName];
 		} else {
-			throw new \system\error\InternalError('Module <em>@name</em> not found.', array('@name' => $moduleName));
+			throw new \system\exceptions\InternalError('Module <em>@name</em> not found.', array('@name' => $moduleName));
 		}
 	}
 
@@ -426,7 +425,7 @@ class Main {
 		if (isset($config['templates'][$templateName])) {
 			return $config['templates'][$templateName];
 		} else {
-			throw new \system\error\InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
+			throw new \system\exceptions\InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
 		}
 	}
 
@@ -440,7 +439,7 @@ class Main {
 			$c = self::configuration();
 			return $c['tables'][$tableName];
 		} else {
-			throw new \system\error\InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
+			throw new \system\exceptions\InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
 		}
 	}
 	
@@ -533,6 +532,7 @@ class Main {
 			if (!$obj->isNested()) {
 				// Raise event onRun
 				self::raiseEvent('onRun', $obj);
+				\system\Theme::onRun($obj);
 			}
 
 			$obj->process();

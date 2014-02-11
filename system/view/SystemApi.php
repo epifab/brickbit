@@ -13,7 +13,7 @@ class SystemApi {
 
 	public static function close() {
 		if (empty(self::$blocks)) {
-			throw new \system\error\InternalError('Syntax error. No block has been open.');
+			throw new \system\exceptions\InternalError('Syntax error. No block has been open.');
 		}
 		list($callback, $args) = \array_pop(self::$blocks);
 		$content = \ob_get_clean();
@@ -32,7 +32,7 @@ class SystemApi {
 	}
 
 	public static function theme_path($url) {
-		return \system\Theme::getThemePath() . $url;
+		return \system\Theme::getPath() . $url;
 	}
 
 	public static function lang_path($lang) {

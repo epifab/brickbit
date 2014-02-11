@@ -27,7 +27,7 @@ class Field {
 	 */
 	public function getSelectExpression() {
 		if (empty($this->builder)) {
-			throw new \system\error\InternalError('Unable to retrieve the select expression.');
+			throw new \system\exceptions\InternalError('Unable to retrieve the select expression.');
 		}
 		if (empty($this->selectExpression)) {
 			return $this->builder->getTableAlias() . "." . $this->getName();
@@ -73,7 +73,7 @@ class Field {
 //		if (is_callable(array($this->metaType, $name))) {
 //			call_user_func(array($this->metaType, $name), $arguments);
 //		} else {
-//			throw new \system\error\InternalError('Uknown method <em>@name</em>', array('@name' => $name));
+//			throw new \system\exceptions\InternalError('Uknown method <em>@name</em>', array('@name' => $name));
 //		}
 //	}
 

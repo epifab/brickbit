@@ -1,7 +1,7 @@
 <?php
 namespace system\utils;
 
-use system\error\ValidationError;
+use system\exceptions\ValidationError;
 
 class Validation {
 	public static function checkNotNullable($str) {

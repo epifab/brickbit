@@ -1,7 +1,7 @@
 <?php
 namespace system\utils;
 
-use system\error\InternalError;
+use system\exceptions\InternalError;
 
 class Utils {
 	const LOG_ERROR = 1;
@@ -93,6 +93,10 @@ class Utils {
 			$msg .= 'null';
 		} else if (\is_string($arg)) {
 			$msg .= '"' . $arg . '"';
+		} else if ($arg === false) {
+			$msg .= 'false';
+		} else if ($arg === true) {
+			$msg .= 'true';
 		} else {
 			$msg .= $arg;
 		}
@@ -100,7 +104,7 @@ class Utils {
 	}
 
 	public static function varDump($arg) {
-		\var_dump($arg);
+		return self::lightVarDump($arg);
 	}
 	
 	public static function getLogs($page=0, $size=10) {

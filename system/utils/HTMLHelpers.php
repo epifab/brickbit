@@ -55,7 +55,7 @@ class HTMLHelpers {
 	 * @param message Messaggio di errore
 	 * @param out Print writer
 	 */
-	public static function makeErrorPage(\system\view\TemplateManager $templateManager, array $datamodel, \system\error\Error $mainError, $executionTime=0) {
+	public static function makeErrorPage(\system\view\TemplateManager $templateManager, array $datamodel, \system\exceptions\Error $mainError, $executionTime=0) {
 		$msg = "";
 		$exception = $mainError;
 
@@ -65,7 +65,7 @@ class HTMLHelpers {
 				. '<h4>' . \system\utils\Lang::translate('Exception details') . '</h4>'
 				. '<p>' . $exception->getFile() . ' ' . $exception->getLine() . '</p>';
 			
-			if ($exception instanceof \system\error\Error) {
+			if ($exception instanceof \system\exceptions\Error) {
 				$msg .= $exception->getDetails();
 			}
 
@@ -93,7 +93,7 @@ class HTMLHelpers {
 							$msg .= \system\utils\Utils::varDump($arg);
 						}
 					}
-					$msg .= '</code>)<br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
+					$msg .= ')</code><br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
 				}
 				$msg .= '</ol>';
 			}
@@ -108,7 +108,7 @@ class HTMLHelpers {
 			)) . '</p>';
 		}
 		
-		if ($mainError instanceof \system\error\AuthorizationError) {
+		if ($mainError instanceof \system\exceptions\AuthorizationError) {
 			$title = \system\utils\Lang::translate('Forbidden');
 			$msg = \system\utils\Lang::translate("You don't have sufficient permission to access this resource.");
 		} else {

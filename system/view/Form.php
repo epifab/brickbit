@@ -27,7 +27,7 @@ class Form {
 	
 	public static function startForm($name) {
 		if (!empty(self::$instance)) {
-			throw new \system\error\InternalError('Illegal nested form.');
+			throw new \system\exceptions\InternalError('Illegal nested form.');
 		}
 		$form = self::getForm($name);
 		if (empty($form)) {
@@ -97,9 +97,32 @@ class Form {
 		}
 	}
 	
-	private static function getPostedFormId() {
+	public static function getPostedFormId() {
 		if (isset($_REQUEST['system']) && isset($_REQUEST['system']['formId'])) {
 			return $_REQUEST['system']['formId'];
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the posted form
+	 * @param string $formId [optional] If passed, the posted form id must match it
+	 * @return \system\view\Form Null if no form has been submitted or the submitted form id doesn't match with the formId argument
+	 */
+	public static function getPostedForm($formId = null) {
+		if (empty($formId) || $formId == self::getPostedFormId()) {
+			if (!isset(self::$submitted)) {
+				$name = self::getPostedFormId();
+				if (!\is_null($name)) {
+					$form = self::getForm($name);
+					if ($form) {
+						$form->fetchInputValues();
+						$form->fetchRecordsets();
+						self::$submitted = $form;
+					}
+				}
+			}
+			return self::$submitted;
 		}
 		return null;
 	}
@@ -108,11 +131,12 @@ class Form {
 	 * Checks whether a form has been submitted
 	 * @return boolean
 	 */
-	public static function checkFormSubmission() {
+	public static function checkFormSubmission($formId = null) {
 		return
 			isset($_REQUEST['system'])
 			&& isset($_REQUEST['system']['formId'])
-			&& Session::getInstance()->exists('forms', $_REQUEST['system']['formId']);
+			&& Session::getInstance()->exists('forms', $_REQUEST['system']['formId'])
+			&& (empty($formId) || $formId == $_REQUEST['system']['formId']);
 	}
 	
 	private static function getInputPostedValue(array $input) {
@@ -144,7 +168,7 @@ class Form {
 			if ($mt) {
 				try {
 					$mt->validate($input['value']);
-				} catch (\system\error\ValidationError $ex) {
+				} catch (\system\exceptions\ValidationError $ex) {
 					$this->errors[$input['name']] = $ex->getMessage();
 				}
 			}
@@ -158,21 +182,6 @@ class Form {
 				$rsObj->setProg($path, $this->input[$name]['value']);
 			}
 		}
-	}
-	
-	public static function submittedForm() {
-		if (!isset(self::$submitted)) {
-			$name = self::getPostedFormId();
-			if (!\is_null($name)) {
-				$form = self::getForm($name);
-				if ($form) {
-					$form->fetchInputValues();
-					$form->fetchRecordsets();
-					self::$submitted = $form;
-				}
-			}
-		}
-		return self::$submitted;
 	}
 	
 	public function getRecordset($name) {
@@ -201,15 +210,19 @@ class Form {
 		return $this->input;
 	}
 	
-	public function getErrors() {
-		return $this->errors;
-	}
-	
 	public function getTimestamp() {
 		return $this->timestamp;
 	}
 	
 	public function getData() {
 		return $this->data;
+	}
+	
+	public function inputErrorCount() {
+		return \count($this->errors);
+	}
+	
+	public function inputErrors() {
+		return $this->errors;
 	}
 }

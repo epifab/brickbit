@@ -1,12 +1,8 @@
 <?php
-namespace system\error;
+namespace system\exceptions;
 
-abstract class Error extends \Exception {
+abstract class BaseException extends \Exception {
 	public function __construct($message, $arguments = array(), $previous=null) {
 		parent::__construct(\cb\t($message, $arguments), 0, $previous);
-	}
-	
-	public function getDetails() {
-		return '';
 	}
 }

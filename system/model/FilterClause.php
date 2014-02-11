@@ -68,7 +68,7 @@ class FilterClause implements SelectClauseInterface {
 		$this->setType($type);
 //		if (($expression == null && $type != FilterClause::OP_IS_NULL && $type != FilterClause::OP_IS_NOT_NULL) ||
 //			($expression != null && ($type == FilterClause::OP_IS_NULL || $type == FilterClause::OP_IS_NOT_NULL))) {
-//			throw new \system\error\InternalError("Parametri type o expression non validi");
+//			throw new \system\exceptions\InternalError("Parametri type o expression non validi");
 //		}
 		$this->expression = $expression;
 		$this->field = $field;
@@ -92,7 +92,7 @@ class FilterClause implements SelectClauseInterface {
 					$this->type = $type;
 					break;
 				default:
-					throw new \system\error\InternalError("Parametro type fuori dal range");
+					throw new \system\exceptions\InternalError('Invalid parameter type');
 			}
 		}
 
@@ -145,12 +145,12 @@ class FilterClause implements SelectClauseInterface {
 					$this->type = FilterClause::OP_IS_NOT_NULL;
 					break;
 				default:
-					throw new \system\error\InternalError("Parametro type fuori dal range");
+					throw new \system\exceptions\InternalError("Parametro type fuori dal range");
 			}
 		}
 
 		else {
-			throw new \system\error\InternalError("Parametro type non valido");
+			throw new \system\exceptions\InternalError("Parametro type non valido");
 		}
 	}
 

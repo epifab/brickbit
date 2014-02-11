@@ -1,5 +1,5 @@
 <?php
-namespace system\error;
+namespace system\exceptions;
 
 /**
  * Classe per la gestione di eccezioni verificatesi sullo strato di accesso ai dati.

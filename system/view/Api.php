@@ -45,7 +45,7 @@ class Api {
 		if (!\is_null($api)) {
 			return \call_user_func_array($api, $args);
 		} else {
-			throw new \system\error\InternalError('Template API <em>@name</em> not found.', array('@name' => $method));
+			throw new \system\exceptions\InternalError('Template API <em>@name</em> not found.', array('@name' => $method));
 		}
 	}
 }

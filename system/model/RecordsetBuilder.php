@@ -350,7 +350,7 @@ class RecordsetBuilder {
 				$this->relationType = $relationType;
 				break;
 			default:
-				throw new \system\error\InternalError('Unknown type for relation <em>@name</em>.', array('@name' => $relationName));
+				throw new \system\exceptions\InternalError('Unknown type for relation <em>@name</em>.', array('@name' => $relationName));
 				break;
 		}
 		
@@ -436,14 +436,14 @@ class RecordsetBuilder {
 		$res = $this->searchProperty($path);
 		if ($res == null) {
 			if ($required) {
-				throw new \system\error\InternalError('Key @path not found.', array('@path' => $path));
+				throw new \system\exceptions\InternalError('Key @path not found.', array('@path' => $path));
 			} else {
 				return null;
 			}
 		} else if ($res instanceof Key) {
 			return $res;
 		} else {
-			throw new \system\error\InternalError('Key @path not found.', array('@path' => $path));
+			throw new \system\exceptions\InternalError('Key @path not found.', array('@path' => $path));
 		}
 	}
 	
@@ -458,14 +458,14 @@ class RecordsetBuilder {
 		$res = $this->searchProperty($path);
 		if ($res == null) {
 			if ($required) {
-				throw new \system\error\InternalError('Field <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+				throw new \system\exceptions\InternalError('Field <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 			} else {
 				return null;
 			}
 		} else if ($res instanceof Field) {
 			return $res;
 		} else {
-			throw new \system\error\InternalError('Field <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+			throw new \system\exceptions\InternalError('Field <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 		}
 	}
 	
@@ -480,14 +480,14 @@ class RecordsetBuilder {
 		$res = $this->searchProperty($path);
 		if ($res == null) {
 			if ($required) {
-				throw new \system\error\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+				throw new \system\exceptions\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 			} else {
 				return null;
 			}
 		} else if ($res instanceof self) {
 			return $res;
 		} else {
-			throw new \system\error\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+			throw new \system\exceptions\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 		}
 	}
 	
@@ -495,7 +495,7 @@ class RecordsetBuilder {
 		try {
 			$rel = $this->searchRelationBuilder($path, true);
 			if ($rel->hasMany()) {
-				throw new \system\error\InternalError('Has-one relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+				throw new \system\exceptions\InternalError('Has-one relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 			}
 			return $rel;
 		} catch (\Exception $ex) {
@@ -509,8 +509,8 @@ class RecordsetBuilder {
 	public function searchHasManyRelationBuilder($path, $required=false) {
 		try {
 			$rel = $this->searchRelationBuilder($path, true);
-			if ($rel->hasMany()) {
-				throw new \system\error\InternalError('Has-many relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+			if (!$rel->hasMany()) {
+				throw new \system\exceptions\InternalError('Has-many relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 			}
 			return $rel;
 		} catch (\Exception $ex) {
@@ -608,7 +608,7 @@ class RecordsetBuilder {
 				$this->joinType = "RIGHT";
 				break;
 			default:
-				throw new \system\error\InternalError("Parametri non validi per il RecordsetBuilder");
+				throw new \system\exceptions\InternalError("Parametri non validi per il RecordsetBuilder");
 		}
 	}
 	
@@ -619,7 +619,7 @@ class RecordsetBuilder {
 				$this->onDelete = $onDelete;
 				break;
 			default:
-				throw new \system\error\InternalError("Parametri non validi per il RecordsetBuilder");
+				throw new \system\exceptions\InternalError("Parametri non validi per il RecordsetBuilder");
 		}
 	}
 	
@@ -634,7 +634,7 @@ class RecordsetBuilder {
 				$this->onUpdate = $onUpdate;
 				break;
 			default:
-				throw new \system\error\InternalError("Parametri non validi per il RecordsetBuilder");
+				throw new \system\exceptions\InternalError("Parametri non validi per il RecordsetBuilder");
 		}
 	}
 	
@@ -788,19 +788,19 @@ class RecordsetBuilder {
 		$this->using("*");
 		foreach ($ti["relations"] as $relationName => $relationInfo) {
 			if (!$this->parentBuilder || \count(\array_diff($relationInfo["clauses"], $this->getClauses())) > 0) {
-				// it just prevent short endless loops:
+				// it just prevents short endless loops:
 				//  if the loop involves more than two relations it won't be catched by the if statement above
 				//  (it catches A->B->A but not A->B->C->A)
-				if ($relationInfo["type"] != "1-N") {
+//				if ($relationInfo["type"] != "1-N") {
 					$this->loadRelationBuilder($relationName)->usingAll();
-				}
+//				}
 			}
 		}
 	}
 	
 	public function setRelation($path, RecordsetBuilder $relation) {
 		if (!$relation->hasMany()) {
-			throw new \system\error\InternalError('Only has many relation can be added.', array());
+			throw new \system\exceptions\InternalError('Only has many relation can be added.', array());
 		}
 		
 		$dotPosition = \strpos($path, ".");
@@ -810,7 +810,7 @@ class RecordsetBuilder {
 				$this->properties[$path] = $relation;
 				$this->relationBuilderList[$path] = $relation;
 			} else {
-				throw new \system\error\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
+				throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
 			}
 		}
 		else {
@@ -818,7 +818,7 @@ class RecordsetBuilder {
 			$rest = substr($path, $dotPosition+1);
 			$builder = $this->loadRelationBuilder($current);
 			if (\is_null($builder)) {
-				throw new \system\error\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
+				throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
 			}
 			$builder->setRelation($rest, $relation);
 		}
@@ -852,7 +852,7 @@ class RecordsetBuilder {
 				}
 				if (!$found) {
 					// The property is neither a field nor a key nor a relation
-					throw new \system\error\InternalError('Field, key or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
+					throw new \system\exceptions\InternalError('Field, key or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->tableName));
 				}
 			}
 			else {
@@ -861,7 +861,7 @@ class RecordsetBuilder {
 				
 				if (\is_null($relation)) {
 					// The property is neither a field nor a key nor a relation
-					throw new \system\error\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
+					throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
 				}
 				
 				$relation->using($rest);
@@ -879,13 +879,13 @@ class RecordsetBuilder {
 			$this->filterClauses = $filterClauses;
 		}
 		else {
-			throw new \system\error\InternalError("Parametro filterClauses non valido");
+			throw new \system\exceptions\InternalError("Parametro filterClauses non valido");
 		}
 	}
 	
 	public function addFilter($filterClauses) {
 		if (!($filterClauses instanceof FilterClause) && !($filterClauses instanceof FilterClauseGroup)) {
-			throw new \system\error\InternalError("Parametro filterClauses non valido");
+			throw new \system\exceptions\InternalError("Parametro filterClauses non valido");
 		}
 
 		if (is_null($this->filterClauses)) {
@@ -907,7 +907,7 @@ class RecordsetBuilder {
 			$this->sortClauses = $sortClauses;
 		}
 		else {
-			throw new \system\error\InternalError("Parametro sortClauses non valido");
+			throw new \system\exceptions\InternalError("Parametro sortClauses non valido");
 		}
 	}
 	
@@ -923,7 +923,7 @@ class RecordsetBuilder {
 			$this->limitClause = $limitClause;
 		}
 		else {
-			throw new \system\error\InternalError("Parametro limitClause non valido");
+			throw new \system\exceptions\InternalError("Parametro limitClause non valido");
 		}
 	}
 	
@@ -1106,7 +1106,11 @@ class RecordsetBuilder {
 //		return $result;
 //	}
 
-	
+	/**
+	 * @param array $fields Associative array "field name" => "value"
+	 * @param boolean $firstResult If true, it returns only the first recordset selected
+	 * @return \system\model\RecordsetInterface[]
+	 */
 	public function selectBy(array $fields, $firstResult=false) {
 		$newFilter = new FilterClauseGroup();
 		foreach ($fields as $name => $value) {
@@ -1124,7 +1128,11 @@ class RecordsetBuilder {
 		return $result;
 	}
 	
-	public function selectFirstBy($fields) {
+	/**
+	 * @param array $fields Associative array "field name" => "value"
+	 * @return \system\model\RecordsetInterface
+	 */
+	public function selectFirstBy(array $fields) {
 		return $this->selectBy($fields, true);
 	}
 
@@ -1219,7 +1227,7 @@ class RecordsetBuilder {
 //	public function unserialize($serialized) {
 //		$tableName = \unserialize($serialized);
 //		if (empty($tableName)) {
-//			throw new \system\error\InternalError('Unable to unserialize the recordset builder (unknown table)');
+//			throw new \system\exceptions\InternalError('Unable to unserialize the recordset builder (unknown table)');
 //		}
 //		$rsb = new self($tableName);
 //		$rsb->usingAll();

@@ -6,23 +6,18 @@ class Handler implements \Serializable {
 	private $_handler;
 	
 	public function __construct($handler, $serialized=null) {
-		if ($serialized) {
-			var_dump($serialized);
-			var_dump($handler);
-		}
-		
 		$this->handler = $handler;
 		if (\is_array($handler)) {
 			if (\is_callable($handler)) {
 				$this->_handler = $handler;
 			} else {
-				throw new \system\error\InternalError('Method @class::@method does not exist.', array(
+				throw new \system\exceptions\InternalError('Method @class::@method does not exist.', array(
 					'@method' => $handler[1], 
 					'@class' => $handler[0]
 				));
 			}
 		} elseif (empty($handler)) {
-			throw new \system\error\InternalError('Empty handler');
+			throw new \system\exceptions\InternalError('Empty handler');
 		} else {
 			eval('$this->_handler = ' . $handler . ';');
 		}

@@ -12,9 +12,9 @@ use system\Theme;
 use system\TemplateManager;
 use system\utils\Utils;
 
-use system\error\InternalError;
-use system\error\AuthorizationError;
-use system\error\ValidationError;
+use system\exceptions\InternalError;
+use system\exceptions\AuthorizationError;
+use system\exceptions\ValidationError;
 
 abstract class Component {
 	//  components stack
@@ -131,7 +131,7 @@ abstract class Component {
 	 * @param \Exception $exception Exception to handle with
 	 */
 	protected function onError($exception) {
-		if (!($exception instanceof \system\error\Error)) {
+		if (!($exception instanceof \system\exceptions\Error)) {
 			$exception = new InternalError($exception->getMessage());
 		}
 		\system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
@@ -152,13 +152,10 @@ abstract class Component {
 //		}
 	}
 	
-	/**
-	 * Can be overriden by
-	 *   onProcessMyAction
-	 *   onProcess 
-	 */
-	protected function onProcess() {
-		return self::RESPONSE_TYPE_READ;
+	protected function onProcess() { }
+	
+	protected function defaultRunHandler() {
+		throw new \system\exceptions\PageNotFound();
 	}
 	
 	/**
@@ -637,60 +634,61 @@ abstract class Component {
 			
 		$pageOutput = "";
 
-		try {
-			// init event
-			$this->onInit();
-			
-			// checking permission
-			if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\utils\Login::getLoggedUser())) {
-				throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
-			}
+		try { // any error
+			try { // handle with redirects
+				// init event
+				$this->onInit();
 
-			$runMethod = null;
-			$runArgs = array();
-			
-			if (!$this->isNested() && \system\view\Form::checkFormSubmission()) {
-				$form = \system\view\Form::formSubmission();
-				var_dump($form);
-			}
-			
-			// onProcess event
-			if (\is_null($runMethod) && \is_callable(array($this, 'run' . $this->action))) {
-				$runMethod = array($this, 'run' . $this->action);
+				// checking permission
+				if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\utils\Login::getLoggedUser())) {
+					throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
+				}
+
+				$runMethod = null;
 				$runArgs = array();
-			}
-			
-			if (\is_null($runMethod)) {
-				$responseType = $this->onProcess();
-			} else {
-				$responseType = \call_user_func_array($runMethod, $runArgs);
+
+				// onProcess event
+				if (\is_callable(array($this, 'run' . $this->action))) {
+					$runMethod = array($this, 'run' . $this->action);
+					$runArgs = array();
+				}
+
+				if (\is_null($runMethod)) {
+					$responseType = $this->defaultRunHandler();
+				} else {
+					$responseType = \call_user_func_array($runMethod, $runArgs);
+				}
+
+				switch ($responseType) {
+					case self::RESPONSE_TYPE_READ:
+					case self::RESPONSE_TYPE_NOTIFY:
+					case self::RESPONSE_TYPE_FORM:
+					case self::RESPONSE_TYPE_ERROR:
+						$this->setResponseType($responseType);
+						break;
+					case null:
+						break;
+					default:
+						throw new InternalError('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
+							'@action' => $this->action, 
+							'@component' => $this->name,
+							'@module' => $this->module
+						));
+				}
+
+				if (!\is_null($responseType)) {
+					// Adding the output to the buffer
+					$this->tplManager->process($this->datamodel);
+				}
+
+				if (!$this->nested) {
+					// Displays the output
+					$pageOutput = \ob_get_flush();
+				}
 			}
 
-			switch ($responseType) {
-				case self::RESPONSE_TYPE_READ:
-				case self::RESPONSE_TYPE_NOTIFY:
-				case self::RESPONSE_TYPE_FORM:
-				case self::RESPONSE_TYPE_ERROR:
-					$this->setResponseType($responseType);
-					break;
-				case null:
-					break;
-				default:
-					throw new InternalError('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
-						'@action' => $this->action, 
-						'@component' => $this->name,
-						'@module' => $this->module
-					));
-			}
-
-			if (!\is_null($responseType)) {
-				// Adding the output to the buffer
-				$this->tplManager->process($this->datamodel);
-			}
-
-			if (!$this->nested) {
-				// Displays the output
-				$pageOutput = \ob_get_flush();
+			catch (\system\exceptions\Redirect $ex) {
+				\system\Main::run($ex->getUrl());
 			}
 		}
 		
@@ -698,7 +696,7 @@ abstract class Component {
 			// Uncaught exception
 			
 			// Cleaning the buffer
-//			while (\ob_get_clean());
+			while (\ob_get_clean());
 
 			// onError event
 			$this->onError($ex);
@@ -731,5 +729,9 @@ abstract class Component {
 		} else {
 			return null;
 		}
+	}
+	
+	public function formSubmission($formId) {
+		\system\view\Form::getPcheckFormSubmission($formId);
 	}
 }

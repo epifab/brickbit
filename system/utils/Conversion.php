@@ -1,7 +1,7 @@
 <?php
 namespace system\utils;
 
-use system\error\ConversionError;
+use system\exceptions\ConversionError;
 
 /**
  * Classe di metodi utili per il data layer

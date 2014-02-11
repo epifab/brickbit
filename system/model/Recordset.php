@@ -180,10 +180,10 @@ class Recordset implements RecordsetInterface {
 				if ($first instanceof RecordsetInterface) {
 					return $first->search(substr($path, $dotPosition+1), $required);
 				} else {
-					throw new \system\error\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $name, '@table' => $this->getBuilder()->getTableName()));
+					throw new \system\exceptions\InternalError('Relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $name, '@table' => $this->getBuilder()->getTableName()));
 				}
 			}
-		} catch (\system\error\InternalError $ex) {
+		} catch (\system\exceptions\InternalError $ex) {
 			if ($required) {
 				throw $ex;
 			}
@@ -195,7 +195,7 @@ class Recordset implements RecordsetInterface {
 		try {
 			$dotPosition = strpos($path, ".");
 			if (empty($path)) {
-				throw new \system\error\InternalError('Field or relation <em>@path</em> does not exist or is not used in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
+				throw new \system\exceptions\InternalError('Field or relation <em>@path</em> does not exist or is not used in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
 			}
 			if ($dotPosition === false) {
 				return array($this, $path);
@@ -204,10 +204,10 @@ class Recordset implements RecordsetInterface {
 				if ($first instanceof RecordsetInterface) {
 					return $first->searchParent(substr($path, $dotPosition+1), $required);
 				} else {
-					throw new \system\error\InternalError('Field or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
+					throw new \system\exceptions\InternalError('Field or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
 				}
 			}
-		} catch (\system\error\InternalError $ex) {
+		} catch (\system\exceptions\InternalError $ex) {
 			if ($required) {
 				throw $ex;
 			}
@@ -223,7 +223,7 @@ class Recordset implements RecordsetInterface {
 			}
 			$rs->fields[$name] = $value;
 		} else {
-			throw new \system\error\InternalError('Field or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
+			throw new \system\exceptions\InternalError('Field or relation <em>@path</em> not found in <em>@table</em>.', array('@path' => $path, '@table' => $this->getBuilder()->getTableName()));
 		}
 	}
 	
@@ -238,7 +238,7 @@ class Recordset implements RecordsetInterface {
 			if ($f->isVirtual()) {
 				return \call_user_func($f->getHandler(), $rs);
 			}
-			throw new \system\error\InternalError('Field, relation or key <em>@path</em> not found in <em>@table</em>.', array('@path' => $name, '@table' => $this->getBuilder()->getTableName()));
+			throw new \system\exceptions\InternalError('Field, relation or key <em>@path</em> not found in <em>@table</em>.', array('@path' => $name, '@table' => $this->getBuilder()->getTableName()));
 		}
 	}
 	
@@ -297,7 +297,7 @@ class Recordset implements RecordsetInterface {
 		}
 		
 		if ($q1 === "") {
-			throw new \system\error\InternalError('Cannot create a record with no field values.');
+			throw new \system\exceptions\InternalError('Cannot create a record with no field values.');
 		}
 
 		$query = "INSERT INTO " . $this->builder->getTableName() . " (" . $q1 . ") VALUES (" . $q2 . ")";
@@ -329,7 +329,7 @@ class Recordset implements RecordsetInterface {
 		\system\Main::raiseModelEvent('onUpdate', $this);
 
 		if (!$this->isStored()) {
-			throw new \system\error\InternalError('Recordset does not exist.');
+			throw new \system\exceptions\InternalError('Recordset does not exist.');
 		}
 		
 		// Controllo i permessi dell'utente per l'aggiornamento del record
@@ -370,13 +370,13 @@ class Recordset implements RecordsetInterface {
 	
 	private function filterByPrimaryClause() {
 		if (!$this->builder->getPrimaryKey()) {
-			throw new \system\error\InternalError('No keys have been set for <em>@name</em> table.', array('@name' => $this->builder->getTableName()));
+			throw new \system\exceptions\InternalError('No keys have been set for <em>@name</em> table.', array('@name' => $this->builder->getTableName()));
 		}
 		$first = true;
 		$query = "";
 		foreach ($this->builder->getPrimaryKey()->getFields() as $field) {
 			if (!\array_key_exists($field->getName(), $this->fields) || \is_null($this->fields[$field->getName()])) {
-				throw new \system\error\InternalError('Primary key fields not imported or invalid.');
+				throw new \system\exceptions\InternalError('Primary key fields not imported or invalid.');
 			}
 			$first ? $first = false : $query .= " AND ";
 			$query .= $field->getName() . " = " . $field->prog2Db($this->fields[$field->getName()]);
@@ -596,7 +596,7 @@ class Recordset implements RecordsetInterface {
 						// due possibilita':
 						// 1 la relazione e' obbligatoria
 						// 2 ci sono campi del join che sono stati specificati mentre questo e' nullo
-						throw new \system\error\ValidationError('Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
+						throw new \system\exceptions\ValidationError('Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
 					} else {
 						// relazione non obbligatoria e campo (fin'ora) tutti nulli
 						$nullRelation = true;
@@ -604,7 +604,7 @@ class Recordset implements RecordsetInterface {
 				} else {
 					if ($nullRelation) {
 						// i campi fin'ora erano tutti nulli
-						throw new \system\error\ValidationError('Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
+						throw new \system\exceptions\ValidationError('Invalid null values for relation <em>@name</em>', array('@name' => $relationName));
 					}
 				}
 
@@ -632,7 +632,7 @@ class Recordset implements RecordsetInterface {
 			
 			return true;
 			
-		} catch (\system\error\ValidationError $ex) {
+		} catch (\system\exceptions\ValidationError $ex) {
 			foreach ($relationBuilder->getClauses() as $parentField => $childField) {
 				$errors[$this->builder->getField($parentField)->getAbsolutePath()] = $ex->getMessage();
 			}

@@ -1,8 +1,8 @@
 <?php
 namespace system\utils;
 
-use system\error\InternalError;
-use system\error\ValidationError;
+use system\exceptions\InternalError;
+use system\exceptions\ValidationError;
 
 class File {
 	public static function getExtension($fileName, $tolowercase=true) {

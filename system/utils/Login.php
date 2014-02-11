@@ -1,7 +1,7 @@
 <?php
 namespace system\utils;
 
-use system\error\LoginError;
+use system\exceptions\LoginError;
 
 define("LOGIN_COOKIE_TIME", (time()+(3600*24*5))); // 5 giorni
 
@@ -185,7 +185,7 @@ class Login {
 
 		if (\array_key_exists("login", $_SESSION)) {
 			if (@$_SESSION["login"]["ip"] != HTMLHelpers::getIpAddress()) {
-				throw new \system\error\LoginError('You seem to be logged in from an other ip address. Please try to log in again later.');
+				throw new \system\exceptions\LoginError('You seem to be logged in from an other ip address. Please try to log in again later.');
 			} else {
 				return self::getUserByLoginData(@$_SESSION["login"]["username"], @$_SESSION["login"]["userpass"]);
 			}

@@ -67,7 +67,7 @@ abstract class MetaType {
 		$fmap = self::getMetaTypesMap();
 		
 		if (!\array_key_exists($type, $fmap)) {
-			throw new \system\error\InternalError('Unknown metatype <em>@name</em>', array('@name' => $type));
+			throw new \system\exceptions\InternalError('Unknown metatype <em>@name</em>', array('@name' => $type));
 		}
 		$metaTypeClass = $fmap[$type];
 		

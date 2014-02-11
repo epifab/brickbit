@@ -18,7 +18,7 @@ class Widget {
 		$wmap = \system\utils\Cache::widgetsMap();
 		
 		if (!\array_key_exists($name, $wmap)) {
-			throw new \system\error\InternalError('Unknown widget <em>@name</em>', array('@name' => $name));
+			throw new \system\exceptions\InternalError('Unknown widget <em>@name</em>', array('@name' => $name));
 		}
 		$widgetClass = $wmap[$name];
 		

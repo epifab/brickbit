@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-use system\error\SqlQueryError;
+use system\exceptions\SqlQueryError;
 
 /**
  * Classe per l'accesso ai dati.
@@ -190,7 +190,7 @@ class DataLayerCore {
 				$this->dbmsType = $dbms;
 				break;
 			default:
-				throw new \system\error\InternalError('Invalid DBMS.');
+				throw new \system\exceptions\InternalError('Invalid DBMS.');
 				break;
 		}
 	}

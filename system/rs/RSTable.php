@@ -91,7 +91,7 @@ class RSTable implements RSTableInterface {
 				return isset($tableInfo['relations'][$path])
 					&& self::propertyExists($tableInfo['relations'][$relationName]['table'], \substr($path, $dotPosition + 1));
 			}
-		} catch (\system\error\Error $ex) {
+		} catch (\system\exceptions\Error $ex) {
 			return false;
 		}
 	}
@@ -118,7 +118,7 @@ class RSTable implements RSTableInterface {
 			$this->virtuals[$name] = $property;
 		}
 		else {
-			throw new \system\error\DataLayerError('Property <em>@name</em> not found in <em>@table</em>', array('@name' => $name, '@table' => $this->getTableName()));
+			throw new \system\exceptions\DataLayerError('Property <em>@name</em> not found in <em>@table</em>', array('@name' => $name, '@table' => $this->getTableName()));
 		}
 	}
 
@@ -126,7 +126,7 @@ class RSTable implements RSTableInterface {
 	 * Import a property
 	 * @param string $path Property path
 	 * @return \system\rs\RSPropertyInterface Property
-	 * @throws \system\error\DataLayerError
+	 * @throws \system\exceptions\DataLayerError
 	 */
 	public function importProperty($path) {
 		if (!isset($this->importedPaths[$path])) {
@@ -144,7 +144,7 @@ class RSTable implements RSTableInterface {
 					$this->_importProperty($relationName);
 				}
 				if (!isset($this->relations[$relationName])) {
-					throw new \system\error\DataLayerError('Relation <em>@name</em> not found in <em>@tanle</em>', array('@name' => $relationName, '@table' => $this->getTableName()));
+					throw new \system\exceptions\DataLayerError('Relation <em>@name</em> not found in <em>@tanle</em>', array('@name' => $relationName, '@table' => $this->getTableName()));
 				}
 
 				$this->importedPaths[$path] = $this->relations[$relationName]->importProperty(\substr($path, $dotPosition + 1));
