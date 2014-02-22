@@ -182,18 +182,18 @@ class Config {
         break;
     }
     
-    \system\utils\Log::create('system', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+    \system\Main::invokeMethodAll('errorLog', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
       '@description' => $description, 
       '@file' => $file, 
       '@line' => $line
     ), $level);
 
-    if ($level == 'error') {
-      echo '<h1>' . $description . '</h1>';
-      echo '<p>File: ' . $file . ' Line: ' . $line . '</p>';
-      echo \system\utils\Utils::backtraceInfo();
-      die();
-    }
+//    if ($level == 'error') {
+//      echo '<h1>' . $description . '</h1>';
+//      echo '<p>File: ' . $file . ' Line: ' . $line . '</p>';
+//      echo \system\utils\Utils::backtraceInfo();
+//      die();
+//    }
   }
   
   

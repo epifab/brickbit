@@ -31,7 +31,7 @@ class Block extends \system\Component {
         'title' => $r->text->title
       );
     }
-    $this->setData('mainMenu', $mm);
+    $this->datamodel['mainMenu'] = $mm;
     $this->setMainTemplate('main-menu');
     return \system\Component::RESPONSE_TYPE_READ;
   }
@@ -45,7 +45,7 @@ class Block extends \system\Component {
         $am[] = array('url' => 'users', 'title' => 'users');
         $am[] = array('url' => 'system/settings', 'title' => 'settings');
       }
-      $this->setData('adminMenu', $am);
+      $this->datamodel['adminMenu'] = $am;
     }
     $this->setMainTemplate('admin-menu');
     return \system\Component::RESPONSE_TYPE_READ;

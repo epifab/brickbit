@@ -158,29 +158,31 @@ abstract class Component {
     throw new \system\exceptions\PageNotFound();
   }
   
-  /**
-   * Set a value to the datamodel.
-   * @param mixed $key Key string or array representing the path to the key
-   * @param mixed $value Value to add to the datamodel
-   */
-  public function setData($key, $value) {
-    if (\is_array($key)) {
-      $dm =& $this->datamodel;
-      \reset($key);
-      do {
-        $k1 = current($key);
-        $k2 = next($key);
-        if (!$k2) {
-          $dm[$k1] = $value;
-        }  else if (!\array_key_exists($k1, $dm)) {
-          $dm[$k1] = array();
-        }
-        $dm =& $dm[$k1];
-      } while ($k2);
-    } else {
-      $this->datamodel[$key] = $value;
-    }
-  }
+//  /**
+//   * Set a value to the datamodel.
+//   * @param mixed $key Key string or array representing the path to the key
+//   * @param mixed $value Value to add to the datamodel
+//   */
+//  public function setData($key, $value) {
+//    if (\is_array($key)) {
+//      $dm =& $this->datamodel;
+//      \reset($key);
+//      do {
+//        $k1 = current($key);
+//        $k2 = next($key);
+//        if ($k2 === false) {
+//          $dm[$k1] = $value;
+//        }
+//        else if (!\array_key_exists($k1, $dm)) {
+//          $dm[$k1] = array();
+//        }
+//        $dm =& $dm[$k1];
+//      } while ($k2);
+//    }
+//    else {
+//      $this->datamodel[$key] = $value;
+//    }
+//  }
   
   /**
    * Get the full datamodel
@@ -333,6 +335,7 @@ abstract class Component {
         'langs' => \config\settings()->LANGUAGES,
         'theme' => Theme::getTheme(),
         'themes' => \config\settings()->THEMES,
+        'messages' => array()
       ),
       'user' => Login::getLoggedUser(),
       'website' => $this->getWebsiteInfo(),
@@ -364,6 +367,16 @@ abstract class Component {
     if (!\in_array($css, $this->datamodel['page']['css'])) {
       $this->datamodel['page']['css'][] = $css;
     }
+  }
+  
+  /**
+   * Add a message to be displayed
+   * @param string $body Message body
+   * @param array $args Message arguments
+   * @param string $type Message type. Typical values are: success, info, warning, danger
+   */
+  public function addMessage($body, $args, $type) {
+    $this->datamodel['system']['messages'][$type][] = \cb\t($body, $args);
   }
   
   /**

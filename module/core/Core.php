@@ -2,6 +2,31 @@
 namespace module\core;
 
 class Core {
+  public static function errorLog($error, $args, $level) {
+    static $levelIndexes = array();
+    if (!isset($levelIndexes[$level])) {
+      $levelIndexes[$level] = 0;
+    }
+
+    $levelStr = '';
+    switch ($level) {
+      case \system\LOG_DEBUG:
+      case \system\LOG_NOTICE:
+        $levelStr = 'info';
+        break;
+      case \system\LOG_WARNING:
+        $levelStr = 'warning';
+        break;
+      case \system\LOG_ERROR:
+        $levelStr = 'danger';
+        break;
+    }
+    
+    \system\Component::getMainComponent()->addMessage($error, $args, $levelStr);
+    
+    $levelIndexes[$level]++;
+//    \system\utils\Log::create($error, $args, $level);
+  }
   
   public static function metaTypesMap() {
     return array(

@@ -28,7 +28,7 @@ class Admin extends \system\Component {
 
     $rsb = self::rsb();
     $logs = $rsb->select();
-    $this->setData('logs', $logs);
+    $this->datamodel['logs'] = $logs;
     
     return \system\Component::RESPONSE_TYPE_READ;
   }
@@ -38,7 +38,7 @@ class Admin extends \system\Component {
     
     $rsb = self::rsb();
     $logs = $rsb->selectBy(array('code' => $this->getUrlArg(0)));
-    $this->setData('logs', $logs);
+    $this->datamodel['logs'] = $logs;
     
     return \system\Component::RESPONSE_TYPE_READ;
   }
@@ -65,7 +65,7 @@ class Admin extends \system\Component {
     
     $rsb = self::rsb();
     $logs = $rsb->selectBy(array('type' => $type));
-    $this->setData('logs', $logs);
+    $this->datamodel['logs'] = $logs;
     
     return \system\Component::RESPONSE_TYPE_READ;
   }

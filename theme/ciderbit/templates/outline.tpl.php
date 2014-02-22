@@ -45,6 +45,15 @@
 
     <div id="main-wrapper">
       <div id="main" class="container">
+        <?php if (!empty($system['messages'])): ?>
+          <div class="messages">
+            <?php foreach ($system['messages'] as $level => $errorMessages): ?>
+              <?php foreach ($errorMessages as $errorMessage): ?>
+                <div class="alert alert-<?php echo $level; ?>"><?php echo $errorMessage; ?></div>
+              <?php endforeach; ?>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
         <div class="row">
           <div class="span7">
             <?php $this->api->import('main-content'); ?>
