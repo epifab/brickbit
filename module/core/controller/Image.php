@@ -82,4 +82,3 @@ class Image extends Component {
     \system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 500, 500);
   }
 }
-?>

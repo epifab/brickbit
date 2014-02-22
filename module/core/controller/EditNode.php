@@ -106,13 +106,15 @@ class EditNode extends Edit {
         case 'Add':
           $this->rs = $this->getTmpRecordset($this->getUrlArg(0));
           break;
+        
         case 'Add2Node':
-          return $this->getTmpRecordset($this->getUrlArg(1), $this->getUrlArg(0));
+          $this->rs = $this->getTmpRecordset($this->getUrlArg(1), $this->getUrlArg(0));
           break;
+        
         case 'Edit':
           $rsb = new \system\model\RecordsetBuilder('node');
           $rsb->using('*');
-          $this->rs = $rsb->selectFirstBy($this->getUrlArg(1));
+          $this->rs = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
           break;
       }
     }

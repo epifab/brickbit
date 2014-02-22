@@ -132,4 +132,3 @@ class User extends Page {
     return \system\Component::RESPONSE_TYPE_READ;
   }
 }
-?>

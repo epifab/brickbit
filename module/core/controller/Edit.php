@@ -31,7 +31,11 @@ abstract class Edit extends Component {
       if (empty($rs)) {
         throw new \system\exceptions\PageNotFound();
       }
+      
       $form = Form::getPostedForm($this->getFormId());
+      
+      $this->datamodel['recordset'] = $rs;
+      
       if (empty($form) || $form->inputErrorCount()) {
         // Form not initialised or input errors
         $this->setMainTemplate($this->getFormTemplate($rs));

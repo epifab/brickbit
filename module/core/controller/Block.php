@@ -56,4 +56,3 @@ class Block extends \system\Component {
     return \system\Component::RESPONSE_TYPE_READ;
   }
 }
-?>

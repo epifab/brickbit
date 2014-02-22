@@ -477,4 +477,3 @@ class Node extends \system\Component {
   }
   ///</editor-fold>
 }
-?>

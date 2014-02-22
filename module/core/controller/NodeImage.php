@@ -38,4 +38,3 @@ class NodeImage extends \system\Component {
     }
   }
 }
-?>

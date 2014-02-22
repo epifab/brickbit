@@ -26,4 +26,3 @@ class Page extends Node {
     return \system\Component::RESPONSE_TYPE_READ;
   }
 }
-?>
