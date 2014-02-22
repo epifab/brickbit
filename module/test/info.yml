@@ -1,0 +1,19 @@
+class: Test
+weight: 1
+enabled: 0
+#modelNs: model
+#modelClass: CoreModel
+#viewNs: view
+#viewClass: CoreApi
+#templatesPath: view/templates
+componentsNs: controller
+components:
+   test:
+      class: TestController
+      pages:
+         - url: test/model/(@strid)/edit/(@strid)
+           action: Edit
+         - url: test/model/(@strid)/delete/(@strid)
+           action: Delete
+         - url: test/model/(@strid)/add
+           action: Add

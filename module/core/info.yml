@@ -5,8 +5,8 @@ modelNs: model
 modelClass: CoreModel
 viewNs: view
 viewClass: CoreApi
-templatesPath: view/templates
-componentsNs: components
+#templatesPath: view/templates
+componentsNs: controller
 components:
   blocks:
     class: Block
@@ -37,25 +37,28 @@ components:
         action: Add
       - url: role/delete
         action: Delete
-  user:
-    class: User
+  edit_user:
+    class: EditUser
     pages:
       - url: user/register
         action: Register
+      - url: user/add
+        action: Add
+      - url: user/([0-9]+)/edit
+        action: Edit
+      - url: user/([0-9]+)/delete
+        action: Delete
+  user:
+    class: User
+    pages:
       - url: user/login
         action: Login
       - url: user/logout
         action: Logout
       - url: user/list
         action: List
-      - url: user/add
-        action: Add
       - url: user/([0-9]+)
         action: Read
-      - url: user/([0-9]+)/edit
-        action: Edit
-      - url: user/([0-9]+)/delete
-        action: Delete
       - url: user/([0-9]+)/add-role/([0-9]+)
         action: AddRole
       - url: user/([0-9]+)/delete-role/([0-9]+)
@@ -71,30 +74,33 @@ components:
 #        action: Thumbnail
 #      - url: file/(@strid)\.(@strid)
 #        action: Download
-  node:
-    class: Node
+  node_editing:
+    class: EditNode
     pages:
-      # content/search
-      - url: content/search
-        action: Search
       # content/add/article
       - url: content/add/(@strid)
         action: Add
       # content/123/add/article
       - url: content/([0-9]+)/add/(@strid)
         action: Add2Node
-      # content/123
-      - url: content/([0-9]+)
-        action: Read
-      # content/about-me
-      - url: content/(@strid)\.html
-        action: ReadByUrn
       # content/123/edit
       - url: content/([0-9]+)/edit
         action: Edit
       # content/123/delete
       - url: content/([0-9]+)/delete
         action: Delete
+  node:
+    class: Node
+    pages:
+      # content/search
+#      - url: content/search
+#        action: Search
+      # content/123
+#      - url: content/([0-9]+)
+#        action: Read
+      # content/about-me
+      - url: content/(@strid)\.html
+        action: ReadByUrn
       # content/123/move/after/234
       - url: content/([0-9]+)/move/(before|after)/([0-9]+)
         action: Move

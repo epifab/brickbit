@@ -6,5 +6,5 @@ namespace system\model;
  * @author Fabio Epifani
  */
 interface SelectClauseInterface {
-	public function getQuery();
+  public function getQuery();
 }

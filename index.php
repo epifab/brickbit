@@ -6,7 +6,7 @@ require_once 'system/shortcuts.php';
 
 $session = \system\session\Session::getInstance();
 //if ($session->expire_time < \time()) {
-//	$session->destruct();
+//  $session->destruct();
 //}
 
 \system\Main::run($_SERVER['REQUEST_URI']);

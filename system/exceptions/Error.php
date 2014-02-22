@@ -2,7 +2,7 @@
 namespace system\exceptions;
 
 abstract class Error extends \system\exceptions\BaseException {
-	public function getDetails() {
-		return '';
-	}
+  public function getDetails() {
+    return '';
+  }
 }

@@ -2,5 +2,5 @@
 namespace system\rs;
 
 class RS {
-	
+  
 }
