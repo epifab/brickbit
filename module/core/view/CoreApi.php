@@ -63,18 +63,24 @@ class CoreApi {
     }
   }
   
-  public static function blockRecordset($content, $params, $open) {
-    
-  }
-
-  public static function deError($path) {
+  /**
+   * Display the error related to the input (if any)
+   * @param string $path Input path
+   * @return string Error message HTML
+   */
+  public static function formInputError($path) {
     $vars = \system\view\Template::current()->getVars();
-    if (\array_key_exists('errors', $vars) && \array_key_exists($path, $vars['errors'])) {
-      return '<div class="de-error">' . $vars['errors'][$path] . '</div>';
-    }
+    return \array_key_exists('errors', $vars) && \array_key_exists($path, $vars['errors'])
+      ? '<div class="de-error">' . $vars['errors'][$path] . '</div>'
+      : '';
   }
   
-  public static function input($params) {
+  /**
+   * Adds a input to a form. Returns the rendered widget.
+   * @param array $params Input parameters
+   * @return string Input HTML
+   */
+  public static function formInput($params) {
     $widget = \cb\array_item('widget', $params, array('required' => true));
     $name = \cb\array_item('name', $params, array('required' => true));
     $value = \cb\array_item('value', $params, array('required' => true));
@@ -86,14 +92,41 @@ class CoreApi {
     }
   }
   
-  public static function formRecordset($name, \system\model\RecordsetInterface $recordset) {
+  /**
+   * Adds a recordset to the form.
+   * @param string $name Recordset name
+   * @param \system\model\RecordsetInterface $recordset Recordset
+   */
+  public static function formRS($name, \system\model\RecordsetInterface $recordset) {
     $form = Form::getCurrent();
     if ($form) {
       $form->addRecordset($name, $recordset);
     }
   }
   
-  public static function recordsetInput($params) {
+  /**
+   * Returns a rendered recordset input label
+   * @param array $params Parameters
+   * @return string HTML
+   */
+  public static function formRSInputLabel($params) {
+    $recordsetName = \cb\array_item('recordset', $params, array('required' => true));
+    $path = \cb\array_item('path', $params, array('required' => true));
+    $label = \cb\array_item('label', $params, array('required' => true));
+
+    $form = Form::getCurrent();
+    if ($form) {
+      $inputId = $form->getName() . '__recordset__' . $recordsetName . '__' . \cb\plaintext(\str_replace('.', '__', $path));
+      return '<label for="' . $inputId . '" class="de-label">' . $label . '</label>';
+    }
+  }
+  
+  /**
+   * Adds a recordset input to the form. Returns the rendered widget
+   * @param array $params Parameters
+   * @return strin HTML
+   */
+  public static function formRSInput($params) {
     $recordsetName = \cb\array_item('recordset', $params, array('required' => true));
     $path = \cb\array_item('path', $params, array('required' => true));
 
@@ -122,7 +155,7 @@ class CoreApi {
     }
   }
   
-  public static function submitControl($label=null) {
+  public static function formSubmitControl($label=null) {
     if (\is_null($label)) {
       $label = \cb\t('Save');
     }

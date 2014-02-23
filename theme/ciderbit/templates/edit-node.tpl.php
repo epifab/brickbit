@@ -219,14 +219,14 @@ ciderbit.setBehavior('plupload', function() {
 <!-- The File Upload jQuery UI plugin -->
 <script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-jui.js"); ?>"></script>
 */ ?>
+<?php 
+$this->api->open('form', array('id' => 'edit-node'));
 
-<?php $this->api->open('form', array('id' => 'edit-node')); ?>
-  <?php 
-  $this->api->formRecordset('node', $recordset); 
-  foreach ($recordset->texts as $lang => $textRs) {
-    $this->api->form_recordset('node_' . $lang, $textRs); 
-  }
-  ?>
+$this->api->formRS('node', $recordset); 
+foreach ($recordset->texts as $lang => $textRs) {
+  $this->api->formRS('node_' . $lang, $textRs); 
+}
+?>
   <div class="dataedit">
     <fieldset>
       <legend>
@@ -243,11 +243,11 @@ ciderbit.setBehavior('plupload', function() {
             
           </div>
           <div class="de-input-wrapper">
-            <?php echo $this->api->input(array(
+            <?php echo $this->api->formInput(array(
               'recordset' => 'node',
               'widget' => 'checkbox',
               'name' => 'text_' . $lang . '.enable',
-              'id' => 'text_' . $lang . '_enable',
+              'id' => 'edit-node-text_' . $lang . '-enable',
               'label' => $this->api->t('Enable for this lang'),
               'value' => isset($recordset->texts[$lang])
             )); ?>
@@ -257,13 +257,17 @@ ciderbit.setBehavior('plupload', function() {
         <div id="node-lang-<?php print $lang; ?>-fields" class="edit-node-text_<?php print $lang; ?>-enable">
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-urn"><?php print $this->api->t("URN"); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php echo $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'urn',
-                // 'widget' => 'textbox', 
+                'label' => $this->api->t('URN'),
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php echo $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'urn',
+                'widget' => 'textbox', 
                 'attributes' => array('class' => 'xl')
               )); ?>
               <div class="de-info">
@@ -276,18 +280,21 @@ ciderbit.setBehavior('plupload', function() {
                   <?php print $this->api->t("Please note also that two different contents, translated in @lang, must have two different URNs.", array('@lang' => $this->api->t($lang))); ?>
                 </p>
               </div>
-              <?php print $this->api->deError('text_' . $lang . '.urn'); ?>
+              <?php print $this->api->formInputError('text_' . $lang . '.urn'); ?>
             </div>
           </div>
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-description"><?php print $this->api->t('Description'); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php print $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'description',
-//                'widget' => 'textbox',
+                'label' => $this->api->t('Description'),
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php print $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'description',
                 'attributes' => array('class' => 'xxl')
               )); ?>
               <div class="de-info">
@@ -295,63 +302,75 @@ ciderbit.setBehavior('plupload', function() {
                   <?php print $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
                 </p>
               </div>
-              <?php print $this->api->deError('text_' . $lang . '.description'); ?>
+              <?php print $this->api->formInputError('text_' . $lang . '.description'); ?>
             </div>
           </div>
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-title"><?php print $this->api->t('Title'); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php print $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'title',
-                'widget' => 'textbox',
+                'label' => $this->api->t('Title')
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php print $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'title',
                 'attributes' => array('class' => 'l')
               )); ?>
-              <?php print $this->api->deError('text_' . $lang . '.title'); ?>
+              <?php print $this->api->formInputError('text_' . $lang . '.title'); ?>
             </div>
           </div>
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-subtitle"><?php print $this->api->t('Subtitle'); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php print $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'subtitle',
-                'widget' => 'textbox',
+                'label' => $this->api->t('Subtitle')
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php print $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'subtitle',
                 'attributes' => array('class' => 'xl')
               )); ?>
-              <?php print $this->api->deError('text_' . $lang . '.subtitle'); ?>
+              <?php print $this->api->formInputError('text_' . $lang . '.subtitle'); ?>
             </div>
           </div>
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-body"><?php print $this->api->t('Body'); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php print $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'body',
-//                'widget' => 'textarea',
+                'label' => $this->api->t('Body')
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php print $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'body',
                 'attributes' => array('class' => 'xxl richtext')
               )); ?>
-              <?php print $this->api->deError('text_' . $lang . '.body'); ?>
+              <?php echo $this->api->formInputError('text_' . $lang . '.body'); ?>
             </div>
           </div>
           <div class="de-row">
             <div class="de-label-wrapper">
-              <label class="de-label" for="edit-node-text_<?php print $lang; ?>-preview"><?php print $this->api->t('Preview'); ?></label>
-            </div>
-            <div class="de-input-wrapper">
-              <?php print $this->api->recordsetInput(array(
+              <?php echo $this->api->formRSInputLabel(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'preview',
-                'widget' => 'textarea',
+                'label' => $this->api->t('Preview')
+              )); ?>
+            </div>
+            <div class="de-input-wrapper">
+              <?php echo $this->api->formRSInput(array(
+                'recordset' => 'node_' . $lang,
+                'path' => 'preview',
                 'attributes' => array('class' => 'xxl richtext')
               )); ?>
-              <?php print $this->api->deError('text_' . $lang . '.preview'); ?>
+              <?php echo $this->api->formInputError('text_' . $lang . '.preview'); ?>
             </div>
           </div>
         </div>
@@ -360,11 +379,11 @@ ciderbit.setBehavior('plupload', function() {
     </fieldset>
 
     <fieldset>
-      <legend><?php print $this->api->t('Tags'); ?></legend>
+      <legend><?php echo $this->api->t('Tags'); ?></legend>
       <div class="de-row">
         <div class="de-label-wrapper">
           <label class="de-label" for="edit-node-terms"/>
-            <?php print $this->api->t('Tags'); ?>
+            <?php echo $this->api->t('Tags'); ?>
           </label>
         </div>
         <div class="de-input-wrapper">
@@ -373,10 +392,10 @@ ciderbit.setBehavior('plupload', function() {
       </div>
     </fieldset>
     <fieldset class="de-fieldset">
-      <legend><?php print $this->api->t('Content access'); ?></legend>
+      <legend><?php echo $this->api->t('Content access'); ?></legend>
       <div class="de-row">
         <div class="de-label-wrapper">
-          <label class="de-label" for="edit-node-record_mode-users"><?php print $this->api->t('Content administrators'); ?></label>
+          <label class="de-label" for="edit-node-record_mode-users"><?php echo $this->api->t('Content administrators'); ?></label>
         </div>
         <div class="de-input-wrapper">
           <input class="de-input xl" type="text" name="node[record_mode.users]" id="edit-node-record_mode-users" value=""/>
@@ -388,52 +407,52 @@ ciderbit.setBehavior('plupload', function() {
 //            'item' => '<div><img src="@[image.url]"/>@[name]</div>',
 //            'name' => 'users'
 //          )); ?>
-          <?php print $this->api->deError("record_mode.users"); ?>
+          <?php echo $this->api->formInputError("record_mode.users"); ?>
         </div>
       </div>
       <div class="de-row">
         <div class="de-label-wrapper">
-          <label class="de-label" for="edit-node-record_mode-read_mode"><?php print $this->api->t('Read access'); ?></label>
+          <label class="de-label" for="edit-node-record_mode-read_mode"><?php echo $this->api->t('Read access'); ?></label>
         </div>
         <div class="de-input-wrapper">
-          <?php echo $this->api->recordsetInput(array(
+          <?php echo $this->api->formRSInput(array(
             'recordset' => 'node',
             'path' => 'record_mode.read_mode',
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l')
           )); ?>
-          <?php print $this->api->deError("record_mode.read_mode"); ?>
+          <?php echo $this->api->formInputError("record_mode.read_mode"); ?>
         </div>
       </div>
       <div class="de-row">
         <div class="de-label-wrapper">
-          <label class="de-label" for="edit-node-record_mode-edit_mode"><?php print $this->api->t('Edit access'); ?></label>
+          <label class="de-label" for="edit-node-record_mode-edit_mode"><?php echo $this->api->t('Edit access'); ?></label>
         </div>
         <div class="de-input-wrapper">
-          <?php echo $this->api->recordsetInput(array(
+          <?php echo $this->api->formRSInput(array(
             'recordset' => 'node',
             'path' => 'record_mode.edit_mode',
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l', 'rows')
           )); ?>
-          <?php print $this->api->deError("record_mode.edit_mode"); ?>
+          <?php echo $this->api->formInputError("record_mode.edit_mode"); ?>
         </div>
       </div>
       <div class="de-row">
         <div class="de-label-wrapper">
-          <label class="de-label" for="edit-node-record_mode-delete_mode"><?php print $this->api->t('Delete access'); ?></label>
+          <label class="de-label" for="edit-node-record_mode-delete_mode"><?php echo $this->api->t('Delete access'); ?></label>
         </div>
         <div class="de-input-wrapper">
-          <?php echo $this->api->recordsetInput(array(
+          <?php echo $this->api->formRSInput(array(
             'recordset' => 'node',
             'path' => 'record_mode.delete_mode',
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l')
           )); ?>
-          <?php print $this->api->deError("record_mode.delete_mode"); ?>
+          <?php echo $this->api->formInputError("record_mode.delete_mode"); ?>
         </div>
       </div>
     </fieldset>
-    <?php print $this->api->submitControl($this->api->t('Save')); ?>
+    <?php echo $this->api->formSubmitControl($this->api->t('Save')); ?>
   </div>
 <?php $this->api->close(); ?>

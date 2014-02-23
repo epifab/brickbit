@@ -182,7 +182,7 @@ class Config {
         break;
     }
     
-    \system\Main::invokeMethodAll('errorLog', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+    \system\Main::invokeMethodAll('watchdog', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
       '@description' => $description, 
       '@file' => $file, 
       '@line' => $line

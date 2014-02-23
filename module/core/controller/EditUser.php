@@ -102,4 +102,4 @@ class EditUser extends Edit {
     $this->setMainTemplate('user-update-submit');
     return \system\Component::RESPONSE_TYPE_NOTIFY;
   }
-}
+}   

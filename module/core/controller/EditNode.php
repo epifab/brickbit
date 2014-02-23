@@ -113,11 +113,12 @@ class EditNode extends Edit {
         
         case 'Edit':
           $rsb = new \system\model\RecordsetBuilder('node');
-          $rsb->using('*');
+          $rsb->usingAll();
           $this->rs = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
           break;
       }
     }
+    $this->addMessage('<code><pre>@code</pre></code>', array('@code' => print_r($this->rs->toArray(), true)), 'notice');
     return $this->rs;
   }
   

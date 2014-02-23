@@ -310,6 +310,7 @@ abstract class Component {
         'domain' => \config\settings()->DOMAIN,
         'base' => \config\settings()->SITE_ADDRESS,
         'defaultLang' => \config\settings()->DEFAULT_LANG,
+        'outlineLayoutTemplate' => 'outline-layout-2cols'
       );
     }
     return $settings;

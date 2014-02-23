@@ -66,7 +66,7 @@ class Form {
     $this->recordsets[$name] = array(
       'name' => $name,
       'table' => $recordset->getBuilder()->getTableName(),
-      'key' => $recordset->getBuilder()->getPrimaryKey(),
+      'key' => $recordset->getPrimaryKey(),
       'input' => array()
     );
   }

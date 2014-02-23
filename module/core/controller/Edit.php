@@ -26,6 +26,7 @@ abstract class Edit extends Component {
   abstract protected function getFormId();
   
   protected function defaultRunHandler() {
+    $this->datamodel['website']['outlineLayoutTemplate'] = 'outline-layout-1col';
     if (\in_array($this->getAction(), $this->getEditActions())) {
       $rs = $this->getEditRecordset();
       if (empty($rs)) {

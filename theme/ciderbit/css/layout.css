@@ -236,9 +236,8 @@ input, textarea {
   padding: 10px 20px;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  margin-left: 10px;
-  margin-bottom: 1px;
-  float: right;
+  margin-bottom: 2px;
+  width: auto;
 }
 
 .dataedit .de-controls {

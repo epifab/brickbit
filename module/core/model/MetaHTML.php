@@ -16,4 +16,3 @@ class MetaHTML extends \system\metatypes\MetaString {
     }
   }
 }
-?>

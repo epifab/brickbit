@@ -2,7 +2,7 @@
 namespace module\core;
 
 class Core {
-  public static function errorLog($error, $args, $level) {
+  public static function watchdog($mesage, $args, $level) {
     static $levelIndexes = array();
     if (!isset($levelIndexes[$level])) {
       $levelIndexes[$level] = 0;
@@ -22,10 +22,11 @@ class Core {
         break;
     }
     
-    \system\Component::getMainComponent()->addMessage($error, $args, $levelStr);
+    if (\system\Component::getMainComponent()) {
+      \system\Component::getMainComponent()->addMessage($mesage, $args, $levelStr);
+    }
     
     $levelIndexes[$level]++;
-//    \system\utils\Log::create($error, $args, $level);
   }
   
   public static function metaTypesMap() {

@@ -54,14 +54,8 @@
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
-        <div class="row">
-          <div class="span7">
-            <?php $this->api->import('main-content'); ?>
-          </div>
-          <div class="span4">
-            <?php $this->api->region('sidebar'); ?>
-          </div>
-        </div>
+        
+        <?php $this->api->import($website['outlineLayoutTemplate']); ?>
       </div>
     </div>
 

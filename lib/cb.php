@@ -4,6 +4,7 @@ namespace cb;
 function t($sentence, $args=null) {
   return \system\utils\Lang::translate($sentence, $args);
 }
+
 function set_log($key, $message, $args = array(), $type=\system\utils\Utils::LOG_INFO) {
   return \system\utils\Log::create($key, $message, $args, $type);
 }

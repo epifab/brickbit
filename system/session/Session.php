@@ -4,6 +4,7 @@ namespace system\session;
 use system\model\RecordsetBuilder;
 use system\utils\Login;
 
+#\session_destroy();
 \session_start();
 
 class Session {
@@ -59,6 +60,7 @@ class Session {
   
   public function commit() {
     $this->session->data = \serialize($this->data);
+    echo '<code>' . $this->session->data . '</code>';
     $this->session->save();
   }
   
