@@ -10,6 +10,11 @@
     <?php foreach ($page['css'] as $css): ?>
     <link href="<?php echo $css; ?>" type="text/css" rel="stylesheet"/>
     <?php endforeach; ?>
+    
+    <?php foreach ($page['js'] as $js): ?>
+    <script type="text/javascript" src="<?php echo $js; ?>"></script>
+    <?php endforeach; ?>
+
   </head>
   
   <body>
@@ -68,9 +73,5 @@
     <?php endif; ?>
     
     <script type="text/javascript"><?php $this->api->jss(); ?></script>
-    
-    <?php foreach ($page['js'] as $js): ?>
-    <script type="text/javascript" src="<?php echo $js; ?>"></script>
-    <?php endforeach; ?>
   </body>
 </html>

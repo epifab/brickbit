@@ -116,9 +116,13 @@ class CoreApi {
 
     $form = Form::getCurrent();
     if ($form) {
-      $inputId = $form->getName() . '__recordset__' . $recordsetName . '__' . \cb\plaintext(\str_replace('.', '__', $path));
+      $inputId = self::getRSInputId($form->getName(), $recordsetName, $path);
       return '<label for="' . $inputId . '" class="de-label">' . $label . '</label>';
     }
+  }
+  
+  private static function getRSInputId($formName, $recordsetName, $path) {
+    return $formName . '--rs-' . $recordsetName . '--' . \cb\plaintext(\str_replace('.', '-', $path));
   }
   
   /**
@@ -138,15 +142,15 @@ class CoreApi {
         
         $widget = isset($params['widget']) ? $params['widget'] : $field->getEditWidget();
         
-        $id = $form->getName() . '__recordset__' . $recordsetName . '__' . \cb\plaintext(\str_replace('.', '__', $path));
+        $id = self::getRSInputId($form->getName(), $recordsetName, $path);
         $name = 'recordset[' . $recordsetName . '][' . $path . ']';
         $value = $recordset->getProg($path);
         
         $input = 
           $params
-          + array('id' => $id, 'name' => $name, 'value' => $value)
-          + $field->getAttributes();
-
+          + $field->getAttributes()
+          + array('id' => $id, 'name' => $name, 'value' => $value);
+        
         $form->addInput($name, $widget, $value, $input);
         $form->addRecordsetInput($recordsetName, $name, $path);
 

@@ -8,4 +8,3 @@ class TinyMCE extends \system\Module {
 	}
 
 }
-?>

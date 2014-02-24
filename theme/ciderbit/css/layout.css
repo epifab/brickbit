@@ -799,3 +799,7 @@ div.row .cell.l.right {
 .node-lang-control.expanded {
   border: 3px solid #FFEEEE;
 }*/
+
+.alert-danger code {
+	/*background-color: #FAA;*/
+}

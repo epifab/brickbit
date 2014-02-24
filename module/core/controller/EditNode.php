@@ -118,7 +118,6 @@ class EditNode extends Edit {
           break;
       }
     }
-    $this->addMessage('<code><pre>@code</pre></code>', array('@code' => print_r($this->rs->toArray(), true)), 'notice');
     return $this->rs;
   }
   
@@ -145,13 +144,14 @@ class EditNode extends Edit {
         return $t;
       }
     }
-    throw new \system\exceptions\InputOutputError('No suitable editing template found for this node.'
-          . '<p>Possible template suggestions are:</p>'
-          . '<ul>'
-          . '<li>edit-node--@nid</li>'
-          . '<li>edit-node-@type</li>'
-          . '<li>edit-node</li>'
-          . '</ul>', array('@nid' => $rs->id, '@type' => $rs->type)
+    throw new \system\exceptions\InputOutputError(
+      'No suitable editing template found for this node.'
+      . '<p>Possible template suggestions are:</p>'
+      . '<ul>'
+      . '<li>edit-node--@nid</li>'
+      . '<li>edit-node-@type</li>'
+      . '<li>edit-node</li>'
+      . '</ul>', array('@nid' => $rs->id, '@type' => $rs->type)
     );
   }
   
@@ -169,6 +169,7 @@ class EditNode extends Edit {
   
   public function submitEdit($form, $rs) {
     $rs->save();
+//    $this->addMessage('Node @id has been updated', array('@id' => $rs->id), 'notice');
     $this->setMainTemplate('node-update-submit');
     return \system\Component::RESPONSE_TYPE_NOTIFY;
   }

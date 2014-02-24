@@ -51,43 +51,45 @@
 */ ?>
 
 <script type="text/javascript">
-ciderbit.setBehavior('plupload', function() {
-  $('#<?php echo $system['component']['requestId']; ?>-plupload-image').each(function() {
-    var id = $(this).attr('id');
-    var title = $(this).attr('title');
-    
-    $('#' + id).pluploadQueue({
-      // General settings
-      runtimes : 'html5,flash',
-      url : '/content/<?php echo $recordset->id; ?>/file/' + title + '/upload',
-      max_file_size : '50mb',
-      chunk_size : '1mb',
-      unique_names : true,
+$(function() {
+  ciderbit.setBehavior('plupload', function() {
+    $('#<?php echo $system['component']['requestId']; ?>-plupload-image').each(function() {
+      var id = $(this).attr('id');
+      var title = $(this).attr('title');
 
-      // Resize images on clientside if we can
-      //resize : {width : 320, height : 240, quality : 90},
+      $('#' + id).pluploadQueue({
+        // General settings
+        runtimes : 'html5,flash',
+        url : '/content/<?php echo $recordset->id; ?>/file/' + title + '/upload',
+        max_file_size : '50mb',
+        chunk_size : '1mb',
+        unique_names : true,
 
-      // Specify what files to browse for
-  //    filters : [
-  //      {title : "Image files", extensions : "jpg,gif,png"},
-  //      {title : "Pdf files", extensions : "pdf"},
-  //      {title : "Audio files", extensions : "mp3"},
-  //      {title : "Video files", extensions : "avi,wmv"},
-  //      {title : "Zip files", extensions : "zip"}
-  //    ],
-//      init : {
-//        FilesAdded: function(up, files) {
-//        },
-//        FilesRemoved: function(up, files) {
-//        }
-//      },
-  //    multi_selection: false,
-      // Flash settings
-      flash_swf_url : '<?php echo $this->api->modulePath('core', 'js/plupload/js/plupload.flash.swf'); ?>',
+        // Resize images on clientside if we can
+        //resize : {width : 320, height : 240, quality : 90},
 
-      // Silverlight settings
-      silverlight_xap_url : '<?php echo $this->api->modulePath('core', 'js/plupload/js/plupload.silverlight.xap'); ?>'
-    })
+        // Specify what files to browse for
+    //    filters : [
+    //      {title : "Image files", extensions : "jpg,gif,png"},
+    //      {title : "Pdf files", extensions : "pdf"},
+    //      {title : "Audio files", extensions : "mp3"},
+    //      {title : "Video files", extensions : "avi,wmv"},
+    //      {title : "Zip files", extensions : "zip"}
+    //    ],
+  //      init : {
+  //        FilesAdded: function(up, files) {
+  //        },
+  //        FilesRemoved: function(up, files) {
+  //        }
+  //      },
+    //    multi_selection: false,
+        // Flash settings
+        flash_swf_url : '<?php echo $this->api->modulePath('core', 'js/plupload/js/plupload.flash.swf'); ?>',
+
+        // Silverlight settings
+        silverlight_xap_url : '<?php echo $this->api->modulePath('core', 'js/plupload/js/plupload.silverlight.xap'); ?>'
+      })
+    });
   });
 });
 </script>
@@ -220,7 +222,7 @@ ciderbit.setBehavior('plupload', function() {
 <script src="<?php echo $this->api->path("js/jquery-file-upload/js/jquery.fileupload-jui.js"); ?>"></script>
 */ ?>
 <?php 
-$this->api->open('form', array('id' => 'edit-node'));
+$this->api->open('form', array('id' => $currentFormId));
 
 $this->api->formRS('node', $recordset); 
 foreach ($recordset->texts as $lang => $textRs) {
@@ -351,7 +353,7 @@ foreach ($recordset->texts as $lang => $textRs) {
               <?php print $this->api->formRSInput(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'body',
-                'attributes' => array('class' => 'xxl richtext')
+                'attributes' => array('class' => 'xxl richtext wysiwyg')
               )); ?>
               <?php echo $this->api->formInputError('text_' . $lang . '.body'); ?>
             </div>
@@ -368,7 +370,7 @@ foreach ($recordset->texts as $lang => $textRs) {
               <?php echo $this->api->formRSInput(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'preview',
-                'attributes' => array('class' => 'xxl richtext')
+                'attributes' => array('class' => 'xxl richtext wysiwyg')
               )); ?>
               <?php echo $this->api->formInputError('text_' . $lang . '.preview'); ?>
             </div>

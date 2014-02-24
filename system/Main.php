@@ -520,7 +520,8 @@ class Main {
     $component = self::getComponent($url);
     
     if (!\is_null($component)) {
-      $obj = new $component['class'](
+      $componentClass = $component['class'];
+      $obj = new $componentClass(
         $component['name'],
         $component['module'],
         $component['action'],

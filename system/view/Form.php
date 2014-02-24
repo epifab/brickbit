@@ -12,10 +12,15 @@ class Form {
    * @var \system\view\Form
    */
   private static $submitted;
+  /**
+   * @var \system\model\RecordsetInterface[][]
+   */
+  private static $formRecordsets = array();
   
   private $name;
   private $input = array();
   private $errors = array();
+  private $errorsNo = 0;
   private $recordsets = array();
   private $data = array();
   private $timestamp;
@@ -63,6 +68,9 @@ class Form {
   }
   
   public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
+    // Cache
+    self::$formRecordsets[$this->name][$name] = $recordset;
+    
     $this->recordsets[$name] = array(
       'name' => $name,
       'table' => $recordset->getBuilder()->getTableName(),
@@ -79,20 +87,21 @@ class Form {
   }
   
   public function addInput($name, $widget, $defaultValue, array $input = array(), $metaType = null) {
-    if (!isset($this->input[$name])) {
+//    if (!isset($this->input[$name])) {
       $this->input[$name] = array(
         'name' => $name,
         'value' => $defaultValue,
         'widget' => $widget,
         'metaType' => $metaType
       ) + $input;
-    }
+//    }
+    $this->input[$name]['value'] = $defaultValue;
     return $this->input[$name]['value'];
   }
   
   public function renderInput($name) {
-    $input = @$this->input[$name];
-    if ($input) {
+    if (!empty($this->input[$name])) {
+      $input = $this->input[$name];
       return \system\view\Widget::getWidget($input['widget'])->render($input);
     }
   }
@@ -158,8 +167,10 @@ class Form {
   }
   
   private function fetchInputValues() {
+    $this->errorsNo = 0;
+    
     foreach ($this->input as &$input) {
-      $input['value'] = self::getInputPostedValue($input['name']);
+      $input['value'] = self::getInputPostedValue($input);
       $input['error'] = null;
       
       $this->errors[$input['name']] = null;
@@ -170,6 +181,7 @@ class Form {
           $mt->validate($input['value']);
         } catch (\system\exceptions\ValidationError $ex) {
           $this->errors[$input['name']] = $ex->getMessage();
+          $this->errorsNo++;
         }
       }
     }
@@ -177,7 +189,7 @@ class Form {
   
   private function fetchRecordsets() {
     foreach ($this->recordsets as $recordset) {
-      $rsObj = $recordset['recordset'];
+      $rsObj = $this->getRecordset($recordset['name']);
       foreach ($recordset['input'] as $path => $name) {
         $rsObj->setProg($path, $this->input[$name]['value']);
       }
@@ -185,20 +197,19 @@ class Form {
   }
   
   public function getRecordset($name) {
-    static $rs = array();
-    if (!isset($rs[$name])) {
+    if (empty(self::$formRecordsets[$this->name]) || !isset(self::$formRecordsets[$this->name][$name])) {
       if (isset($this->recordsets[$name])) {
         $rsb = new \system\model\RecordsetBuilder($this->recordsets[$name]['table']);
         $rsb->usingAll();
-        if (empty($this->recordsets[$name]['key'])) {
-          $rs[$name] = $rsb->selectFirstBy($this->recordsets[$name]['key']);
+        if (!empty($this->recordsets[$name]['key'])) {
+          self::$formRecordsets[$this->name][$name] = $rsb->selectFirstBy($this->recordsets[$name]['key']);
         } else {
-          $rs[$name] = $rsb->newRecordset();
+          self::$formRecordsets[$this->name][$name] = $rsb->newRecordset();
         }
       }
     }
-    return isset($rs[$name])
-      ? $rs[$name]
+    return isset(self::$formRecordsets[$this->name][$name])
+      ? self::$formRecordsets[$this->name][$name]
       : null;
   }
   
@@ -219,7 +230,7 @@ class Form {
   }
   
   public function inputErrorCount() {
-    return \count($this->errors);
+    return $this->errorsNo;
   }
   
   public function inputErrors() {

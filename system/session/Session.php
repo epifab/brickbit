@@ -60,7 +60,6 @@ class Session {
   
   public function commit() {
     $this->session->data = \serialize($this->data);
-    echo '<code>' . $this->session->data . '</code>';
     $this->session->save();
   }
   

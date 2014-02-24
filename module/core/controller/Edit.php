@@ -27,6 +27,9 @@ abstract class Edit extends Component {
   
   protected function defaultRunHandler() {
     $this->datamodel['website']['outlineLayoutTemplate'] = 'outline-layout-1col';
+    
+    $this->datamodel['currentFormId'] = $this->getFormId();
+    
     if (\in_array($this->getAction(), $this->getEditActions())) {
       $rs = $this->getEditRecordset();
       if (empty($rs)) {
@@ -45,11 +48,9 @@ abstract class Edit extends Component {
       else {
         // Submit handler
         if (\is_callable(array($this, 'submit' . $this->getAction()))) {
-          \call_user_func(array($this, 'submit' . $this->getAction()), $form, $rs  );
+          \call_user_func(array($this, 'submit' . $this->getAction()), $form, $rs);
         }
-        else {
-          $this->defaultSubmitHandler($form, $rs);
-        }
+        return Component::RESPONSE_TYPE_NOTIFY;
       }
     }
     return parent::defaultRunHandler();

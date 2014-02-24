@@ -706,6 +706,17 @@ abstract class Component {
       }
     }
     
+    catch (\system\exceptions\PageNotFound $ex) {
+      while (\ob_get_clean());
+      $this->setMainTemplate('404');
+      try {
+        $this->tplManager->process($this->datamodel);
+      }
+      catch (\Exception $ex) {
+        \header("HTTP/1.0 404 Not Found");
+      }
+    }
+    
     catch (\Exception $ex) {
       // Uncaught exception
       
