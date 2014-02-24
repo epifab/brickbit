@@ -93,8 +93,8 @@ class Recordset implements RecordsetInterface {
       // salvo il filtro originale
       $oldFilter = $builder->getFilter();
 
-      if ($builder->getFilterHandle()) {
-        $handle = $builder->getFilterHandle();
+      if ($builder->getFilterHandler()) {
+        $handle = $builder->getFilterHandler();
         // handle should set filters and other stu
         $handle($this, $builder);
       }
@@ -343,10 +343,8 @@ class Recordset implements RecordsetInterface {
         $q1 .= ($q1 === "" ? "" : ", ") . $name . " = " . $field->prog2Db($this->modifiedFields[$name]);
       }
 
-      $query = "UPDATE " . $this->builder->getTableName() . " SET " . $q1 . " WHERE " . $this->filterByPrimaryClause();
+      $query = "UPDATE {$this->builder->getTableName()} SET {$q1} WHERE {$this->filterByPrimaryClause()}";
       
-      \system\utils\Log::debug('<p>Update recordset query</p><div><code>@query</code></div>', array('@query' => $query));
-
       $dataAccess = DataLayerCore::getInstance();
       $dataAccess->executeUpdate($query);
     }
@@ -361,7 +359,7 @@ class Recordset implements RecordsetInterface {
     }
     \system\Main::raiseModelEvent('onDelete', $this);
     
-    $query = "DELETE FROM " . $this->builder->getTableName() . " WHERE " . $this->filterByPrimaryClause();
+    $query = "DELETE FROM {$this->builder->getTableName()} WHERE {$this->filterByPrimaryClause()}";
     $dataAccess = DataLayerCore::getInstance();
     $dataAccess->executeUpdate($query);
 

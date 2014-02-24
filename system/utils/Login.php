@@ -252,8 +252,8 @@ class Login {
 
   public static function logout() {
     if (!self::isAnonymous()) {
-      self::getInstance()->unsetLoginCookie();
-      self::getInstance()->unsetLoginSession();
+      self::unsetLoginCookie();
+      self::unsetLoginSession();
       self::getInstance()->user = null;
     }
   }

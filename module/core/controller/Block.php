@@ -25,7 +25,7 @@ class Block extends \system\Component {
     
     $rs = $rsb->select();
     foreach ($rs as $r) {
-      $mm[] = array(
+      $mm[$r->id] = array(
         'id' => $r->id,
         'url' => $r->url,
         'title' => $r->text->title
@@ -42,8 +42,11 @@ class Block extends \system\Component {
         array('url' => 'user/' . \system\utils\Login::getLoggedUserId(), 'title' => 'account'),
       );
       if (\system\utils\Login::isSuperuser()) {
-        $am[] = array('url' => 'users', 'title' => 'users');
-        $am[] = array('url' => 'system/settings', 'title' => 'settings');
+        $am[] = array('url' => 'users', 'title' => \cb\t('users'));
+        $am[] = array('url' => 'system/settings', 'title' => \cb\t('settings'));
+        $am[] = array('title' => 'admin', 'items' => array(
+            'logs' => array('title' => \cb\t('Logs'), 'url' => 'admin/logs', 'ajax' => false)
+        ));
       }
       $this->datamodel['adminMenu'] = $am;
     }

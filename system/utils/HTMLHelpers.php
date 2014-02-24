@@ -49,18 +49,12 @@ class HTMLHelpers {
          (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) && (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'));
   }
 
-  /**
-   * Genera una pagina HTML di errore, con un messaggio specificato dall'utente
-   * @param tpl Template manager
-   * @param message Messaggio di errore
-   * @param out Print writer
-   */
-  public static function makeErrorPage(\system\view\TemplateManager $templateManager, array $datamodel, \system\exceptions\Error $exception, $executionTime=0) {
-    $trace = $exception->getTrace();
-    $traceString = '';
-    
+  public static function traceString($trace = null) {
+    if (empty($trace)) {
+      $trace = debug_backtrace();
+    }
     if (count($trace) > 0) {
-      $traceString .= '<ol>';
+      $traceString = '<ol>';
 
       $i = count($trace);
       foreach ($trace as $t) {
@@ -68,7 +62,7 @@ class HTMLHelpers {
 
         $i--;
 
-        if (array_key_exists('class', $t) && !empty($t['class'])) {
+        if (!empty($t['class'])) {
           $traceString .= $t['class'] . '->';
         }
         $traceString .= '<b>' . $t['function'] . '</b>(';
@@ -81,10 +75,21 @@ class HTMLHelpers {
             $traceString .= \system\utils\Utils::varDump($arg);
           }
         }
-        $traceString .= ')</code><br/> ' . @$t['file'] . ' ' . @$t['line'] . '</p></li>';
+        $traceString .= ')</code><br/> ' . (isset($t['file']) ? $t['file'] : '') . ' ' . (isset($t['line']) ? $t['line'] : '') .  '</p></li>';
       }
       $traceString .= '</ol>';
     }
+    return $traceString;
+  }
+  
+  /**
+   * Genera una pagina HTML di errore, con un messaggio specificato dall'utente
+   * @param tpl Template manager
+   * @param message Messaggio di errore
+   * @param out Print writer
+   */
+  public static function makeErrorPage(\system\view\TemplateManager $templateManager, array $datamodel, \system\exceptions\Error $exception, $executionTime=0) {
+    $traceString = self::traceString($exception->getTrace());
 
     $executionTimeString = ($executionTime > 0)
       ? Lang::translate('<p>Execution time: @time</p>', array(
@@ -127,7 +132,7 @@ class HTMLHelpers {
     );
     $datamodel['system']['responseType'] = 'ERROR';
     
-    \system\utils\Log::create('system', $msg, array(), \system\LOG_ERROR);
+    \system\utils\Log::create('system', $exception->getMessage(), array(), \system\LOG_ERROR);
 
     try {
       

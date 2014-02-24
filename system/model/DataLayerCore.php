@@ -69,7 +69,7 @@ class DataLayerCore {
   private function sqlConnect($dbHost, $dbUser, $dbPass) {
     $this->dbHost = $dbHost;
 
-    \system\utils\Log::debug('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em></p>.', array(
+    \system\utils\Log::debug('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em>.</p>', array(
       '@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
       '@host' => $dbHost,
       '@user' => $dbUser
@@ -104,7 +104,22 @@ class DataLayerCore {
    * sqlQuery will also fail and return false if the user does not have permission to access the table(s) referenced by the query.
    */
   protected function sqlQuery($query) {
-    \system\utils\Log::debug('<div><p><strong>SQL Query</strong></p><textarea rows="10" cols="80">@query</textarea>', array('@name' => $this->dbName, '@hos  t' => $this->dbHost, '@query' => $query));
+//    static $nesting = 0;
+//    if ($nesting == 0) {
+//      // Prevent recursion
+//      $nesting++;
+//      \system\utils\Log::debug('model', '<div><p><strong>SQL Query</strong></p>@query', array(
+//        '@name' => $this->dbName, 
+//        '@host' => $this->dbHost,
+//        '@query' => \system\utils\SqlFormatter::format($query)
+//      ), \system\LOG_DEBUG);
+//      $nesting--;
+//    }
+      \system\utils\Log::debug('<p>SQL Query (host: <b>@host</b> database: <b>@database</b>)</p>@query', array(
+        '@database' => empty($this->dbName) ? '&lt;none&gt;' : $this->dbName,
+        '@host' => $this->dbHost,
+        '@query' => \system\utils\SqlFormatter::format($query)
+      ));
 
     if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
       return \mssql_query($query, $this->connection);

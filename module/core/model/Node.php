@@ -5,6 +5,7 @@ use system\model\RecordsetBuilder;
 use system\model\RecordsetInterface;
 use system\model\FilterClauseGroup;
 use system\model\FilterClause;
+use system\model\LimitClause;
 use system\model\SortClause;
 
 class Node {
@@ -91,14 +92,15 @@ class Node {
 //    }
 //  }
   
-  public static function textFilter(RecordsetInterface $node, RecordsetBuilder $textBuilder) {
+  public static function textFilter(RecordsetBuilder $nodeBuilder, RecordsetBuilder $textBuilder) {
     $textBuilder->addFilter(new FilterClauseGroup(
       new FilterClause($textBuilder->lang, 'IS_NULL'),
       'OR',
       new FilterClause($textBuilder->lang, '=', \system\utils\Lang::getLang())
     ));
+//    $textBuilder->addFilter(new FilterClause($textBuilder->lang, '=', \system\utils\Lang::getLang()));
     $textBuilder->setSort(new SortClause($textBuilder->lang, 'DESC'));
-    $textBuilder->setLimit(1);
+    $textBuilder->setLimit(new LimitClause(1));
   }
   
   public static function text_und(RecordsetInterface $node) {

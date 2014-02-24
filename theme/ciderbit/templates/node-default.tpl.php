@@ -2,22 +2,25 @@
   <div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?>">
 
     <?php if ($this->api->access($node->edit_url)): ?>
-      <div class="page-controls">
-        <?php $this->api->open('link', array(
-          'ajax' => false,
-          'url' => $node->edit_url,
-          'width' => 800,
-          'class' => 'btn',
-          'height' => 420,
-          'title' => $this->api->t('Edit @name', array('@name' => $node->type))
-        )); ?><?php echo $this->api->t('Edit @name', array('@name' => $node->type)); ?><?php echo $this->api->close(); ?>
-        <?php $this->api->open('link', array(
-          'url' => $node->delete_url,
-          'confirm' => true,
-          'class' => 'btn',
-          'confirmTitle' => $this->api->t('The @name will be deleted', array('@name' => $node->type)),
-          'title' => $this->api->t('Delete @name', array('@name' => $node->type))
-        )); ?><?php echo $this->api->t('Delete @name', array('@name' => $node->type)); ?><?php echo $this->api->close(); ?>
+      <div class="page-controls btn-toolbar">
+        <div class="btn-group">
+          <?php $this->api->open('link', array(
+            'ajax' => false,
+            'url' => $node->edit_url,
+            'width' => 800,
+            'class' => 'btn btn-small',
+            'height' => 420,
+            'title' => $this->api->t('Edit @name', array('@name' => $node->type))
+              )); ?><i class="icon icon-pencil"></i><?php echo $this->api->close(); ?>
+
+          <?php $this->api->open('link', array(
+            'url' => $node->delete_url,
+            'confirm' => true,
+            'class' => 'btn btn-small btn-danger',
+            'confirmTitle' => $this->api->t('The @name will be deleted', array('@name' => $node->type)),
+            'title' => $this->api->t('Delete @name', array('@name' => $node->type))
+              )); ?><i class="icon icon-trash"></i><?php echo $this->api->close(); ?>
+        </div>
       </div>
     <?php endif; ?>
 

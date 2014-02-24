@@ -248,8 +248,4 @@ class CoreApi {
   public static function access($url, $args = array()) {
     return \system\Main::checkAccess($url, $args);
   }
-
-  //////////////////////
-  // 
-  //////////////////////
 }

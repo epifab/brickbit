@@ -24,9 +24,9 @@ components:
         action: Logs
       - url: admin/logs/reset
         action: LogsReset
-      - url: admin/logs/type/(@strid)
+      - url: admin/logs/level/([0-9]+)
         action: LogsByType
-      - url: admin/logs/key/(@strid)
+      - url: admin/logs/code/(@strid)
         action: LogsByKey
   role:
     class: Role

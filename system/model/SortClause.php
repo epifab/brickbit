@@ -48,7 +48,7 @@ class SortClause implements SelectClauseInterface {
           $this->type = SortClause::STYPE_RAND;
           break;
         default:
-          throw new \system\exceptions\InternalError("Parametro type non valido.");
+          throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'type'));
       }
     }
 
@@ -60,7 +60,7 @@ class SortClause implements SelectClauseInterface {
           $this->type = $type;
           break;
         default:
-          throw new \system\exceptions\InternalError("Parametro type non valido.");
+          throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'type'));
       }
     }
   }

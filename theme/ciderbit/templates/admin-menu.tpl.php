@@ -11,9 +11,21 @@
         <div class="nav-collapse collapse">
           <ul class="nav">
             <?php foreach ($adminMenu as $item): ?>
-            <li><?php $this->api->open('link', $item); 
-              ?><?php echo $item['title']; ?><?php echo $this->api->close(); ?>
-            </li>
+              <?php if (!empty($item['items'])): ?>
+                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo $item['title']; ?> <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <?php foreach ($item['items'] as $i): ?>
+                      <li><?php $this->api->open('link', $i); 
+                        ?><?php echo $i['title']; ?><?php echo $this->api->close(); ?>
+                      </li>
+                    <?php endforeach; ?>
+                  </ul>
+                </li>
+              <?php else: ?>
+              <li><?php $this->api->open('link', $item); 
+                ?><?php echo $item['title']; ?><?php echo $this->api->close(); ?>
+              </li>
+              <?php endif; ?>
             <?php endforeach; ?>
           </ul>
         </div><!--/.nav-collapse -->

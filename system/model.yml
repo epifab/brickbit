@@ -366,3 +366,24 @@ tables:
       primary:
         fields: [id]
         autoIncrement: 1
+    virtuals:
+       level_class:
+          type: string
+          dependencies: level
+          handler: |
+            function($log) {
+               switch ($log->level) {
+                  case \system\LOG_NOTICE:
+                     return 'success';
+                     break;
+                  case \system\LOG_WARNING:
+                     return 'warning';
+                     break;
+                  case \system\LOG_ERROR:
+                     return 'danger';
+                     break;
+                  case \system\LOG_DEBUG:
+                     return 'info';
+                     break;
+               }
+            }

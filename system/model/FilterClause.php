@@ -145,12 +145,12 @@ class FilterClause implements SelectClauseInterface {
           $this->type = FilterClause::OP_IS_NOT_NULL;
           break;
         default:
-          throw new \system\exceptions\InternalError("Parametro type fuori dal range");
+          throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'type'));
       }
     }
 
     else {
-      throw new \system\exceptions\InternalError("Parametro type non valido");
+      throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'type'));
     }
   }
 

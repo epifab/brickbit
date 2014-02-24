@@ -58,7 +58,7 @@ class RecordsetBuilder {
    * Handler to add filters to the recordset builder
    * @var callable
    */
-  private $filterHandle = null;
+  private $filterHandler = null;
   /**
    * Tipo di relazione
    * @var string
@@ -242,9 +242,9 @@ class RecordsetBuilder {
       $info = $this->tableInfo["relations"][$name];
       $builder = new self($info["table"]);
       $builder->setParent($this, $name, 
-        \array_key_exists('clauses', $info) ? $info["clauses"] : array(),
-        \array_key_exists('type', $info) ? $info["type"] : '1-N',
-        \array_key_exists('filterHandle', $info) ? $info["filterHandle"] : null
+        \array_key_exists('clauses', $info) ? $info['clauses'] : array(),
+        \array_key_exists('type', $info) ? $info['type'] : '1-N',
+        \array_key_exists('filterHandler', $info) ? $info['filterHandler'] : null
       );
       $builder->setOnUpdate(\array_key_exists("onUpdate", $info) ? $info["onUpdate"] : "NO_ACTION");
       $builder->setOnDelete(\array_key_exists("onDelete", $info) ? $info["onDelete"] : "NO_ACTION");
@@ -339,7 +339,7 @@ class RecordsetBuilder {
     }
   }
 
-  private function setParent(RecordsetBuilder $parentBuilder, $relationName, $clauses, $relationType, $filterHandle) {
+  private function setParent(RecordsetBuilder $parentBuilder, $relationName, $clauses, $relationType, $filterHandler) {
     $this->absolutePath = $parentBuilder->getAbsolutePath() != "" ? $parentBuilder->getAbsolutePath() . "." . $relationName : $relationName;
     $this->parentBuilder = $parentBuilder;
     $this->clauses = $clauses;
@@ -362,7 +362,7 @@ class RecordsetBuilder {
     
     $this->useAllKeys();
     
-    $this->filterHandle = $filterHandle;
+    $this->filterHandler = $filterHandler;
   }
   
   private function useAllKeys() {
@@ -568,8 +568,8 @@ class RecordsetBuilder {
     return $this->parentBuilder;
   }
   
-  public function getFilterHandle() {
-    return $this->filterHandle;
+  public function getFilterHandler() {
+    return $this->filterHandler;
   }
   
   /**
@@ -879,13 +879,13 @@ class RecordsetBuilder {
       $this->filterClauses = $filterClauses;
     }
     else {
-      throw new \system\exceptions\InternalError("Parametro filterClauses non valido");
+      throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'filterClause'));
     }
   }
   
   public function addFilter($filterClauses) {
     if (!($filterClauses instanceof FilterClause) && !($filterClauses instanceof FilterClauseGroup)) {
-      throw new \system\exceptions\InternalError("Parametro filterClauses non valido");
+      throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'filterClause'));
     }
 
     if (is_null($this->filterClauses)) {
@@ -907,7 +907,7 @@ class RecordsetBuilder {
       $this->sortClauses = $sortClauses;
     }
     else {
-      throw new \system\exceptions\InternalError("Parametro sortClauses non valido");
+      throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'sortClauses'));
     }
   }
   
@@ -916,14 +916,14 @@ class RecordsetBuilder {
   }
   
   public function setLimit($limitClause) {
-    if (is_null($limitClause)) {
+    if (\is_null($limitClause)) {
       $this->limitClause = null;
     }
     else if ($limitClause instanceof LimitClause) {
       $this->limitClause = $limitClause;
     }
     else {
-      throw new \system\exceptions\InternalError("Parametro limitClause non valido");
+      throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'limitClause'));
     }
   }
   
@@ -983,9 +983,14 @@ class RecordsetBuilder {
       $oldFilter = $builder->getFilter();
       
       // Initialize custom filters
-      if (!\is_null($builder->filterHandle)) {
-        eval('$func = ' . $builder->filterHandle . ';');
-        \call_user_func($func, $this, $builder);
+      if (!\is_null($builder->filterHandler)) {
+        if (\is_array($builder->filterHandler)) {
+          \call_user_func($builder->filterHandler, $this, $builder);
+        }
+        else {
+          eval('$func = ' . $builder->filterHandler . ';');
+          \call_user_func($func, $this, $builder);
+        }
       }
       
       if (!\is_null($builder->filterClauses)) {

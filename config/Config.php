@@ -160,8 +160,6 @@ class Config {
     switch ($code) {
       case E_NOTICE:
       case E_USER_NOTICE:
-        $level = \system\LOG_NOTICE;
-        break;
       case E_CORE_WARNING:
       case E_DEPRECATED:
       case E_USER_DEPRECATED:
@@ -182,7 +180,7 @@ class Config {
         break;
     }
     
-    \system\Main::invokeMethodAll('watchdog', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+    \system\Main::invokeMethodAll('watchdog', 'system', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
       '@description' => $description, 
       '@file' => $file, 
       '@line' => $line

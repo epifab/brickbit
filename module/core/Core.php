@@ -2,7 +2,7 @@
 namespace module\core;
 
 class Core {
-  public static function watchdog($mesage, $args, $level) {
+  public static function watchdog($code, $message, $args, $level) {
     static $levelIndexes = array();
     if (!isset($levelIndexes[$level])) {
       $levelIndexes[$level] = 0;
@@ -11,8 +11,10 @@ class Core {
     $levelStr = '';
     switch ($level) {
       case \system\LOG_DEBUG:
-      case \system\LOG_NOTICE:
         $levelStr = 'info';
+        break;
+      case \system\LOG_NOTICE:
+        $levelStr = 'success';
         break;
       case \system\LOG_WARNING:
         $levelStr = 'warning';
@@ -22,9 +24,12 @@ class Core {
         break;
     }
     
-    if (\system\Component::getMainComponent()) {
-      \system\Component::getMainComponent()->addMessage($mesage, $args, $levelStr);
-    }
+    \system\utils\Log::create($code, $message, $args, $level);
+    
+    \system\utils\Log::pushMessage(array(
+      'message' => \cb\t($message, $args),
+      'level' => $levelStr
+    ));
     
     $levelIndexes[$level]++;
   }
@@ -34,6 +39,14 @@ class Core {
       'html' => '\module\core\model\MetaHTML',
       'plaintext' => '\system\metatypes\MetaString'
     );
+  }
+  
+  public static function preprocessTemplate() {
+    // Debug info as output
+    \system\utils\Log::pushMessage(array(
+      'message' => \system\utils\Log::getDebug(),
+      'level' => 'info'
+    ));
   }
   
   /**

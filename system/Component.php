@@ -690,6 +690,10 @@ abstract class Component {
             ));
         }
 
+        if (!$this->nested) {
+          \system\Main::invokeMethodAll('preprocessTemplate');
+        }
+        
         if (!\is_null($responseType)) {
           // Adding the output to the buffer
           $this->tplManager->process($this->datamodel);

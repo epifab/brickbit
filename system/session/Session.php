@@ -4,8 +4,8 @@ namespace system\session;
 use system\model\RecordsetBuilder;
 use system\utils\Login;
 
-#\session_destroy();
 \session_start();
+\session_destroy();
 
 class Session {
   private static $instance;
@@ -61,23 +61,39 @@ class Session {
   public function commit() {
     $this->session->data = \serialize($this->data);
     $this->session->save();
+    \system\Main::invokeMethodAll('sessionCommit');
   }
   
+  /**
+   * Get a session variable
+   * @param string $type Key 1
+   * @param string $key Key 2
+   * @return null
+   */
   public function get($type, $key) {
-    if (isset($this->data[$type]) && isset($this->data[$type][$key])) {
-      return $this->data[$type][$key];
-    }
-    return null;
+    return (isset($this->data[$type]) && isset($this->data[$type][$key]))
+      ? $this->data[$type][$key]
+      : null;
   }
   
+  /**
+   * Set a session variable
+   * @param string $type Key 1
+   * @param string $key Key 2
+   * @param mixed $data Data
+   */
   public function set($type, $key, $data) {
-    \system\utils\Log::create(__FUNCTION__, \system\utils\Utils::backtraceInfo());
-    if (!$this->data[$type]) {
+    if (!isset($this->data[$type])) {
       $this->data[$type] = array();
     }
     $this->data[$type][$key] = $data;
   }
   
+  /**
+   * Remove a session variable
+   * @param string $type Key 1
+   * @param string $key Key 2
+   */
   public function remove($type, $key) {
     if (isset($this->data[$type]) && isset($this->data[$type][$key])) {
       unset($this->data[$type][$key]);
