@@ -153,7 +153,10 @@ class Login {
   private function setLoginCookie() {
     $contents = \md5($this->user->email) . "%%" . $this->user->password;
     $domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
-    \setcookie("login", $contents, LOGIN_COOKIE_TIME, "/", \count($domains) >= 3 ? "." . $domains[1] . '.' . $domains[0] : "");
+    // localhost          => localhost
+    // ciderbit.local     => ciderbit.local
+    // www.ciderbit.local => ciderbit.local
+    \setcookie("login", $contents, LOGIN_COOKIE_TIME, "/", \count($domains) == 1 ? $domains[0] : $domains[1] . '.' . $domains[0]);
   }
 
   /**
@@ -167,8 +170,11 @@ class Login {
    * Elimina il cookie riguardante i dati di login
    */
   private static function unsetLoginCookie() {
-    $domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
-    \setcookie("login", "", time()-3600, "/", \count($domains) >= 3 ? "." . $domains[1] . '.' . $domains[0] : "");
+    $domains = \array_reverse(\explode('.', $_SERVER['HTTP_HOST']));
+    // localhost          => localhost
+    // ciderbit.local     => ciderbit.local
+    // www.ciderbit.local => ciderbit.local
+    \setcookie("login", "", time()-3600, "/", count($domains) == 1 ? $domains[0] : $domains[1] . '.' . $domains[0]);
   }
 
   /* ---------------------------------------- *

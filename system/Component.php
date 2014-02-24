@@ -372,12 +372,14 @@ abstract class Component {
   
   /**
    * Add a message to be displayed
-   * @param string $body Message body
-   * @param array $args Message arguments
-   * @param string $type Message type. Typical values are: success, info, warning, danger
+   * @param string $message Message
+   * @param string $class Message class. Typical values are: success, info, warning, danger
    */
-  public function addMessage($body, $args, $type) {
-    $this->datamodel['system']['messages'][$type][] = \cb\t($body, $args);
+  public function addMessage($message, $class) {
+    \system\utils\Log::pushMessage(array(
+      'class' => $class,
+      'message' => $message
+    ));
   }
   
   /**

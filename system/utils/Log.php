@@ -92,7 +92,10 @@ class Log {
    * @param array $args Message arguments
    */
   public static function debug($body, $args = array()) {
-    self::$debugInfo[] = \cb\t($body, $args);
+    self::$debugInfo[] = array(
+      'message' => $body,
+      'args' => $args,
+    );
   }
   
   /**
@@ -100,6 +103,6 @@ class Log {
    * @return string Debug info
    */
   public static function getDebug() {
-    return '<div class="debug">' . \implode('</div><div class="debug">', self::$debugInfo) . '</div>';
+    return self::$debugInfo;
   }
 }

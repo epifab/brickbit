@@ -1020,15 +1020,15 @@ class RecordsetBuilder {
     if ($this->isRecordModed()) {
       $mode = $modeType . "_mode";
       
-      if ($user->superuser) {
-        // SUPERUSER -> just make sure the record mode is >= than MODE_SU
-        $this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_SU));
+      if (empty($user) || $user->anonymous) {
+        // NOT LOGGED -> not logged user can access the recordset only when record mode is = MODE_ANYONE
+        $this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_ANYONE));
         return;
       }
       
-      else if ($user->anonymous) {
-        // NOT LOGGED -> not logged user can access the recordset only when record mode is = MODE_ANYONE
-        $this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_ANYONE));
+      else if ($user->superuser) {
+        // SUPERUSER -> just make sure the record mode is >= than MODE_SU
+        $this->addFilter(new FilterClause($this->record_mode->$mode, '>=', \system\model\RecordMode::MODE_SU));
         return;
       }
       

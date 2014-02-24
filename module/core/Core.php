@@ -8,19 +8,19 @@ class Core {
       $levelIndexes[$level] = 0;
     }
 
-    $levelStr = '';
+    $class = '';
     switch ($level) {
-      case \system\LOG_DEBUG:
-        $levelStr = 'info';
-        break;
       case \system\LOG_NOTICE:
-        $levelStr = 'success';
+        $class = 'success';
         break;
       case \system\LOG_WARNING:
-        $levelStr = 'warning';
+        $class = 'warning';
         break;
       case \system\LOG_ERROR:
-        $levelStr = 'danger';
+        $class = 'danger';
+        break;
+      default:
+        $class = 'info';
         break;
     }
     
@@ -28,7 +28,7 @@ class Core {
     
     \system\utils\Log::pushMessage(array(
       'message' => \cb\t($message, $args),
-      'level' => $levelStr
+      'class' => $class
     ));
     
     $levelIndexes[$level]++;
@@ -43,10 +43,12 @@ class Core {
   
   public static function preprocessTemplate() {
     // Debug info as output
-    \system\utils\Log::pushMessage(array(
-      'message' => \system\utils\Log::getDebug(),
-      'level' => 'info'
-    ));
+    foreach (\system\utils\Log::getDebug() as $debug) {
+      \system\utils\Log::pushMessage(array(
+        'message' => \cb\t($debug['message'], $debug['args']),
+        'class' => 'info'
+      ));
+    }
   }
   
   /**

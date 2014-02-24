@@ -170,8 +170,8 @@ class EditNode extends Edit {
   public function submitEdit($form, $rs) {
     $rs->save();
 //    $this->addMessage('Node @id has been updated', array('@id' => $rs->id), 'notice');
-//    $this->setMainTemplate('notify');
-    return NULL;
+    $this->setMainTemplate('notify');
+    return \system\Component::RESPONSE_TYPE_NOTIFY;
   }
   
   public function runDelete() {

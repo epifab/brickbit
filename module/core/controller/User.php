@@ -68,7 +68,7 @@ class User extends Page {
         $user = \system\utils\Login::login($_REQUEST['login']);
       }
       catch (\system\exceptions\LoginError $ex) {
-        $this->datamodel['message'] = $ex->getMessage();
+        $this->addMessage($ex->getMessage(), 'warning');
       }
     }
     
@@ -89,7 +89,7 @@ class User extends Page {
     \system\utils\Login::logout();
     
     $this->setMainTemplate('notify');
-    $this->datamodel["message"] = array(
+    $this->datamodel['message'] = array(
       'title' => \system\utils\Lang::translate('Logged out'),
       'body' => \system\utils\Lang::translate('You have been logged out.')
     );

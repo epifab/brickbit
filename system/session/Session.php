@@ -5,7 +5,7 @@ use system\model\RecordsetBuilder;
 use system\utils\Login;
 
 \session_start();
-\session_destroy();
+//\session_destroy();
 
 class Session {
   private static $instance;

@@ -50,16 +50,18 @@
 
     <div id="main-wrapper">
       <div id="main" class="container">
-        
-        <?php if (count(\system\utils\Log::getMessages())): ?>
-          <div class="messages">
-            <?php while ($message = \system\utils\Log::popMessage()): ?>
-              <div class="alert alert-<?php echo $message['level']; ?>"><?php echo $message['message']; ?></div>
-            <?php endwhile; ?>
-          </div>
-        <?php endif; ?>
-        
         <?php $this->api->import($website['outlineLayoutTemplate']); ?>
+
+        <div class="messages">
+          <?php if (count(\system\utils\Log::getMessages())): ?>
+            <div class="messages">
+              <?php while ($message = \system\utils\Log::popMessage()): ?>
+                <div class="alert alert-<?php echo $message['class']; ?>"><?php echo $message['message']; ?></div>
+              <?php endwhile; ?>
+            </div>
+          <?php endif; ?>
+        </div>
+
       </div>
     </div>
 
