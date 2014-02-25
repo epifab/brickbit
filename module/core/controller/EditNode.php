@@ -199,16 +199,16 @@ class EditNode extends Edit {
     );
   }
   
-  public function submitAdd($form) {
+  public function submitAdd() {
     throw new \system\exceptions\InternalError('Not yet implemented');
   }
   
-  public function submitAdd2Node($form) {
+  public function submitAdd2Node() {
     throw new \system\exceptions\InternalError('Not yet implemented');
   }
   
-  public function submitEdit(\system\view\FormRecordset $form) {
-    $this->addMessage('<pre>' . print_r($form->getRecordset('node')->toArray(), true) . '</pre>');
+  public function submitEdit() {
+    $this->addMessage('<pre>' . print_r($this->getForm()->getRecordset('node')->toArray(), true) . '</pre>');
     throw new \system\exceptions\InternalError('Not yet implemented');
   }
   

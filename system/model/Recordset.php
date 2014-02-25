@@ -299,7 +299,7 @@ class Recordset implements RecordsetInterface {
       throw new \system\exceptions\InternalError('Cannot create a record with no field values.');
     }
 
-    $query = "INSERT INTO " . $this->builder->getTableName() . " (" . $q1 . ") VALUES (" . $q2 . ")";
+    $query = "INSERT INTO {$this->builder->getTableName()} ({$q1}) VALUES ({$q2})";
 
     $dataAccess = DataLayerCore::getInstance();
     $dataAccess->executeUpdate($query);

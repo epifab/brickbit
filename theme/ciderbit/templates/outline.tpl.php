@@ -50,8 +50,6 @@
 
     <div id="main-wrapper">
       <div id="main" class="container">
-        <?php $this->api->import($website['outlineLayoutTemplate']); ?>
-
         <div class="messages">
           <?php if (count(\system\utils\Log::getMessages())): ?>
             <div class="messages">
@@ -62,6 +60,7 @@
           <?php endif; ?>
         </div>
 
+        <?php $this->api->import($website['outlineLayoutTemplate']); ?>
       </div>
     </div>
 

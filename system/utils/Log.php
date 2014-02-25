@@ -35,9 +35,12 @@ class Log {
    * Push a message (FIFO queue)
    * @param array $message Message
    */
-  public static function pushMessage($message) {
+  public static function pushMessage($message, $class = 'info') {
     self::loadMessages();
-    self::$messages[] = $message;
+    self::$messages[] = array(
+      'class' => $class,
+      'message' => $message
+    );
     self::updateMessages();
   }
   

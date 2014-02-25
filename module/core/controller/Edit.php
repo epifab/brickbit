@@ -2,8 +2,6 @@
 namespace module\core\controller;
 
 use system\Component as Component;
-use system\view\Form as Form;
-use system\view\FormRecordset as FormRecordset;
 
 /**
  * Generic base recordset editing component
@@ -30,18 +28,18 @@ abstract class Edit extends Component {
   abstract protected function getFormTemplate();
 
   /**
-   * @var \system\view\FormRecordset Form object
+   * @var \system\view\Form Form object
    */
   private $form = null;
   
   /**
    * Returns the form object
-   * @return \system\view\FormRecordset Form object
+   * @return \system\view\Form Form object
    */
   public function getForm() {
     if (empty($this->form)) {
       // Initialize the form
-      $this->form = \system\view\FormRecordset::initForm($this->getFormId());
+      $this->form = \system\view\Form::initForm($this->getFormId());
       foreach ($this->getEditRecordsets() as $name => $recordset) {
         // Attach the recordsets to the form
         $this->form->addRecordset($name, $recordset);
@@ -79,14 +77,13 @@ abstract class Edit extends Component {
     else {
       // Submit handler
       if (\is_callable(array($this, 'submit' . $this->getAction()))) {
-        \call_user_func(array($this, 'submit' . $this->getAction()), $form);
+        \call_user_func(array($this, 'submit' . $this->getAction()));
       }
       return Component::RESPONSE_TYPE_NOTIFY;
     }
   }
   
-  protected function defaultSubmitHandler(\system\view\FormRecordset $form) {
+  protected function defaultSubmitHandler() {
     
-    $rs->save();
   }
 }

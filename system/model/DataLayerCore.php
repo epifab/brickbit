@@ -191,7 +191,7 @@ class DataLayerCore {
   
   public function sqlRealEscapeStrings($string) {
     if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
-      return \mysql_real_escape_string(stripslashes($string));
+      return \mysql_real_escape_string($string);
     } else {
       return \mb_ereg_replace("'", "''", $string);
     }

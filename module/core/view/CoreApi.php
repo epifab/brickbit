@@ -26,7 +26,8 @@ class CoreApi {
     if (\array_key_exists($path, $ids)) {
       return 'de-input-' . \str_replace('.', '-', $path) . '-' . $ids[$path];
       $ids[$path]++;
-    } else {
+    }
+    else {
       return 'de-input-' . \str_replace('.', '-', $path);
       $ids[$path] = 1;
     }
@@ -67,11 +68,20 @@ class CoreApi {
    * @param string $path Input path
    * @return string Error message HTML
    */
-  public static function formInputError($path) {
-    $vars = \system\view\Template::current()->getVars();
-    return \array_key_exists('errors', $vars) && \array_key_exists($path, $vars['errors'])
-      ? '<div class="de-error">' . $vars['errors'][$path] . '</div>'
-      : '';
+  public static function formInputError($params) {
+    $recordsetName = \cb\array_item('recordset', $params, array('required' => true));
+    $path = \cb\array_item('path', $params, array('required' => true));
+
+    $form = Form::getCurrent();
+    if ($form) {
+      $inputName = $form->getRecordsetInputName($recordsetName, $path);
+      if (!empty($inputName)) {
+        $errorMsg = $form->getValidationError($inputName);
+        return (!empty($errorMsg))
+          ? '<div class="de-error">' . $errorMsg . '</div>'
+          : '';
+      }
+    }
   }
   
   /**
@@ -128,6 +138,7 @@ class CoreApi {
         $field = $recordset->getBuilder()->searchField($path, true);
         
         $widget = isset($params['widget']) ? $params['widget'] : $field->getEditWidget();
+        $metaType = $field->getMetaType();
         
         $id = self::getRSInputId($form->getId(), $recordsetName, $path);
         $name = 'recordset[' . $recordsetName . '][' . $path . ']';
@@ -138,7 +149,7 @@ class CoreApi {
           + $field->getAttributes()
           + array('id' => $id, 'name' => $name, 'value' => $value);
         
-        $form->addInput($name, $widget, $value, $input);
+        $form->addInput($name, $widget, $value, $input, $metaType);
         $form->addRecordsetInput($recordsetName, $name, $path);
 
         return $form->renderInput($name);

@@ -1,6 +1,4 @@
 <div class="log">
-  <h3>Log #<?php echo $log->id; ?></h3>
-  
   <div>
     <h4 class="alert alert-<?php echo $log->level_class; ?>"><?php echo $log->body; ?></h4>
     

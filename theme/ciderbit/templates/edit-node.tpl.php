@@ -1,5 +1,5 @@
 <?php $this->api->open('form', array('id' => $form->getId())); ?>
-<div class="dataedit">
+  <div class="dataedit">
     <fieldset>
       <legend>
         <div class="legend">
@@ -25,10 +25,9 @@
               'widget' => 'checkbox',
               'name' => 'text_' . $lang . '.enable',
               'id' => 'edit-node-text_' . $lang . '-enable',
-              'label' => $this->api->t('Enable for this lang'),
+              'label' => $this->api->t('Enable for this language'),
               'value' => isset($form->getRecordset('node')->texts[$lang])
             )); ?>
-            <label for="edit-node-text_<?php echo $lang; ?>-enable"><?php echo $this->api->t("Content available for this language."); ?></label>
           </div>
         </div>
         <div id="node-lang-<?php echo $lang; ?>-fields" class="edit-node-text_<?php echo $lang; ?>-enable">
@@ -57,7 +56,7 @@
                   <?php echo $this->api->t("Please note also that two different contents, translated in @lang, must have two different URNs.", array('@lang' => $this->api->t($lang))); ?>
                 </p>
               </div>
-              <?php echo $this->api->formInputError('text_' . $lang . '.urn'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'urn')); ?>
             </div>
           </div>
           <div class="de-row">
@@ -79,7 +78,7 @@
                   <?php echo $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
                 </p>
               </div>
-              <?php echo $this->api->formInputError('text_' . $lang . '.description'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'description')); ?>
             </div>
           </div>
           <div class="de-row">
@@ -96,7 +95,7 @@
                 'path' => 'title',
                 'attributes' => array('class' => 'l')
               )); ?>
-              <?php echo $this->api->formInputError('text_' . $lang . '.title'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'title')); ?>
             </div>
           </div>
           <div class="de-row">
@@ -113,7 +112,7 @@
                 'path' => 'subtitle',
                 'attributes' => array('class' => 'xl')
               )); ?>
-              <?php echo $this->api->formInputError('text_' . $lang . '.subtitle'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'subtitle')); ?>
             </div>
           </div>
           <div class="de-row">
@@ -130,7 +129,7 @@
                 'path' => 'body',
                 'attributes' => array('class' => 'xxl richtext wysiwyg')
               )); ?>
-              <?php echo $this->api->formInputError('text_' . $lang . '.body'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'body')); ?>
             </div>
           </div>
           <div class="de-row">
@@ -147,7 +146,7 @@
                 'path' => 'preview',
                 'attributes' => array('class' => 'xxl richtext wysiwyg')
               )); ?>
-              <?php echo $this->api->formInputError('text_' . $lang . '.preview'); ?>
+              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'preview')); ?>
             </div>
           </div>
         </div>
@@ -185,7 +184,7 @@
 //            'item' => '<div><img src="@[image.url]"/>@[name]</div>',
 //            'name' => 'users'
 //          )); ?>
-          <?php echo $this->api->formInputError("record_mode.users"); ?>
+          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.users')); ?>
         </div>
       </div>
       <div class="de-row">
@@ -199,7 +198,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l')
           )); ?>
-          <?php echo $this->api->formInputError("record_mode.read_mode"); ?>
+          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.read_mode')); ?>
         </div>
       </div>
       <div class="de-row">
@@ -213,7 +212,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l', 'rows')
           )); ?>
-          <?php echo $this->api->formInputError("record_mode.edit_mode"); ?>
+          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.edit_mode')); ?>
         </div>
       </div>
       <div class="de-row">
@@ -227,7 +226,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l')
           )); ?>
-          <?php echo $this->api->formInputError("record_mode.delete_mode"); ?>
+          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.delete_mode')); ?>
         </div>
       </div>
     </fieldset>

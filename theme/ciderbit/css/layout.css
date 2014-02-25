@@ -164,6 +164,9 @@ input, textarea {
 /*
  * DATAEDIT
  */
+.dataedit {
+	margin-bottom: 30px;
+}
 .dataedit .de-row {
   clear: both;
   position: relative;
@@ -228,13 +231,13 @@ input, textarea {
 }
 .dataedit fieldset {
   border: 0px;
-  padding: 15px;
+  padding: 15px 0px;
   margin: 5px 0px;
 }
 .dataedit fieldset legend {
   color: #366;
   background-color: #FFF;
-  font-weight: bold;
+  font-weight: bold;	
   display: block;
   margin: 15px 0px 2px 0px;
   border-top-left-radius: 5px;

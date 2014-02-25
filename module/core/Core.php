@@ -26,10 +26,7 @@ class Core {
     
     \system\utils\Log::create($code, $message, $args, $level);
     
-    \system\utils\Log::pushMessage(array(
-      'message' => \cb\t($message, $args),
-      'class' => $class
-    ));
+    \system\utils\Log::pushMessage(\cb\t($message, $args), $class);
     
     $levelIndexes[$level]++;
   }
@@ -43,12 +40,12 @@ class Core {
   
   public static function preprocessTemplate() {
     // Debug info as output
-    foreach (\system\utils\Log::getDebug() as $debug) {
-      \system\utils\Log::pushMessage(array(
-        'message' => \cb\t($debug['message'], $debug['args']),
-        'class' => 'info'
-      ));
-    }
+//    foreach (\system\utils\Log::getDebug() as $debug) {
+//      \system\utils\Log::pushMessage(array(
+//        'message' => \cb\t($debug['message'], $debug['args']),
+//        'class' => 'info'
+//      ));
+//    }
   }
   
   /**

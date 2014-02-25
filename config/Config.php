@@ -216,7 +216,7 @@ class Config {
 //  @\session_id($_REQUEST[\session_name()]);
 //}
 
-\set_error_handler('\config\Config::errors');
+//\set_error_handler('\config\Config::errors');
 \set_exception_handler('\config\Config::exceptions');
 \spl_autoload_register('\config\Config::autoload');
 
