@@ -10,6 +10,10 @@ class Admin extends \system\Component {
     return $user && $user->superuser;
   }
   
+  public static function accessLogDetails($urlArgs, $request, $user) {
+    return $user && $user->superuser;
+  }
+  
   public static function accessLogsKey($urlArgs, $request, $user) {
     return $user && $user->superuser;
   }
@@ -24,11 +28,28 @@ class Admin extends \system\Component {
   }
   
   public function runLogs() {
+    $this->setPageTitle('Logs');
+    
     $this->setMainTemplate('logs');
 
     $rsb = self::rsb();
     $logs = $rsb->select();
     $this->datamodel['logs'] = $logs;
+    
+    return \system\Component::RESPONSE_TYPE_READ;
+  }
+  
+  public function runLogDetails() {
+    $this->setPageTitle(\cb\t('Log #@id', array('@id' => $this->getUrlArg(0))));
+    
+    $this->setMainTemplate('log');
+
+    $rsb = self::rsb();
+    $log = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
+    if (empty($log)) {
+      throw new \system\exceptions\PageNotFound();
+    }
+    $this->datamodel['log'] = $log;
     
     return \system\Component::RESPONSE_TYPE_READ;
   }

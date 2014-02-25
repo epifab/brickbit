@@ -8,51 +8,77 @@ class Form {
    * @var \system\view\Form
    */
   private static $instance;
-  /**
-   * @var \system\view\Form
-   */
-  private static $submitted;
-  /**
-   * @var \system\model\RecordsetInterface[][]
-   */
-  private static $formRecordsets = array();
   
-  private $name;
-  private $input = array();
-  private $errors = array();
-  private $errorsNo = 0;
-  private $recordsets = array();
-  private $data = array();
-  private $timestamp;
+  protected $id;
+  protected $input = array();
+  protected $errors = array();
+  protected $errorsNo = 0;
+  protected $data = array();
+  protected $timestamp;
   
-  private function __construct($name) {
+  private function __construct($id) {
     $this->timestamp = \time();
-    $this->name = $name;
+    $this->id = $id;
   }
   
-  public static function startForm($name) {
+  /**
+   * Initialize a form.
+   * This is tipically called from the control layer before the form is 
+   *  rendered.
+   * @param string $id Form id
+   * @param string $class Form class name (must extend the \system\view\Form 
+   *  class) [optional]
+   * @return \system\view\Form
+   */
+  public static function initForm($id, $delegateClass = '\\system\\view\\Form') {
+    $form = self::getForm($id);
+    if (empty($form)) {
+      if (!\class_exists($delegateClass)) {
+        throw new \system\exceptions\InternalError('Class @class not found.', array('@class' => $delegateClass));
+      }
+      $form = new $delegateClass($id);
+      if (!($form instanceof self)) {
+        throw new \system\exceptions\InternalError('Invalid form class @class', array('@class' => $delegateClass));
+      }
+      Session::getInstance()->set('forms', $id, $form);
+    }
+    return $form;
+  }
+  
+  /**
+   * Starts a form.
+   * This must be called from the view layer.
+   * @param string $id Form id
+   * @throws \system\exceptions\InternalError
+   */
+  public static function startForm($id) {
     if (!empty(self::$instance)) {
       throw new \system\exceptions\InternalError('Illegal nested form.');
     }
-    $form = self::getForm($name);
+    $form = self::getForm($id);
     if (empty($form)) {
-      $form = new self($name);
-      Session::getInstance()->set('forms', $name, $form);
+      throw new \system\exceptions\InternalError('Starting a uninitialized form.');
     }
     self::$instance = $form;
   }
 
+  /**
+   * Closes the current form (after this has been started)
+   */
   public static function closeForm() {
+    if (empty(self::$instance)) {
+      throw new \system\exceptions\InternalError('No form has been open.');
+    }
     self::$instance = null;
   }
   
   /**
    * Return the form (if exists)
-   * @param string $name Form name
+   * @param string $id Form id
    * @return \system\view\Form
    */
-  public static function getForm($name) {
-    return Session::getInstance()->get('forms', $name);
+  public static function getForm($id) {
+    return Session::getInstance()->get('forms', $id);
   }
   
   /**
@@ -63,35 +89,31 @@ class Form {
     return self::$instance;
   }
   
-  public function attach($name, $value) {
-    $this->data[$name] = $value;
+  /**
+   * Attach data to the form
+   * @param string $key Key
+   * @param mixed $value Value
+   */
+  public function attach($key, $value) {
+    $this->data[$key] = $value;
   }
   
-  public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
-    // Cache
-    self::$formRecordsets[$this->name][$name] = $recordset;
-    
-    $this->recordsets[$name] = array(
-      'name' => $name,
-      'table' => $recordset->getBuilder()->getTableName(),
-      'key' => $recordset->getPrimaryKey(),
-      'input' => array()
-    );
-  }
-  
-  public function addRecordsetInput($recordsetName, $name, $path) {
-    if (isset($this->recordsets[$recordsetName])) {
-      $rs =& $this->recordsets[$recordsetName];
-      $rs['input'][$path] = $name;
-    }
-  }
-  
-  public function addInput($name, $widget, $defaultValue, array $input = array(), $metaType = null) {
+  /**
+   * Add a form input
+   * @param string $name Input name
+   * @param string $widget Widget name to render the input
+   * @param mixed $defaultValue Default input value
+   * @param array $input Input parameters [optional]
+   * @param \system\metatypes\MetaType $metaType Meta type associated with the 
+   *  input[optional]
+   * @return mixed The current input value
+   */
+  public function addInput($name, $widgetName, $defaultValue, array $input = array(), $metaType = null) {
 //    if (!isset($this->input[$name])) {
       $this->input[$name] = array(
         'name' => $name,
         'value' => $defaultValue,
-        'widget' => $widget,
+        'widget' => $widgetName,
         'metaType' => $metaType
       ) + $input;
 //    }
@@ -99,6 +121,11 @@ class Form {
     return $this->input[$name]['value'];
   }
   
+  /**
+   * Renders a input
+   * @param string $name Input name
+   * @return string Rendered input (HTML code)
+   */
   public function renderInput($name) {
     if (!empty($this->input[$name])) {
       $input = $this->input[$name];
@@ -106,57 +133,56 @@ class Form {
     }
   }
   
+  /**
+   * Checks whether or not the form has been submitted
+   * @return boolean TRUE if the form has been submitted
+   */
+  public function checkSubmission() {
+    return $this->getId() && self::getPostedFormId() == $this->getId();
+  }
+  
+  /**
+   * Fetch input values
+   */
+  public function submission() {
+    $this->fetchInputValues();
+    $this->onSubmission();
+    return $this->inputErrorCount() == 0;
+  }
+  
+  /**
+   * Allows extending classes to do something on submission
+   */
+  public function onSubmission() {
+  }
+  
+  /**
+   * Returns the current posted form ID
+   * @return string Form ID (if any)
+   */
   public static function getPostedFormId() {
-    if (isset($_REQUEST['system']) && isset($_REQUEST['system']['formId'])) {
-      return $_REQUEST['system']['formId'];
-    }
-    return null;
-  }
-
-  /**
-   * Returns the posted form
-   * @param string $formId [optional] If passed, the posted form id must match it
-   * @return \system\view\Form Null if no form has been submitted or the submitted form id doesn't match with the formId argument
-   */
-  public static function getPostedForm($formId = null) {
-    if (empty($formId) || $formId == self::getPostedFormId()) {
-      if (!isset(self::$submitted)) {
-        $name = self::getPostedFormId();
-        if (!\is_null($name)) {
-          $form = self::getForm($name);
-          if ($form) {
-            $form->fetchInputValues();
-            $form->fetchRecordsets();
-            self::$submitted = $form;
-          }
-        }
-      }
-      return self::$submitted;
-    }
-    return null;
+    return (isset($_REQUEST['system']) && isset($_REQUEST['system']['formId']))
+      ? $_REQUEST['system']['formId']
+      : null;
   }
   
   /**
-   * Checks whether a form has been submitted
-   * @return boolean
+   * Returns the input value
+   * @param array $input Input info
+   * @return mixed Input submitted value as returned by the widget fetch method
    */
-  public static function checkFormSubmission($formId = null) {
-    return
-      isset($_REQUEST['system'])
-      && isset($_REQUEST['system']['formId'])
-      && Session::getInstance()->exists('forms', $_REQUEST['system']['formId'])
-      && (empty($formId) || $formId == $_REQUEST['system']['formId']);
-  }
-  
   private static function getInputPostedValue(array $input) {
     $haystack = $_REQUEST;
     
+    // Handles with input name like foo[bar][foo] -> $_REQUEST[foo][bar][foo]
     $needles = \preg_split('/(\[|\])+/', $input['name'], 0, PREG_SPLIT_NO_EMPTY);
     if (count($needles)) {
       foreach ($needles as $needle) {
         if (\array_key_exists($needle, $haystack)) {
           $haystack = $haystack[$needle];
-        } else {
+        }
+        else {
+          // Not transmitted
           return null;
         }
       }
@@ -166,6 +192,9 @@ class Form {
     }
   }
   
+  /**
+   * Fetch every form input
+   */
   private function fetchInputValues() {
     $this->errorsNo = 0;
     
@@ -187,52 +216,50 @@ class Form {
     }
   }
   
-  private function fetchRecordsets() {
-    foreach ($this->recordsets as $recordset) {
-      $rsObj = $this->getRecordset($recordset['name']);
-      foreach ($recordset['input'] as $path => $name) {
-        $rsObj->setProg($path, $this->input[$name]['value']);
-      }
-    }
+  /**
+   * Get form ID
+   * @return string Form ID
+   */
+  public function getId() {
+    return $this->id;
   }
   
-  public function getRecordset($name) {
-    if (empty(self::$formRecordsets[$this->name]) || !isset(self::$formRecordsets[$this->name][$name])) {
-      if (isset($this->recordsets[$name])) {
-        $rsb = new \system\model\RecordsetBuilder($this->recordsets[$name]['table']);
-        $rsb->usingAll();
-        if (!empty($this->recordsets[$name]['key'])) {
-          self::$formRecordsets[$this->name][$name] = $rsb->selectFirstBy($this->recordsets[$name]['key']);
-        } else {
-          self::$formRecordsets[$this->name][$name] = $rsb->newRecordset();
-        }
-      }
-    }
-    return isset(self::$formRecordsets[$this->name][$name])
-      ? self::$formRecordsets[$this->name][$name]
-      : null;
-  }
-  
-  public function getName() {
-    return $this->name;
-  }
-  
+  /**
+   * Get form input
+   * @return array Form input
+   */
   public function getInput() {
     return $this->input;
   }
   
+  /**
+   * Get form timestamp
+   * @return time Form timestamp
+   */
   public function getTimestamp() {
     return $this->timestamp;
   }
   
+  /**
+   * Get form attached data
+   * @return array Form data
+   */
   public function getData() {
     return $this->data;
   }
   
+  /**
+   * Count validation errors
+   * @return int Number of errors
+   */
   public function inputErrorCount() {
     return $this->errorsNo;
   }
   
+  /**
+   * Get validation errors
+   * @return array Validation errors
+   */
   public function inputErrors() {
     return $this->errors;
   }

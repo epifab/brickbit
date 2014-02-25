@@ -74,17 +74,16 @@ class Recordset implements RecordsetInterface {
     }
     
     if (\array_key_exists($name, $this->hasOneRelations)) {
-
       // Has One Relation
       return $this->hasOneRelations[$name];
-
-    } else if (\array_key_exists($name, $this->hasManyRelations)) {
-
+    }
+    
+    else if (\array_key_exists($name, $this->hasManyRelations)) {
       // Has Many Relation (precedentemente caricata)
       return $this->hasManyRelations[$name];
-
-    } else if (\array_key_exists($name, $this->builder->getRelationBuilderList())) {
-      
+    }
+    
+    else if (\array_key_exists($name, $this->builder->getRelationBuilderList())) {
       // Relation valida ma ancora non caricata (LAZY LOAD)
 
       // recupero il builder del recordset corrispondente alla has many relation

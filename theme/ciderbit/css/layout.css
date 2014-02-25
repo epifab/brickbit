@@ -161,6 +161,9 @@ input, textarea {
   background-color: #FFF;
 }
 
+/*
+ * DATAEDIT
+ */
 .dataedit .de-row {
   clear: both;
   position: relative;
@@ -175,7 +178,7 @@ input, textarea {
   top: 0px;
   left: 0px;
   width: 200px;
-  background-color: #EEF;
+  background-color: #F2F2FF;
   padding: 0px;
   text-align: right;
   margin: 0px 0px 3px 0px;
@@ -190,7 +193,7 @@ input, textarea {
 .dataedit .de-row .de-input-wrapper {
   margin-left: 201px;
   padding: 5px;
-  background-color: #EEF;
+  background-color: #E2E2FF;
 }
 .dataedit .de-row .de-input-wrapper .de-input {
   height: 24px;
@@ -225,19 +228,20 @@ input, textarea {
 }
 .dataedit fieldset {
   border: 0px;
-  padding: 0px;
+  padding: 15px;
   margin: 5px 0px;
 }
 .dataedit fieldset legend {
-  color: #999;
-  background-color: #EEF;
+  color: #366;
+  background-color: #FFF;
   font-weight: bold;
   display: block;
-  padding: 10px 20px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  margin-bottom: 2px;
-  width: auto;
+  margin: 15px 0px 2px 0px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.dataedit fieldset legend div.legend {
+	padding: 5px;
 }
 
 .dataedit .de-controls {
@@ -279,6 +283,31 @@ input, textarea {
   -webkit-border-radius: 4px;
   border-radius: 4px;
   margin: 1px 0px;
+}
+
+/*
+ * NODE
+ */
+.node.node-admin {
+	padding: 15px;
+	position: relative;
+}
+
+.node .node-edit-controls {
+	display: none;
+	position: absolute;
+	top: 0px;
+	right: 10px;
+	background-color: #EED;
+	padding: 20px;
+}
+
+.node.node-admin:hover {
+	border: 5px dashed #CCC;
+}
+
+.node.node-admin:hover .node-edit-controls {
+	display: block;
 }
 
 table {

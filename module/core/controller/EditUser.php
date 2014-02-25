@@ -31,7 +31,7 @@ class EditUser extends Edit {
     return array('Register', 'Add', 'Update');
   }
   
-  public function getEditRecordset() {
+  public function getEditRecordsets() {
     $rsb = new \system\model\RecordsetBuilder('user');
     $rsb->using('*');
     switch ($this->getAction()) {
@@ -59,7 +59,7 @@ class EditUser extends Edit {
     }
   }
   
-  public function getFormTemplate(\system\model\RecordsetInterface $rs) {
+  public function getFormTemplate() {
     switch ($this->getAction()) {
       case 'Register':
         return 'user-register';
@@ -77,29 +77,29 @@ class EditUser extends Edit {
     return array();
   }
   
-  public function submitRegister($form, $rs) {
-    $rs->save();
-    $rsb = new \system\model\RecordsetBuilder('user_group');
-    $rsb->using('*');
-    foreach ($this->getUserGroupsOnRegister() as $groupId) {
-      $ug = $rsb->newRecordset();
-      $ug->user_id = $rs->id;
-      $ug->group_id = $groupId;
-      $ug->add();
-    }
-    $this->setMainTemplate('user-register-submit');
-    return \system\Component::RESPONSE_TYPE_NOTIFY;
-  }
-  
-  public function submitAdd($form, $rs) {
-    $rs->save();
-    $this->setMainTemplate('user-add-submit');
-    return \system\Component::RESPONSE_TYPE_NOTIFY;
-  }
-  
-  public function submitUpdate($form, $rs) {
-    $rs->save();
-    $this->setMainTemplate('user-update-submit');
-    return \system\Component::RESPONSE_TYPE_NOTIFY;
-  }
-}   
+//  public function submitRegister($form, $rs) {
+//    $rs->save();
+//    $rsb = new \system\model\RecordsetBuilder('user_group');
+//    $rsb->using('*');
+//    foreach ($this->getUserGroupsOnRegister() as $groupId) {
+//      $ug = $rsb->newRecordset();
+//      $ug->user_id = $rs->id;
+//      $ug->group_id = $groupId;
+//      $ug->add();
+//    }
+//    $this->setMainTemplate('user-register-submit');
+//    return \system\Component::RESPONSE_TYPE_NOTIFY;
+//  }
+//  
+//  public function submitAdd($form, $rs) {
+//    $rs->save();
+//    $this->setMainTemplate('user-add-submit');
+//    return \system\Component::RESPONSE_TYPE_NOTIFY;
+//  }
+//  
+//  public function submitUpdate($form, $rs) {
+//    $rs->save();
+//    $this->setMainTemplate('user-update-submit');
+//    return \system\Component::RESPONSE_TYPE_NOTIFY;
+//  }
+}

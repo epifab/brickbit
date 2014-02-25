@@ -375,7 +375,7 @@ abstract class Component {
    * @param string $message Message
    * @param string $class Message class. Typical values are: success, info, warning, danger
    */
-  public function addMessage($message, $class) {
+  public function addMessage($message, $class = 'info') {
     \system\utils\Log::pushMessage(array(
       'class' => $class,
       'message' => $message

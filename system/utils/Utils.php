@@ -172,6 +172,13 @@ class Utils {
     fclose($fp);
   }
   
+  /**
+   * Get a session variable
+   * @param string $module Module name
+   * @param string $key Variable name
+   * @param mixed $default Default value
+   * @return mixed Variable value
+   */
   public static function getSession($module, $key, $default) {
     if (!\array_key_exists($module, $_SESSION)) {
       $_SESSION[$module] = array();
@@ -179,10 +186,21 @@ class Utils {
     return self::getParam($key, $_SESSION[$module], array('default' => $default));
   }
   
+  /**
+   * Set a session variable
+   * @param string $module Module name
+   * @param string $key Variable name
+   * @param mixed $value Value
+   */
   public static function setSession($module, $key, $value) {
     $_SESSION[$module][$key] = $value;
   }
   
+  /**
+   * Delete a session variable
+   * @param string $module Module name
+   * @param string $key Variable name
+   */
   public static function unsetSession($module, $key=null) {
     if (\is_null($key)) {
       unset($_SESSION[$module]);

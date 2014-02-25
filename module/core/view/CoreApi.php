@@ -42,13 +42,12 @@ class CoreApi {
   public static function blockForm($content, $params, $open) {
     $vars = \system\view\Template::current()->getVars();
     
-    $recordset = \cb\array_item('recordset', $params);
     $formId = \cb\array_item('id', $params, array('required' => true));
 
     $id = $formId . '-' . $vars['system']['component']['requestId'];
 
     if ($open) {
-      Form::startForm($formId, $recordset);
+      Form::startForm($formId);
     } 
     else {
       Form::closeForm();
@@ -93,18 +92,6 @@ class CoreApi {
   }
   
   /**
-   * Adds a recordset to the form.
-   * @param string $name Recordset name
-   * @param \system\model\RecordsetInterface $recordset Recordset
-   */
-  public static function formRS($name, \system\model\RecordsetInterface $recordset) {
-    $form = Form::getCurrent();
-    if ($form) {
-      $form->addRecordset($name, $recordset);
-    }
-  }
-  
-  /**
    * Returns a rendered recordset input label
    * @param array $params Parameters
    * @return string HTML
@@ -116,12 +103,12 @@ class CoreApi {
 
     $form = Form::getCurrent();
     if ($form) {
-      $inputId = self::getRSInputId($form->getName(), $recordsetName, $path);
+      $inputId = self::getRSInputId($form->getId(), $recordsetName, $path);
       return '<label for="' . $inputId . '" class="de-label">' . $label . '</label>';
     }
   }
   
-  private static function getRSInputId($formName, $recordsetName, $path) {
+  public static function getRSInputId($formName, $recordsetName, $path) {
     return $formName . '--rs-' . $recordsetName . '--' . \cb\plaintext(\str_replace('.', '-', $path));
   }
   
@@ -142,7 +129,7 @@ class CoreApi {
         
         $widget = isset($params['widget']) ? $params['widget'] : $field->getEditWidget();
         
-        $id = self::getRSInputId($form->getName(), $recordsetName, $path);
+        $id = self::getRSInputId($form->getId(), $recordsetName, $path);
         $name = 'recordset[' . $recordsetName . '][' . $path . ']';
         $value = $recordset->getProg($path);
         
@@ -247,5 +234,30 @@ class CoreApi {
   
   public static function access($url, $args = array()) {
     return \system\Main::checkAccess($url, $args);
+  }
+  
+  public static function dateTimeFormat($time, $key = 'medium') {
+    return date('d/m/Y H:i:s', $time);
+  }
+  
+  public static function dateFormat($time, $key = 'medium') {
+    return date('d/m/Y', $time);
+  }
+  
+  public static function timeFormat($time, $key = 'medium') {
+    return date('H:i:s', $time);
+  }
+  
+  public static function userName($userId) {
+    static $users = array();
+    static $userBuilder = null;
+    if (!isset($users[$userId])) {
+      if (empty($userBuilder)) {
+        $userBuilder = new \system\model\RecordsetBuilder('user');
+        $userBuilder->using('full_name');
+      }
+      $users[$userId] = $userBuilder->selectFirstBy(array('id' => $userId));
+    }
+    return $users[$userId]->full_name;
   }
 }

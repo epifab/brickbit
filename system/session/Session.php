@@ -11,7 +11,7 @@ class Session {
   private static $instance;
   
   private $data;
-  
+    
   /**
    * @var \system\model\Recordset Session object
    */
@@ -68,12 +68,13 @@ class Session {
    * Get a session variable
    * @param string $type Key 1
    * @param string $key Key 2
+   * @param mixed $default Default value
    * @return null
    */
-  public function get($type, $key) {
+  public function get($type, $key, $default = null) {
     return (isset($this->data[$type]) && isset($this->data[$type][$key]))
       ? $this->data[$type][$key]
-      : null;
+      : $default;
   }
   
   /**

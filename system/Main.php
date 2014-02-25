@@ -458,7 +458,7 @@ class Main {
     
     if (!empty($url)) {
       $x = \strstr($url, '?', true);
-      if ($x) {
+      if ($x !== false) {
         $url = $x;
       }
     }

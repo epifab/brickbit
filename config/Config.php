@@ -141,17 +141,10 @@ class Config {
   
   public static function exceptions(\Exception $ex) {
     echo '<h3>' . $ex->getMessage() . '</h3>';
-//    var_dump($ex);
-//    echo \system\utils\Utils::backtraceInfo();
     if ($ex instanceof \system\exceptions\Error) {
       echo '<div>' . $ex->getDetails() . '</div>';
       echo '<div>' . \system\utils\Utils::backtraceInfo($ex->getTrace()) . '</div>';
     }
-//    try {
-//      echo \system\utils\Utils::backtraceInfo();
-//    } catch (\Exception $e) {
-//      echo $e->getMessage();
-//    }
     die();
   }
   

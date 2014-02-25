@@ -22,6 +22,8 @@ components:
     pages:
       - url: admin/logs
         action: Logs
+      - url: admin/logs/([0-9]+)
+        action: LogDetails
       - url: admin/logs/reset
         action: LogsReset
       - url: admin/logs/level/([0-9]+)
