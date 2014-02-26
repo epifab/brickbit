@@ -76,21 +76,6 @@ components:
 #        action: Thumbnail
 #      - url: file/(@strid)\.(@strid)
 #        action: Download
-  node_editing:
-    class: EditNode
-    pages:
-      # content/add/article
-      - url: content/add/(@strid)
-        action: Add
-      # content/123/add/article
-      - url: content/([0-9]+)/add/(@strid)
-        action: Add2Node
-      # content/123/edit
-      - url: content/([0-9]+)/edit
-        action: Edit
-      # content/123/delete
-      - url: content/([0-9]+)/delete
-        action: Delete
   node:
     class: Node
     pages:
@@ -103,9 +88,23 @@ components:
       # content/about-me
       - url: content/(@strid)\.html
         action: ReadByUrn
+      - url: content/([0-9]+)
+        action: Read
       # content/123/move/after/234
       - url: content/([0-9]+)/move/(before|after)/([0-9]+)
         action: Move
+      # content/add/article
+      - url: content/add/(@strid)
+        action: Add
+      # content/123/add/article
+      - url: content/([0-9]+)/add/(@strid)
+        action: Add2Node
+      # content/123/edit
+      - url: content/([0-9]+)/edit
+        action: Edit
+      # content/123/delete
+      - url: content/([0-9]+)/delete
+        action: Delete
   node_file:
     class: NodeFile
     pages:

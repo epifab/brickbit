@@ -35,7 +35,7 @@
             <?php $this->api->open('link', array(
               'url' => '',
               'ajax' => false
-            )); ?><img src="<?php echo $this->api->themePath('img/layout/ciderbit.png'); ?>" alt="<?php echo $website['title']; ?>"/>
+            )); ?><img src="<?php echo $this->api->themePath('img/layout/ciderbit.png'); ?>" alt="<?php echo $website['title']; ?>"/><?php echo $this->api->close(); ?>
             <div class="hide"><?php echo $website['title']; ?></div>
           </h1>
         </div>

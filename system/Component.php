@@ -192,6 +192,14 @@ abstract class Component {
     return $this->datamodel;
   }
   
+  /**
+   * @param string $name Component name
+   * @param string $module Module name
+   * @param string $action Action
+   * @param string $url URL
+   * @param array $urlArgs URL arguments
+   * @param array $request Request
+   */
   public function __construct($name, $module, $action, $url, $urlArgs, $request=null) {
     $this->name = $name;
     $this->module = $module;
@@ -654,7 +662,7 @@ abstract class Component {
 
         // checking permission
         if (!self::access(\get_class($this), $this->action, $this->urlArgs, \system\utils\Login::getLoggedUser())) {
-          throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
+          throw new AuthorizationError();
         }
 
         $runMethod = null;
