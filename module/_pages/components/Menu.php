@@ -19,7 +19,7 @@ class Menu extends \system\Component {
     return $pages[$url];
   }
   
-  public static function accessMain($urlArgs, $request, $user) {
+  public static function accessMain($urlArgs, $user) {
     $page = self::getPage(current($urlArgs));
     if (!$page) {
       throw new \system\exceptions\PageNotFound();

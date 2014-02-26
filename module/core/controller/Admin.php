@@ -2,23 +2,23 @@
 namespace module\core\controller;
 
 class Admin extends \system\Component {
-  public static function accessLogsReset($urlArgs, $request, $user) {
+  public static function accessLogsReset($urlArgs, $user) {
     return $user && $user->superuser;
   }
   
-  public static function accessLogs($urlArgs, $request, $user) {
+  public static function accessLogs($urlArgs, $user) {
     return $user && $user->superuser;
   }
   
-  public static function accessLogDetails($urlArgs, $request, $user) {
+  public static function accessLogDetails($urlArgs, $user) {
     return $user && $user->superuser;
   }
   
-  public static function accessLogsKey($urlArgs, $request, $user) {
+  public static function accessLogsKey($urlArgs, $user) {
     return $user && $user->superuser;
   }
   
-  public static function accessLogsType($urlArgs, $request, $user) {
+  public static function accessLogsType($urlArgs, $user) {
     return $user && $user->superuser;
   }
   

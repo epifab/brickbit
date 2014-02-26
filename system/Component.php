@@ -109,9 +109,9 @@ abstract class Component {
    * @param string $urlArgs url arguments
    * @return boolean true if 
    */
-  public static function access($class, $action, $urlArgs, $request, $user) {
+  public static function access($class, $action, $urlArgs, $user) {
     if (\is_callable(array($class, "access" . $action))) {
-      return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $request, $user);
+      return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $user);
     } 
 //    else if (\is_callable(array($class, "access"))) {
 //      return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
@@ -653,7 +653,7 @@ abstract class Component {
         $this->onInit();
 
         // checking permission
-        if (!self::access(\get_class($this), $this->action, $this->urlArgs, $this->requestData, \system\utils\Login::getLoggedUser())) {
+        if (!self::access(\get_class($this), $this->action, $this->urlArgs, \system\utils\Login::getLoggedUser())) {
           throw new AuthorizationError('Sorry, you are not authorized to access this resource.');
         }
 
@@ -711,12 +711,13 @@ abstract class Component {
     
     catch (\system\exceptions\PageNotFound $ex) {
       while (\ob_get_clean());
+      \header("HTTP/1.0 404 Not Found");
       $this->setMainTemplate('404');
       try {
         $this->tplManager->process($this->datamodel);
       }
       catch (\Exception $ex) {
-        \header("HTTP/1.0 404 Not Found");
+        
       }
     }
     
@@ -757,9 +758,5 @@ abstract class Component {
     } else {
       return null;
     }
-  }
-  
-  public function formSubmission($formId) {
-    \system\view\Form::getPcheckFormSubmission($formId);
   }
 }

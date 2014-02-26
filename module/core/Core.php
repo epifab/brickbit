@@ -213,16 +213,11 @@ class Core {
   }
   
   public static function onRun(\system\Component $component) {
-    $component->addJs(\system\Module::getAbsPath('core') . 'js/jquery-1.8.2.js');
-    $component->addJs(\system\Module::getAbsPath('core') . 'js/jquery.form.js');
-    $component->addJs(\system\Module::getAbsPath('core') . 'js/jquery-ui/jquery-ui-1.9.0.custom.js');
-    $component->addJs(\system\Module::getAbsPath('core') . 'js/jquery.ciderbit.js');
-
     $component->addTemplate('website-logo', 'header');
     $component->addTemplate('langs-control', 'header-sidebar');
     $component->addTemplate('footer', 'footer');
-//    $component->addTemplate('sidebar', 'sidebar');
+    //$component->addTemplate('sidebar', 'sidebar');
     
-    $component->addJs(\system\Module::getAbsPath('core') . 'js/core.js');
+    //$component->addJs(\system\Module::getAbsPath('core') . 'js/core.js');
   }
 }

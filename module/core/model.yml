@@ -205,7 +205,6 @@ tables:
       preview:
         type: html
         label: Preview
-        maxlength: 256
         # allow just a limited number of tags and attributes
         html: filtered
       body:

@@ -121,6 +121,10 @@ class Main {
         if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
           throw new \system\exceptions\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
         }
+        $templatesPath = str_replace('\\', '/', $templatesPath);
+        if (substr($templatesPath, -1) != '/') {
+          $templatesPath .= '/';
+        }
 
         // components namespace
         $componentsNs = $moduleNs . (isset($moduleInfo['componentsNs'])
@@ -291,6 +295,7 @@ class Main {
   
   /**
    * Generates the view configuration array.
+   * Returns a list of available templates [template name] => [template path].
    */
   private static function loadViewCfg($modules) {
     $TEMPLATES = array();
@@ -302,7 +307,7 @@ class Main {
         $d = \opendir($module['templatesPath']);
         while (($fileName = \readdir($d))) {
           if (\substr($fileName, -8) == '.tpl.php') {
-            $templateName = \substr($fileName, 0, -8);
+            $templateName = \substr($fileName, 0, -8); // strip .tpl.php
             $TEMPLATES[$templateName] = $module['templatesPath'] . $fileName;
           }
         }
@@ -310,7 +315,7 @@ class Main {
       }
     }
 
-    $themeTplPath = \system\Theme::getAbsPath('templates');
+    $themeTplPath = \system\Theme::getAbsPath('templates/');
     if (!\is_null($themeTplPath) && \is_dir($themeTplPath)) {
       $d = \opendir($themeTplPath);
       while (($fileName = \readdir($d))) {
@@ -494,7 +499,7 @@ class Main {
     return $urls[$url];
   }
   
-  public static function checkAccess($url, $request=array(), $user=false) {
+  public static function checkAccess($url, $user=false) {
     if ($user === false) {
       $user = \system\utils\Login::getLoggedUser();
     }
@@ -504,7 +509,6 @@ class Main {
         $x['class'],
         $x['action'],
         $x['urlArgs'],
-        $request,
         $user
       );
     } else {
@@ -531,6 +535,8 @@ class Main {
       );
 
       if (!$obj->isNested()) {
+        // Allows the theme to do special stuff before modules
+        \system\Theme::preRun($obj);
         // Raise event onRun
         self::raiseEvent('onRun', $obj);
         \system\Theme::onRun($obj);

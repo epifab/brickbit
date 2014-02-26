@@ -78,7 +78,7 @@ class CoreApi {
       if (!empty($inputName)) {
         $errorMsg = $form->getValidationError($inputName);
         return (!empty($errorMsg))
-          ? '<div class="de-error">' . $errorMsg . '</div>'
+          ? '<div class="de-error alert alert-warning">' . $errorMsg . '</div>'
           : '';
       }
     }
@@ -163,7 +163,7 @@ class CoreApi {
     }
     $vars = \system\view\Template::current()->getVars();
     if ($vars['system']['component']['requestType'] != 'MAIN') {
-      return '<div class="de-controls"><input class="de-control" type="submit" value="' . $label . '"/></div>';
+      return '<div class="de-controls"><input class="de-control btn btn-primary btn-la" type="submit" value="' . $label . '"/></div>';
     }
   }
 
@@ -243,8 +243,8 @@ class CoreApi {
     }
   }
   
-  public static function access($url, $args = array()) {
-    return \system\Main::checkAccess($url, $args);
+  public static function access($url) {
+    return \system\Main::checkAccess($url);
   }
   
   public static function dateTimeFormat($time, $key = 'medium') {
@@ -269,6 +269,6 @@ class CoreApi {
       }
       $users[$userId] = $userBuilder->selectFirstBy(array('id' => $userId));
     }
-    return $users[$userId]->full_name;
+    return !empty($users[$userId]) ? $users[$userId]->full_name : 'Anonymous';
   }
 }

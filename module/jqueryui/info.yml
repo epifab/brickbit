@@ -1,6 +1,6 @@
 class: JQueryUI
 weight: 1
-enabled: 1
+enabled: 0
 #modelNs: model
 #modelClass: CoreModel
 #viewNs: view

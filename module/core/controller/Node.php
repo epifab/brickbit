@@ -33,7 +33,7 @@ class Node extends \system\Component {
   }
 
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
-  public static function accessAdd($urlArgs, $request, $user) {
+  public static function accessAdd($urlArgs, $user) {
     $nodeTypes = \system\utils\Cache::nodeTypes();
     
     if (isset($nodeTypes[$urlArgs[0]])) {
@@ -47,7 +47,7 @@ class Node extends \system\Component {
     return $user && $user->superuser;
   }
   
-  public static function accessAdd2Node($urlArgs, $request, $user) {
+  public static function accessAdd2Node($urlArgs, $user) {
     $nodeTypes = \system\utils\Cache::nodeTypes();
     
     if (isset($nodeTypes[$urlArgs[1]])) {
@@ -67,25 +67,25 @@ class Node extends \system\Component {
     // edit permissions ok
     
     // just need to check that is allowed to add the node
-    if (!\in_array($urlArgs[1], @$nodeTypes[$parentNode->type]['children'])) {
+    if (!\in_array($urlArgs[1], $nodeTypes[$parentNode->type]['children'])) {
       return false;
     }
     return true;
   }
   
-  public static function accessRead($urlArgs, $request, $user) {
+  public static function accessRead($urlArgs, $user) {
     return self::accessRED("READ", $urlArgs[0], $user);
   }
 
-  public static function accessEdit($urlArgs, $request, $user) {
+  public static function accessEdit($urlArgs, $user) {
     return self::accessRED("EDIT", $urlArgs[0], $user);
   }
 
-  public static function accessDelete($urlArgs, $request, $user) {
+  public static function accessDelete($urlArgs, $user) {
     return self::accessRED("DELETE", $urlArgs[0], $user);
   }
 
-  public static function accessReadByUrn($urlArgs, $request, $user) {
+  public static function accessReadByUrn($urlArgs, $user) {
     list($urn) = $urlArgs;
     
     $rsb = new RecordsetBuilder('node');
@@ -421,8 +421,7 @@ class Node extends \system\Component {
 
   public function runNotFound() {
     $this->setPageTitle(\system\utils\Lang::translate('Page not found'));
-    $this->setMainTemplate('notify');
-    $this->datamodel['message'] = \system\utils\Lang::translate('The page you were looking was not found.');
+    $this->setMainTemplate('404');
     return Component::RESPONSE_TYPE_NOTIFY;
   }
   

@@ -84,7 +84,7 @@ class MetaString extends MetaType {
     }
     $regexp = $this->getAttr('regexp', array('default' => null));
     if (!\is_null($regexp)) {
-      if (!@\preg_match('@^' . $regexp . '$@', $x)) {
+      if (!@\preg_match($regexp, $x)) {
         throw new \system\exceptions\ValidationError('Invalid value for <me>@name</em> field.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));

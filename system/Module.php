@@ -2,25 +2,14 @@
 namespace system;
 
 abstract class Module {
-  private static function getPathArr($moduleName, array $subpaths) {
+  public static function getPath($moduleName, $path = '') {
     $module = \system\Main::getModule($moduleName);
-    $path = $module['path'];
-    foreach ($subpaths as $subpath) {
-      $path .= $subpath . '/';
-    }
-    return $path;
+    return $module['path'] . '/' . $path;
   }
   
-  public static function getPath($moduleName) {
-    $args = func_get_args();
-    unset($args[0]);
-    return self::getPathArr($moduleName, $args);
-  }
-  
-  public static function getAbsPath($module) {
-    $args = func_get_args();
-    unset($args[0]);
-    return \config\settings()->BASE_DIR . self::getPathArr($module, $args);
+  public static function getAbsPath($moduleName, $path = '') {
+    $module = \system\Main::getModule($moduleName);
+    return \config\settings()->BASE_DIR . $module['path'] . '/' . $path;
   }
   
   public static function getNamespace($moduleName) {

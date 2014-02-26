@@ -37,22 +37,34 @@ class Theme {
     }
   }
   
-  public static function getPath($subfolder=null) {
-    return \config\settings()->BASE_DIR . 'theme/' . self::getTheme() . '/' . (empty($subfolder) ? '' : $subfolder . '/');
+  public static function getPath($path = '') {
+    return \config\settings()->BASE_DIR . 'theme/' . self::getTheme() . '/' . $path;
   }
   
-  public static function getAbsPath($subfolder=null) {
-    return \config\settings()->BASE_DIR_ABS . 'theme/' . self::getTheme() . '/' . (empty($subfolder) ? '' : $subfolder . '/');
+  public static function getAbsPath($path = '') {
+    return \config\settings()->BASE_DIR_ABS . 'theme/' . self::getTheme() . '/' . $path;
+  }
+  
+  public static function preRun(\system\Component $compponent) {
+    self::themeEvent('preRun', $compponent);
   }
   
   public static function onRun(\system\Component $component) {
-//    $obj = self::getThemeObject();
-//    if (!empty($obj)) {
-//      $obj->init($component);
-//    }
+    self::themeEvent('onRun', $component);
+  }
+  
+  /**
+   * Raise a theme event.
+   * Basically, it searches a method called $event on the current theme class
+   *  running it (if found)
+   * @param string $event Event
+   */
+  private static function themeEvent($event) {
+    $args = \func_get_args();
+    array_shift($args);
     $cname = '\theme\\' . self::getTheme() . '\\Theme';
-    if (\class_exists($cname) && \is_callable($cname . '::onRun')) {
-      \call_user_func($cname . '::onRun', $component);
+    if (\class_exists($cname) && \is_callable($cname . '::' . $event)) {
+      \call_user_func_array($cname . '::' . $event, $args);
     }
   }
 }

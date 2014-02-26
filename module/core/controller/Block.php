@@ -37,9 +37,13 @@ class Block extends \system\Component {
   }
   
   public function runAdminMenu() {
+    $am = array();
     if (!\system\utils\Login::isAnonymous()) {
       $am = array(
-        array('url' => 'user/' . \system\utils\Login::getLoggedUserId(), 'title' => 'account'),
+        array(
+          'url' => 'user/' . \system\utils\Login::getLoggedUserId(), 
+          'title' => 'account'
+        )
       );
       if (\system\utils\Login::isSuperuser()) {
         $am[] = array('url' => 'users', 'title' => \cb\t('users'));
@@ -48,8 +52,8 @@ class Block extends \system\Component {
             'logs' => array('title' => \cb\t('Logs'), 'url' => 'admin/logs', 'ajax' => false)
         ));
       }
-      $this->datamodel['adminMenu'] = $am;
     }
+    $this->datamodel['adminMenu'] = $am;
     $this->setMainTemplate('admin-menu');
     return \system\Component::RESPONSE_TYPE_READ;
   }

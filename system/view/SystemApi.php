@@ -28,11 +28,11 @@ class SystemApi {
   }
 
   public static function modulePath($module, $url) {
-    return \system\Module::getAbsPath($module) . $url;
+    return \system\Module::getAbsPath($module, $url);
   }
 
   public static function themePath($url) {
-    return \system\Theme::getPath() . $url;
+    return \system\Theme::getPath($url);
   }
 
   public static function langPath($lang) {

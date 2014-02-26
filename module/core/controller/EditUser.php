@@ -2,11 +2,11 @@
 namespace module\core\controller;
 
 class EditUser extends Edit {
-  public static function accessEdit($urlArgs, $request, $user) {
+  public static function accessEdit($urlArgs, $user) {
     return $user->superuser || $user->id == $urlArgs[0];
   }
   
-  public static function accessDelete($urlArgs, $request, $user) {
+  public static function accessDelete($urlArgs, $user) {
     return $user->superuser || $user->id == $urlArgs[0];
   }
   
@@ -19,11 +19,11 @@ class EditUser extends Edit {
     $rs->delete();
   }
   
-  public static function accessAdd($urlArgs, $request, $user) {
+  public static function accessAdd($urlArgs, $user) {
     return $user->superuser;
   }
   
-  public static function accessRegister($urlArgs, $request, $user) {
+  public static function accessRegister($urlArgs, $user) {
     return true;
   }
 

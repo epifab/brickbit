@@ -9,7 +9,7 @@ class Theme {
     $component->addCss(\system\Theme::getPath() . 'bootstrap/css/bootstrap-responsive.min.css');
     
     $component->addCss('http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/flick/jquery-ui.css');
-    
+
     $component->addCss(\system\Theme::getPath() . 'css/layout.css');
   }
 }

@@ -16,48 +16,49 @@ class User extends Page {
     return $loggedUser->superuser || $loggedUser->id == $userId;
   }
   
-  public static function accessAdd($urlArgs, $request, $user) {
+  public static function accessAdd($urlArgs, $user) {
     return $user->superuser;
   }
   
-  public static function accessRead($urlArgs, $request, $user) {
+  public static function accessRead($urlArgs, $user) {
     return self::accessRED('read', $urlArgs[0], $user);
   }
   
-  public static function accessEdit($urlArgs, $request, $user) {
+  public static function accessEdit($urlArgs, $user) {
     return self::accessRED('edit', $urlArgs[0], $user);
   }
   
-  public static function accessDelete($urlArgs, $request, $user) {
+  public static function accessDelete($urlArgs, $user) {
     return self::accessRED('delete', $urlArgs[0], $user);
   }
   
-  public static function accessLogin($urlArgs, $request, $user) {
+  public static function accessLogin($urlArgs, $user) {
     return $user->anonymous;
   }
   
-  public static function accessLogout($urlArgs, $request, $user) {
+  public static function accessLogout($urlArgs, $user) {
     return !$user->anonymous;
   }
   
-  public static function accessRegister($urlArgs, $request, $user) {
+  public static function accessRegister($urlArgs, $user) {
     return $user->anonymous;
   }
   
-  public static function accessAddRole($urlArgs, $request, $user) {
+  public static function accessAddRole($urlArgs, $user) {
     return $user->superuser;
   }
   
-  public static function accessDeleteRole($urlArgs, $request, $user) {
+  public static function accessDeleteRole($urlArgs, $user) {
     return $user->superuser;
   }
   
-  public static function accessList($urlArgs, $request, $user) {
+  public static function accessList($urlArgs, $user) {
     return $user->superuser;
   }
   
   public function runLogin() {
     $this->setMainTemplate('login-form');
+    $this->datamodel['page']['bodyClass'] = 'signin';
 
     $this->setPageTitle(\system\utils\Lang::translate("Login"));
     
@@ -98,37 +99,38 @@ class User extends Page {
   
   public function runRegister() {
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runList() {
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runAdd() {
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runRead() {
+    throw new \system\exceptions\InternalError('Test');
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runEdit() {
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runDelete() {
     $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('developing');
+    $this->setMainTemplate('501');
     return \system\Component::RESPONSE_TYPE_READ;
   }
 }

@@ -41,15 +41,14 @@ class Config {
     "LANGUAGES" => array(
       "en",
       "it",
-      "de",
     ),
     "DEFAULT_LANG" => "en",
     
     "THEMES" => array(
-      "standard",
-      "ciderbit"  
+      "ciderbit",
+      "ciderbit2"
     ),
-    "DEFAULT_THEME" => 'ciderbit',
+    "DEFAULT_THEME" => 'ciderbit2',
      
     // links
     "BASE_DIR" => "/",
@@ -123,7 +122,7 @@ class Config {
         break;
       
       case "BASE_DIR_ABS":
-        return dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
+        return str_replace('\\', '/', dirname(dirname(__FILE__))) . '/';
         break;
       
       case "DOMAIN":

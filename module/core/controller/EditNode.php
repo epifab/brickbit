@@ -1,7 +1,125 @@
 <?php
 namespace module\core\controller;
 
+use \system\Component;
+use \system\model\Recordset;
+use \system\model\RecordsetBuilder;
+use \system\model\FilterClause;
+use \system\model\FilterClauseGroup;
+use \system\model\LimitClause;
+use \system\model\SortClause;
+use \system\model\SortClauseGroup;  
+
 class EditNode extends Edit {
+  /**
+   * Check whether the user has access to the node identified by the $id
+   *  parameter according to the $action parameter
+   * @param string $action Action (READ, EDIT, DELETE)
+   * @param int $id Node id
+   * @param object $user User
+   * @return boolean True if the user has access to the node
+   */
+  private static function accessRED($action, $id, $user) {
+    $rsb = new RecordsetBuilder('node');
+    $rsb->addFilter(new FilterClause($rsb->id, '=', $id));
+    
+    if ($rsb->countRecords() > 0) {
+      switch ($action) {
+        case "READ":
+          $rsb->addReadModeFilters($user);
+          break;
+        case "EDIT":
+          $rsb->addEditModeFilters($user);
+          break;
+        case "DELETE":
+          $rsb->addDeleteModeFilters($user);
+          break;
+        default:
+          throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'action'));
+      }
+      return $rsb->countRecords() > 0;
+    }
+    return true;
+  }
+
+  /**
+   * Determines access to creation of root nodes
+   * @param array $urlArgs URL arguments
+   * @param object $user User
+   * @return boolean TRUE if the user is able to create a root node
+   * @throws \system\exceptions\InputOutputError
+   */
+  public static function accessAdd($urlArgs, $user) {
+    $nodeTypes = \system\utils\Cache::nodeTypes();
+    
+    if (isset($nodeTypes[$urlArgs[0]])) {
+      throw new \system\exceptions\InputOutputError('Invalid node type.');
+    }
+    if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
+      return false;
+    }
+    
+    // only superuser is able to add nodes to the root
+    return $user && $user->superuser;
+  }
+  
+  /**
+   * Determines access to creation of a node as a child of a specific node
+   * @param array $urlArgs URL arguments
+   * @param object $user User
+   * @return boolean TRUE if the user is able to create the node
+   * @throws \system\exceptions\InputOutputError
+   */
+  public static function accessAdd2Node($urlArgs, $user) {
+    $nodeTypes = \system\utils\Cache::nodeTypes();
+    
+    if (isset($nodeTypes[$urlArgs[1]])) {
+      throw new \system\exceptions\InputOutputError('Invalid node type.');
+    }
+    
+    // get the parent node
+    $rsb = new RecordsetBuilder('node');
+    $rsb->using('type');
+    $rsb->addFilter(new FilterClause($rsb->id, '=', $urlArgs[0]));
+    $rsb->addEditModeFilters($user); // Check if the logged user has sufficient permissions to edit the parent node
+    $parentNode = $rsb->selectFirst();
+    
+    if (!$parentNode) {
+      return false;
+    }
+    // edit permissions ok
+    
+    // just need to check that is allowed to add the node
+    if (!\in_array($urlArgs[1], $nodeTypes[$parentNode->type]['children'])) {
+      return false;
+    }
+    return true;
+  }
+  
+  public static function accessRead($urlArgs, $user) {
+    return self::accessRED("READ", $urlArgs[0], $user);
+  }
+
+  /**
+   * Determines access to node editing
+   * @param array $urlArgs URL arguments
+   * @param object $user User
+   * @return boolean TRUE if the user should be able to edit this node
+   */
+  public static function accessEdit($urlArgs, $user) {
+    return self::accessRED("EDIT", $urlArgs[0], $user);
+  }
+
+  /**
+   * Determines access to node deletion
+   * @param array $urlArgs URL arguments
+   * @param object $user User
+   * @return boolean TRUE if the user should be able to delete this node
+   */
+  public static function accessDelete($urlArgs, $user) {
+    return self::accessRED("DELETE", $urlArgs[0], $user);
+  }
+  
   /**
    * Edit actions (add, add to a node, edit.
    * @return array List of available actions
@@ -200,16 +318,26 @@ class EditNode extends Edit {
   }
   
   public function submitAdd() {
-    throw new \system\exceptions\InternalError('Not yet implemented');
+    $form = $this->getForm();
+    foreach ($form->getRecordsets() as $recordset) {
+      $recordset->update();
+    }
   }
   
   public function submitAdd2Node() {
-    throw new \system\exceptions\InternalError('Not yet implemented');
+    $form = $this->getForm();
+    // Make the node valid
+    $form->getRecordset('node')->temp = false;
+    foreach ($form->getRecordsets() as $recordset) {
+      $recordset->update();
+    }
   }
   
   public function submitEdit() {
-    $this->addMessage('<pre>' . print_r($this->getForm()->getRecordset('node')->toArray(), true) . '</pre>');
-    throw new \system\exceptions\InternalError('Not yet implemented');
+    $form = $this->getForm();
+    foreach ($form->getRecordsets() as $recordset) {
+      $recordset->update();
+    }
   }
   
   public function runDelete() {

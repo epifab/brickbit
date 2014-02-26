@@ -2,7 +2,7 @@
 namespace module\core\controller;
 
 class File extends \system\Component {
-  public static function access($action, $urlArgs, $request, \system\utils\Login $user) {
+  public static function access($action, $urlArgs, \system\utils\Login $user) {
     return $user && $user->logged;
   }
   
