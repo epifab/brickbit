@@ -1,4 +1,4 @@
-<div id="admin-menu" class="navbar navbar-static-top" role="navigation">
+<div id="admin-menu" class="navbar" role="navigation">
   <div class="container">
     <div class= "navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -44,12 +44,12 @@
             <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo $this->api->t('Hi, @name', array('@name' => $this->api->userName($user->id))); ?> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li>
-                  <?php $this->api->open('link', array('url' => 'user/preferences', 'ajax' => false)); ?>
-                    <span class="glyphicon glyphicon-cog"></span> <?php echo $this->api->t('Preferences'); ?>
+                  <?php $this->api->open('link', array('url' => $user->url, 'ajax' => false)); ?>
+                    <span class="glyphicon glyphicon-user"></span> <?php echo $this->api->t('Profile'); ?>
                   <?php echo $this->api->close(); ?>
                 </li>
                 <li>
-                  <?php $this->api->open('link', array('url' => 'user/edit', 'ajax' => false)); ?>
+                  <?php $this->api->open('link', array('url' => $user->edit_url, 'ajax' => false)); ?>
                     <span class="glyphicon glyphicon-pencil"></span> <?php echo $this->api->t('Edir profile'); ?>
                   <?php echo $this->api->close(); ?>
                 </li>

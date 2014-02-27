@@ -2,24 +2,24 @@
   <div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?><?php echo $this->api->access($node->edit_url) ? ' node-admin' : ''; ?>">
 
     <?php if ($this->api->access($node->edit_url)): ?>
-      <div class="node-edit-controls btn-toolbar">
+      <div class="edit-controls btn-toolbar">
         <div class="btn-group">
           <?php $this->api->open('link', array(
             'ajax' => false,
             'url' => $node->edit_url,
             'width' => 800,
-            'class' => 'btn btn-default btn-sm',
+            'class' => 'btn btn-primary',
             'height' => 420,
             'title' => $this->api->t('Edit @name', array('@name' => $node->type))
-          )); ?><span class="glyphicon glyphicon-pencil"></span><?php echo $this->api->close(); ?>
+          )); ?><span class="glyphicon glyphicon-pencil"></span> Edit <?php echo $node->type; ?><?php echo $this->api->close(); ?>
 
           <?php $this->api->open('link', array(
             'url' => $node->delete_url,
             'confirm' => true,
-            'class' => 'btn btn-default btn-sm',
+            'class' => 'btn btn-danger',
             'confirmTitle' => $this->api->t('The @name will be deleted', array('@name' => $node->type)),
             'title' => $this->api->t('Delete @name', array('@name' => $node->type))
-          )); ?><i class="glyphicon glyphicon-trash"></i> <?php echo $this->api->close(); ?>
+          )); ?><span class="glyphicon glyphicon-trash"></span> Delete <?php echo $node->type; ?><?php echo $this->api->close(); ?>
         </div>
       </div>
     <?php endif; ?>

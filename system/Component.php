@@ -249,18 +249,12 @@ abstract class Component {
        || !isset($this->requestData['system']['requestId'])
        || !\preg_match('/^[a-zA-Z0-9_-]+$/', $this->requestData['system']['requestId'])) {
       
-      if (!isset($_SESSION['system'])) {
-        $_SESSION['system'] = array();
-      }
-      if (!isset($_SESSION['system']['requestIds'])) {
-        $_SESSION['system']['requestIds'] = array();
-      }
-      $_SESSION['system']['requestIds'][$this->name] =
-        (isset($_SESSION['system']['requestIds'][$this->name]))
-          ? $_SESSION['system']['requestIds'][$this->name] + 1
+      $requestIds = &Utils::session('system', 'requestIds', array());
+      $requestIds[$this->name] = isset($requestIds[$this->name])
+          ? $requestIds[$this->name] + 1
           : 1;
       
-      $this->requestId = $this->name . $_SESSION['system']['requestIds'][$this->name];
+      $this->requestId = $this->name . $requestIds[$this->name];
     } else {
       $this->requestId = $this->requestData['system']['requestId'];
     }
@@ -717,16 +711,37 @@ abstract class Component {
       }
     }
     
+    catch (\system\exceptions\AuthorizationError $ex) {
+      while (\ob_get_clean());
+      \header("HTTP/1.1 403 Forbidden");
+      $this->setPageTitle('Access denied');
+      $this->setMainTemplate('403');
+      try {
+        $this->tplManager->process($this->datamodel);
+      }
+      catch (\Exception $ex) { }
+    }
+    
     catch (\system\exceptions\PageNotFound $ex) {
       while (\ob_get_clean());
       \header("HTTP/1.0 404 Not Found");
       $this->setMainTemplate('404');
+      $this->setPageTitle('Resource not found');
       try {
         $this->tplManager->process($this->datamodel);
       }
-      catch (\Exception $ex) {
-        
+      catch (\Exception $ex) { }
+    }
+    
+    catch (\system\exceptions\UnderDevelopment $ex) {
+      while (\ob_get_clean());
+      \header("HTTP/1.1 501 Not implemented");
+      $this->setMainTemplate('501');
+      $this->setPageTitle('Under development');
+      try {
+        $this->tplManager->process($this->datamodel);
       }
+      catch (\Exception $ex) { }
     }
     
     catch (\Exception $ex) {

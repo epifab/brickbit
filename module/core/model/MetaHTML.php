@@ -11,7 +11,7 @@ class MetaHTML extends \system\metatypes\MetaString {
     $tags = $this->getAttr('tags');
     if ($tags) {
       if (\array_key_exists('allowed', $tags)) {
-
+        // @todo To be implemented
       }
     }
   }

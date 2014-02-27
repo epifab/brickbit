@@ -13,9 +13,10 @@ tables:
         fields: [id]
         autoIncrement: 1
     relations:
-      table: file
-      clauses: [id: dir_id]
-      type: 1-N
+      files:
+        table: file
+        clauses: [id: dir_id]
+        type: 1-N
   file:
     fields:
       id:
@@ -352,38 +353,38 @@ tables:
       children_groups:
         table: Node
         dependencies: [children]
-        handler: [\module\core\model\Node, children_groups]
+        handler: [\module\core\model\Node, getChildrenGroups]
       # urls
       url:
-        label: Text (undeterminate)
+        label: URL
         dependencies: [id, text]
-        handler: [\module\core\model\Node, url]
+        handler: [\module\core\model\Node, getUrl]
       edit_url:
-        label: Text (undeterminate)
+        label: Edit URL
         dependencies: [id]
-        handler: [\module\core\model\Node, edit_url]
+        handler: [\module\core\model\Node, getEditUrl]
       delete_url:
-        label: Text (undeterminate)
+        label: Delete URL
         dependencies: [id]
-        handler: [\module\core\model\Node, delete_url]
+        handler: [\module\core\model\Node, getDeleteUrl]
       # texts
 #      text:
 #        label: Text (undeterminate)
 #        dependencies: [texts]
-#        handler: [\module\core\model\Node, text]
+#        handler: [\module\core\model\Node, getText]
 #      text_und:
 #        label: Text (undeterminate)
 #        dependencies: [texts]
-#        handler: [\module\core\model\Node, text_und]
+#        handler: [\module\core\model\Node, getTextUnd]
       title:
         label: Title
         dependencies: [text.title]
-        handler: [\module\core\model\Node, title]
+        handler: [\module\core\model\Node, getTitle]
       # content
       content:
         label: Content
         dependencies: [id, type]
-        handler: [\module\core\model\Node, content]
+        handler: [\module\core\model\Node, getContent]
   node_file:
     fields:
       node_id:
@@ -429,15 +430,15 @@ tables:
       urn:
         label: Text (undeterminate)
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\core\model\NodeFile, urn]
+        handler: [\module\core\model\NodeFile, getUrn]
       edit_urn:
         label: Text (undeterminate)
         dependencies: [file_id]
-        handler: [\module\core\model\NodeFile, edit_urn]
+        handler: [\module\core\model\NodeFile, getEditUrn]
       delete_urn:
         label: Text (undeterminate)
         dependencies: [file_id]
-        handler: [\module\core\model\NodeFile, delete_urn]
+        handler: [\module\core\model\NodeFile, getDeleteUrn]
       download_path:
         handler: |
           function($recordset) {
@@ -446,8 +447,11 @@ tables:
       images:
         label: Images
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\core\model\NodeFile, images]
+        handler: [\module\core\model\NodeFile, getImages]
   user:
+    fields:
+      password:
+        type: password
     virtuals:
       superuser:
         handler: |
@@ -459,3 +463,15 @@ tables:
           function(\system\model\Recordset $user) {
             return $user->id == 0;
           }
+      url:
+        label: URL
+        dependencies: [id]
+        handler: [\module\core\model\User, getUrl]
+      edit_url:
+        label: Edit URL
+        dependencies: [id]
+        handler: [\module\core\model\User, getEditUrl]
+      delete_url:
+        label: Delete URL
+        dependencies: [id]
+        handler: [\module\core\model\User, getDeleteUrl]

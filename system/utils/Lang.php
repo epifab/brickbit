@@ -21,11 +21,11 @@ class Lang {
   private static $lang = null;
   private static $vocabulary = null;
   
-  private static function initLang($langId=null) {
-    if (\is_null($langId)) {
-      $langId = \array_key_exists("lang", $_SESSION) ? $_SESSION["lang"] : \config\settings()->DEFAULT_LANG;
-    }
-    self::$lang = $langId;
+  private static function initLang($langId = null) {
+    self::$lang = empty($langId)
+      ? Utils::session('system', 'lang', \config\settings()->DEFAULT_LANG)
+      : $langId;
+    
     $callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
     if (\is_callable($callback)) {
       self::$vocabulary = \call_user_func($callback);
@@ -41,7 +41,7 @@ class Lang {
   
   public static function setLang($langId) {
     if (\in_array($langId, \config\settings()->LANGUAGES)) {
-      $_SESSION["lang"] = $langId;
+      Utils::setSession('system', 'lang', $langId);
       self::initLang();
     }
   }

@@ -39,14 +39,14 @@ class Block extends \system\Component {
   public function runAdminMenu() {
     $am = array();
     if (!\system\utils\Login::isAnonymous()) {
-      $am = array(
-        array(
-          'url' => 'user/' . \system\utils\Login::getLoggedUserId(), 
-          'title' => 'account'
-        )
-      );
+//      $am = array(
+//        array(
+//          'url' => 'user/' . \system\utils\Login::getLoggedUserId(), 
+//          'title' => 'account'
+//        )
+//      );
       if (\system\utils\Login::isSuperuser()) {
-        $am[] = array('url' => 'users', 'title' => \cb\t('users'));
+        $am[] = array('url' => 'user/list', 'title' => \cb\t('users'), 'ajax' => false);
         $am[] = array('url' => 'system/settings', 'title' => \cb\t('settings'));
         $am[] = array('title' => 'admin', 'items' => array(
             'logs' => array('title' => \cb\t('Logs'), 'url' => 'admin/logs', 'ajax' => false)

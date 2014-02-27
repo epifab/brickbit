@@ -75,15 +75,17 @@ abstract class Edit extends Component {
       return Component::RESPONSE_TYPE_FORM;
     }
     else {
-      // Submit handler
-      if (\is_callable(array($this, 'submit' . $this->getAction()))) {
-        \call_user_func(array($this, 'submit' . $this->getAction()));
+      try {
+        // Submit handler
+        if (\is_callable(array($this, 'submit' . $this->getAction()))) {
+          \call_user_func(array($this, 'submit' . $this->getAction()));
+        }
+        return Component::RESPONSE_TYPE_NOTIFY;
       }
-      return Component::RESPONSE_TYPE_NOTIFY;
+      catch (\system\exceptions\ValidationError $ex) {
+        $this->setMainTemplate($this->getFormTemplate());
+        return Component::RESPONSE_TYPE_FORM;
+      }
     }
-  }
-  
-  protected function defaultSubmitHandler() {
-    
   }
 }

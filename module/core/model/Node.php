@@ -9,7 +9,7 @@ use system\model\LimitClause;
 use system\model\SortClause;
 
 class Node {
-  public static function children_groups(RecordsetInterface $node) {
+  public static function getChildrenGroups(RecordsetInterface $node) {
     static $children = array();
     if (!isset($children[$node->id])) {
       $children[$node->id] = array();
@@ -20,7 +20,7 @@ class Node {
     return $children[$node->id];
   }
   
-  public static function content(RecordsetInterface $node) {
+  public static function getContent(RecordsetInterface $node) {
     static $contents = array();
     if (!isset($contents[$node->id])) {
       try {
@@ -53,7 +53,7 @@ class Node {
 //    return $texts[$node->id];
 //  }
   
-  public static function url(\system\model\RecordsetInterface $recordset) {
+  public static function getUrl(\system\model\RecordsetInterface $recordset) {
     if ($recordset->text->urn) {
       if ($recordset->type == 'page') {
         return $recordset->text->urn . '.html';
@@ -65,15 +65,15 @@ class Node {
     }
   }
   
-  public static function edit_url(\system\model\RecordsetInterface $recordset) {
+  public static function getEditUrl(\system\model\RecordsetInterface $recordset) {
     return 'content/' . $recordset->id . '/edit';
   }
   
-  public static function delete_url(\system\model\RecordsetInterface $recordset) {
+  public static function getDeleteUrl(\system\model\RecordsetInterface $recordset) {
     return 'content/' . $recordset->id . '/delete';
   }
   
-  public static function title(RecordsetInterface $node) {
+  public static function getTitle(RecordsetInterface $node) {
     if ($node->text->title) {
       return $node->text->title;
     } else {
@@ -103,7 +103,7 @@ class Node {
     $textBuilder->setLimit(new LimitClause(1));
   }
   
-  public static function text_und(RecordsetInterface $node) {
+  public static function getTextUnd(RecordsetInterface $node) {
     return $node->texts[null];
   }
   

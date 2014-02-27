@@ -149,14 +149,6 @@ class Node extends Edit {
   ///</editor-fold>
   
   /**
-   * Edit actions (add, add to a node, edit.
-   * @return array List of available actions
-   */
-  public function getEditActions() {
-    return array('Add', 'Add2Node', 'Edit');
-  }
-  
-  /**
    * Returns the node builder
    * @return \system\model\RecordsetBuilder Node builder
    */
@@ -268,6 +260,15 @@ class Node extends Edit {
     return $node;
   }
   
+  ///<editor-fold defaultstate="collapsed" desc="Editing stuff">
+  /**
+   * Edit actions (add, add to a node, edit.
+   * @return array List of available actions
+   */
+  public function getEditActions() {
+    return array('Add', 'Add2Node', 'Edit');
+  }
+  
   /**
    * Returns the node recordset to edit
    * @return \system\model\RecordsetInterface
@@ -345,7 +346,6 @@ class Node extends Edit {
     );
   }
   
-  ///<editor-fold defaultstate="collapsed" desc="Submit methods">
   public function submitAdd() {
     $form = $this->getForm();
     foreach ($form->getRecordsets() as $recordset) {

@@ -118,10 +118,6 @@ tables:
       password:
         type: string
         size: 32
-        edit2Prog: |
-          function($x) {
-            return \md5($x);
-          }
       full_name:
         type: string
         size: 128
@@ -158,7 +154,7 @@ tables:
       users:
         table: user_role
         type: 1-N
-        clauses: [id: user_id]
+        clauses: [id: user_id]  
         onDelete: CASCADE
   #    components:
   #      table: role_component

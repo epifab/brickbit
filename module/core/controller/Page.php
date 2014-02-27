@@ -10,6 +10,7 @@ class Page extends Node {
   }
   
   public function runHome() {
+    $this->addMessage('<pre>' . print_r($_SESSION, TRUE) . '</pre>');
     $this->setMainTemplate('home');
     return \system\Component::RESPONSE_TYPE_READ;
   }

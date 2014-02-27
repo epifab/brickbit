@@ -22,7 +22,7 @@
                 'name' => 'text_' . $lang . '.enable',
                 'id' => 'edit-node-text_' . $lang . '-enable',
                 'label' => $this->api->t('Enable for this language'),
-                'attributes' => array('class' => 'xxl form-control richtext wysiwyg'),
+                'attributes' => array('class' => ''),
                 'value' => isset($form->getRecordset('node')->texts[$lang])
               )); ?>
             </div>
@@ -55,7 +55,7 @@
                   <?php echo $this->api->t("Please note also that two different contents, translated in @lang, must have two different URNs.", array('@lang' => $this->api->t($lang))); ?>
                 </p>
               </div>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'urn')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'urn')); ?>
             </div>
           </div>
           <div class="row de-row">
@@ -77,7 +77,7 @@
                   <?php echo $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes."); ?>
                 </p>
               </div>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'description')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'description')); ?>
             </div>
           </div>
           <div class="row de-row">
@@ -94,7 +94,7 @@
                 'path' => 'title',
                 'attributes' => array('class' => 'l form-control')
               )); ?>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'title')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'title')); ?>
             </div>
           </div>
           <div class="row de-row">
@@ -111,7 +111,7 @@
                 'path' => 'subtitle',
                 'attributes' => array('class' => 'xl form-control')
               )); ?>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'subtitle')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'subtitle')); ?>
             </div>
           </div>
           <div class="row de-row">
@@ -128,7 +128,7 @@
                 'path' => 'body',
                 'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
               )); ?>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'body')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'body')); ?>
             </div>
           </div>
           <div class="row de-row">
@@ -145,7 +145,7 @@
                 'path' => 'preview',
                 'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
               )); ?>
-              <?php echo $this->api->formInputError(array('recordset' => 'node_' . $lang, 'path' => 'preview')); ?>
+              <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'preview')); ?>
             </div>
           </div>
         </div>
@@ -182,7 +182,7 @@
 //            'item' => '<div><img src="@[image.url]"/>@[name]</div>',
 //            'name' => 'users'
 //          )); ?>
-          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.users')); ?>
+          <?php echo $this->api->formRSInputError(array('recordset' => 'node', 'path' => 'record_mode.users')); ?>
         </div>
       </div>
       <div class="row de-row">
@@ -196,7 +196,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l form-control')
           )); ?>
-          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.read_mode')); ?>
+          <?php echo $this->api->formRSInputError(array('recordset' => 'node', 'path' => 'record_mode.read_mode')); ?>
         </div>
         <div class="col-md-2 col-sm-4 de-label-wrapper">
           <label class="de-label" for="edit-node-record_mode-edit_mode"><?php echo $this->api->t('Edit access'); ?></label>
@@ -208,7 +208,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l form-control')
           )); ?>
-          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.edit_mode')); ?>
+          <?php echo $this->api->formRSInputError(array('recordset' => 'node', 'path' => 'record_mode.edit_mode')); ?>
         </div>
         <div class="col-md-2 col-sm-4 de-label-wrapper">
           <label class="de-label" for="edit-node-record_mode-delete_mode"><?php echo $this->api->t('Delete access'); ?></label>
@@ -220,7 +220,7 @@
             'widget' => 'selectbox',
             'attributes' => array('class' => 'l form-control')
           )); ?>
-          <?php echo $this->api->formInputError(array('recordset' => 'node', 'path' => 'record_mode.delete_mode')); ?>
+          <?php echo $this->api->formRSInputError(array('recordset' => 'node', 'path' => 'record_mode.delete_mode')); ?>
         </div>
       </div>
     </fieldset>

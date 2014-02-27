@@ -235,11 +235,22 @@ class Form {
   }
   
   /**
-   * Get form input
+   * Get form input array
    * @return array Form input
    */
   public function getInput() {
     return $this->input;
+  }
+  
+  /**
+   * Get input value
+   * @param string $inputName Input name
+   * @return mixed Input value (null if the input does not exist)
+   */
+  public function getInputValue($inputName) {
+    return isset($this->input[$inputName]) 
+      ? $this->input[$inputName]['value']
+      : null;
   }
   
   /**
@@ -275,6 +286,30 @@ class Form {
    */
   public function getValidationErrors() {
     return $this->errors;
+  }
+  
+  /**
+   * Set a validation error. Allows components to set a validation error
+   * @param string $inputName Input name
+   * @param string $errorMessage Error message
+   */
+  public function setValidationError($inputName, $errorMessage) {
+    $this->errors[$inputName] = $errorMessage;
+  }
+  
+  /**
+   * Unset a validation error.
+   * @param string $inputName Input name
+   */
+  public function unsetValidationError($inputName) {
+    unset($this->errors[$inputName]);
+  }
+  
+  /**
+   * Reset all validation errors
+   */
+  public function resetValidationErrors() {
+    $this->errors = array();
   }
   
   /**

@@ -69,6 +69,24 @@ class CoreApi {
    * @return string Error message HTML
    */
   public static function formInputError($params) {
+    $inputName = \cb\array_item('name', $params, array('required' => true));
+
+    $form = Form::getCurrent();
+    
+    if ($form) {
+      $errorMsg = $form->getValidationError($inputName);
+      return (!empty($errorMsg))
+        ? '<div class="de-error alert alert-warning">' . $errorMsg . '</div>'
+        : '';
+    }
+  }
+  
+  /**
+   * Display the error related to the input (if any)
+   * @param string $path Input path
+   * @return string Error message HTML
+   */
+  public static function formRSInputError($params) {
     $recordsetName = \cb\array_item('recordset', $params, array('required' => true));
     $path = \cb\array_item('path', $params, array('required' => true));
 
@@ -83,21 +101,19 @@ class CoreApi {
       }
     }
   }
-  
+
   /**
-   * Adds a input to a form. Returns the rendered widget.
-   * @param array $params Input parameters
-   * @return string Input HTML
+   * Returns a rendered recordset input label
+   * @param array $params Parameters
+   * @return string HTML
    */
-  public static function formInput($params) {
-    $widget = \cb\array_item('widget', $params, array('required' => true));
-    $name = \cb\array_item('name', $params, array('required' => true));
-    $value = \cb\array_item('value', $params, array('required' => true));
+  public static function formInputLabel($params) {
+    $inputId = \cb\array_item('id', $params, array('required' => true));
+    $label = \cb\array_item('label', $params, array('required' => true));
 
     $form = Form::getCurrent();
     if ($form) {
-      $form->addInput($name, $widget, $value, $params);
-      return $form->renderInput($name);
+      return '<label for="' . $inputId . '" class="de-label">' . $label . '</label>';
     }
   }
   
@@ -118,8 +134,21 @@ class CoreApi {
     }
   }
   
-  public static function getRSInputId($formName, $recordsetName, $path) {
-    return $formName . '--rs-' . $recordsetName . '--' . \cb\plaintext(\str_replace('.', '-', $path));
+  /**
+   * Adds a input to a form. Returns the rendered widget.
+   * @param array $params Input parameters
+   * @return string Input HTML
+   */
+  public static function formInput($params) {
+    $widget = \cb\array_item('widget', $params, array('required' => true));
+    $name = \cb\array_item('name', $params, array('required' => true));
+    $value = \cb\array_item('value', $params, array('required' => true));
+
+    $form = Form::getCurrent();
+    if ($form) {
+      $form->addInput($name, $widget, $value, $params);
+      return $form->renderInput($name);
+    }
   }
   
   /**
@@ -156,6 +185,11 @@ class CoreApi {
       }
     }
   }
+  
+  public static function getRSInputId($formName, $recordsetName, $path) {
+    return $formName . '--rs-' . $recordsetName . '--' . \cb\plaintext(\str_replace('.', '-', $path));
+  }
+  
   
   public static function formSubmitControl($label=null) {
     if (\is_null($label)) {

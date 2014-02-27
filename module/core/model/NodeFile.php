@@ -8,7 +8,7 @@ use system\model\FilterClause;
 use system\model\SortClause;
 
 class NodeFile {
-  public static function urn(RecordsetInterface $rs) {
+  public static function getUrn(RecordsetInterface $rs) {
     if (!$rs->node_id) {
       return 'content/file/' . $rs->file_id . '.' . $rs->file->extension;
     } else {
@@ -16,15 +16,15 @@ class NodeFile {
     }
   }
   
-  public static function edit_urn(RecordsetInterface $recordset) {
+  public static function getEditUrn(RecordsetInterface $recordset) {
     return 'content/file/' . $recordset->file_id . '/edit';
   }
   
-  public static function delete_urn(RecordsetInterface $recordset) {
+  public static function getDeleteUrn(RecordsetInterface $recordset) {
     return 'content/file/' . $recordset->file_id . '/delete';
   }
   
-  public static function images(RecordsetInterface $rs) {
+  public static function getImages(RecordsetInterface $rs) {
     $imgVersions = \array_keys(\system\utils\Cache::imageVersionMakers());
     $versions = array();
     foreach ($imgVersions as $version) {

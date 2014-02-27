@@ -145,12 +145,20 @@ class Utils {
   }
   
   public static function resetLogs() {
-    self::set('system-logs', array());
-    self::set('system-logs-by-key', array());
-    self::set('system-logs-by-type', array());
+    self::setVariable('system-logs', array());
+    self::setVariable('system-logs-by-key', array());
+    self::setVariable('system-logs-by-type', array());
   }
-    
-  public static function get($name, $default=null) {
+
+  /**
+   * Get a variable. Variable are stored in the file system via method 
+   *  setVariable
+   * @param string $name Key
+   * @param mixed $default Default value (returned in case the variable is not
+   *  defined)
+   * @return mixed Value
+   */
+  public static function getVariable($name, $default = null) {
     if (file_exists("config/vars/" . $name . ".var")) {
       $fp = fopen("config/vars/" . $name . ".var", "r");
       $content = "";
@@ -163,8 +171,25 @@ class Utils {
       return $default;
     }
   }
+  
+  /**
+   * Alias of getVariable.
+   * @deprecated
+   * @param string $name Key
+   * @param mixed $default Default
+   * @return mixed Value
+   */
+  public static function get($name, $default = null) {
+    return self::getVariable($name, $default);
+  }
 
-  public static function set($name, $value) {
+  /**
+   * Set a variable. Variables are stored in the file system and can be accessed
+   *  via method getVariable
+   * @param string $name Key
+   * @param mixed $value Value
+   */
+  public static function setVariable($name, $value) {
     $content = serialize($value);
 
     $fp = fopen("config/vars/" . $name . ".var", "w");
@@ -173,17 +198,84 @@ class Utils {
   }
   
   /**
-   * Get a session variable
+   * Alias of setVariable
+   * @deprecated
+   * @param string $name Key
+   * @param mixed $value Value
+   */
+  public static function set($name, $value) {
+    return self::setVariable($name, $value);
+  }
+  
+  /**
+   * Returns the ciderbit session.
+   * Examples: 
+   * <code>
+   * // Returns the entire ciderbit session
+   * session();
+   * 
+   * // Returns the entire 'core' module array
+   * // If it hasn't been initialized yet, it will be set to a empty array
+   * session('core');
+   * 
+   * // Returns the 'test' variable in the 'core' module array
+   * // If it hasn't been initialized yet, it will be set to the $default 
+   * //  parameter value
+   * session('system', 'test');
+   * 
+   * NB.
+   * This method always returns a reference. This means that the following code:
+   * $x = &Utils::session('test', 'x');
+   * $x = 'asd';
+   * echo Utils::session('test', 'x');
+   * Will print out 'asd'
+   * </code>
+   * @param string $module Module [optional, if not passed the whole ciderbit 
+   *  session is returned]
+   * @param string $key Key [optional, if not passed the whole module session
+   *  is returned]
+   * @param mixed $default Default key value
+   * @return mixed Session
+   */
+  public static function &session($module = null, $key = null, $default = null) {
+    if (!isset($_SESSION['ciderbit'])) {
+      $_SESSION['ciderbit'] = array();
+    }
+    if (!empty($module)) {
+      // Module has been transmitted
+      if (!isset($_SESSION['ciderbit'][$module])) {
+        // Initialize if does not exist
+        $_SESSION['ciderbit'][$module] = array();
+      }
+      if (!empty($key)) {
+        // Key has been transmitted
+        if (!isset($_SESSION['ciderbit'][$module][$key])) {
+          // Initialize if does not exist
+          $_SESSION['ciderbit'][$module][$key]= $default;
+        }
+        // Return the key value
+        return $_SESSION['ciderbit'][$module][$key];
+      }
+      else {
+        // Return the module array
+        return $_SESSION['ciderbit'][$module];
+      }
+    }
+    else {
+      // Return the whole ciderbit session
+      return $_SESSION['ciderbit'];
+    }
+  }
+  
+  /**
+   * Get a session variable.
    * @param string $module Module name
    * @param string $key Variable name
    * @param mixed $default Default value
    * @return mixed Variable value
    */
-  public static function getSession($module, $key, $default) {
-    if (!\array_key_exists($module, $_SESSION)) {
-      $_SESSION[$module] = array();
-    }
-    return self::getParam($key, $_SESSION[$module], array('default' => $default));
+  public static function &getSession($module, $key, $default = null) {
+    return self::session($module, $key, $default);
   }
   
   /**
@@ -193,7 +285,8 @@ class Utils {
    * @param mixed $value Value
    */
   public static function setSession($module, $key, $value) {
-    $_SESSION[$module][$key] = $value;
+    $var = &self::session($module, $key);
+    $var = $value;
   }
   
   /**
@@ -202,10 +295,13 @@ class Utils {
    * @param string $key Variable name
    */
   public static function unsetSession($module, $key=null) {
-    if (\is_null($key)) {
-      unset($_SESSION[$module]);
-    } else {
-      unset($_SESSION[$module][$key]);
+    if (empty($key)) {
+      $session = &self::session();
+      unset($session[$module]);
+    }
+    else {
+      $session = &self::session($module);
+      unset($session[$key]);
     }
   }
 

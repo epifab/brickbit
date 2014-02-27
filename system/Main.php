@@ -248,19 +248,47 @@ class Main {
       }
       $fields = \cb\array_item('fields', $table, array('default' => array()));
       foreach ($fields as $fieldName => $field) {
-        $TABLES[$tableName]['fields'][$fieldName] = $field;
+        if (!\is_array($field)) {
+          throw new exceptions\InternalError('Invalid <em>@field</em> field definition for table <em>@table</em>', array(
+            '@field' => $fieldName, 
+            '@table' => $tableName
+          ));
+        }
+        $prevFieldInfo = \cb\array_item($fieldName, $TABLES[$tableName]['fields'], array('default' => array()));
+        $TABLES[$tableName]['fields'][$fieldName] = $prevFieldInfo + $field;
       }
       $keys = \cb\array_item('keys', $table, array('default' => array()));
       foreach ($keys as $keyName => $key) {
-        $TABLES[$tableName]['keys'][$keyName] = $key;
+        if (!\is_array($key)) {
+          throw new exceptions\InternalError('Invalid <em>@key</em> key definition for table <em>@table</em>', array(
+            '@key' => $keyName, 
+            '@table' => $tableName
+          ));
+        }
+        $prevKeyInfo = \cb\array_item($keyName, $TABLES[$tableName]['keys'], array('default' => array()));
+        $TABLES[$tableName]['keys'][$keyName] = $prevKeyInfo + $key;
       }
       $relations = \cb\array_item('relations', $table, array('default' => array()));
       foreach ($relations as $relationName => $relation) {
-        $TABLES[$tableName]['relations'][$relationName] = $relation;
+        if (!\is_array($relation)) {
+          throw new exceptions\InternalError('Invalid <em>@relation</em> relation definition for table <em>@table</em>', array(
+            '@relation' => $relationName,
+            '@table' => $tableName
+          ));
+        }
+        $prevRelationInfo = \cb\array_item($relationName, $TABLES[$tableName]['relations'], array('default' => array()));
+        $TABLES[$tableName]['relations'][$relationName] = $prevRelationInfo + $relation;
       }
       $virtuals = \cb\array_item('virtuals', $table, array('default' => array()));
       foreach ($virtuals as $virtualName => $virtual) {
-        $TABLES[$tableName]['virtuals'][$virtualName] = $virtual;
+        if (!\is_array($virtual)) {
+          throw new exceptions\InternalError('Invalid <em>@virtual</em> virtual field definition for table <em>@table</em>', array(
+            '@virtual' => $virtualName,
+            '@table' => $tableName
+          ));
+        }
+        $prevVirtualInfo = \cb\array_item($virtualName, $TABLES[$tableName]['virtuals'], array('default' => array()));
+        $TABLES[$tableName]['virtuals'][$virtualName] = $prevVirtualInfo + $virtual;
       }
     }
   }

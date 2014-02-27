@@ -31,13 +31,6 @@ class Core {
     $levelIndexes[$level]++;
   }
   
-  public static function metaTypesMap() {
-    return array(
-      'html' => '\module\core\model\MetaHTML',
-      'plaintext' => '\system\metatypes\MetaString'
-    );
-  }
-  
   public static function preprocessTemplate() {
     // Debug info as output
 //    foreach (\system\utils\Log::getDebug() as $debug) {
@@ -219,5 +212,19 @@ class Core {
     //$component->addTemplate('sidebar', 'sidebar');
     
     //$component->addJs(\system\Module::getAbsPath('core') . 'js/core.js');
+  }
+  
+  public static function widgetsMap() {
+    return array(
+      'password' => '\module\core\view\WidgetPassword',
+    );
+  }
+  
+  public static function metaTypesMap() {
+    return array(
+      'html' => '\module\core\model\MetaHTML',
+      'plaintext' => '\system\metatypes\MetaString',
+      'password' => '\module\core\model\MetaPassword'
+    );
   }
 }

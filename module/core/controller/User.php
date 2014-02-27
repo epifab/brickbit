@@ -10,8 +10,8 @@ use \system\model\LimitClause;
 use \system\model\SortClause;
 use \system\model\SortClauseGroup;
 
-// Inherits onInit method
-class User extends Page {
+class User extends Edit {
+  ///<editor-fold defaultstate="collapsed" desc="Access methods">
   private static function accessRED($action, $userId, $loggedUser) {
     return $loggedUser->superuser || $loggedUser->id == $userId;
   }
@@ -55,6 +55,13 @@ class User extends Page {
   public static function accessList($urlArgs, $user) {
     return $user->superuser;
   }
+  ///</editor-fold>
+  
+  private function getUserBuilder() {
+    $userBuilder = new \system\model\RecordsetBuilder('user');
+    $userBuilder->usingAll();
+    return $userBuilder;
+  }
   
   public function runLogin() {
     $this->setMainTemplate('login-form');
@@ -97,40 +104,133 @@ class User extends Page {
     return Component::RESPONSE_TYPE_NOTIFY;
   }
   
-  public function runRegister() {
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
-    return \system\Component::RESPONSE_TYPE_READ;
-  }
-  
   public function runList() {
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
+    $userBuilder = $this->getUserBuilder();
+    $users = $userBuilder->select();
+    $this->datamodel['users'] = $users;
+    $this->setPageTitle(\cb\t('Users'));
+    $this->setMainTemplate('users');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
-  public function runAdd() {
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
+  private function read($user) {
+    $this->setPageTitle($user->full_name);
+    $this->datamodel['u'] = $user;
+    $this->setMainTemplate('user');
     return \system\Component::RESPONSE_TYPE_READ;
   }
   
   public function runRead() {
-    throw new \system\exceptions\InternalError('Test');
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
-    return \system\Component::RESPONSE_TYPE_READ;
-  }
-  
-  public function runEdit() {
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return $this->read($this->getUserBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0))));
   }
   
   public function runDelete() {
-    $this->setPageTitle(\cb\t('Under development'));
-    $this->setMainTemplate('501');
-    return \system\Component::RESPONSE_TYPE_READ;
+    throw new \system\exceptions\UnderDevelopment();
   }
+
+  ///<editor-fold defaultstate="collapsed" desc="Editing stuff">
+  /**
+   * Edit actions (add, add to a node, edit.
+   * @return array List of available actions
+   */
+  public function getEditActions() {
+    return array('Add', 'Register', 'Edit');
+  }
+  
+  protected function getEditRecordsets() {
+    $user = null;
+    switch ($this->getAction()) {
+      case 'Add':
+      case 'Register':
+        $user = $this->getUserBuilder()->newRecordset();
+        break;
+
+      case 'Edit':
+        $user = $this->getUserBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0)));
+        break;
+    }
+    $recordsets = array('user' => $user);
+
+    return $recordsets;
+  }
+
+  protected function getFormId() {
+    switch ($this->getAction()) {
+      case 'Register':
+        return 'user-register-form';
+        break;
+      case 'Add':
+        return 'user-create-form';
+        break;
+      case 'Edit':
+      default:
+        return 'user-update-form';
+        break;
+    }
+  }
+
+  protected function getFormTemplate() {
+    switch ($this->getAction()) {
+      case 'Register':
+        return 'user-register';
+        break;
+      default:
+        return 'user-edit';
+        break;
+    }
+  }
+  
+  public function submitRegister() {
+    throw new \system\exceptions\UnderDevelopment();
+    $this->getForm()->getRecordset('user')->save();
+  }
+  
+  public function submitAdd() {
+    throw new \system\exceptions\UnderDevelopment();
+    $this->getForm()->getRecordset('user')->save();
+  }
+  
+  public function submitEdit() {
+    $form = $this->getForm();
+    
+    $user = $form->getRecordset('user');
+    
+    $pw1 = $form->getInputValue('password');
+    $pw2 = $form->getInputValue('password2');
+    
+    if (!empty($pw1) || !empty($pw2)) {
+      if (empty($pw1)) {
+        // New password not sent
+        $form->setValidationError('password', \cb\t('Please enter a valid password'));
+      }
+      else if (empty($pw2)) {
+        // Confirmation not sent
+        $form->setValidationError('password2', \cb\t('Please confirm the new password'));
+      }
+      elseif ($pw1 != $pw2) {
+        // Passwords do not match
+        $form->setValidationError('password2', \cb\t('Passwords do not match'));
+      }
+      else {
+        $user->password = \md5($pw1);
+      }
+      
+      if ($form->countValidationErrors()) {
+        throw new \system\exceptions\ValidationError('Invalid password');
+      }
+    }
+    
+    $user->last_upd_date_time = \time();
+    $user->save();
+    
+    if ($user->id == \system\utils\Login::getLoggedUserId()) {
+      // In case the user has changed email or password we refresh the login 
+      //  with the new data
+      \system\utils\Login::forceLogin($user);
+    }
+    
+    // Displays the user profile page
+    return $this->read($user);
+  }
+  ///</editor-fold>
 }

@@ -39,8 +39,8 @@ components:
         action: Add
       - url: role/delete
         action: Delete
-  edit_user:
-    class: EditUser
+  user:
+    class: User
     pages:
       - url: user/register
         action: Register
@@ -50,9 +50,6 @@ components:
         action: Edit
       - url: user/([0-9]+)/delete
         action: Delete
-  user:
-    class: User
-    pages:
       - url: user/login
         action: Login
       - url: user/logout

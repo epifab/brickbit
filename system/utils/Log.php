@@ -65,10 +65,12 @@ class Log {
   
   /**
    * Create a log
-   * @param string $code
-   * @param string $body
-   * @param array $args
-   * @param int $level
+   * @param string $code Typically the name of the module which has raised the
+   *  log. Can be any string.
+   * @param string $body Message body
+   * @param array $args Message arguments
+   * @param int $level Log level. Please use one of 
+   *  LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR
    * @return int Log id
    */
   public static function create($code, $body, $args = array(), $level = \system\LOG_WARNING) {
