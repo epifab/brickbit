@@ -190,7 +190,7 @@ class Main {
     }
     \closedir($d);
     
-    \arsort($WEIGHTS);
+    \asort($WEIGHTS);
     // discending order: heavier modules will override lighter ones
     foreach ($WEIGHTS as $modules) {
       \asort($modules);

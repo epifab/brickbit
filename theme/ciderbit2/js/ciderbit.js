@@ -1,56 +1,100 @@
-ciderbit.setBehavior('core-buttons', function () {
-  $('input:button .button').each(function(id,el) {
-    var text = false;
-    var icon = "ui-icon-";
+ciderbit.langHandler = function(lang) {
+  input = $('input#node-lang-' + lang + '-enable');
+  enableBtn = $('#node-lang-' + lang + '-enable-btn');
+  disableBtn = $('#node-lang-' + lang + '-disable-btn');
+  textInputGroup = $('.node-lang-' + lang + '-group');
+
+  if (input.is(':checked')) {
+    enableBtn.removeClass('btn-disabled');
+    disableBtn.addClass('btn-disabled');
+    textInputGroup.show();
+  }
+  else {
+    enableBtn.addClass('btn-disabled');
+    disableBtn.removeClass('btn-disabled');
+    textInputGroup.hide();
+  }
+};
+
+ciderbit.setBehavior('edit-node', function() {
+  $('.node-lang-enable-disable-btn').click(function() {
+    input = $('input#node-lang-' + $(this).data('lang') + '-enable');
+    action = $(this).data('action');
+
+    alert(input.is(':checked'));
     
-    if ($(el).hasClass("read") || $(el).hasClass("search")) {
-      icon += "search";
-    } else if ($(el).hasClass("create") || $(el).hasClass("document")) {
-      icon += "document";
-    } else if ($(el).hasClass("update")) {
-      icon += "wrench";
-    } else if ($(el).hasClass("delete") || $(el).hasClass("trash")) {
-//        icon += "trash";
-      icon += "closethick";
-    } else if ($(el).hasClass("heart")) {
-      icon += "heart";
-    } else if ($(el).hasClass("star")) {
-      icon += "star";
-    } else if ($(el).hasClass("mail")) {
-      icon += "mail-closed";
-    } else if ($(el).hasClass("cancel")) {
-      icon += "close";
-    } else if ($(el).hasClass("home")) {
-      icon += "home";
-    } else if ($(el).hasClass("search")) {
-      icon += "search";
-    } else if ($(el).hasClass("asc")) {
-      icon += "triangle-1-n";
-    } else if ($(el).hasClass("desc")) {
-      icon += "triangle-1-s";
-    } else {
-      icon = false;
+    if (action == 'enable') {
+      alert('Trying to check it!' + input.val());
+      input.attr('checked', true);
     }
-
-    if ($(el).hasClass("full")) {
-      text = true;
-    } else {
-      text = false;
+    else {
+      alert('Trying to uncheck it!' + input.val());
+      input.attr('checked', true);
     }
-
-    if (icon == false) {
-      $(el).button({
-        text: text
-      })
-    } else {
-      $(el).button({
-        text: text,
-        icons: {
-          primary: icon
-        }
-      });
-    }
+    $(input).trigger('change');
   });
+  $('input.node-lang-enable').each(function() {
+    $(this).change(function() {
+      ciderbit.langHandler($(this).data('lang'));
+    });
+  });
+});
+
+ciderbit.setBehavior('core-buttons', function () {
+//  $('.btn').button();
+  
+//  $('input:button .button').each(function(id,el) {
+//    var text = false;
+//    var icon = "ui-icon-";
+//    
+//    if ($(el).hasClass("read") || $(el).hasClass("search")) {
+//      icon += "search";
+//    } else if ($(el).hasClass("create") || $(el).hasClass("document")) {
+//      icon += "document";
+//    } else if ($(el).hasClass("update")) {
+//      icon += "wrench";
+//    } else if ($(el).hasClass("delete") || $(el).hasClass("trash")) {
+////        icon += "trash";
+//      icon += "closethick";
+//    } else if ($(el).hasClass("heart")) {
+//      icon += "heart";
+//    } else if ($(el).hasClass("star")) {
+//      icon += "star";
+//    } else if ($(el).hasClass("mail")) {
+//      icon += "mail-closed";
+//    } else if ($(el).hasClass("cancel")) {
+//      icon += "close";
+//    } else if ($(el).hasClass("home")) {
+//      icon += "home";
+//    } else if ($(el).hasClass("search")) {
+//      icon += "search";
+//    } else if ($(el).hasClass("asc")) {
+//      icon += "triangle-1-n";
+//    } else if ($(el).hasClass("desc")) {
+//      icon += "triangle-1-s";
+//    } else {
+//      icon = false;
+//    }
+//
+//    if ($(el).hasClass("full")) {
+//      text = true;
+//    } else {
+//      text = false;
+//    }
+//
+//    if (icon == false) {
+//      $(el).button({
+//        text: text
+//      })
+//    } else {
+//      $(el).button({
+//        text: text,
+//        icons: {
+//          primary: icon
+//        }
+//      });
+//    }
+//  });
 });
 
 //ciderbit.setBehavior('core-file-upload', function () {

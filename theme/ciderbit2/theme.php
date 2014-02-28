@@ -12,12 +12,12 @@ class Theme {
   }
   
   public static function onRun(\system\Component $component) {
-    // bootstrap
-    $component->addJs(\system\Theme::getPath('bootstrap/js/bootstrap.min.js'));
-    $component->addCss(\system\Theme::getPath('bootstrap/css/bootstrap.min.css'));
     // jquery ui
     $component->addJs(\system\Theme::getPath('js/jquery-ui-1.10.4/js/jquery-ui-1.10.4.custom.min.js'));
     $component->addCss(\system\Theme::getPath('js/jquery-ui-1.10.4/css/flick/jquery-ui-1.10.4.custom.css'));
+    // bootstrap
+    $component->addJs(\system\Theme::getPath('bootstrap/js/bootstrap.min.js'));
+    $component->addCss(\system\Theme::getPath('bootstrap/css/bootstrap.min.css'));
     // $component->addCss(\system\Theme::getPath() . 'bootstrap/css/bootstrap-theme.min.css');
     
     // custom

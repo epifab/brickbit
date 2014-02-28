@@ -52,8 +52,10 @@ class Node extends Edit {
    */
   public static function accessAdd($urlArgs, $user) {
     $nodeTypes = \system\utils\Cache::nodeTypes();
+//    $nodeTypes = \system\Main::invokeMethodAll('nodeTypes');
+    \system\utils\Log::pushMessage('<pre>' . print_r($nodeTypes, true) . '</pre>');
     
-    if (isset($nodeTypes[$urlArgs[0]])) {
+    if (!isset($nodeTypes[$urlArgs[0]])) {
       throw new \system\exceptions\InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
     }
     if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
@@ -74,7 +76,7 @@ class Node extends Edit {
   public static function accessAdd2Node($urlArgs, $user) {
     $nodeTypes = \system\utils\Cache::nodeTypes();
     
-    if (isset($nodeTypes[$urlArgs[1]])) {
+    if (!isset($nodeTypes[$urlArgs[1]])) {
       throw new \system\exceptions\InputOutputError('Invalid node type.');
     }
     
@@ -242,12 +244,12 @@ class Node extends Edit {
 
         $node->save(
           // default record mode options
-          \system\model\RecordMode::MODE_SU_OWNER,
-          \system\model\RecordMode::MODE_SU_OWNER,
+          \system\model\RecordMode::MODE_SU_OWNER_ADMINS,
+          \system\model\RecordMode::MODE_SU_OWNER_ADMINS,
           \system\model\RecordMode::MODE_SU_OWNER
         );
         
-        \system\session\Session::getInstance()->set('code::EditNode', 'temp_node_id', $node->id);
+        \system\session\Session::getInstance()->set('core::EditNode', 'temp_node_id', $node->id);
         
         $da->commitTransaction();
       }
@@ -293,8 +295,18 @@ class Node extends Edit {
       'node' => $node,
       'node__record_mode' => $node->record_mode
     );
-    foreach ($node->texts as $nodeText) {
-      $recordsets['node_' . $nodeText->lang] = $nodeText;
+    $nodeTextBuilder = new RecordsetBuilder('node_text');
+    $nodeTextBuilder->using('*');
+    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+      if (isset($node->texts[$lang])) {
+        $nodeText = $node->texts[$lang];
+      }
+      else {
+        $nodeText = $nodeTextBuilder->newRecordset();
+        $nodeText->lang = $lang;
+        $nodeText->node_id = $node->id;
+      }
+      $recordsets['node_' . $lang] = $nodeText;
     }
     
     return $recordsets;
@@ -346,29 +358,44 @@ class Node extends Edit {
     );
   }
   
+  protected function saveRecordsets() {
+    $form = $this->getForm();
+    
+    $node = $form->getRecordset('node');
+    
+    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+      $text = $form->getRecordset('node_' . $lang);
+      if ($form->getInputValue('node_' . $lang . '_enable')) {
+        $this->addMessage("Saving {$lang}");
+        $text->save();
+      }
+      else {
+        if ($text->isStored()) {
+          $this->addMessage("Deleting {$lang}");
+          $text->delete();
+        }
+      }
+    }
+    $node->save();
+  }
+  
   public function submitAdd() {
     $form = $this->getForm();
-    foreach ($form->getRecordsets() as $recordset) {
-      $recordset->update();
-    }
-    $this->read($form->getRecordset('node'));
+    $form->getRecordset('node')->temp = false;
+    $this->saveRecordsets();
+    return $this->read($form->getRecordset('node'));
   }
   
   public function submitAdd2Node() {
     $form = $this->getForm();
-    // Make the node valid
     $form->getRecordset('node')->temp = false;
-    foreach ($form->getRecordsets() as $recordset) {
-      $recordset->update();
-    }
-    $this->read($form->getRecordset('node'));
+    $this->saveRecordsets();
+    return $this->read($form->getRecordset('node'));
   }
   
   public function submitEdit() {
     $form = $this->getForm();
-    foreach ($form->getRecordsets() as $recordset) {
-      $recordset->update();
-    }
+    $this->saveRecordsets();
     $this->read($form->getRecordset('node'));
   }
   ///</editor-fold>

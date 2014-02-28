@@ -441,8 +441,6 @@ class Recordset implements RecordsetInterface {
     $recordMode->last_upd_date_time = \time();
     $recordMode->last_modifier_id = \system\utils\Login::getLoggedUserId();
     
-    echo "EDIT MODE: " . $recordMode->edit_mode;
-    
     $recordMode->create();
     
     if (\config\settings()->RECORD_MODE_LOGS) {

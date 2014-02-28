@@ -1,5 +1,5 @@
 body {
-	background: linear-gradient(to bottom,#fff 200px,#eee 700px);
+	background: linear-gradient(to bottom,#fff 300px,#eee 700px);
 }
 
 h1, h2 {
@@ -260,4 +260,14 @@ body.signin {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.ui-dialog-titlebar {
+  background-color: #fff;
+  background-image: none;
+}
+
+.btn-disabled {
+  background-color: #ccc;
+  border: 1px solid #ddd;
 }
