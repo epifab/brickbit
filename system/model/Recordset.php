@@ -534,8 +534,13 @@ class Recordset implements RecordsetInterface {
     $rs->create();
   }
   
-  
-  public function checkKey($keyName, &$errors) {
+  /**
+   * Checks the consistency of the given key
+   * @param string $keyName Key name
+   * @return boolean TRUE if the recordset key field values are valid
+   * @throws InternalError
+   */
+  public function checkKey($keyName) {
     $key = $this->builder->searchKey($keyName, true);
     if (is_null($key)) {
       throw new InternalError('Key @name not found', array('@name' => $keyName));
@@ -543,7 +548,7 @@ class Recordset implements RecordsetInterface {
     
     $newFilter = null;
     foreach ($key->getFields() as $field) {
-      $fieldValue = $this->getEdit($field->getName());
+      $fieldValue = $this->{$field->getName()};
       $filterClause = new FilterClause($field, "=", $fieldValue);
       if (is_null($newFilter)) {
         $newFilter = new FilterClauseGroup($filterClause);
@@ -556,7 +561,7 @@ class Recordset implements RecordsetInterface {
       // taglio il record corrispondente a quello che sto modificando
       $primary = $this->builder->getPrimaryKey();
       foreach ($primary as $field) {
-        $fieldValue = $this->getEdit($field->getName());
+        $fieldValue = $this->{$field->getName()};
         $filterClaue = new FilterClause($field, "<>", $fieldValue);
         $newFilter->addClauses("AND", $filterClaue);
       }
@@ -566,15 +571,8 @@ class Recordset implements RecordsetInterface {
     $this->builder->setFilter($newFilter);
     $numRecords = $this->builder->countRecords(true);
     $this->builder->setFilter($oldFilter);
-    
-    if ($numRecords == 0) {
-      return true;
-    } else {
-      foreach ($key as $field) {
-        $errors[$field->getAbsolutePath()] = "Chiave duplicata";
-      }
-      return false;
-    }
+
+    return ($numRecords == 0);
   }
   
   public function checkHasOneRelation($relationName, &$errors, $required=true) {

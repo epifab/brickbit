@@ -15,7 +15,9 @@
         <div class="node-lang-<?php echo $lang; ?>">
           <?php $text = $form->getRecordset("node_{$lang}"); ?>
           <div class="row de-row">
-            <div class="col-md-2 col-sm-2"></div>
+            <div class="col-md-2 col-sm-2 de-label-wrapper">
+              <img src="<?php echo $this->api->themePath('img/lang/40/' . $lang . '.jpg'); ?>"/>              
+            </div>
             <div class="col-md-10 col-sm-10 de-input-wrapper">
               <?php echo $this->api->formInput(array(
                 'id' => "node-lang-{$lang}-enable",
@@ -40,6 +42,7 @@
                   data-lang="<?php echo $lang; ?>" 
                   data-action="disable"><?php echo $this->api->t('Disable'); ?></span>
               </div>
+              <?php echo $this->api->formInputError(array('name' => "node_{$lang}_enable")); ?>
             </div>
           </div>
           <div class="node-lang-<?php echo $lang; ?>-group">

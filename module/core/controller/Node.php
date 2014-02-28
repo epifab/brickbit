@@ -363,20 +363,36 @@ class Node extends Edit {
     
     $node = $form->getRecordset('node');
     
-    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
-      $text = $form->getRecordset('node_' . $lang);
-      if ($form->getInputValue('node_' . $lang . '_enable')) {
-        $this->addMessage("Saving {$lang}");
-        $text->save();
-      }
-      else {
-        if ($text->isStored()) {
-          $this->addMessage("Deleting {$lang}");
-          $text->delete();
+    $da = \system\model\DataLayerCore::getInstance();
+    
+    try {
+      foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+        $text = $form->getRecordset('node_' . $lang);
+        if ($form->getInputValue('node_' . $lang . '_enable')) {
+          if (!$text->checkKey('urn_key')) {
+            $form->setValidationError(
+              $form->getRecordsetInputName('node_' . $lang, 'urn'),
+              \cb\t('The URN you entered is already in use.')
+            );
+            throw new \system\exceptions\ValidationError('Duplicate URN key');
+          }
+          $text->save();
+        }
+        else {
+          if ($text->isStored()) {
+            $this->addMessage("Deleting {$lang}");
+            $text->delete();
+          }
         }
       }
+      $node->save();
+      
+      $da->commitTransaction();
     }
-    $node->save();
+    catch (\Exception $ex) {
+      $da->rollbackTransaction();
+      throw $ex;
+    }
   }
   
   public function submitAdd() {

@@ -221,6 +221,10 @@ h3, h4 {
   }
 }
 
+.node-lang-enable {
+  display: none;
+}
+
 /**
  * Login form
  */

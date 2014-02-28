@@ -51,7 +51,8 @@ abstract class Edit extends Component {
   /**
    * This is used to implements every action.
    * There's no need to implement any runAction handler as the entire control is
-   *  implemented here
+   *  implemented here, unless you need other actions outside the list returned
+   *  by getEditActions() method.
    * @return type
    */
   protected function defaultRunHandler() {

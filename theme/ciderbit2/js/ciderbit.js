@@ -21,22 +21,20 @@ ciderbit.setBehavior('edit-node', function() {
     input = $('input#node-lang-' + $(this).data('lang') + '-enable');
     action = $(this).data('action');
 
-    alert(input.is(':checked'));
-    
     if (action == 'enable') {
-      alert('Trying to check it!' + input.val());
-      input.attr('checked', true);
+      input.prop('checked', true);
     }
     else {
-      alert('Trying to uncheck it!' + input.val());
-      input.attr('checked', true);
+      input.prop('checked', false);
     }
-    $(input).trigger('change');
+    input.trigger('change');
   });
+  
   $('input.node-lang-enable').each(function() {
     $(this).change(function() {
       ciderbit.langHandler($(this).data('lang'));
     });
+    ciderbit.langHandler($(this).data('lang'));
   });
 });
 
