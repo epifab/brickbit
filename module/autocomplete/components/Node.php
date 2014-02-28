@@ -5,12 +5,11 @@ class Node extends \system\Component {
   public function runNodes() {
     $q = $_REQUEST['q'];
     $rsb = new \system\model\RecordsetBuilder('node');
-    $rsb->using('*', 'text.*', 'image.*');
+    $rsb->using('*');
     
     $rsb->setLimit(new \system\model\LimitClause(30));
     
-    // Select some nodes
-    $rs = $rsb->selectBy(array('name' => $q));
+    $rs = $rsb->selectBy(array('text.title' => $q));
     
     if (!empty($rs)) {
       echo \module\autocomplete\Autocomplete::autocompleteNodes($rs);
@@ -22,9 +21,13 @@ class Node extends \system\Component {
   
   public function runUsers() {
     $q = $_REQUEST['q'];
-    $rsb = new \system\model\RecordsetBuilder('node');
-    $rsb->usingAll();
-    $rs = $rsb->selectBy(array('name' => $q));
+    $rsb = new \system\model\RecordsetBuilder('user');
+    $rsb->using('*');
+    
+    $rsb->setLimit(new \system\model\LimitClause(30));
+
+    $rs = $rsb->selectBy(array('full_name' => $q));
+    
     if (!empty($rs)) {
       echo \module\autocomplete\Autocomplete::autocompleteNodes($rs);
     } else {

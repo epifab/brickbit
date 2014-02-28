@@ -31,5 +31,8 @@ interface RecordsetInterface {
   public function getFieldList();
   
   public function toArray();
+  
+  public function setExtra($key, $content);
+  public function getExtra($key, $default = null);
 }
 

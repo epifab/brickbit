@@ -11,6 +11,7 @@ class Recordset implements RecordsetInterface {
   private $hasOneRelations = array();
   private $hasManyRelations = array();
   private $stored = false;
+  private $extra = array();
   
   public function __construct(RecordsetBuilder $builder, $data=null) {
 
@@ -230,9 +231,11 @@ class Recordset implements RecordsetInterface {
     list($rs, $name) = $this->searchParent($path, true);
     if (\array_key_exists($name, $rs->modifiedFields)) {
       return $rs->modifiedFields[$name];
-    } else if (\array_key_exists($name, $rs->fields)) {
+    }
+    else if (\array_key_exists($name, $rs->fields)) {
       return $rs->fields[$name];
-    } else {
+    }
+    else {
       $f = $rs->builder->searchField($name, true);
       if ($f->isVirtual()) {
         return \call_user_func($f->getHandler(), $rs);
@@ -541,16 +544,25 @@ class Recordset implements RecordsetInterface {
    * @throws InternalError
    */
   public function checkKey($keyName) {
-    $key = $this->builder->searchKey($keyName, true);
-    if (is_null($key)) {
-      throw new InternalError('Key @name not found', array('@name' => $keyName));
+    static $rsbCache = array();
+    
+    $tableName = $this->getBuilder()->getTableName();
+    
+    if (!isset($rsbCache[$tableName])) {
+      $rsbCache[$tableName] = array();
     }
+    if (!isset($rsbCache[$tableName][$keyName])) {
+      $rsbCache[$tableName][$keyName] = new RecordsetBuilder($tableName);
+      $rsbCache[$tableName][$keyName]->using($keyName);
+    }
+    
+    $key = $rsbCache[$tableName][$keyName]->{$keyName};
     
     $newFilter = null;
     foreach ($key->getFields() as $field) {
       $fieldValue = $this->{$field->getName()};
       $filterClause = new FilterClause($field, "=", $fieldValue);
-      if (is_null($newFilter)) {
+      if (empty($newFilter)) {
         $newFilter = new FilterClauseGroup($filterClause);
       } else {
         $newFilter->addClauses("AND", $filterClause);
@@ -558,23 +570,33 @@ class Recordset implements RecordsetInterface {
     }
     
     if ($this->isStored()) {
-      // taglio il record corrispondente a quello che sto modificando
-      $primary = $this->builder->getPrimaryKey();
-      foreach ($primary as $field) {
+      // Ignore this record
+      $primary = $rsbCache[$tableName][$keyName]->getPrimaryKey();
+      $primaryClause = null;
+      foreach ($primary->getFields() as $field) {
         $fieldValue = $this->{$field->getName()};
-        $filterClaue = new FilterClause($field, "<>", $fieldValue);
-        $newFilter->addClauses("AND", $filterClaue);
+        $filterClause = new FilterClause($field, "<>", $fieldValue);
+        if (empty($primaryClause)) {
+          $primaryClause = new FilterClauseGroup($filterClause);
+        }
+        else {
+          $primaryClause->addClauses("OR", $filterClause);
+        }
       }
+      $newFilter->addClauses("AND", $primaryClause);
     }
     
-    $oldFilter = $this->builder->getFilter();
-    $this->builder->setFilter($newFilter);
-    $numRecords = $this->builder->countRecords(true);
-    $this->builder->setFilter($oldFilter);
-
-    return ($numRecords == 0);
+    DataLayerCore::resetLogs();
+    
+    $rsbCache[$tableName][$keyName]->setFilter($newFilter);
+    $ret = $rsbCache[$tableName][$keyName]->countRecords() == 0;
+    foreach (DataLayerCore::getLogs() as $log) {
+      \system\utils\Log::pushMessage($log);
+    }
+    return $ret;
   }
   
+  // NOT-TESTED
   public function checkHasOneRelation($relationName, &$errors, $required=true) {
     $relationBuilder = $this->builder->searchHasOneRelationBuilder($relationName, true);
     
@@ -640,6 +662,25 @@ class Recordset implements RecordsetInterface {
     else if (\array_key_exists($name, $this->hasOneRelations)) {
       $this->hasOneRelations[$name] = $value;
     }
+  }
+  
+  /**
+   * Attach extra content to the recordset
+   * @param string $key Extra key
+   * @param mixed $content Extra content
+   */
+  public function setExtra($key, $content) {
+    $this->extra[$key] = $content;
+  }
+
+  /**
+   * Retrieve extra content attached to the recordset
+   * @param string $key Extra key
+   * @param mixed $default Default value returned when the content doesn't exist
+   * @return mixed Extra content
+   */
+  public function getExtra($key, $default = null) {
+    return isset($this->extra[$key]) ? $this->extra[$key] : $default;
   }
   
   public function unsetRelation($name) {

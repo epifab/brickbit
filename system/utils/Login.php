@@ -77,7 +77,7 @@ class Login {
     static $rs = null;
     if (!$rs) {
       $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->usingAll();
+      $rsb->using('*');
       $rs = $rsb->newRecordset();
     }
     return $rs;
@@ -99,7 +99,7 @@ class Login {
       }
     } else {
       $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->usingAll();
+      $rsb->using('*');
 
       $rsb->setFilter(new \system\model\FilterClauseGroup(
         new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
@@ -124,7 +124,7 @@ class Login {
     }
     else {
       $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->usingAll();
+      $rsb->using('*');
       self::$users[$uid] = $rsb->selectFirstBy(array('id' => $uid));
       if (self::$users[$uid]) {
         self::$usersByEmail[self::$users[$uid]->email] = self::$users[$uid];

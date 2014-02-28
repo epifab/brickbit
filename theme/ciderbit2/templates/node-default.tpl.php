@@ -7,12 +7,27 @@
           <?php $this->api->open('link', array(
             'ajax' => false,
             'url' => $node->edit_url,
-            'width' => 800,
             'class' => 'btn btn-primary',
-            'height' => 420,
-            'title' => $this->api->t('Edit @name', array('@name' => $node->type))
-          )); ?><span class="glyphicon glyphicon-pencil"></span> Edit <?php echo $node->type; ?><?php echo $this->api->close(); ?>
-
+          )); ?><span class="glyphicon glyphicon-pencil"></span> Edit <?php echo $this->api->t('Edit @name', array('@name' => $node->type)); ?><?php echo $this->api->close(); ?>
+          
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-file"></span>
+              <?php echo $this->api->t('Add'); ?>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <?php foreach ($node->valid_children_types as $type): ?>
+                <li>
+                  <?php $this->api->open('link', array(
+                    'ajax' => false,
+                    'url' => 'content/' . $node->id . '/add/' . $type,
+                  )); ?><?php echo $this->api->t('Add @type', array('@type' => $type)); ?><?php echo $this->api->close(); ?>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+          
           <?php $this->api->open('link', array(
             'url' => $node->delete_url,
             'confirm' => true,
@@ -45,10 +60,10 @@
 
     <?php endif; ?>
 
-    <?php if (count($node->children)): ?>
+    <?php if (count($node->children_recursive)): ?>
       <div class="node-children">
-      <?php foreach ($node->children as $child): ?>
-        <?php $this->api->displayNode($child, 'teaser'); ?>
+      <?php foreach ($node->children_recursive as $child): ?>
+        <?php $this->api->displayNode($child, 'default'); ?>
       <?php endforeach; ?>
       </div>
     <?php endif; ?>

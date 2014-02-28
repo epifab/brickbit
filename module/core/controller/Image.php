@@ -18,7 +18,7 @@ class Image extends Component {
       throw new \system\exceptions\PageNotFound();
     }
     $rsb = new RecordsetBuilder('node_file');
-    $rsb->usingAll();
+    $rsb->usingAll('*');
     $nodeFile = $rsb->selectFirstBy(array('node_id(' => $nodeId, 'node_index' => $nodeIndex, 'virtual_name' => $virtualName));
     if (!$nodeFile) {
       throw new \system\exceptions\PageNotFound();

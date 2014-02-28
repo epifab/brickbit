@@ -49,6 +49,14 @@ abstract class Edit extends Component {
   }
   
   /**
+   * Perform form submission and validation
+   * @return boolean TRUE if there isn't any validation error
+   */
+  protected function formSubmission() {
+    return $this->getForm()->submission();
+  }
+  
+  /**
    * This is used to implements every action.
    * There's no need to implement any runAction handler as the entire control is
    *  implemented here, unless you need other actions outside the list returned
@@ -70,7 +78,7 @@ abstract class Edit extends Component {
     
     $this->datamodel['form'] = $form;
 
-    if (!$form->checkSubmission() || !$form->submission()) {
+    if (!$form->checkSubmission() || !$this->formSubmission()) {
       // Form not submitted or validation errors
       $this->setMainTemplate($this->getFormTemplate());
       return Component::RESPONSE_TYPE_FORM;

@@ -95,7 +95,7 @@ class Admin extends \system\Component {
     $pageSize = 30;
     
     $rsb = new \system\model\RecordsetBuilder('log');
-    $rsb->usingAll();
+    $rsb->using('*');
     $pages = $rsb->countPages($pageSize);
     $page = isset($_REQUEST['page']) && $_REQUEST['page'] > 0 && $_REQUEST['page'] < $pages
       ? intval($_REQUEST['page'])

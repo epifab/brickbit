@@ -52,8 +52,6 @@ class Node extends Edit {
    */
   public static function accessAdd($urlArgs, $user) {
     $nodeTypes = \system\utils\Cache::nodeTypes();
-//    $nodeTypes = \system\Main::invokeMethodAll('nodeTypes');
-    \system\utils\Log::pushMessage('<pre>' . print_r($nodeTypes, true) . '</pre>');
     
     if (!isset($nodeTypes[$urlArgs[0]])) {
       throw new \system\exceptions\InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
@@ -92,7 +90,7 @@ class Node extends Edit {
     }
     // edit permissions ok
     
-    // just need to check that is allowed to add the node
+    // just need to check whether is allowed to add the node
     if (!\in_array($urlArgs[1], $nodeTypes[$parentNode->type]['children'])) {
       return false;
     }
@@ -150,13 +148,49 @@ class Node extends Edit {
   }
   ///</editor-fold>
   
+  protected function initNodeBuilder($node, $maxLevel = 5) {
+    if ($maxLevel < 1) {
+      return;
+    }
+    $node->using(
+      '*',
+      'record_mode.*',
+      'text.*',
+      'texts.*',
+      'files.*'
+    );
+    $maxLevel--;
+    
+    if ($maxLevel >= 1) {
+      $node->using('children');
+      $this->initNodeBuilder($node->children, $maxLevel);
+    }
+  }
+  
   /**
    * Returns the node builder
    * @return \system\model\RecordsetBuilder Node builder
    */
   protected function getNodeBuilder() {
     $rsb = new \system\model\RecordsetBuilder('node');
-    $rsb->usingAll();
+    $rsb->using(
+      '*',
+      'record_mode.*',
+      'text.*',
+      'texts.*',
+      'files.*'
+    );
+
+//    $this->initNodeBuilder($rsb);
+    
+//    $rsb->using('*'); // Import every field (even virtuals)
+//    $rsb->using('text.*'); // Main translation
+//    $rsb->using('texts.*'); // All translations
+//    
+//    $rsb->using('children.*');
+//    $rsb->using('children.text.*');
+//    $rsb->using('children.texts.*');
+//    $rsb->setRelation('children', $rsb); // Recursion for node children
     return $rsb;
   }
   
@@ -272,7 +306,25 @@ class Node extends Edit {
   }
   
   /**
-   * Returns the node recordset to edit
+   * Perform some custom validation
+   * @return boolean TRUE if the submission is valid
+   */
+  protected function formSubmission() {
+    $form = $this->getForm();
+    // Ignore disabled languages
+    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+      if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
+        // Text disabled: we can ignore every input related to that translation
+        $form->removeRecordsetInput('node_' . $lang);
+        $this->addMessage("Ignoring {$lang}");
+      }
+    }
+    // Default form submission
+    return parent::formSubmission();
+  }
+  
+  /**
+   * Returns editable recordsets
    * @return \system\model\RecordsetInterface
    * @throws \system\exceptions\InputOutputError
    */
@@ -291,18 +343,25 @@ class Node extends Edit {
         $node = $this->getNodeBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0)));
         break;
     }
+    
     $recordsets = array(
       'node' => $node,
-      'node__record_mode' => $node->record_mode
+      'node_record_mode' => $node->record_mode // Record mode
     );
+    
+    // This is used for text which aren't stored in the DB
     $nodeTextBuilder = new RecordsetBuilder('node_text');
     $nodeTextBuilder->using('*');
+    
     foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
       if (isset($node->texts[$lang])) {
+        // Translation already exists
         $nodeText = $node->texts[$lang];
       }
       else {
+        // Translation does not exist... Need to add a new recordset to the form
         $nodeText = $nodeTextBuilder->newRecordset();
+        // Initialize primary key
         $nodeText->lang = $lang;
         $nodeText->node_id = $node->id;
       }
@@ -368,6 +427,7 @@ class Node extends Edit {
     try {
       foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
         $text = $form->getRecordset('node_' . $lang);
+        
         if ($form->getInputValue('node_' . $lang . '_enable')) {
           if (!$text->checkKey('urn_key')) {
             $form->setValidationError(

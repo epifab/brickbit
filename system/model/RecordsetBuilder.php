@@ -783,46 +783,44 @@ class RecordsetBuilder {
     return $fullExpression;
   }
   
+  /**
+   * Imports all fields and first level relations with all their fields.
+   * @deprecated For performance reason please avoid the use of this method.
+   */
   public function usingAll() {
-    $ti = $this->getTableInfo();
     $this->using("*");
+    
+    $ti = $this->getTableInfo();
     foreach ($ti["relations"] as $relationName => $relationInfo) {
-      if (!$this->parentBuilder || \count(\array_diff($relationInfo["clauses"], $this->getClauses())) > 0) {
-        // it just prevents short endless loops:
-        //  if the loop involves more than two relations it won't be catched by the if statement above
-        //  (it catches A->B->A but not A->B->C->A)
-//        if ($relationInfo["type"] != "1-N") {
-          $this->loadRelationBuilder($relationName)->usingAll();
-//        }
-      }
+      $this->loadRelationBuilder($relationName)->using('*');
     }
   }
   
-  public function setRelation($path, RecordsetBuilder $relation) {
-    if (!$relation->hasMany()) {
-      throw new \system\exceptions\InternalError('Only has many relation can be added.', array());
-    }
-    
-    $dotPosition = \strpos($path, ".");
-
-    if ($dotPosition === false) {
-      if (\array_key_exists($path, $this->tableInfo['relations'])) {
-        $this->properties[$path] = $relation;
-        $this->relationBuilderList[$path] = $relation;
-      } else {
-        throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
-      }
-    }
-    else {
-      $current = substr($path, 0, $dotPosition);
-      $rest = substr($path, $dotPosition+1);
-      $builder = $this->loadRelationBuilder($current);
-      if (\is_null($builder)) {
-        throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
-      }
-      $builder->setRelation($rest, $relation);
-    }
-  }
+//  public function setRelation($path, RecordsetBuilder $relation) {
+//    if (!$relation->hasMany()) {
+//      throw new \system\exceptions\InternalError('Only has many relation can be added.', array());
+//    }
+//    
+//    $dotPosition = \strpos($path, ".");
+//
+//    if ($dotPosition === false) {
+//      if (\array_key_exists($path, $this->tableInfo['relations'])) {
+//        $this->properties[$path] = $relation;
+//        $this->relationBuilderList[$path] = $relation;
+//      } else {
+//        throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
+//      }
+//    }
+//    else {
+//      $current = substr($path, 0, $dotPosition);
+//      $rest = substr($path, $dotPosition+1);
+//      $builder = $this->loadRelationBuilder($current);
+//      if (\is_null($builder)) {
+//        throw new \system\exceptions\InternalError('Relation <em>@path</em> not found.', array('@path' => $path));
+//      }
+//      $builder->setRelation($rest, $relation);
+//    }
+//  }
 
   /**
    * Metodo per importare nuovi campi e relazioni HAS ONE all'interno dell'albero del recordset builder.<br/>

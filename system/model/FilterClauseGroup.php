@@ -38,10 +38,12 @@ class FilterClauseGroup implements SelectClauseInterface {
           default:
             throw new \system\exceptions\InternalError('Invalid arg parameter. A logical operator was expected.');
         }
-      } else if (\is_object($arg) && ($arg instanceof FilterClause || $arg instanceof FilterClauseGroup || $arg instanceof CustomClause)) {
+      }
+      else if (\is_object($arg) && ($arg instanceof FilterClause || $arg instanceof FilterClauseGroup || $arg instanceof CustomClause)) {
         $this->clauses[] = 'AND';
         $this->clauses[] = $arg;
-      } else {
+      }
+      else {
         throw new \system\exceptions\InternalError('Invalid arg parameter. A logical operator, FilterClause or FilterClauseGroup instance was expected.');
       }
     }

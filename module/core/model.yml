@@ -350,10 +350,18 @@ tables:
         onDelete: CASCADE
         selectKey: file_id
     virtuals:
-      children_groups:
-        table: Node
+      # 'children recursive' can be used instead of children
+      # it automatically loads the same fields and relations used for the parent
+      #  node
+      children_recursive:
+        dependencies: [id]
+        handler: [\module\core\model\Node, getChildrenRecursive]
+      children_grouped_by_type:
         dependencies: [children]
-        handler: [\module\core\model\Node, getChildrenGroups]
+        handler: [\module\core\model\Node, getChildrenGroupedByType]
+      valid_children_types:
+        dependencies: [type]
+        handler: [\module\core\model\Node, getValidChildrenTypes]
       # urls
       url:
         label: URL

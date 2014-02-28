@@ -21,6 +21,35 @@ class DataLayerCore {
    * @var DataLayerCore
    */
   private static $instance = null;
+  
+  /**
+   * @var array Data layer logs
+   */
+  private static $logs = array();
+
+  /**
+   * Log a message
+   * @param type $message
+   * @param type $args
+   */
+  private static function addLog($message, $args = array()) {
+    self::$logs[] = \cb\t($message, $args);
+  }
+  
+  /**
+   * Returns data layer logs
+   * @return array Logs
+   */
+  public static function getLogs() {
+    return self::$logs;
+  }
+  
+  /**
+   * Resets data layer logs
+   */
+  public static function resetLogs() {
+    self::$logs = array();
+  }
 
   /**
    * Restituisce un'istanza dello strato di accesso ai dati
@@ -46,7 +75,7 @@ class DataLayerCore {
     $this->connection = $this->sqlConnect($dbHost, $dbUser, $dbPass);
     if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
       if (ini_set('mssql.charset', 'utf-8') === false) {
-        \system\utils\Log::debug('<p>Unable to set mssql.charset in php ini configuration file.</p>');
+        self::addLog('<p>Unable to set mssql.charset in php ini configuration file.</p>');
       }
     }
     if (!$this->connection) {
@@ -69,7 +98,7 @@ class DataLayerCore {
   private function sqlConnect($dbHost, $dbUser, $dbPass) {
     $this->dbHost = $dbHost;
 
-    \system\utils\Log::debug('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em>.</p>', array(
+    self::addLog('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em>.</p>', array(
       '@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
       '@host' => $dbHost,
       '@user' => $dbUser
@@ -87,7 +116,7 @@ class DataLayerCore {
 
     $res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
     if ($res) {
-      \system\utils\Log::debug('<p>Database <strong>@name</strong> has been selected</p>', array('@name' => $dbName));
+      self::addLog('<p>Database <strong>@name</strong> has been selected</p>', array('@name' => $dbName));
     }
     return $res;
   }
@@ -104,22 +133,11 @@ class DataLayerCore {
    * sqlQuery will also fail and return false if the user does not have permission to access the table(s) referenced by the query.
    */
   protected function sqlQuery($query) {
-//    static $nesting = 0;
-//    if ($nesting == 0) {
-//      // Prevent recursion
-//      $nesting++;
-//      \system\utils\Log::debug('model', '<div><p><strong>SQL Query</strong></p>@query', array(
-//        '@name' => $this->dbName, 
-//        '@host' => $this->dbHost,
-//        '@query' => \system\utils\SqlFormatter::format($query)
-//      ), \system\LOG_DEBUG);
-//      $nesting--;
-//    }
-      \system\utils\Log::debug('<p>SQL Query (host: <b>@host</b> database: <b>@database</b>)</p>@query', array(
-        '@database' => empty($this->dbName) ? '&lt;none&gt;' : $this->dbName,
-        '@host' => $this->dbHost,
-        '@query' => \system\utils\SqlFormatter::format($query)
-      ));
+    self::addLog('<p>SQL Query (host: <b>@host</b> database: <b>@database</b>)</p>@query', array(
+      '@database' => empty($this->dbName) ? '&lt;none&gt;' : $this->dbName,
+      '@host' => $this->dbHost,
+      '@query' => \system\utils\SqlFormatter::format($query)
+    ));
 
     if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
       return \mssql_query($query, $this->connection);
@@ -230,12 +248,12 @@ class DataLayerCore {
     }
     $arr = $this->sqlFetchArray($res, true);
     if (!$arr || empty($arr[0])) {
-      \system\utils\Log::debug('<p>Query returned no results</p>');
+      self::addLog('<p>Query returned no results</p>');
       return null;
     }
     $x = $arr[0];
     $this->sqlFreeResult($res);
-    \system\utils\Log::debug('<p>Query result: <em>@value</em></p>', array('@value' => $x));
+    self::addLog('<p>Query result: <em>@value</em></p>', array('@value' => $x));
   
     return $x;
   }
@@ -256,12 +274,12 @@ class DataLayerCore {
     }
     $arr = $this->sqlFetchArray($res, true);
     if (!$arr) {
-      \system\utils\Log::debug('<p>Query returned no results</p>');
+      self::addLog('<p>Query returned no results</p>');
       return null;
     }
     $x = $arr;
     $this->sqlFreeResult($res);
-    \system\utils\Log::debug('<p>Query result: <em>@value</em></p>', array('@value' => \print_r($x, true)));
+    self::addLog('<p>Query result: <em>@value</em></p>', array('@value' => \print_r($x, true)));
   
     return $x;
   }
@@ -285,12 +303,9 @@ class DataLayerCore {
   public function executeQueryArray($query) {
     $result = $this->executeQuery($query);
     $x = array();
-    \system\utils\Log::debug(print_r($x, TRUE));
     while ($arr = $this->sqlFetchArray($result)) {
-      \system\utils\Log::debug(print_r($x, TRUE));
       $x[] = $arr;
     }
-    \system\utils\Log::debug(print_r($x, TRUE));
     return $x;
   }
 

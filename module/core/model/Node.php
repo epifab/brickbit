@@ -9,15 +9,44 @@ use system\model\LimitClause;
 use system\model\SortClause;
 
 class Node {
-  public static function getChildrenGroups(RecordsetInterface $node) {
-    static $children = array();
-    if (!isset($children[$node->id])) {
-      $children[$node->id] = array();
-      foreach ($node->children as $child) {
-        $children[$node->id][$node->type][$child->id] = $child;
-      }
+  /**
+   * Returns the node children using the same recordset builder interface as the
+   *  parent node.
+   * @param \system\model\RecordsetInterface $node
+   */
+  public static function getChildrenRecursive(RecordsetInterface $node) {
+    if ($node->getExtra('children_recursive', false) === false) {
+      \system\model\DataLayerCore::resetLogs();
+      $rsb = $node->getBuilder();
+      $node->setExtra('children_recursive', $rsb->selectBy(array('parent_id' => $node->id)));
     }
-    return $children[$node->id];
+    return $node->getExtra('children_recursive', array());
+  }
+  
+  /**
+   * Returns an array of valid children types (according to the node type)-
+   * @param \system\model\RecordsetInterface $node
+   * @return array List of node types
+   */
+  public static function getValidChildrenTypes(RecordsetInterface $node) {
+    $nodeTypes = \system\utils\Cache::nodeTypes();
+    return $nodeTypes[$node->type]['children'];
+  }
+  
+  /**
+   * Groups node children by their type
+   * @param \system\model\RecordsetInterface $node
+   * @return array Array like: ([type1] => array(...), [type2] => array(...))
+   */
+  public static function getChildrenGroupedByType(RecordsetInterface $node) {
+    if ($node->getExtra('children_groups', false) === false) {
+      $children = array();
+      foreach ($node->children as $child) {
+        $children[$node->type][$child->id] = $child;
+      }
+      $node->setExtra('children_groups', $children);
+    }
+    return $node->getExtra('children_groups');
   }
   
   public static function getContent(RecordsetInterface $node) {

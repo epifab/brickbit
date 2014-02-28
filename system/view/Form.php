@@ -20,7 +20,7 @@ class Form {
   private $recordsetsInfo = array();
   
   protected $id;
-  protected $input = array();
+  protected $inputInfo = array();
   protected $errors = array();
   protected $data = array();
   protected $timestamp;
@@ -51,6 +51,8 @@ class Form {
       }
       Session::getInstance()->set('forms', $id, $form);
     }
+    // Make sure there are not previous validation errors
+    $form->resetValidationErrors();
     return $form;
   }
   
@@ -118,16 +120,24 @@ class Form {
    * @return mixed The current input value
    */
   public function addInput($name, $widgetName, $defaultValue, array $input = array(), $metaType = null) {
-//    if (!isset($this->input[$name])) {
-      $this->input[$name] = array(
+//    if (!isset($this->inputInfo[$name])) {
+      $this->inputInfo[$name] = array(
         'name' => $name,
         'value' => $defaultValue,
         'widget' => $widgetName,
         'metaType' => $metaType
       ) + $input;
 //    }
-    $this->input[$name]['value'] = $defaultValue;
-    return $this->input[$name]['value'];
+    $this->inputInfo[$name]['value'] = $defaultValue;
+    return $this->inputInfo[$name]['value'];
+  }
+  
+  /**
+   * Removes an input
+   * @param string $name Input name
+   */
+  public function removeInput($name) {
+    unset($this->inputInfo[$name]);
   }
   
   /**
@@ -136,8 +146,8 @@ class Form {
    * @return string Rendered input (HTML code)
    */
   public function renderInput($name) {
-    if (!empty($this->input[$name])) {
-      $input = $this->input[$name];
+    if (!empty($this->inputInfo[$name])) {
+      $input = $this->inputInfo[$name];
       return \system\view\Widget::getWidget($input['widget'])->render($input);
     }
   }
@@ -164,6 +174,7 @@ class Form {
    * Allows extending classes to do something on submission
    */
   public function onSubmission() {
+    
   }
   
   /**
@@ -203,14 +214,31 @@ class Form {
   }
   
   /**
+   * Fetch a input value
+   * @param string $inputName Input name
+   * @throws \system\exceptions\ValidationError
+   */
+  public function fetchInputValue($inputName) {
+    $input =& $this->inputInfo[$inputName];
+    
+    $input['value'] = self::getInputPostedValue($input);
+
+    if ($input['metaType']) {
+      // Metatype validation
+      $input['metaType']->validate($input['value']);
+    }
+    
+    return $input['value'];
+  }
+  
+  /**
    * Fetch every form input
    */
   private function fetchInputValues() {
     $this->errors = array(); // Reset errors
     
-    foreach ($this->input as &$input) {
+    foreach ($this->inputInfo as &$input) {
       $input['value'] = self::getInputPostedValue($input);
-      $input['error'] = null;
 
       $mt = $input['metaType'];
       if ($mt) {
@@ -219,7 +247,6 @@ class Form {
           $mt->validate($input['value']);
         }
         catch (\system\exceptions\ValidationError $ex) {
-          \system\utils\Log::pushMessage($ex->getMessage(), 'warning');
           $this->errors[$input['name']] = $ex->getMessage();
         }
       }
@@ -239,7 +266,7 @@ class Form {
    * @return array Form input
    */
   public function getInput() {
-    return $this->input;
+    return $this->inputInfo;
   }
   
   /**
@@ -248,8 +275,8 @@ class Form {
    * @return mixed Input value (null if the input does not exist)
    */
   public function getInputValue($inputName) {
-    return isset($this->input[$inputName]) 
-      ? $this->input[$inputName]['value']
+    return isset($this->inputInfo[$inputName]) 
+      ? $this->inputInfo[$inputName]['value']
       : null;
   }
   
@@ -342,10 +369,37 @@ class Form {
         'key' => $recordset->getPrimaryKey(),
         // All the form input which are related to the recordset
         // This array will contain an association path => name, where name
-        //  represents the form input name ($this->input[$name])
+        //  represents the form input name ($this->inputInfo[$name])
         //  while path represents the recordset field path
         'input' => array()
       );
+    }
+  }
+  
+  /**
+   * Removes recordset input.
+   * @param string $recordsetName Recordset name
+   * @param array $paths Field paths. If not specified, it removes every field
+   */
+  public function removeRecordsetInput($recordsetName, $paths = array()) {
+    if (isset($this->recordsetsInfo[$recordsetName])) {
+      if (empty($paths)) {
+        // Remove every input
+        foreach ($this->recordsetsInfo[$recordsetName]['input'] as $path => $inputName) {
+          unset($this->inputInfo[$inputName]);
+          unset($this->recordsetsInfo[$recordsetName]['input'][$path]);
+        }
+      }
+      else {
+        // Remove only input specified in path
+        $paths = (array)$paths;
+        foreach ($paths as $path) {
+          if (isset($this->recordsetsInfo[$recordsetName]['input'][$path])) {
+            unset($this->inputInfo[$this->recordsetsInfo[$recordsetName]['input'][$path]]);
+            unset($this->recordsetsInfo[$recordsetName]['input'][$path]);
+          }
+        }
+      }
     }
   }
   
@@ -398,10 +452,9 @@ class Form {
    */
   public function fetchRecordsets() {
     foreach ($this->recordsetsInfo as $recordsetInfo) {
+      $recordset = $this->getRecordset($recordsetInfo['name']);
       foreach ($recordsetInfo['input'] as $path => $name) {
-        $this
-          ->getRecordset($recordsetInfo['name'])
-          ->setProg($path, $this->input[$name]['value']);
+        $recordset->setProg($path, $this->inputInfo[$name]['value']);
       }
     }
   }

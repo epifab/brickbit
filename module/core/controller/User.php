@@ -59,7 +59,7 @@ class User extends Edit {
   
   private function getUserBuilder() {
     $userBuilder = new \system\model\RecordsetBuilder('user');
-    $userBuilder->usingAll();
+    $userBuilder->using('*');
     return $userBuilder;
   }
   
