@@ -47,13 +47,6 @@ tables:
         clauses: [id: file_id]
         type: 1-1
     virtuals:
-      text_en:
-        dependencies: [texts]
-        label: Text (english)
-        handler: |
-          function($node) {
-            return $node['en'];
-          }
       path:
         dependencies: [dir.path, name]
         label: File path

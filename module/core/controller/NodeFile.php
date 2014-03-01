@@ -16,7 +16,7 @@ class NodeFile extends \system\Component {
       . ' WHERE node_id = ' . $nodeId
       . ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex);
     
-    $virtualName = \system\utils\File::getSafeFilename($originalFileName);
+    $virtualName = \system\utils\File::getSafeFilename($fileName);
     
     $name = \system\utils\File::stripExtension($virtualName);
     $ext = \system\utils\File::getExtension($virtualName);
@@ -54,7 +54,7 @@ class NodeFile extends \system\Component {
   }
   
   public static function getDirId() {
-    $dirId = \system\utils\Utils::get('core-nodefile-dir-id', null);
+    $dirId = \system\Main::getVariable('core-nodefile-dir-id', null);
     if (!$dirId) {
       $rsb = new \system\model\RecordsetBuilder('dir');
       $rsb->using('*');
@@ -66,13 +66,13 @@ class NodeFile extends \system\Component {
         $rs->save();
       }
       $dirId = $rs->id;
-      \system\utils\Utils::set('upload-dir-id', $rs->id);
+      \system\Main::setVariable('core-nodefile-dir-id', $rs->id);
     }
     return $dirId;
   }
 
   public static function getDirPath() {
-    return 'nodes/';
+    return 'data/nodes/';
   }
   
   public static function getAbsDirPath() {
@@ -80,6 +80,117 @@ class NodeFile extends \system\Component {
   }
   
   public function runUpload() {
+    new \module\core\lib\JQueryFileUploadHandler(
+        array(
+            'script_url' => $this->getUrl(),
+            'upload_dir' => \system\Main::dataPath('nodes/'),
+            'upload_url' => $this->getUrl(),
+            'user_dirs' => false,
+            'mkdir_mode' => 0755,
+            'param_name' => 'files',
+            // Set the following option to 'POST', if your server does not support
+            // DELETE requests. This is a parameter sent to the client:
+            'delete_type' => 'DELETE',
+            'access_control_allow_origin' => '*',
+            'access_control_allow_credentials' => false,
+            'access_control_allow_methods' => array(
+                'OPTIONS',
+                'HEAD',
+                'GET',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE'
+            ),
+            'access_control_allow_headers' => array(
+                'Content-Type',
+                'Content-Range',
+                'Content-Disposition'
+            ),
+            // Enable to provide file downloads via GET requests to the PHP script:
+            //     1. Set to 1 to download files via readfile method through PHP
+            //     2. Set to 2 to send a X-Sendfile header for lighttpd/Apache
+            //     3. Set to 3 to send a X-Accel-Redirect header for nginx
+            // If set to 2 or 3, adjust the upload_url option to the base path of
+            // the redirect parameter, e.g. '/files/'.
+            'download_via_php' => false,
+            // Read files in chunks to avoid memory limits when download_via_php
+            // is enabled, set to 0 to disable chunked reading of files:
+            'readfile_chunk_size' => 10 * 1024 * 1024, // 10 MiB
+            // Defines which files can be displayed inline when downloaded:
+            'inline_file_types' => '/\.(gif|jpe?g|png)$/i',
+            // Defines which files (based on their names) are accepted for upload:
+            'accept_file_types' => '/.+$/i',
+            // The php.ini settings upload_max_filesize and post_max_size
+            // take precedence over the following max_file_size setting:
+            'max_file_size' => null,
+            'min_file_size' => 1,
+            // The maximum number of files for the upload directory:
+            'max_number_of_files' => null,
+            // Defines which files are handled as image files:
+            'image_file_types' => '/\.(gif|jpe?g|png)$/i',
+            // Image resolution restrictions:
+            'max_width' => null,
+            'max_height' => null,
+            'min_width' => 1,
+            'min_height' => 1,
+            // Set the following option to false to enable resumable uploads:
+            'discard_aborted_uploads' => true,
+            // Set to 0 to use the GD library to scale and orient images,
+            // set to 1 to use imagick (if installed, falls back to GD),
+            // set to 2 to use the ImageMagick convert binary directly:
+            'image_library' => 1,
+            // Uncomment the following to define an array of resource limits
+            // for imagick:
+            /*
+            'imagick_resource_limits' => array(
+                imagick::RESOURCETYPE_MAP => 32,
+                imagick::RESOURCETYPE_MEMORY => 32
+            ),
+            */
+            // Command or path to the ImageMagick convert binary:
+            'convert_bin' => 'convert',
+            // Uncomment the following to add parameters in front of each
+            // ImageMagick convert call (the limit constraints seem only
+            // to have an effect if put in front):
+            /*
+            'convert_params' => '-limit memory 32MiB -limit map 32MiB',
+            */
+            // Command or path for to the ImageMagick identify binary:
+            'identify_bin' => 'identify',
+            'image_versions' => array(
+                // The empty image version key defines options for the original image:
+                '' => array(
+                    // Automatically rotate images based on EXIF meta data:
+                    'auto_orient' => true
+                ),
+                // Uncomment the following to create medium sized images:
+                /*
+                'medium' => array(
+                    'max_width' => 800,
+                    'max_height' => 600
+                ),
+                */
+                'thumbnail' => array(
+                    // Uncomment the following to use a defined directory for the thumbnails
+                    // instead of a subdirectory based on the version identifier.
+                    // Make sure that this directory doesn't allow execution of files if you
+                    // don't pose any restrictions on the type of uploaded files, e.g. by
+                    // copying the .htaccess file from the files directory for Apache:
+                    //'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/thumb/',
+                    //'upload_url' => $this->get_full_url().'/thumb/',
+                    // Uncomment the following to force the max
+                    // dimensions and e.g. create square thumbnails:
+                    //'crop' => true,
+                    'max_width' => 80,
+                    'max_height' => 80
+                )
+            )
+        )
+    );
+  }
+  
+  public function __runUpload() {
     /**
     * upload.php
     *
@@ -132,7 +243,7 @@ class NodeFile extends \system\Component {
       $fileName = $fileName_a . '_' . $count . $fileName_b;
     }
 
-    $filePath = $targetDir . DIRECTORY_SEPARATOR . $fileName;
+    $filePath = $targetDir . $fileName;
 
     // Create target dir
     if (!\file_exists($targetDir))
@@ -162,13 +273,14 @@ class NodeFile extends \system\Component {
       $contentType = $_SERVER["CONTENT_TYPE"];
 
     // Handle non multipart uploads older WebKit versions didn't support multipart in HTML5
-    if (\strpos($contentType, "multipart") !== false) {
-      if (isset($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
+    if (empty($contentType) || \strpos($contentType, "multipart") !== false) {
+      
+      if (isset($_FILES['files']['tmp_name']) && \is_uploaded_file($_FILES['files']['tmp_name'][0])) {
         // Open temp file
         $out = \fopen("{$filePath}.part", $chunk == 0 ? "wb" : "ab");
         if ($out) {
           // Read binary input stream and append it to temp file
-          $in = \fopen($_FILES['file']['tmp_name'], "rb");
+          $in = \fopen($_FILES['files']['tmp_name'][0], "rb");
 
           if ($in) {
             while ($buff = fread($in, 4096))
@@ -178,7 +290,7 @@ class NodeFile extends \system\Component {
           }
           \fclose($in);
           \fclose($out);
-          @\unlink($_FILES['file']['tmp_name']);
+          @\unlink($_FILES['files']['tmp_name'][0]);
         } else
           die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
       } else

@@ -46,7 +46,7 @@ RELEASE 1.0
           [static] onUpdateRecord(Recordset $recordset)
           [static] onDeleteRecord(Recordset $recordset)
         - logic
-          [static] chron($chronName) (unraised)
+          [static] cron($chronName) (unraised)
           [static] onLoad() (raised by \system\logic\Component)
           [static] [custom event]()  (@see \system\controller\Module::raise($event, [arg1, ...))
         

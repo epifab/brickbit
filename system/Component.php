@@ -249,7 +249,7 @@ abstract class Component {
        || !isset($this->requestData['system']['requestId'])
        || !\preg_match('/^[a-zA-Z0-9_-]+$/', $this->requestData['system']['requestId'])) {
       
-      $requestIds = &Utils::session('system', 'requestIds', array());
+      $requestIds = &Main::session('system', 'requestIds', array());
       $requestIds[$this->name] = isset($requestIds[$this->name])
           ? $requestIds[$this->name] + 1
           : 1;
@@ -378,7 +378,7 @@ abstract class Component {
    * @param string $class Message class. Typical values are: success, info, warning, danger
    */
   public function addMessage($message, $class = 'info') {
-    \system\utils\Log::pushMessage($message, $class);
+    \system\Main::pushMessage($message, $class);
   }
   
   /**

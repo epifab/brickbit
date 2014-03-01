@@ -4,65 +4,6 @@ namespace system\utils;
 class Log {
   private static $debugInfo = array();
   
-  private static $messages = null;
-  
-  /**
-   * Get messages
-   * @return array Messages
-   */
-  public static function getMessages() {
-    self::loadMessages();
-    return self::$messages;
-  }
-  
-  /**
-   * Consume a message (FIFO queue)
-   * @return array Message (or NULL if the queue is empty)
-   */
-  public static function popMessage() {
-    self::loadMessages();
-    if (!empty(self::$messages)) {
-      $first = \array_shift(self::$messages);
-      self::updateMessages();
-      return $first;
-    }
-    else {
-      return null;
-    }
-  }
-  
-  /**
-   * Push a message (FIFO queue)
-   * @param array $message Message
-   */
-  public static function pushMessage($message, $class = 'info') {
-    self::loadMessages();
-    self::$messages[] = array(
-      'class' => $class,
-      'message' => $message
-    );
-    self::updateMessages();
-  }
-  
-  /**
-   * Load session messages
-   */
-  private static function loadMessages() {
-    if (\is_null(self::$messages)) {
-      self::$messages = \system\session\Session::getInstance()->get('log', 'messages');
-      if (\is_null(self::$messages)) {
-        self::$messages = array();
-      }
-    }
-  }
-  
-  /**
-   * Update session messages
-   */
-  private static function updateMessages() {
-    \system\session\Session::getInstance()->set('log', 'messages', self::$messages);
-  }
-  
   /**
    * Create a log
    * @param string $code Typically the name of the module which has raised the

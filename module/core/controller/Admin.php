@@ -23,8 +23,7 @@ class Admin extends \system\Component {
   }
   
   public function runLogsReset() {
-    \system\utils\Utils::resetLogs();
-    return $this->runLogs();
+    throw new \system\exceptions\UnderDevelopment('Not yet implemented');
   }
   
   public function runLogs() {
@@ -68,16 +67,16 @@ class Admin extends \system\Component {
     $type = 0;
     switch ($this->getUrlArg(0)) {
       case "error":
-        $type = \system\utils\Utils::LOG_ERROR;
+        $type = \system\LOG_ERROR;
         break;
       case "warning":
-        $type = \system\utils\Utils::LOG_WARNING;
+        $type = \system\LOG_WARNING;
         break;
       case "info":
-        $type = \system\utils\Utils::LOG_INFO;
+        $type = \system\LOG_INFO;
         break;
       case "debug":
-        $type = \system\utils\Utils::LOG_DEBUG;
+        $type = \system\LOG_DEBUG;
         break;
       default:
         return $this->runLogs();

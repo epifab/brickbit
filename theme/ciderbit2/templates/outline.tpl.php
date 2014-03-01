@@ -48,9 +48,9 @@
     <div id="main-wrapper">
       <div id="main" class="container">
         <div class="messages">
-          <?php if (count(\system\utils\Log::getMessages())): ?>
+          <?php if (count(\system\Main::countMessages())): ?>
             <div class="messages">
-              <?php while ($message = \system\utils\Log::popMessage()): ?>
+              <?php while ($message = \system\Main::popMessage()): ?>
                 <div class="alert alert-<?php echo $message['class']; ?>"><?php echo $message['message']; ?></div>
               <?php endwhile; ?>
             </div>

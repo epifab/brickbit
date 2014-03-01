@@ -180,17 +180,6 @@ class Node extends Edit {
       'texts.*',
       'files.*'
     );
-
-//    $this->initNodeBuilder($rsb);
-    
-//    $rsb->using('*'); // Import every field (even virtuals)
-//    $rsb->using('text.*'); // Main translation
-//    $rsb->using('texts.*'); // All translations
-//    
-//    $rsb->using('children.*');
-//    $rsb->using('children.text.*');
-//    $rsb->using('children.texts.*');
-//    $rsb->setRelation('children', $rsb); // Recursion for node children
     return $rsb;
   }
   
@@ -312,7 +301,7 @@ class Node extends Edit {
   protected function formSubmission() {
     $form = $this->getForm();
     // Ignore disabled languages
-    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+    foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
@@ -353,7 +342,7 @@ class Node extends Edit {
     $nodeTextBuilder = new RecordsetBuilder('node_text');
     $nodeTextBuilder->using('*');
     
-    foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+    foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
         $nodeText = $node->texts[$lang];
@@ -425,7 +414,7 @@ class Node extends Edit {
     $da = \system\model\DataLayerCore::getInstance();
     
     try {
-      foreach (\config\Config::getInstance()->LANGUAGES as $lang) {
+      foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
         $text = $form->getRecordset('node_' . $lang);
         
         if ($form->getInputValue('node_' . $lang . '_enable')) {
@@ -486,7 +475,10 @@ class Node extends Edit {
   }
 
   public function runRead() {
-    $node = $this->getNodeBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0)));
+    $rsb = $this->getNodeBuilder();
+    $rsb->addFilter(new FilterClause($rsb->temp, '=', 0));
+    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
+    $node = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
     if (!$node) {
       throw new \system\exceptions\PageNotFound();
     }
@@ -494,7 +486,9 @@ class Node extends Edit {
   }
   
   public function runReadByUrn() {
-    $node = $this->getNodeBuilder()->selectFirstBy(array('text.urn' => $this->getUrlArg(0)));
+    $rsb = $this->getNodeBuilder();
+    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
+    $node = $rsb->selectFirstBy(array('text.urn' => $this->getUrlArg(0)));
     if (!$node) {
       throw new \system\exceptions\PageNotFound();
     }

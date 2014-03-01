@@ -112,6 +112,7 @@ h3, h4 {
 }
 #admin-menu .navbar-collapse,
 #admin-menu .navbar-form {
+  border: 0px;
   /*border-color: #eee;*/
 }
 #admin-menu .navbar-nav > .open > a,
@@ -170,7 +171,12 @@ h3, h4 {
 .edit-controls {
   background-color: #f5f5f5;
   padding: 10px 5px;
+}
+.edit-controls-top {
   margin-bottom: 10px;
+}
+.edit-controls-bottom {
+  margin-top: 20px;
 }
 
 /*.btn {
@@ -280,4 +286,11 @@ body.signin {
   background-color: #fff;
   padding: 15px;
   margin: 10px 0px;
+}
+
+.node > .edit-controls > div {
+  visibility: hidden;
+}
+.node:hover > .edit-controls > div {
+  visibility: visible;
 }

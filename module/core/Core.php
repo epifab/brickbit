@@ -24,21 +24,15 @@ class Core {
         break;
     }
     
-    \system\utils\Log::create($code, $message, $args, $level);
+    //\system\utils\Log::create($code, $message, $args, $level);
     
-    \system\utils\Log::pushMessage(\cb\t($message, $args), $class);
+    \system\Main::pushMessage(\cb\t($message, $args), $class);
     
     $levelIndexes[$level]++;
   }
   
   public static function preprocessTemplate() {
-    // Debug info as output
-//    foreach (\system\utils\Log::getDebug() as $debug) {
-//      \system\utils\Log::pushMessage(array(
-//        'message' => \cb\t($debug['message'], $debug['args']),
-//        'class' => 'info'
-//      ));
-//    }
+    
   }
   
   /**
@@ -48,13 +42,13 @@ class Core {
   public static function nodeTypes() {
     return array(
       '#' => array(
-        'page'
+        'page' // Only pages on the master level
       ),
-      'profile' => array(
-        'label' => \cb\t('User profile'),
-        'file' => array('avatar'),
-        'children' => array() // no children
-      ),
+//      'profile' => array(
+//        'label' => \cb\t('User profile'),
+//        'file' => array('avatar'),
+//        'children' => array() // no children
+//      ),
       'page' => array(
         'label' => \cb\t('Page'),
         'children' => array(
@@ -65,7 +59,7 @@ class Core {
       'article' => array(
         'label' => \cb\t('Article'),
         'children' => array(
-          'gallery',
+          'photogallery',
           'audioplayer',
           'videoplayer',
           'comment'

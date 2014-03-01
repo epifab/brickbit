@@ -23,7 +23,7 @@ class Lang {
   
   private static function initLang($langId = null) {
     self::$lang = empty($langId)
-      ? Utils::session('system', 'lang', \config\settings()->DEFAULT_LANG)
+      ? \system\Main::session('system', 'lang', \config\settings()->DEFAULT_LANG)
       : $langId;
     
     $callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
@@ -41,7 +41,7 @@ class Lang {
   
   public static function setLang($langId) {
     if (\in_array($langId, \config\settings()->LANGUAGES)) {
-      Utils::setSession('system', 'lang', $langId);
+      \system\Main::setSession('system', 'lang', $langId);
       self::initLang();
     }
   }

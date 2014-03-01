@@ -235,8 +235,8 @@ tables:
       read_mode:
         type: integer
         options:
-  #        0: Nobody
-  #        1: Superuser
+#          0: Nobody
+#          1: Superuser
           2: Owner only
           3: Administrators
           4: Registered users
@@ -244,12 +244,12 @@ tables:
       edit_mode:
         type: integer
         options:
-  #        0: Nobody
+#          0: Nobody
           1: Superuser
           2: Owner only
           3: Administrators
           4: Registered users
-          5: Anyone
+#          5: Anyone
       delete_mode:
         type: integer
         options:
@@ -258,7 +258,7 @@ tables:
           2: Owner only
           3: Administrators
           4: Registered users
-          5: Anyone
+#          5: Anyone
     keys:
       primary:
         fields: [id]

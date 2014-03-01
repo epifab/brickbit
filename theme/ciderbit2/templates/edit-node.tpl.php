@@ -1,3 +1,5 @@
+<?php $this->api->import('edit-node--attached', array('node' => $form->getRecordset('node'))); ?>
+
 <?php $this->api->open('form', array('id' => $form->getId())); ?>
   <div class="dataedit">
     <fieldset>

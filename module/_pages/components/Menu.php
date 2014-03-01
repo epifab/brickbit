@@ -1,5 +1,6 @@
 <?php
 namespace module\pages\components;
+
 use system\model\RecordsetBuilder;
 use system\model\FilterClause;
 use system\model\FilterClauseGroup;
@@ -28,6 +29,6 @@ class Menu extends \system\Component {
   }
   
   public function runMain() {
-    \system\utils\Utils::resetLogs();
+    
   }
 }

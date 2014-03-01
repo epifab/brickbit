@@ -586,14 +586,8 @@ class Recordset implements RecordsetInterface {
       $newFilter->addClauses("AND", $primaryClause);
     }
     
-    DataLayerCore::resetLogs();
-    
     $rsbCache[$tableName][$keyName]->setFilter($newFilter);
-    $ret = $rsbCache[$tableName][$keyName]->countRecords() == 0;
-    foreach (DataLayerCore::getLogs() as $log) {
-      \system\utils\Log::pushMessage($log);
-    }
-    return $ret;
+    return $rsbCache[$tableName][$keyName]->countRecords() == 0;
   }
   
   // NOT-TESTED

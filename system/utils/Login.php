@@ -137,7 +137,7 @@ class Login {
    * Saves login session
    */
   private function setLoginSession() {
-    Utils::setSession('system', 'login', array(
+    \system\Main::setSession('system', 'login', array(
       'id' => $this->user->id,
       'username' => \md5(\strtolower($this->user->email)), // crypt email
       'userpass' => $this->user->password, // already crypted
@@ -149,7 +149,7 @@ class Login {
    * Destroys login session
    */
   private static function unsetLoginSession() {
-    Utils::unsetSession('system', 'login');
+    \system\Main::unsetSession('system', 'login');
   }
 
   /**
@@ -181,7 +181,7 @@ class Login {
    *  session data
    */
   private static function getLoginSession() {
-    $loginSession = Utils::getSession('system', 'login', array());
+    $loginSession = \system\Main::getSession('system', 'login', array());
     if (!empty($loginSession)) {
       if ($loginSession['ip'] != HTMLHelpers::getIpAddress()) {
         \system\utils\Log::create('login', 'User <em>@id</em> seems to be already logged in from two different ip address.', array('@name' => $loginSession['id']), \system\LOG_NOTICE);

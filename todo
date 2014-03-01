@@ -4,13 +4,13 @@
 
 -- 03
 
-logs to database
+# logs to database
 
 -- 02
 
-* forms
-  * sistema form (templates)
-		gestore form: all'interno di un elemento form tenere traccia di tutti i widget che rappresentano inpu
+# forms
+  # sistema form (templates)
+		gestore form: all'interno di un elemento form tenere traccia di tutti i widget che rappresentano input
 
 		<form(name)>
 			<textbox(recordset, path1, attributes)>

@@ -2,13 +2,15 @@
 namespace system;
 
 use system\Component;
-use system\Module;
 
 class Main {
-  public static function setMessage($message, $type="error") {
-    echo "<p>$message</p>";
-  }
-  
+  /**
+   * Loads the module configuration by parsng its info.yml file.
+   * @param string $moduleName Module name
+   * @param string $moduleNs Module namespace
+   * @param string $moduleDir Module directory
+   * @return array Module info or null if something goes wrong
+   */
   private static function loadModuleInfo($moduleName, $moduleNs, $moduleDir) {
     if (\is_dir($moduleDir)) {
       $infoPath = $moduleDir . 'info.yml';
@@ -236,6 +238,14 @@ class Main {
     );
   }
   
+  /**
+   * Incrementally merges tables definition into $TABLES.
+   * @param array $tables Current table definition
+   * @param array $TABLES Incremental tables definition (will be updated by 
+   *  merging with the $tables parameter)
+   * @throws exceptions\InternalError In case something looks wrong in the table
+   *  definition
+   */
   private static function setTables($tables, &$TABLES) {
     foreach ($tables as $tableName => $table) {
       if (!\array_key_exists($tableName, $TABLES)) {
@@ -296,9 +306,11 @@ class Main {
   /**
    * Generates the model configuration array.
    * Parses each model.yml file defined on every active module.
-   * If two modules declare the same table, the two table definitions are merged.
-   * If two modules declare also the same table property as a field a key or a relation 
-   *  the highest priority module definition will override the other one.
+   * If two modules declare the same table, the two table definitions are
+   *  merged.
+   * If two modules declare also the same table property (as a field a key or a 
+   *  relation) the two definitions are merged as well.
+   * @params array $modules Modules configuration array
    * @return array Associative array (<table name> => <table definition>, ...)
    */
   private static function loadModelCfg($modules) {
@@ -323,7 +335,9 @@ class Main {
   
   /**
    * Generates the view configuration array.
-   * Returns a list of available templates [template name] => [template path].
+   * @param array $modules Modules configuration array
+   * @return array List of available templates 
+   *  [template name] => [template path]
    */
   private static function loadViewCfg($modules) {
     $TEMPLATES = array();
@@ -358,8 +372,10 @@ class Main {
   }
 
   /**
+   * Returns the entire application configuration.
+   * 
    * NB. modules are sorted by weight ascending
-   * <code>
+   * <pre>
    *    'modules' :
    *      [module name] :
    *        'name' : [module name]
@@ -410,29 +426,41 @@ class Main {
    *    'viewClasses' :
    *      [view class]
    *      ...
-   * </code>
+   * </pre>
    * @return array
    */
   public static function configuration() {
     static $configuration = null;
     
     if (\is_null($configuration) && \config\settings()->CORE_CACHE) {
-      $configuration = \system\utils\Utils::get('system-configuration', null);
+      $configuration = self::getVariable('system-configuration', null);
     }
     if (\is_null($configuration)) {
       $configuration = self::loadConfiguration();
       if (\config\settings()->CORE_CACHE) {
-        \system\utils\Utils::set('system-configuration', $configuration);
+        self::setVariable('system-configuration', $configuration);
       }
     }
     return $configuration;
   }
   
+  /**
+   * Checks if the module exists.
+   * @param string $moduleName Module name
+   * @return boolean TRUE if the module exists (and enabled)
+   */
   public static function moduleExists($moduleName) {
     $c = self::configuration();
     return \array_key_exists($moduleName, $c['modules']);
   }
   
+  /**
+   * Returns the module configuration.
+   * @param string $moduleName Module name
+   * @return array Module configuration array
+   * @throws \system\exceptions\InternalError In case the module does not exist
+   *  or is not enabled.
+   */
   public static function getModule($moduleName) {
     if (\is_null($moduleName)) {
       return null;
@@ -445,11 +473,23 @@ class Main {
     }
   }
 
+  /**
+   * Checks if a template exists.
+   * @param string $templateName Template name
+   * @return boolean TRUE if the template exists (and the possible module which
+   *  contains the template is enabled).
+   */
   public static function templateExists($templateName) {
     $c = self::configuration();
     return \array_key_exists($templateName, $c['templates']);
   }
   
+  /**
+   * Returns a template file path.
+   * @param string $templateName Template name
+   * @return string Template full path
+   * @throws \system\exceptions\InternalError In case the template doesn't exist
+   */
   public static function getTemplate($templateName) {
     if (\is_null($templateName)) {
       return null;
@@ -462,11 +502,24 @@ class Main {
     }
   }
 
+  /**
+   * Checks if a table exists.
+   * @param string $tableName Table name
+   * @return boolean TRUE if at least one active module define this table in its
+   *  model.yml configuration file.
+   */
   public static function tableExists($tableName) {
     $c = self::configuration();
     return \array_key_exists($tableName, $c['tables']);
   }
   
+  /**
+   * Returns a table configuration.
+   * @param string $tableName
+   * @return array Table configuration
+   * @throws \system\exceptions\InternalError In case the table does not exist
+   *  or its defining module isn't enabled.
+   */
   public static function getTable($tableName) {
     if (self::tableExists($tableName)) {
       $c = self::configuration();
@@ -476,10 +529,32 @@ class Main {
     }
   }
   
+  /**
+   * Checks if the URL matches any pattern defined in any active module.
+   * @param string $url URL
+   * @return boolean TRUE if at least one active module component is associated
+   *  to this url.
+   */
   public static function urlExists($url) {
     return !\is_null(self::getComponent($url));
   }
   
+  /**
+   * Returns info about the component responsible for the URL.
+   * This information are defined by info.yml files.
+   * This method doesn't take into account unactive modules.
+   * <ul>
+   *   <li>'module': module name</li>
+   *   <li>'name': component name</li>
+   *   <li>'class': component class</li>
+   *   <li>'action': action to be invoked for the given URL</li>
+   *   <li>'urlArgs': URL arguments, extracted according to the 'info.yml'
+   *  configuration file</li>
+   * </ul>
+   * @param string $url URL
+   * @return array Component info (null in case the URL doesn't match any 
+   *  pattern defined by any active module)
+   */
   public static function getComponent($url) {
     static $urls = null;
     
@@ -499,7 +574,7 @@ class Main {
     if (\is_null($urls)) {
       if (\config\settings()->CORE_CACHE) {
         // Url cache
-        $urls = \system\utils\Utils::get("system-urls", array());
+        $urls = self::getVariable("system-urls", array());
       } else {
         $urls = array();
       }
@@ -518,7 +593,7 @@ class Main {
             'urlArgs' => $m
           );
           if (\config\settings()->CORE_CACHE) {
-            \system\utils\Utils::set("system-urls", $urls);
+            self::setVariable("system-urls", $urls);
           }
           break;
         }
@@ -527,6 +602,12 @@ class Main {
     return $urls[$url];
   }
   
+  /**
+   * Checks if the user has access to a given URL
+   * @param string $url URL
+   * @param object $user User
+   * @return boolean TRUE if the user has access to the URL
+   */
   public static function checkAccess($url, $user=false) {
     if ($user === false) {
       $user = \system\utils\Login::getLoggedUser();
@@ -544,7 +625,12 @@ class Main {
     }
   }
   
-  public static function run($url, $request=null) {
+  /**
+   * Runs the application
+   * @param string $url URL
+   * @param array $request Application request (default to $_REQUEST)
+   */
+  public static function run($url, $request = null) {
     if (\is_null($request)) {
       $request = $_REQUEST;
     }
@@ -566,7 +652,7 @@ class Main {
         // Allows the theme to do special stuff before modules
         \system\Theme::preRun($obj);
         // Raise event onRun
-        self::raiseEvent('onRun', $obj);
+        self::raiseControllerEvent('onRun', $obj);
         \system\Theme::onRun($obj);
       }
 
@@ -577,8 +663,51 @@ class Main {
     }
   }
   
+  /**
+   * Returns a cached module configuration value.
+   * Runs invokeMethodAll and cached its results.
+   * The way this method works is to progressively merge implementing methods
+   *  array results.
+   * Considering the two following module classes:
+   * <pre>
+   *  class Module1 {
+   *    public static function x() {
+   *      return array(
+   *        'a' => 'module1',
+   *        'b' => 'module1'
+   *      );
+   *    }
+   *  }
+   *  class Module2 {
+   *    public static function x() {
+   *      return array(
+   *        'b' => 'module2',
+   *        'c' => 'module2'
+   *      );
+   *    }
+   *  }
+   * </pre>
+   * Assuming both the modules are enabled and 'Module1' has higher priority,
+   *  than the following statement:
+   * <pre>
+   * print_r(Main::moduleConfigArray('x'));
+   * </pre>
+   * Will print out:
+   * <pre>
+   * array (
+   *   'a' => 'module1',
+   *   'b' => 'module2',
+   *   'c' => 'module2'
+   * )
+   * </pre>
+   * Please note that unlike 'invokeMethodAll', this function does not accept 
+   *  any argument other than $methodName. The controller methods are then 
+   *  called without additional arguments.
+   * @param string $methodName Method name
+   * @return mixed Result
+   */
   public static function moduleConfigArray($eventName) {
-    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
+    $results = self::getVariable('module-config-' . $eventName, null);
     if (\is_null($results)) {
       $results = array();
       $v = self::invokeMethodAll($eventName);
@@ -589,25 +718,43 @@ class Main {
         }
         $results = $m + $results;
       }
-      \system\utils\Utils::set('module-config-' . $eventName, $results);
+      self::setVariable('module-config-' . $eventName, $results);
     }
     return $results;
   }
   
-  public static function moduleConfig($eventName) {
-    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
+  /**
+   * Returns a cached module configuration value.
+   * Runs invokeMethod and cached its results.
+   * Unlike 'invokeMethod', this function does not accept any argument other 
+   *  than $methodName. The controller methods are then called without additional
+   *  arguments.
+   * @param string $methodName Method name
+   * @return mixed Result
+   */
+  public static function moduleConfig($methodName) {
+    $results = self::getVariable('module-config-' . $methodName, null);
     if (\is_null($results)) {
-      $results = \end(self::invokeMethod($eventName));
-      \system\utils\Utils::set('module-config-' . $eventName, $results);
+      $results = \end(self::invokeMethod($methodName));
+      self::setVariable('module-config-' . $methodName, $results);
     }
     return $results;
   }
   
-  public static function moduleConfigAll($eventName) {
-    $results = \system\utils\Utils::get('module-config-' . $eventName, null);
+  /**
+   * Returns a cached module configuration value.
+   * Runs invokeMethodAll and cached its results.
+   * Unlike 'invokeMethodAll', this function does not accept any argument other 
+   *  than $methodName. The controller methods are then called without 
+   *  additional arguments.
+   * @param string $methodName Method name
+   * @return mixed Result
+   */
+  public static function moduleConfigAll($methodName) {
+    $results = self::getVariable('module-config-' . $methodName, null);
     if (\is_null($results)) {
-      $results = self::invokeMethodAll($eventName); // last element of the array
-      \system\utils\Utils::set('module-config-' . $eventName, $results);
+      $results = self::invokeMethodAll($methodName); // last element of the array
+      self::setVariable('module-config-' . $methodName, $results);
     }
     return $results;
   }
@@ -616,92 +763,168 @@ class Main {
    * Alias of invokeMethodAll
    * @param string $eventName Method name
    */
-  public static function raiseEvent($eventName) {
+  public static function raiseControllerEvent($eventName) {
     return \call_user_func_array(array('self', 'invokeMethodAll'), \func_get_args());
   }
   
+  /**
+   * Invokes a controller method.
+   * Searches for module classes implementing the method and runs every method
+   *  following the modules priority order.
+   * This function takes an unlimited number of arguments.
+   * Every argument (apart the method name) is passed to the module class
+   *  method.
+   * @param string $methodName Name of the module class method
+   * @return Returns an array of non-null values returned by module classes
+   */
   public static function invokeMethodAll($methodName) {
-    $configuration = self::configuration();
-    $result = array();
+    // Cache - array ('method name' => callable[])
+    static $methodBinding = array();
     
-    $args = null;
-    if (\func_num_args() > 1) {
-      $args = \func_get_args();
-      \array_shift($args);
-    }
+    if (!\array_key_exists($methodName, $methodBinding)) {
+      $methodBinding[$methodName] = array();
+      
+      $configuration = self::configuration();
     
-    foreach ($configuration['modules'] as $module) {
-      $class = $module['class'];
-      if (\is_callable(array($class, $methodName))) {
-        $x = \is_null($args)
-          ? \call_user_func(array($class, $methodName))
-          : \call_user_func_array(array($class, $methodName), $args);
-        if (\is_null($x)) {
-          // do nothing
-        } else {
-          $result[] = $x;
+      foreach ($configuration['modules'] as $module) {
+        $class = $module['class'];
+        if (\is_callable(array($class, $methodName))) {
+          $methodBinding[$methodName][] = array($class, $methodName);
         }
       }
     }
-    return $result;
+    
+    $results = array();
+    if (!empty($methodBinding[$methodName])) {
+      // Arguments to be passed
+      $args = array();
+      if (\func_num_args() > 1) {
+        $args = \func_get_args();
+        \array_shift($args);
+      }
+
+      foreach ($methodBinding[$methodName] as $handler) {
+        $x = \call_user_func_array($handler, $args);
+        if (!\is_null($x)) {
+          $results[] = $x;
+        }
+      }
+    }
+    return $results;
   }
   
+  /**
+   * Invokes a controller method.
+   * Searches for the highest priority module class which implements the method
+   *  and calls it. If the method isn't implemented by any module class, it 
+   *  returns null.
+   * This function takes an unlimited number of arguments.
+   * Every argument (apart the method name) is passed to the module class
+   *  method.
+   * @param string $methodName Name of the module class method
+   * @return Returns the implementing method results.
+   */
   public static function invokeMethod($methodName) {
-    $configuration = self::configuration();
-    $result = array();
+    static $modules = null;
+    static $methodBinding = array();
     
-    $args = null;
+    if (\is_null($modules)) {
+      $configuration = self::configuration();
+      $modules = $configuration['modules'];
+      \array_reverse($modules);
+    }
+    
+    $args = array();
     if (\func_num_args() > 1) {
       $args = \func_get_args();
       \array_shift($args);
     }
-    
-    foreach ($configuration['modules'] as $module) {
-      $class = $module['class'];
-      if (\is_callable(array($class, $methodName))) {
-        return \is_null($args)
-          ? \call_user_func(array($class, $methodName))
-          : \call_user_func_array(array($class, $methodName), $args);
+
+    // Cache
+    if (!\array_key_exists($methodBinding, $methodBinding)) {
+      foreach ($modules as $module) {
+        $class = $module['class'];
+        if (\is_callable(array($class, $methodName))) {
+          $method = array($class, $methodName);
+          break;
+        }
       }
+      $methodBinding[$methodName] = $method;
     }
-    return null;
+    
+    return (!empty($methodBinding[$methodName]))
+      ? \call_user_func_array($methodBinding[$methodName], $args)
+      : null;
   }
   
-  public static function raiseModelEvent($eventName) {
-    $c = self::configuration();
-    $result = array();
+  /**
+   * Invokes a model method.
+   * Searches for model classes implementing the method and runs every method
+   *  following the modules priority order.
+   * This function takes an unlimited number of arguments.
+   * Every argument (apart the method name) is passed to the module class
+   *  method.
+   * @param string $methodName Name of the module class method
+   * @return Returns an array of non-null values returned by model classes
+   */
+  public static function raiseModelEvent($methodName) {
+    // Cache - array ('method name' => callable[])
+    static $methodBinding = array();
     
-    $args = null;
-    if (\func_num_args() > 1) {
-      $args = \func_get_args();
-      \array_shift($args);
-    }
+    if (!\array_key_exists($methodName, $methodBinding)) {
+      $methodBinding[$methodName] = array();
+      
+      $configuration = self::configuration();
     
-    foreach ($c['modelClasses'] as $class) {
-      if (\is_callable(array($class, $eventName))) {
-        $x = \is_null($args)
-          ? \call_user_func(array($class, $eventName))
-          : \call_user_func_array(array($class, $eventName), $args);
-        if (\is_null($x)) {
-          // do nothing
-        } else {
-          $result[] = $x;
+      foreach ($configuration['modelClasses'] as $class) {
+        if (\is_callable(array($class, $methodName))) {
+          $methodBinding[$methodName][] = array($class, $methodName);
         }
       }
     }
-    return $result;
+    
+    $results = array();
+    if (!empty($methodBinding[$methodName])) {
+      // Arguments to be passed
+      $args = array();
+      if (\func_num_args() > 1) {
+        $args = \func_get_args();
+        \array_shift($args);
+      }
+
+      foreach ($methodBinding[$methodName] as $handler) {
+        $x = \call_user_func_array($handler, $args);
+        if (!\is_null($x)) {
+          $results[] = $x;
+        }
+      }
+    }
+    return $results;
   }
   
+  /**
+   * Returns every 'model class' declard in active modules.
+   * @return array List of model classes
+   */
   public static function getModelClasses() {
     $c = self::configuration();
     return $c['modelClasses'];
   }
   
+  /**
+   * Returns every 'view class' declared in active modules.
+   * @return array List of classes
+   */
   public static function getViewClasses() {
     $c = self::configuration();
     return $c['viewClasses'];
   }
 
+  /**
+   * Returns an instance of the template manager.
+   * Implements the singleton design pattern always returning the same instance.
+   * @return \system\view\TemplateManager Template manager
+   */
   public static function getTemplateManager() {
     static $tpl = null;
     if (\is_null($tpl)) {
@@ -710,11 +933,226 @@ class Main {
     return $tpl;
   }
   
-  public static function tempPath() {
-    return \config\settings()->BASE_DIR_ABS . 'temp/';
+  /**
+   * Returns the absolute path to the temp folder. 
+   * Typically this is used for temporary application data.
+   * @param string $path Path relative to the data folder
+   * @return type
+   */
+  public static function tempPath($path = '') {
+    return \config\settings()->BASE_DIR_ABS . 'temp/' . self::prepareUrl($path);
   }
   
-  public static function dataPath() {
-    return \config\settings()->BASE_DIR_ABS . 'data/';
+  /**
+   * Returns the absolute path to the data folder. 
+   * Typically this is used for file upload and other application data.
+   * @param string $path Path relative to the data folder
+   * @return string Data path
+   */
+  public static function dataPath($path = '') {
+    return \config\settings()->BASE_DIR_ABS . 'data/' . self::prepareUrl($path);
+  }
+  
+  /**
+   * Removes the initial slash and replace backslashes with shashes
+   * @param string $path Path
+   * @return string Path
+   */
+  private static function prepareUrl($path) {
+    $path = str_replace('\\', '/', $path);
+    return (!empty($path) && substr($path, 0, 1) == '/')
+      ? substr($path, 1)
+      : $path;
+  }
+  
+  /**
+   * Get a variable. Variable are stored in the file system via method 
+   *  setVariable
+   * @param string $name Key
+   * @param mixed $default Default value (returned in case the variable is not
+   *  defined)
+   * @return mixed Value
+   */
+  public static function getVariable($name, $default = null) {
+    if (\file_exists("config/vars/" . $name . ".var")) {
+      $fp = \fopen("config/vars/" . $name . ".var", "r");
+      $content = "";
+      while ($s = \fread($fp, 4096)) {
+        $content .= $s;
+      }
+      fclose($fp);
+      return \unserialize($content);
+    }
+    else {
+      return $default;
+    }
+  }
+  
+  /**
+   * Set a variable. Variables are stored in the file system and can be accessed
+   *  via method getVariable
+   * @param string $name Key
+   * @param mixed $value Value
+   */
+  public static function setVariable($name, $value) {
+    $content = \serialize($value);
+
+    $fp = \fopen("config/vars/" . $name . ".var", "w");
+    \fwrite($fp, $content);
+    \fclose($fp);
+  }
+  
+  /**
+   * Returns a configuration variable.
+   * @param string $name Name
+   * @param mixed $default Default value (returned if it does not exist)
+   * @return mixed Config value
+   */
+  public static function getCfg($name, $default = null) {
+    try {
+      return \config\Config::getInstance()->{$name};
+    }
+    catch (\system\exceptions\Error $ex) {
+      return $default;
+    }
+  }
+  
+  /**
+   * Returns the ciderbit session.
+   * Examples: 
+   * <code>
+   * // Returns the entire ciderbit session
+   * session();
+   * 
+   * // Returns the entire 'core' module array
+   * // If it hasn't been initialized yet, it will be set to a empty array
+   * session('core');
+   * 
+   * // Returns the 'test' variable in the 'core' module array
+   * // If it hasn't been initialized yet, it will be set to the $default 
+   * //  parameter value
+   * session('system', 'test');
+   * 
+   * NB.
+   * This method always returns a reference. This means that the following code:
+   * $x = &Main::session('test', 'x');
+   * $x = 'asd';
+   * echo Main::session('test', 'x');
+   * Will print out 'asd'
+   * </code>
+   * @param string $module Module [optional, if not passed the whole ciderbit 
+   *  session is returned]
+   * @param string $key Key [optional, if not passed the whole module session
+   *  is returned]
+   * @param mixed $default Default key value
+   * @return mixed Session
+   */
+  public static function &session($module = null, $key = null, $default = null) {
+    if (!isset($_SESSION['ciderbit'])) {
+      $_SESSION['ciderbit'] = array();
+    }
+    if (!empty($module)) {
+      // Module has been transmitted
+      if (!isset($_SESSION['ciderbit'][$module])) {
+        // Initialize if does not exist
+        $_SESSION['ciderbit'][$module] = array();
+      }
+      if (!empty($key)) {
+        // Key has been transmitted
+        if (!isset($_SESSION['ciderbit'][$module][$key])) {
+          // Initialize if does not exist
+          $_SESSION['ciderbit'][$module][$key]= $default;
+        }
+        // Return the key value
+        return $_SESSION['ciderbit'][$module][$key];
+      }
+      else {
+        // Return the module array
+        return $_SESSION['ciderbit'][$module];
+      }
+    }
+    else {
+      // Return the whole ciderbit session
+      return $_SESSION['ciderbit'];
+    }
+  }
+  
+  /**
+   * Get a session variable.
+   * @param string $module Module name
+   * @param string $key Variable name
+   * @param mixed $default Default value
+   * @return mixed Variable value
+   */
+  public static function &getSession($module, $key, $default = null) {
+    return self::session($module, $key, $default);
+  }
+  
+  /**
+   * Set a session variable
+   * @param string $module Module name
+   * @param string $key Variable name
+   * @param mixed $value Value
+   */
+  public static function setSession($module, $key, $value) {
+    $var = &self::session($module, $key);
+    $var = $value;
+  }
+  
+  /**
+   * Delete a session variable
+   * @param string $module Module name
+   * @param string $key Variable name
+   */
+  public static function unsetSession($module, $key=null) {
+    if (empty($key)) {
+      $session = &self::session();
+      unset($session[$module]);
+    }
+    else {
+      $session = &self::session($module);
+      unset($session[$key]);
+    }
+  }
+
+  /**
+   * Returns all system messages
+   * @return array Messages
+   */
+  private static function &getMessages() {
+    return self::session('system', 'messages', array());
+  }
+  
+  /**
+   * Pushes a system message (FIFO queue)
+   * @param array $message Message
+   */
+  public static function pushMessage($message, $class = 'info') {
+    $messages = &self::getMessages();
+    
+    $messages[] = array(
+      'class' => $class,
+      'message' => $message
+    );
+  }
+
+  /**
+   * Consumes a system message (FIFO queue)
+   * @return array Message (or NULL if the queue is empty)
+   */
+  public static function popMessage() {
+    $messages = &self::getMessages();
+    
+    return (!empty($messages))
+      ? \array_shift($messages)
+      : null;
+  }
+  
+  /**
+   * Counts system messages
+   * @return int Number of messages to be consumed
+   */
+  public static function countMessages() {
+    return \count(self::getMessages());
   }
 }
