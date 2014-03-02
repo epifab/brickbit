@@ -1,5 +1,6 @@
 <?php
 namespace module\core\controller;
+use \system\Main;
 
 class Page extends Node {
   /**
@@ -10,9 +11,6 @@ class Page extends Node {
   }
   
   public function runHome() {
-    $x = \system\utils\Cache::nodeTypes();
-    $this->addMessage('<pre>' . print_r($x, TRUE) . '</pre>');
-    $this->addMessage('<pre>' . print_r($_SESSION, TRUE) . '</pre>');
     $this->setMainTemplate('home');
     return \system\Component::RESPONSE_TYPE_READ;
   }

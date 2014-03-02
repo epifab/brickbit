@@ -115,6 +115,9 @@ h3, h4 {
   border: 0px;
   /*border-color: #eee;*/
 }
+#admin-menu .navbar-nav .open {
+  background-color: #0070fd;
+}
 #admin-menu .navbar-nav > .open > a,
 #admin-menu .navbar-nav > .open > a:hover,
 #admin-menu .navbar-nav > .open > a:focus {

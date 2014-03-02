@@ -355,6 +355,9 @@ tables:
       valid_children_types:
         dependencies: [type]
         handler: [\module\core\model\Node, getValidChildrenTypes]
+      valid_file_keys:
+        dependencies: [type]
+        handler: [\module\core\model\Node, getValidFileKeys]
       # urls
       url:
         label: URL

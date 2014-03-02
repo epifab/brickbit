@@ -51,7 +51,7 @@ class Node extends Edit {
    * @throws \system\exceptions\InputOutputError
    */
   public static function accessAdd($urlArgs, $user) {
-    $nodeTypes = \system\utils\Cache::nodeTypes();
+    $nodeTypes = \system\Main::moduleConfig('nodeTypes', true);
     
     if (!isset($nodeTypes[$urlArgs[0]])) {
       throw new \system\exceptions\InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
@@ -72,7 +72,7 @@ class Node extends Edit {
    * @throws \system\exceptions\InputOutputError
    */
   public static function accessAdd2Node($urlArgs, $user) {
-    $nodeTypes = \system\utils\Cache::nodeTypes();
+    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
     
     if (!isset($nodeTypes[$urlArgs[1]])) {
       throw new \system\exceptions\InputOutputError('Invalid node type.');
@@ -305,7 +305,6 @@ class Node extends Edit {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
-        $this->addMessage("Ignoring {$lang}");
       }
     }
     // Default form submission

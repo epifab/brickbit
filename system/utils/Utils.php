@@ -73,31 +73,49 @@ class Utils {
 //    self::set('system-logs-by-type', $logsByType);
 //  }
   
-  public static function lightVarDump($arg, $maxLevel=-1) {
+  public static function lightVarDump($arg, $maxLevel = 5, $indent = '') {
     $msg = '';
     if (\is_array($arg)) {
       if ($maxLevel == 0) {
-        $msg .= 'array';
-      } else {
+        $msg .= 'array(...)';
+      }
+      else {
         $msg .= 'array(';
         $first = true;
         foreach ($arg as $k => $v) {
-          $first ? $first = false : $msg .= ", ";
-          $msg .= self::lightVarDump($k, 0) . " => " . self::lightVarDump($v, 0);
+          $first ? $first = false : $msg .= ",";
+          $msg .= "\n" . $indent . '  ' . self::lightVarDump($k, 0, $indent . '  ') . " => " . self::lightVarDump($v, $maxLevel - 1, $indent . '  ');
         }
-        $msg .= ')';
+        $msg .= "\n" . $indent . ')';
       }
-    } else if (\is_object($arg)) {
-      $msg .= '[object ' . get_class($arg) . ']';
-    } else if (\is_null($arg)) {
+    }
+    elseif (\is_object($arg)) {
+      if ($maxLevel == 0) {
+        $msg .= get_class($arg) . '(...)';
+      }
+      else {
+        $msg .= get_class($arg) . '(';
+        $first = true;
+        foreach ($arg as $k => $v) {
+          $first ? $first = false : $msg .= ",";
+          $msg .= "\n" . $indent . '  ' . self::lightVarDump($k, 0, $indent . '  ') . " => " . self::lightVarDump($v, $maxLevel - 1, $indent . '  ');
+        }
+        $msg .= "\n" . $indent . ')';
+      }
+    }
+    else if (\is_null($arg)) {
       $msg .= 'null';
-    } else if (\is_string($arg)) {
+    }
+    else if (\is_string($arg)) {
       $msg .= '"' . $arg . '"';
-    } else if ($arg === false) {
+    }
+    else if ($arg === false) {
       $msg .= 'false';
-    } else if ($arg === true) {
+    }
+    else if ($arg === true) {
       $msg .= 'true';
-    } else {
+    }
+    else {
       $msg .= $arg;
     }
     return $msg;
@@ -244,5 +262,32 @@ class Utils {
         return $haystack[$needle];
       }
     }
+  }
+  
+  /**
+   * Example usage:
+   * $asd = array(1 => array(2 => 'x'));
+   * $x = arrayItem($asd, '1|2', null); // x
+   * $x = arrayItem($asd, '1'); // array(2 => 'x')
+   * $x = arrayItem($asd, '1|3'); // null
+   * $x = arrayItem($asd, '1|3', 'hello!'); // 'hello!'
+   * Note, this doesn't raise any php error
+   * @param array $haystack Haystack
+   * @param string $needle Needles (multidimensional indexes separated by pipe 
+   *  character)
+   * @param mixed $default Default value returned for not found elements
+   * @return mixed Value
+   */
+  public static function arrayElement(&$haystack, $needle, $default = null) {
+    $h = &$haystack;
+    foreach (explode('|', $needle) as $k) {
+      if (\array_key_exists($k, $h)) {
+        $h = &$h[$k];
+      }
+      else {
+        return $default;
+      }
+    }
+    return $h;
   }
 }

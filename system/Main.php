@@ -33,7 +33,7 @@ class Main {
   
   /**
    * Generates the module configuration array.
-   * Parses each info.yml looking for active modules
+   * <p>Parses each info.yml looking for active modules.</p>
    * @return array
    */
   private static function loadConfiguration() {
@@ -192,10 +192,9 @@ class Main {
     }
     \closedir($d);
     
-    \asort($WEIGHTS);
+    \ksort($WEIGHTS);
     // discending order: heavier modules will override lighter ones
-    foreach ($WEIGHTS as $modules) {
-      \asort($modules);
+    foreach ($WEIGHTS as $weight => $modules) {
       foreach ($modules as $module) {
         $MODULES[$module['name']] = $module;
         foreach ($module['components'] as $component) {
@@ -223,18 +222,15 @@ class Main {
       }
     }
     
-    // sorting the array by module weight descending
-    //  this is because the view classes are designed for templates API,
-    //  it makes more sense to search for the right api in hevier modules first
-    \asort($VIEW_CLASSES);
+    // We want to search for URLS according to modules weight descending
     
     return array(
       'modules' => $MODULES,
-      'urls' => $URLS,
+      'urls' => \array_reverse($URLS),
       'tables' => self::loadModelCfg($MODULES),
       'modelClasses' => $MODEL_CLASSES,
       'templates' => self::loadViewCfg($MODULES),
-      'viewClasses' => $VIEW_CLASSES
+      'viewClasses' => \array_reverse($VIEW_CLASSES)
     );
   }
   
@@ -265,51 +261,32 @@ class Main {
           ));
         }
         $prevFieldInfo = \cb\array_item($fieldName, $TABLES[$tableName]['fields'], array('default' => array()));
-        $TABLES[$tableName]['fields'][$fieldName] = $prevFieldInfo + $field;
+        $TABLES[$tableName]['fields'][$fieldName] = $field + $prevFieldInfo;
       }
-      $keys = \cb\array_item('keys', $table, array('default' => array()));
+      $keys = \cb\array_item('keys', $table, array('default' => array(), 'type' => 'array'));
       foreach ($keys as $keyName => $key) {
-        if (!\is_array($key)) {
-          throw new exceptions\InternalError('Invalid <em>@key</em> key definition for table <em>@table</em>', array(
-            '@key' => $keyName, 
-            '@table' => $tableName
-          ));
-        }
-        $prevKeyInfo = \cb\array_item($keyName, $TABLES[$tableName]['keys'], array('default' => array()));
-        $TABLES[$tableName]['keys'][$keyName] = $prevKeyInfo + $key;
+        $TABLES[$tableName]['keys'][$keyName] = $key;
       }
-      $relations = \cb\array_item('relations', $table, array('default' => array()));
+      
+      $relations = \cb\array_item('relations', $table, array('default' => array(), 'type' => 'array'));
       foreach ($relations as $relationName => $relation) {
-        if (!\is_array($relation)) {
-          throw new exceptions\InternalError('Invalid <em>@relation</em> relation definition for table <em>@table</em>', array(
-            '@relation' => $relationName,
-            '@table' => $tableName
-          ));
-        }
-        $prevRelationInfo = \cb\array_item($relationName, $TABLES[$tableName]['relations'], array('default' => array()));
-        $TABLES[$tableName]['relations'][$relationName] = $prevRelationInfo + $relation;
+        $TABLES[$tableName]['relations'][$relationName] = $relation;
       }
-      $virtuals = \cb\array_item('virtuals', $table, array('default' => array()));
+      
+      $virtuals = \cb\array_item('virtuals', $table, array('default' => array(), 'type' => 'array'));
       foreach ($virtuals as $virtualName => $virtual) {
-        if (!\is_array($virtual)) {
-          throw new exceptions\InternalError('Invalid <em>@virtual</em> virtual field definition for table <em>@table</em>', array(
-            '@virtual' => $virtualName,
-            '@table' => $tableName
-          ));
-        }
-        $prevVirtualInfo = \cb\array_item($virtualName, $TABLES[$tableName]['virtuals'], array('default' => array()));
-        $TABLES[$tableName]['virtuals'][$virtualName] = $prevVirtualInfo + $virtual;
+        $TABLES[$tableName]['virtuals'][$virtualName] = $virtual;
       }
     }
   }
   
   /**
    * Generates the model configuration array.
-   * Parses each model.yml file defined on every active module.
-   * If two modules declare the same table, the two table definitions are
-   *  merged.
-   * If two modules declare also the same table property (as a field a key or a 
-   *  relation) the two definitions are merged as well.
+   * <p>Parses each model.yml file defined on every active module.</p>
+   * <p>If two modules declare the same table, the two table definitions are
+   *  merged.</p>
+   * <p>If two modules declare also the same table property (as a field a key or 
+   *  a relation) the two definitions are merged as well.</p>
    * @params array $modules Modules configuration array
    * @return array Associative array (<table name> => <table definition>, ...)
    */
@@ -374,7 +351,8 @@ class Main {
   /**
    * Returns the entire application configuration.
    * 
-   * NB. modules are sorted by weight ascending
+   * <p>NB. modules are sorted by weight ascending.</p>
+   * 
    * <pre>
    *    'modules' :
    *      [module name] :
@@ -541,8 +519,8 @@ class Main {
   
   /**
    * Returns info about the component responsible for the URL.
-   * This information are defined by info.yml files.
-   * This method doesn't take into account unactive modules.
+   * <p>This information are defined by info.yml files.</p>
+   * <p>This method doesn't take into account unactive modules.</p>
    * <ul>
    *   <li>'module': module name</li>
    *   <li>'name': component name</li>
@@ -665,10 +643,108 @@ class Main {
   
   /**
    * Returns a cached module configuration value.
-   * Runs invokeMethodAll and cached its results.
-   * The way this method works is to progressively merge implementing methods
-   *  array results.
-   * Considering the two following module classes:
+   * <p>Runs invokeMethodAll and caches its results.</p>
+   * <p>The way this method works is to progressively merge implementing methods
+   *  array results.</p>
+   * <p>Considering the two following module classes:</p>
+
+   * <p>Unlike 'invokeMethodAllMerge', this function does not accept any 
+   *  additional argument to pass to the controller methods.</p>
+   * @param string $methodName Method name
+   * @return mixed Result
+   */
+  public static function invokeStaticMethodAllMerge($methodName, $staticCache = true) {
+    static $results = array(); // Cache level 1
+    
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-all-merge-' . $methodName)) {
+      // Cache level 2
+      $results[$methodName] = self::getVariable('system-static-method-all-merge-' . $methodName);
+    }
+    
+    if (!\array_key_exists($methodName, $results)) {
+      $results[$methodName] = self::invokeMethodAllMerge($methodName, $staticCache);
+      if ($staticCache) {
+        self::setVariable('system-static-method-all-merge-' . $methodName, $results[$methodName]);
+      }
+    }
+    return $results[$methodName];
+  }
+  
+  /**
+   * Returns a cached module configuration value.
+   * <p>Runs invokeMethod and caches its results.</p>
+   * <p>Unlike 'invokeMethod', this function does not accept any additional 
+   *  argument to pass to the controller methods.</p>
+   * @param string $methodName Method name
+   * @param boolean $staticCache TRUE if you wish to caches the results on the
+   *  file system (cache is implemented by using getVariable and setVariable 
+   *  methods)
+   * @return mixed Result
+   */
+  public static function invokeStaticMethod($methodName, $staticCache = true) {
+    static $results = array(); // Cache level 1
+    
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-' . $methodName)) {
+      // Cache level 2
+      $results[$methodName] = self::getVariable('system-static-method-' . $methodName);
+    }
+    
+    if (!\array_key_exists($methodName, $results)) {
+      $results[$methodName] = self::invokeMethod($methodName);
+      if ($staticCache) {
+        self::setVariable('system-static-method-' . $methodName, $results[$methodName]);
+      }
+    }
+    return $results[$methodName];
+  }
+  
+  /**
+   * Returns a cached module configuration value.
+   * <p>Runs invokeMethodAll and caches its results.</p>
+   * <p>Unlike 'invokeMethodAll', this function does not accept any additional 
+   *  argument to pass to the controller methods.</p>
+   * @param string $methodName Method name
+   * @param boolean $staticCache TRUE if you wish to caches the results on the
+   *  file system (cache is implemented by using getVariable and setVariable 
+   *  methods)
+   * @return mixed Result
+   */
+  public static function invokeStaticMethodAll($methodName, $staticCache = true) {
+    static $results = array(); // Cache level 1
+    
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-all-' . $methodName)) {
+      // Cache level 2
+      $results[$methodName] = self::getVariable('system-static-method-all-' . $methodName);
+    }
+    
+    if (!\array_key_exists($methodName, $results)) {
+      $results[$methodName] = self::invokeMethodAll($methodName);
+      if ($staticCache) {
+        self::setVariable('system-static-method-all-' . $methodName, $results[$methodName]);
+      }
+    }
+    return $results[$methodName];
+  }
+
+  /**
+   * Alias of invokeMethodAll
+   * @param string $eventName Method name
+   */
+  public static function raiseControllerEvent($eventName) {
+    return \call_user_func_array(array('self', 'invokeMethodAll'), \func_get_args());
+  }
+  
+  /**
+   * Invokes a controller method.
+   * <p>Searches for the highest priority module class which implements the 
+   *  method and calls it. If the method isn't implemented by any module class, 
+   *  it returns null.</p>
+   * <p>This function takes an unlimited number of arguments.</p>
+   * <p>Every argument (apart from the method name) is passed to the module 
+   *  class method.</p>
+   * 
+   * <p>Usage example:</p>
+   * <code>
    * <pre>
    *  class Module1 {
    *    public static function x() {
@@ -686,96 +762,125 @@ class Main {
    *      );
    *    }
    *  }
+   *  class Module3 {
+   *    public static function x() {
+   *      return 'module3';
+   *    }
+   *  }
+   *  class Module4 {
+   *    public static function x() {
+   *      return null;
+   *    }
+   *  }
    * </pre>
-   * Assuming both the modules are enabled and 'Module1' has higher priority,
-   *  than the following statement:
+   * </code>
+   * 
+   * <p>Assuming modules are all enabled and priority order is 
+   *  Module1 > Module2 > Module3 > Module4, then:</p>
+   * 
+   * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
+   * 
+   * <p>Will print out:</p>
+   * 
    * <pre>
-   * print_r(Main::moduleConfigArray('x'));
+   * array('a' => 'module1', 'b' => 'module1')
    * </pre>
-   * Will print out:
-   * <pre>
-   * array (
-   *   'a' => 'module1',
-   *   'b' => 'module2',
-   *   'c' => 'module2'
-   * )
-   * </pre>
-   * Please note that unlike 'invokeMethodAll', this function does not accept 
-   *  any argument other than $methodName. The controller methods are then 
-   *  called without additional arguments.
-   * @param string $methodName Method name
-   * @return mixed Result
+   * @param string $methodName Name of the module class method
+   * @return Returns the implementing method results.
    */
-  public static function moduleConfigArray($eventName) {
-    $results = self::getVariable('module-config-' . $eventName, null);
-    if (\is_null($results)) {
-      $results = array();
-      $v = self::invokeMethodAll($eventName);
-      foreach ($v as $m) {
-        if (!\is_array($m)) {
-          // skipping all non-array values
-          continue;
-        }
-        $results = $m + $results;
-      }
-      self::setVariable('module-config-' . $eventName, $results);
+  public static function invokeMethod($methodName) {
+    static $modules = null;
+    static $methodBinding = array();
+    
+    if (\is_null($modules)) {
+      $configuration = self::configuration();
+      // Modules are ordered according to their weight ascending
+      // We want to search for the right method to run following the descending
+      //  order...
+      $modules = $configuration['modules'];
+      \rsort($modules);
     }
-    return $results;
-  }
-  
-  /**
-   * Returns a cached module configuration value.
-   * Runs invokeMethod and cached its results.
-   * Unlike 'invokeMethod', this function does not accept any argument other 
-   *  than $methodName. The controller methods are then called without additional
-   *  arguments.
-   * @param string $methodName Method name
-   * @return mixed Result
-   */
-  public static function moduleConfig($methodName) {
-    $results = self::getVariable('module-config-' . $methodName, null);
-    if (\is_null($results)) {
-      $results = \end(self::invokeMethod($methodName));
-      self::setVariable('module-config-' . $methodName, $results);
+    
+    $args = array();
+    if (\func_num_args() > 1) {
+      $args = \func_get_args();
+      \array_shift($args);
     }
-    return $results;
-  }
-  
-  /**
-   * Returns a cached module configuration value.
-   * Runs invokeMethodAll and cached its results.
-   * Unlike 'invokeMethodAll', this function does not accept any argument other 
-   *  than $methodName. The controller methods are then called without 
-   *  additional arguments.
-   * @param string $methodName Method name
-   * @return mixed Result
-   */
-  public static function moduleConfigAll($methodName) {
-    $results = self::getVariable('module-config-' . $methodName, null);
-    if (\is_null($results)) {
-      $results = self::invokeMethodAll($methodName); // last element of the array
-      self::setVariable('module-config-' . $methodName, $results);
-    }
-    return $results;
-  }
 
-  /**
-   * Alias of invokeMethodAll
-   * @param string $eventName Method name
-   */
-  public static function raiseControllerEvent($eventName) {
-    return \call_user_func_array(array('self', 'invokeMethodAll'), \func_get_args());
+    // Cache
+    if (!\array_key_exists($methodName, $methodBinding)) {
+      foreach ($modules as $module) {
+        $class = $module['class'];
+        if (\is_callable(array($class, $methodName))) {
+          $method = array($class, $methodName);
+          break;
+        }
+      }
+      $methodBinding[$methodName] = $method;
+    }
+    
+    return (!empty($methodBinding[$methodName]))
+      ? \call_user_func_array($methodBinding[$methodName], $args)
+      : null;
   }
   
   /**
    * Invokes a controller method.
-   * Searches for module classes implementing the method and runs every method
-   *  following the modules priority order.
-   * This function takes an unlimited number of arguments.
-   * Every argument (apart the method name) is passed to the module class
-   *  method.
+   * <p>Searches for module classes implementing the method and runs every
+   *  method following the modules priority order.</p>
+   * <p>This function takes an unlimited number of arguments.</p>
+   * <p>Every argument (apart from the method name) is passed to the module 
+   *  class method.</p>
+   * 
+   * <p>Usage example:</p>
+   * <code>
+   * <pre>
+   *  class Module1 {
+   *    public static function x() {
+   *      return array(
+   *        'a' => 'module1',
+   *        'b' => 'module1'
+   *      );
+   *    }
+   *  }
+   *  class Module2 {
+   *    public static function x() {
+   *      return array(
+   *        'b' => 'module2',
+   *        'c' => 'module2'
+   *      );
+   *    }
+   *  }
+   *  class Module3 {
+   *    public static function x() {
+   *      return 'module3';
+   *    }
+   *  }
+   *  class Module4 {
+   *    public static function x() {
+   *      return null;
+   *    }
+   *  }
+   * </pre>
+   * </code>
+   * 
+   * <p>Assuming modules are all enabled and priority order is 
+   *  Module1 > Module2 > Module3 > Module4, then:</p>
+   * 
+   * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
+   * 
+   * <p>Will print out:</p>
+   * 
+   * <pre>
+   * array (
+   *   0 => null
+   *   1 => 'module3',
+   *   2 => array('b' => 'module2', 'c' => 'module2'),
+   *   3 => array('a' => 'module1', 'b' => 'module1'),
+   * )
+   * </pre>
    * @param string $methodName Name of the module class method
-   * @return Returns an array of non-null values returned by module classes
+   * @return Returns an array of values returned by module classes
    */
   public static function invokeMethodAll($methodName) {
     // Cache - array ('method name' => callable[])
@@ -805,9 +910,7 @@ class Main {
 
       foreach ($methodBinding[$methodName] as $handler) {
         $x = \call_user_func_array($handler, $args);
-        if (!\is_null($x)) {
-          $results[] = $x;
-        }
+        $results[] = $x;
       }
     }
     return $results;
@@ -815,55 +918,111 @@ class Main {
   
   /**
    * Invokes a controller method.
-   * Searches for the highest priority module class which implements the method
-   *  and calls it. If the method isn't implemented by any module class, it 
-   *  returns null.
-   * This function takes an unlimited number of arguments.
-   * Every argument (apart the method name) is passed to the module class
-   *  method.
+   * <p>Searches for module classes implementing the method and runs every
+   *  method following the modules priority order.</p>
+   * <p>This function takes an unlimited number of arguments.</p>
+   * <p>Every argument (apart from the method name) is passed to the module 
+   *  class method.</p>
+   * <p>
+   * This method progressively merges results rather than returning their list.
+   * To get the list containing every result please use invokeMethodAll.
+   * <br/>
+   * If an invoked controller method doesn't return an array, it will not be 
+   *  used to produce the resulting array.
+   * </p>
+   * 
+   * <p>Usage example:</p>
+   * <code>
+   * <pre>
+   *  class Module1 {
+   *    public static function x() {
+   *      return array(
+   *        'a' => 'module1',
+   *        'b' => 'module1'
+   *      );
+   *    }
+   *  }
+   *  class Module2 {
+   *    public static function x() {
+   *      return array(
+   *        'b' => 'module2',
+   *        'c' => 'module2'
+   *      );
+   *    }
+   *  }
+   *  class Module3 {
+   *    public static function x() {
+   *      return 'module3';
+   *    }
+   *  }
+   *  class Module4 {
+   *    public static function x() {
+   *      return null;
+   *    }
+   *  }
+   * </pre>
+   * </code>
+   * 
+   * <p>Assuming modules are all enabled and priority order is 
+   *  Module1 > Module2 > Module3 > Module4, then:</p>
+   * 
+   * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
+   * 
+   * <p>Will print out:</p>
+   * 
+   * <pre>
+   * array (
+   *   'a' => 'module1',
+   *   'b' => 'module1',
+   *   'c' => 'module2'
+   * )
+   * </pre>
    * @param string $methodName Name of the module class method
-   * @return Returns the implementing method results.
+   * @return Returns an array of non-null values returned by module classes
    */
-  public static function invokeMethod($methodName) {
-    static $modules = null;
+  public static function invokeMethodAllMerge($methodName) {
+    // Cache - array ('method name' => callable[])
     static $methodBinding = array();
     
-    if (\is_null($modules)) {
+    if (!\array_key_exists($methodName, $methodBinding)) {
+      $methodBinding[$methodName] = array();
+      
       $configuration = self::configuration();
-      $modules = $configuration['modules'];
-      \array_reverse($modules);
-    }
     
-    $args = array();
-    if (\func_num_args() > 1) {
-      $args = \func_get_args();
-      \array_shift($args);
-    }
-
-    // Cache
-    if (!\array_key_exists($methodBinding, $methodBinding)) {
-      foreach ($modules as $module) {
+      foreach ($configuration['modules'] as $module) {
         $class = $module['class'];
         if (\is_callable(array($class, $methodName))) {
-          $method = array($class, $methodName);
-          break;
+          $methodBinding[$methodName][] = array($class, $methodName);
         }
       }
-      $methodBinding[$methodName] = $method;
     }
     
-    return (!empty($methodBinding[$methodName]))
-      ? \call_user_func_array($methodBinding[$methodName], $args)
-      : null;
+    $results = array();
+    if (!empty($methodBinding[$methodName])) {
+      // Arguments to be passed
+      $args = array();
+      if (\func_num_args() > 1) {
+        $args = \func_get_args();
+        \array_shift($args);
+      }
+
+      foreach ($methodBinding[$methodName] as $handler) {
+        $x = \call_user_func_array($handler, $args);
+        if (\is_array($x)) {
+          $results = $x + $results;
+        }
+      }
+    }
+    return $results;
   }
   
   /**
    * Invokes a model method.
-   * Searches for model classes implementing the method and runs every method
-   *  following the modules priority order.
-   * This function takes an unlimited number of arguments.
-   * Every argument (apart the method name) is passed to the module class
-   *  method.
+   * <p>Searches for model classes implementing the method and runs every method
+   *  following the modules priority order.</p>
+   * <p>This function takes an unlimited number of arguments.</p>
+   * <p>Every argument (apart from the method name) is passed to the module 
+   *  class method.</p>
    * @param string $methodName Name of the module class method
    * @return Returns an array of non-null values returned by model classes
    */
@@ -922,7 +1081,8 @@ class Main {
 
   /**
    * Returns an instance of the template manager.
-   * Implements the singleton design pattern always returning the same instance.
+   * <p>Implements the singleton design pattern always returning the same 
+   *  instance.</p>
    * @return \system\view\TemplateManager Template manager
    */
   public static function getTemplateManager() {
@@ -935,7 +1095,7 @@ class Main {
   
   /**
    * Returns the absolute path to the temp folder. 
-   * Typically this is used for temporary application data.
+   * <p>Typically this is used for temporary application data.</p>
    * @param string $path Path relative to the data folder
    * @return type
    */
@@ -945,7 +1105,7 @@ class Main {
   
   /**
    * Returns the absolute path to the data folder. 
-   * Typically this is used for file upload and other application data.
+   * <p>Typically this is used for file upload and other application data.</p>
    * @param string $path Path relative to the data folder
    * @return string Data path
    */
@@ -966,15 +1126,24 @@ class Main {
   }
   
   /**
-   * Get a variable. Variable are stored in the file system via method 
-   *  setVariable
+   * Checks whether a cached variable exist.
+   * @param string $name Variable name
+   * @return boolean TRUE if the variable exists
+   */
+  public static function variableExists($name) {
+    return \file_exists("config/vars/{$name}.var");
+  }
+  
+  /**
+   * Gets a cached variable. Variable are stored in the file system via method 
+   *  setVariable.
    * @param string $name Key
    * @param mixed $default Default value (returned in case the variable is not
    *  defined)
    * @return mixed Value
    */
   public static function getVariable($name, $default = null) {
-    if (\file_exists("config/vars/" . $name . ".var")) {
+    if (self::variableExists($name)) {
       $fp = \fopen("config/vars/" . $name . ".var", "r");
       $content = "";
       while ($s = \fread($fp, 4096)) {
@@ -989,8 +1158,8 @@ class Main {
   }
   
   /**
-   * Set a variable. Variables are stored in the file system and can be accessed
-   *  via method getVariable
+   * Caches a variable. Variables are stored in the file system and can be 
+   *  accessed via method getVariable.
    * @param string $name Key
    * @param mixed $value Value
    */
@@ -1019,8 +1188,8 @@ class Main {
   
   /**
    * Returns the ciderbit session.
-   * Examples: 
-   * <code>
+   * <p>Examples:
+   * <pre><code>
    * // Returns the entire ciderbit session
    * session();
    * 
@@ -1039,7 +1208,8 @@ class Main {
    * $x = 'asd';
    * echo Main::session('test', 'x');
    * Will print out 'asd'
-   * </code>
+   * </code></pre>
+   * </p>
    * @param string $module Module [optional, if not passed the whole ciderbit 
    *  session is returned]
    * @param string $key Key [optional, if not passed the whole module session
@@ -1129,6 +1299,13 @@ class Main {
    */
   public static function pushMessage($message, $class = 'info') {
     $messages = &self::getMessages();
+    
+    if (\is_array($message) || \is_object($message)) {
+      $message =
+        '<pre>'
+        . utils\Utils::varDump($message)
+        . '</pre>';
+    }
     
     $messages[] = array(
       'class' => $class,

@@ -57,7 +57,7 @@
           <?php endif; ?>
         </div>
         <div id="columns-wrapper">
-          <?php $this->api->import($website['outlineLayoutTemplate']); ?>
+          <?php $this->api->import('main-content'); ?>
         </div>
       </div>
     </div>

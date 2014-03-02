@@ -48,6 +48,89 @@
             </div>
           </div>
           <div class="node-lang-<?php echo $lang; ?>-group">
+            <!--
+            Title
+            -->
+            <div class="row de-row">
+              <div class="col-md-2 col-sm-2 de-label-wrapper">
+                <?php echo $this->api->formRSInputLabel(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'title',
+                  'label' => $this->api->t('Title')
+                )); ?>
+              </div>
+              <div class="col-md-10 col-sm-10 de-input-wrapper">
+                <?php echo $this->api->formRSInput(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'title',
+                  'attributes' => array('class' => 'l form-control')
+                )); ?>
+                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'title')); ?>
+              </div>
+            </div>
+            <!--
+            Subtitle
+            -->
+            <div class="row de-row">
+              <div class="col-md-2 col-sm-2 de-label-wrapper">
+                <?php echo $this->api->formRSInputLabel(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'subtitle',
+                  'label' => $this->api->t('Subtitle')
+                )); ?>
+              </div>
+              <div class="col-md-10 col-sm-10 de-input-wrapper">
+                <?php echo $this->api->formRSInput(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'subtitle',
+                  'attributes' => array('class' => 'xl form-control')
+                )); ?>
+                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'subtitle')); ?>
+              </div>
+            </div>
+            <!--
+            Body
+            -->
+            <div class="row de-row">
+              <div class="col-md-2 de-label-wrapper">
+                <?php echo $this->api->formRSInputLabel(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'body',
+                  'label' => $this->api->t('Body')
+                )); ?>
+              </div>
+              <div class="col-md-10 de-input-wrapper">
+                <?php echo $this->api->formRSInput(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'body',
+                  'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
+                )); ?>
+                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'body')); ?>
+              </div>
+            </div>
+            <!--
+            Preview
+            -->
+            <div class="row de-row">
+              <div class="col-md-2 de-label-wrapper">
+                <?php echo $this->api->formRSInputLabel(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'preview',
+                  'label' => $this->api->t('Preview')
+                )); ?>
+              </div>
+              <div class="col-md-10 de-input-wrapper">
+                <?php echo $this->api->formRSInput(array(
+                  'recordset' => 'node_' . $lang,
+                  'path' => 'preview',
+                  'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
+                )); ?>
+                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'preview')); ?>
+              </div>
+            </div>
+            <!-- 
+            URN 
+            -->
             <div class="row de-row">
               <div class="col-md-2 col-sm-2 de-label-wrapper">
                 <?php echo $this->api->formRSInputLabel(array(
@@ -77,6 +160,9 @@
                 <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'urn')); ?>
               </div>
             </div>
+            <!-- 
+            Description 
+            -->
             <div class="row de-row">
               <div class="col-md-2 col-sm-2 de-label-wrapper">
                 <?php echo $this->api->formRSInputLabel(array(
@@ -97,74 +183,6 @@
                   </p>
                 </div>
                 <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'description')); ?>
-              </div>
-            </div>
-            <div class="row de-row">
-              <div class="col-md-2 col-sm-2 de-label-wrapper">
-                <?php echo $this->api->formRSInputLabel(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'title',
-                  'label' => $this->api->t('Title')
-                )); ?>
-              </div>
-              <div class="col-md-10 col-sm-10 de-input-wrapper">
-                <?php echo $this->api->formRSInput(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'title',
-                  'attributes' => array('class' => 'l form-control')
-                )); ?>
-                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'title')); ?>
-              </div>
-            </div>
-            <div class="row de-row">
-              <div class="col-md-2 col-sm-2 de-label-wrapper">
-                <?php echo $this->api->formRSInputLabel(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'subtitle',
-                  'label' => $this->api->t('Subtitle')
-                )); ?>
-              </div>
-              <div class="col-md-10 col-sm-10 de-input-wrapper">
-                <?php echo $this->api->formRSInput(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'subtitle',
-                  'attributes' => array('class' => 'xl form-control')
-                )); ?>
-                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'subtitle')); ?>
-              </div>
-            </div>
-            <div class="row de-row">
-              <div class="col-md-2 de-label-wrapper">
-                <?php echo $this->api->formRSInputLabel(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'body',
-                  'label' => $this->api->t('Body')
-                )); ?>
-              </div>
-              <div class="col-md-10 de-input-wrapper">
-                <?php echo $this->api->formRSInput(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'body',
-                  'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
-                )); ?>
-                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'body')); ?>
-              </div>
-            </div>
-            <div class="row de-row">
-              <div class="col-md-2 de-label-wrapper">
-                <?php echo $this->api->formRSInputLabel(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'preview',
-                  'label' => $this->api->t('Preview')
-                )); ?>
-              </div>
-              <div class="col-md-10 de-input-wrapper">
-                <?php echo $this->api->formRSInput(array(
-                  'recordset' => 'node_' . $lang,
-                  'path' => 'preview',
-                  'attributes' => array('class' => 'xxl form-control richtext wysiwyg')
-                )); ?>
-                <?php echo $this->api->formRSInputError(array('recordset' => 'node_' . $lang, 'path' => 'preview')); ?>
               </div>
             </div>
           </div>

@@ -157,5 +157,3 @@ components:
         action: ReadByUrn
       - url:
         action: Home
-      - url: .*
-        action: NotFound

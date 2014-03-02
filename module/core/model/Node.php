@@ -29,8 +29,18 @@ class Node {
    * @return array List of node types
    */
   public static function getValidChildrenTypes(RecordsetInterface $node) {
-    $nodeTypes = \system\utils\Cache::nodeTypes();
+    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
     return $nodeTypes[$node->type]['children'];
+  }
+  
+  /**
+   * Returns an array of valid children types (according to the node type)-
+   * @param \system\model\RecordsetInterface $node
+   * @return array List of node types
+   */
+  public static function getValidFileKeys(RecordsetInterface $node) {
+    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
+    return $nodeTypes[$node->type]['files'];
   }
   
   /**

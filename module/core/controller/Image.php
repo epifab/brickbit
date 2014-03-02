@@ -14,7 +14,7 @@ class Image extends Component {
   
   public static function runVersion() {
     list($version, $nodeId, $nodeIndex, $virtualName, $ext) = $this->getUrlArgs();
-    if (!\array_key_exists($version, \system\utils\Cache::imageVersionMakers())) {
+    if (!\array_key_exists($version, \system\Main::invokeStaticMethodAllMerge('imageVersionMakers'))) {
       throw new \system\exceptions\PageNotFound();
     }
     $rsb = new RecordsetBuilder('node_file');
@@ -35,7 +35,7 @@ class Image extends Component {
     
     if (!\file_exists($fileName) || \filetime($fileName) < $nodeFile->file->last_update) {
       // file version doesn't exist or outdated
-      $handler = \system\utils\Cache::imageVersionMakers();
+      $handler = \system\Main::invokeStaticMethodAllMerge('imageVersionMakers');
       if (!isset($handler[$version])) {
         throw new \system\exceptions\PageNotFound();
       } else {

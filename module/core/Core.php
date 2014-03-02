@@ -1,7 +1,80 @@
 <?php
 namespace module\core;
 
+use system\Component;
+use system\utils\Lang;
+use system\utils\HTMLHelpers;
+use system\utils\Login;
+use system\Theme;
+
 class Core {
+  /**
+   * Implements controller event initDatamodel()
+   */
+  public static function initDatamodel() {
+    return array(
+      'system' => array(
+        'component' => self::initDatamodelComponentInfo(Component::getCurrentComponent()),
+        'mainComponent' => self::initDatamodelComponentInfo(Component::getMainComponent()),
+        // Default response type
+        'responseType' => Component::RESPONSE_TYPE_READ,
+        'ajax' => HTMLHelpers::isAjaxRequest(),
+        'ipAddress' => HTMLHelpers::getIpAddress(),
+        'lang' => Lang::getLang(),
+        'langs' => \config\settings()->LANGUAGES,
+        'theme' => Theme::getTheme(),
+        'themes' => \config\settings()->THEMES,
+        'messages' => array()
+      ),
+      'user' => Login::getLoggedUser(),
+      'website' => self::initDatamodelWebsiteInfo(),
+      'page' => array(
+        'title' => '',
+        'url' => Component::getMainComponent()->getUrl(),
+        'meta' => array(),
+        'js' => array(),
+        'css' => array(),
+      )
+    );
+  }
+  
+  private static function initDatamodelComponentInfo(\system\Component $component) {
+    static $info = array();
+    
+    if (!isset($info[$component->getRequestId()])) {
+      $info[$component->getRequestId()] = array(
+        'name' => $component->getName(),
+        'module' => $component->getModule(),
+        'action' => $component->getAction(),
+        'url' => $component->getUrl(),
+        'urlArgs' => $component->getUrlArgs(),
+        'requestId' => $component->getRequestId(),
+        'requestType' => $component->getRequestTime(),
+        'requestData' => $component->getRequestData(),
+        'nested' => $component->isNested(),
+        'alias' => $component->getAlias()
+      );
+    }
+    return $info[$component->getRequestId()];
+  }
+  
+  private static function initDatamodelWebsiteInfo() {
+    static $settings = null;
+    if (\is_null($settings)) {
+      $settings = array(
+        'title' => \config\settings()->SITE_TITLE,
+        'subtitle' => \config\settings()->SITE_SUBTITLE,
+        'domain' => \config\settings()->DOMAIN,
+        'base' => \config\settings()->SITE_ADDRESS,
+        'defaultLang' => \config\settings()->DEFAULT_LANG,
+      );
+    }
+    return $settings;
+  }
+  
+  /**
+   * Implements controller event watchdog()
+   */
   public static function watchdog($code, $message, $args, $level) {
     static $levelIndexes = array();
     if (!isset($levelIndexes[$level])) {
@@ -31,13 +104,15 @@ class Core {
     $levelIndexes[$level]++;
   }
   
+  /**
+   * Implements controller event preprocessTemplate()
+   */
   public static function preprocessTemplate() {
     
   }
   
   /**
-   * Define node types and variables allowed files / node children
-   * @return type 
+   * Implements controller event nodeTypes()
    */
   public static function nodeTypes() {
     return array(
@@ -54,7 +129,10 @@ class Core {
         'children' => array(
           'article'
         ),
-        'files' => array() // no files allowed for pages
+        'files' => array(
+          'images',
+          'attachments'
+        ) // no files allowed for pages?
       ),
       'article' => array(
         'label' => \cb\t('Article'),
@@ -126,6 +204,9 @@ class Core {
     );
   }
 
+  /**
+   * Implements controller event imageVersion()
+   */
   public static function imageVersion($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
     switch ($version) {
       case 'thumb':
@@ -161,6 +242,9 @@ class Core {
     \system\utils\File::saveImage($nodeFile->file->path, $fileName, 0, $y);
   }
   
+  /**
+   * Implements controller event imageVersionMakers()
+   */
   public static function imageVersionMakers() {
     $makers = array(
       'thumb' => array(\system\Module::getNamespace('core') . 'Core', 'imageVersion'),
@@ -195,10 +279,9 @@ class Core {
     return $makers;
   }
   
-  public static function cron() {
-
-  }
-  
+  /**
+   * Implements controller event onRun()
+   */
   public static function onRun(\system\Component $component) {
     $component->addTemplate('website-logo', 'header');
     $component->addTemplate('langs-control', 'header-sidebar');
@@ -208,12 +291,18 @@ class Core {
     //$component->addJs(\system\Module::getAbsPath('core') . 'js/core.js');
   }
   
+  /**
+   * Implements controller event widgetsMap()
+   */
   public static function widgetsMap() {
     return array(
       'password' => '\module\core\view\WidgetPassword',
     );
   }
   
+  /**
+   * Implements controller event metaTypesMap()
+   */
   public static function metaTypesMap() {
     return array(
       'html' => '\module\core\model\MetaHTML',

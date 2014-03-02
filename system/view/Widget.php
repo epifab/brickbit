@@ -15,7 +15,7 @@ class Widget {
       return self::$widgets[$name];
     }
 
-    $wmap = \system\utils\Cache::widgetsMap();
+    $wmap = \system\Main::invokeStaticMethodAllMerge('widgetsMap');
     
     if (!\array_key_exists($name, $wmap)) {
       throw new \system\exceptions\InternalError('Unknown widget <em>@name</em>', array('@name' => $name));

@@ -120,15 +120,14 @@ class Form {
    * @return mixed The current input value
    */
   public function addInput($name, $widgetName, $defaultValue, array $input = array(), $metaType = null) {
-//    if (!isset($this->inputInfo[$name])) {
+    if (!isset($this->inputInfo[$name])) {
       $this->inputInfo[$name] = array(
         'name' => $name,
         'value' => $defaultValue,
         'widget' => $widgetName,
         'metaType' => $metaType
       ) + $input;
-//    }
-    $this->inputInfo[$name]['value'] = $defaultValue;
+    }
     return $this->inputInfo[$name]['value'];
   }
   

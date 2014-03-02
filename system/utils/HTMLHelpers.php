@@ -132,8 +132,6 @@ class HTMLHelpers {
     );
     $datamodel['system']['responseType'] = 'ERROR';
     
-    \system\utils\Log::create('system', $exception->getMessage(), array(), \system\LOG_ERROR);
-
     try {
       
       $templateManager->setMainTemplate($template);

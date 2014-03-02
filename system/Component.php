@@ -2,16 +2,8 @@
 namespace system;
 
 use system\model\RecordsetBuilder;
-use system\model\Recordset;
-use system\model\RecordsetInterface;
-
 use system\utils\HTMLHelpers;
-use system\utils\Lang;
-use system\utils\Login;
-use system\Theme;
 use system\TemplateManager;
-use system\utils\Utils;
-
 use system\exceptions\InternalError;
 use system\exceptions\AuthorizationError;
 use system\exceptions\ValidationError;
@@ -113,9 +105,6 @@ abstract class Component {
     if (\is_callable(array($class, "access" . $action))) {
       return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $user);
     } 
-//    else if (\is_callable(array($class, "access"))) {
-//      return (bool)\call_user_func(array($class, "access"), $action, $urlArgs, $request, $user);
-//    }
     return true;
   }
   
@@ -157,32 +146,6 @@ abstract class Component {
   protected function defaultRunHandler() {
     throw new \system\exceptions\PageNotFound();
   }
-  
-//  /**
-//   * Set a value to the datamodel.
-//   * @param mixed $key Key string or array representing the path to the key
-//   * @param mixed $value Value to add to the datamodel
-//   */
-//  public function setData($key, $value) {
-//    if (\is_array($key)) {
-//      $dm =& $this->datamodel;
-//      \reset($key);
-//      do {
-//        $k1 = current($key);
-//        $k2 = next($key);
-//        if ($k2 === false) {
-//          $dm[$k1] = $value;
-//        }
-//        else if (!\array_key_exists($k1, $dm)) {
-//          $dm[$k1] = array();
-//        }
-//        $dm =& $dm[$k1];
-//      } while ($k2);
-//    }
-//    else {
-//      $this->datamodel[$key] = $value;
-//    }
-//  }
   
   /**
    * Get the full datamodel
@@ -283,73 +246,10 @@ abstract class Component {
           : 'HTML';
     }
   }
-  
-  private function getComponentInfo() {
-    static $info = null;
-    if (\is_null($info)) {
-      $info = array(
-        'name' => $this->name,
-        'module' => $this->getModule(),
-        'action' => $this->action,
-        'url' => $this->url,
-        'urlArgs' => $this->urlArgs,
-        'requestId' => $this->requestId,
-        'requestType' => $this->requestType,
-        'requestData' => $this->requestData,
-        'nested' => $this->nested,
-        'alias' => $this->alias
-      );
-    }
-    return $info;
-  }
-  
-  private static function getWebsiteInfo() {
-    static $settings = null;
-    if (\is_null($settings)) {
-      $settings = array(
-        'title' => \config\settings()->SITE_TITLE,
-        'subtitle' => \config\settings()->SITE_SUBTITLE,
-        'domain' => \config\settings()->DOMAIN,
-        'base' => \config\settings()->SITE_ADDRESS,
-        'defaultLang' => \config\settings()->DEFAULT_LANG,
-        'outlineLayoutTemplate' => 'outline-layout-2cols'
-      );
-    }
-    return $settings;
-  }
-  
+
   private function initView() {
-    $this->tplManager = \system\Main::getTemplateManager();
-    
-    $mainComponent = self::getMainComponent();
-    if (\is_null($mainComponent)) {
-      $mainComponent = $this;
-    }
-    
-    $this->datamodel = array(
-      'system' => array(
-        'component' => $this->getComponentInfo(),
-        'mainComponent' => $mainComponent->getComponentInfo(),
-        // default response type
-        'responseType' => self::RESPONSE_TYPE_READ,
-        'ajax' => HTMLHelpers::isAjaxRequest(),
-        'ipAddress' => HTMLHelpers::getIpAddress(),
-        'lang' => Lang::getLang(),
-        'langs' => \config\settings()->LANGUAGES,
-        'theme' => Theme::getTheme(),
-        'themes' => \config\settings()->THEMES,
-        'messages' => array()
-      ),
-      'user' => Login::getLoggedUser(),
-      'website' => $this->getWebsiteInfo(),
-      'page' => array(
-        'title' => '',
-        'url' => $mainComponent->url,
-        'meta' => array(),
-        'js' => array(),
-        'css' => array(),
-      )
-    );
+    $this->tplManager = Main::getTemplateManager();
+    $this->datamodel = Main::invokeMethodAllMerge('initDatamodel');
   }
   
   /**
@@ -692,7 +592,7 @@ abstract class Component {
         }
 
         if (!$this->nested) {
-          \system\Main::invokeMethodAll('preprocessTemplate');
+          Main::invokeMethodAll('preprocessTemplate');
         }
         
         if (!\is_null($responseType)) {
@@ -707,7 +607,7 @@ abstract class Component {
       }
 
       catch (\system\exceptions\Redirect $ex) {
-        \system\Main::run($ex->getUrl());
+        Main::run($ex->getUrl());
       }
     }
     

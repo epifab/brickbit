@@ -26,41 +26,7 @@ abstract class MetaType {
 //  }
   
   public static function getMetaTypesMap() {
-    return \system\utils\Cache::metaTypesMap();
-    
-//    static $map = null;
-//    if (\is_null($map)) {
-//      if (\config\settings()->CORE_CACHE) {
-//        $map = \system\Main::get('system-mtmap', null);
-//        if (!\is_null($map)) {
-//          return $map;
-//        }
-//      }
-//      $map = array();
-//      
-//      // default overridable values
-//      $map['integer'] = '\\system\\metatypes\\MetaInteger';
-//      $map['decimal'] = '\\system\\metatypes\\MetaDecimal';
-//      $map['string'] = '\\system\\metatypes\\MetaString';
-//      $map['boolean'] = '\\system\\metatypes\\MetaBoolean';
-//      $map['date'] = '\\system\\metatypes\\MetaDate';
-//      $map['datetime'] = '\\system\\metatypes\\MetaDateTime';
-//      $map['virtual'] = '\\system\\metatypes\\MetaString';
-//      
-//      $conf = \system\Main::raiseModelEvent('metaTypesMap');
-//
-//      foreach ($conf as $m) {
-//        if (\is_array($m)) {
-//          foreach ($m as $type => $class) {
-//            $map[$type] = $class;
-//          }
-//        }
-//      }
-//      if (\config\settings()->CORE_CACHE) {
-//        \system\utils\Main::set('system-mtmap', $map);
-//      }
-//    }
-//    return $map;
+    return \system\Main::invokeStaticMethodAllMerge('metaTypesMap');
   }
   
   public static function newMetaType($name, $type, $attributes = array()) {

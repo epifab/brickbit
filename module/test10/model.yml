@@ -1,0 +1,25 @@
+tables:
+  test:
+    fields:
+      id:
+        type: integer
+        label: Id test 10
+    virtuals:
+      test1:
+        label: Test 10
+        handler: |
+          function($x) {
+            return '10';
+          }
+      test2:
+        label: Test 10
+        handler: |
+          function($x) {
+            return '10';
+          }
+      test3:
+        label: Test 10
+        handler: |
+          function($x) {
+            return '10';
+          }
