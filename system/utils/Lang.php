@@ -53,7 +53,7 @@ class Lang {
     return self::$lang;
   }
   
-  public static function translate($sentence, $args=null) {
+  public static function translate($sentence, $args = null) {
     // Make sure the vocabulary has been loaded
     self::getLang();
     
@@ -66,7 +66,7 @@ class Lang {
         $sentence = self::$vocabulary[$sentence];
       }
     }
-    if (!\is_null($args)) {
+    if (!empty($args)) {
       foreach ($args as $key => $value) {
         $sentence = \str_replace($key, $value, $sentence);
       }

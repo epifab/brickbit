@@ -9,14 +9,13 @@ class WidgetHidden implements WidgetInterface {
     $args = array(
       'type' => 'hidden',
       'name' => $input['name'],
-      'value' => $input['value'],
-      'class' => 'de-input hidden' . \cb\array_item('class', $attributes, array('default' => '', 'prefix' => ' '))
+      'value' => $input['state'],
     ) + $attributes;
     
     return '<input' . \cb\xml_arguments($args) . ' />';
   }
 
   public function fetch($value, array $input) {
-    return $input['value'];
+    return $input['state'];
   }
 }

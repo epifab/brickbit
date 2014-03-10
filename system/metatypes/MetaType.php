@@ -57,13 +57,17 @@ abstract class MetaType {
   public function getAttr($key, $options = array()) {
     return \cb\array_item($key, $this->attributes, $options);
   }
-
+  
   public function getAttributes() {
     return $this->attributes;
   }
 
   public function getName() {
     return $this->name;
+  }
+  
+  public function getLabel() {
+    return $this->getAttr('label', array('default' => $this->getName()));
   }
 
   public function getType() {

@@ -1,3 +1,4 @@
+<h3>Resources</h3>
 <?php foreach ($form->getRecordset('node')->valid_file_keys as $fileKey): ?>
   <form class="dataedit fileupload" id="fileupload-<?php echo $fileKey; ?>" data-filekey="<?php echo $fileKey; ?>" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
     <fieldset>

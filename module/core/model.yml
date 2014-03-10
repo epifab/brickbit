@@ -181,7 +181,14 @@ tables:
       urn:
         type: plaintext
         label: URN
-        regexp: /^[A-Za-z0-9_-]*$/
+        validation:
+          - regexp: /^[A-Za-z0-9_-]+$/
+            message: Invalid @label
+          - minlength: 3
+            message: @label too short
+          - maxlength: 32
+            message: @label too long
+        regexp: /^[A-Za-z0-9_-]+$/
         minlength: 3
         maxlength: 32
       description:

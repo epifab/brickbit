@@ -24,7 +24,9 @@ class SystemApi {
   }
 
   public static function path($url) {
-    return \config\settings()->BASE_DIR . $url;
+//    $colonpos = strpos($url, ':');
+//    $internal = ($colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && drupal_strip_dangerous_protocols($path) == $path);
+    return \system\Main::getUrl($url);
   }
 
   public static function modulePath($module, $url) {

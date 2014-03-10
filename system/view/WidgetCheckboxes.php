@@ -11,7 +11,7 @@ class WidgetCheckboxes implements WidgetInterface {
     $options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
     
     // list of active checkboxes (option keys)
-    $input['value'] = (array)$input['value']; // just to make sure
+    $input['state'] = (array)$input['state']; // just to make sure
     
     // input optional attributes
     $attributes = \cb\array_item('attributes', $input, array('default' => array(), 'type' => 'array'));
@@ -19,20 +19,19 @@ class WidgetCheckboxes implements WidgetInterface {
     // name and id (they need to be changed while rendering each checkbox)
     $baseId = \cb\array_item('id', $input, array('required' => true));
     
-    $output = 
-      '<div class="checkboxes" id="' . \cb\plaintext($baseId) . '">';
+    $output = '<div class="checkboxes" id="' . \cb\plaintext($baseId) . '">';
     
     // checkbox elements
     foreach ($options as $k => $v) {
       $inp2 = array(
         'name' => $input['name'] . '[' . \cb\plaintext($k) . ']',
-        'value' => $k,
+        'value' => '1',
         'id' => $baseId . '-option-' . \cb\plaintext($k),
         'label' => $v, // defining a label
-        'checked' => \in_array($k, $input['value']),
+        'state' => \in_array($k, $input['state']),
         'attributes' => $attributes
       );
-      $output .= '<div class="checkbox">' . $checkboxWidget->render($inp2) . '</div>';
+      $output .= $checkboxWidget->render($inp2);
     }
     
     return $output . '</div>';

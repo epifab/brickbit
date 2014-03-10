@@ -114,19 +114,25 @@ tables:
         type: integer
       email:
         type: string
+        label: Email
         size: 128
       password:
         type: string
+        label: Password
         size: 32
       full_name:
         type: string
+        label: Full name
         size: 128
       last_login:
         type: datetime
+        label: Last login
       ins_date_time:
         type: datetime
+        label: Registration date
       last_upd_date_time:
         type: datetime
+        label: Last update
     keys:
       primary:
         fields: [id]
@@ -241,6 +247,7 @@ tables:
           3: Administrators
           4: Registered users
           5: Anyone
+        label: Read mode
       edit_mode:
         type: integer
         options:
@@ -250,6 +257,7 @@ tables:
           3: Administrators
           4: Registered users
 #          5: Anyone
+        label: Edit mode
       delete_mode:
         type: integer
         options:
@@ -259,6 +267,7 @@ tables:
           3: Administrators
           4: Registered users
 #          5: Anyone
+        label: Delete mode
     keys:
       primary:
         fields: [id]

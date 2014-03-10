@@ -52,13 +52,13 @@ class MetaDecimal extends MetaType {
       $minOccurrence = $this->getAttr('minOccurrence', array('default' => 0));
       $maxOccurrence = $this->getAttr('maxOccurrence', array('default' => 0));
       if (\count($x) < $minOccurrence) {
-        throw new \system\exceptions\ValidationError('At least @n values should be entered in the <em>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('Invalid <em>@name</em>. At least <em>@n</em> values expected.', array(
           '@n' => $minOccurrence,
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }
       if ($maxOccurrence > 0 && \count($x) > $maxOccurrence) {
-        throw new \system\exceptions\ValidationError('No more than @n values can be entered in the <em>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('Invalid <em>@name</em>. No more than <em>@n</em> values allowed.', array(
           '@n' => $minOccurrence,
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));

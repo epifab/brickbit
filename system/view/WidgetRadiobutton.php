@@ -14,17 +14,17 @@ class WidgetRadiobutton implements WidgetInterface {
       'id' => $id,
       'type' => 'radio',
       'name' => $input['name'],
-      'value' => $input['value'],
-      'class' => 'de-input radio' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
+      'value' => \cb\array_item('value', $input, array('required' => true)),
     ) + $attributes;
     
-    if (!empty($input['checked'])) {
+    if (!empty($input['state'])) {
       $args['checked'] = 'checked';
     }
     
-    return 
-      '<input' . \cb\xml_arguments($args) . ' />'
-      . (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '');
+    return
+      (isset($input['label']) ? ' <label class="radio-inline" for="' . $id . '">' : '')
+      . '<input' . \cb\xml_arguments($args) . ' />'
+      . (isset($input['label']) ? ' ' . \cb\plaintext($input['label']) . '</label>' : '');
   }
 
   public function fetch($value, array $input) {

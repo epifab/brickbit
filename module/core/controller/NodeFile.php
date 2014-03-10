@@ -101,7 +101,7 @@ class NodeFile extends \system\Component {
     $files = $upload->post();
     
     foreach ($files as $file) {
-      \system\utils\Log::create(__CLASS__, \system\utils\Utils::varDump($file), \system\LOG_DEBUG);
+      \system\utils\Log::create(__CLASS__, \system\utils\Utils::varDump($file), array(), \system\LOG_DEBUG);
       $this->createFile($file->name);
     }
     

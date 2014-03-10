@@ -1,14 +1,7 @@
 <?php
 namespace module\core\controller;
 
-use \system\Component;
-use \system\model\Recordset;
-use \system\model\RecordsetBuilder;
-use \system\model\FilterClause;
-use \system\model\FilterClauseGroup;
-use \system\model\LimitClause;
-use \system\model\SortClause;
-use \system\model\SortClauseGroup;  
+use \system\Main;
 
 class Block extends \system\Component {
   
@@ -21,7 +14,7 @@ class Block extends \system\Component {
     );
     $rsb->addFilter(new \system\model\FilterClause($rsb->type, '=', 'page'));
     $rsb->addFilter(new \system\model\FilterClause($rsb->text->title, 'IS_NOT_NULL'));
-    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser()  );
+    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
     
     $rs = $rsb->select();
     foreach ($rs as $r) {
@@ -46,10 +39,10 @@ class Block extends \system\Component {
 //        )
 //      );
       if (\system\utils\Login::isSuperuser()) {
-        $am[] = array('url' => 'user/list', 'title' => \cb\t('users'), 'ajax' => false);
-        $am[] = array('url' => 'system/settings', 'title' => \cb\t('settings'));
+        $am[] = array('url' => Main::getUrl('user/list'), 'title' => \cb\t('users'), 'ajax' => false);
+        $am[] = array('url' => Main::getUrl('system/settings'), 'title' => \cb\t('settings'));
         $am[] = array('title' => 'admin', 'items' => array(
-            'logs' => array('title' => \cb\t('Logs'), 'url' => 'admin/logs', 'ajax' => false)
+          'logs' => array('title' => \cb\t('Logs'), 'url' => Main::getUrl('admin/logs'), 'ajax' => false)
         ));
       }
     }

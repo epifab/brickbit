@@ -12,6 +12,10 @@ class Core {
    * Implements controller event initDatamodel()
    */
   public static function initDatamodel() {
+    $langsLabels = array();
+    foreach (\config\settings()->LANGUAGES as $lang) {
+      $langsLabels[$lang] = \cb\t('@lang', array('@lang' => $lang));
+    }
     return array(
       'system' => array(
         'component' => self::initDatamodelComponentInfo(Component::getCurrentComponent()),
@@ -22,6 +26,7 @@ class Core {
         'ipAddress' => HTMLHelpers::getIpAddress(),
         'lang' => Lang::getLang(),
         'langs' => \config\settings()->LANGUAGES,
+        'langsLabels' => $langsLabels,
         'theme' => Theme::getTheme(),
         'themes' => \config\settings()->THEMES,
         'messages' => array()
@@ -29,7 +34,7 @@ class Core {
       'user' => Login::getLoggedUser(),
       'website' => self::initDatamodelWebsiteInfo(),
       'page' => array(
-        'title' => '',
+        'title' => \config\settings()->DEFAULT_PAGE_TITLE,
         'url' => Component::getMainComponent()->getUrl(),
         'meta' => array(),
         'js' => array(),

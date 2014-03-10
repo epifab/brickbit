@@ -625,20 +625,20 @@ class Main {
         $component['urlArgs'],
         $request
       );
-
-      if (!$obj->isNested()) {
-        // Allows the theme to do special stuff before modules
-        \system\Theme::preRun($obj);
-        // Raise event onRun
-        self::raiseControllerEvent('onRun', $obj);
-        \system\Theme::onRun($obj);
-      }
-
-      $obj->process();
-    } else {
-      \header("HTTP/1.0 404 Not Found");
-      die();
     }
+    else {
+      $obj = new DefaultComponent($url);
+    }
+
+    if (!$obj->isNested()) {
+      // Allows the theme to do special stuff before modules
+      \system\Theme::preRun($obj);
+      // Raise event onRun
+      self::raiseControllerEvent('onRun', $obj);
+      \system\Theme::onRun($obj);
+    }
+
+    $obj->process();
   }
   
   /**
@@ -1114,6 +1114,16 @@ class Main {
   }
   
   /**
+   * Returns an internal URL
+   * @param string $path Path is assumed to be relative to the ciderbit root 
+   *  directory.
+   * @return string URL
+   */
+  public static function getUrl($path) {
+    return \config\settings()->BASE_DIR . self::prepareUrl($path);
+  }
+  
+  /**
    * Removes the initial slash and replace backslashes with shashes
    * @param string $path Path
    * @return string Path
@@ -1123,6 +1133,52 @@ class Main {
     return (!empty($path) && substr($path, 0, 1) == '/')
       ? substr($path, 1)
       : $path;
+  }
+  
+  private static function urlIsExternal($uri) {
+    // Return an external link if $path contains an allowed absolute URL. Only
+    // call the slow drupal_strip_dangerous_protocols() if $path contains a ':'
+    // before any / ? or #. Note: we could use url_is_external($path) here, but
+    // that would require another function call, and performance inside url() is
+    // critical.
+    $colonpos = strpos($path, ':');
+    return ($colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && self::urlStripDangerousProtocols($path) == $path);
+  }
+  
+  private static function urlStripDangerousProtocols($uri) {
+    static $allowedProtocols;
+
+    if (!isset($allowedProtocols)) {
+      $allowedProtocols = array_flip(
+        self::getVariable('system-filter-allowed-protocols', array(
+          'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 
+          'sftp', 'ssh', 'tel', 'telnet', 'webcal'
+        ))
+      );
+    }
+
+    // Iteratively remove any invalid protocol found.
+    do {
+      $before = $uri;
+      $colonpos = strpos($uri, ':');
+      if ($colonpos > 0) {
+        // We found a colon, possibly a protocol. Verify.
+        $protocol = substr($uri, 0, $colonpos);
+        // If a colon is preceded by a slash, question mark or hash, it cannot
+        // possibly be part of the URL scheme. This must be a relative URL, which
+        // inherits the (safe) protocol of the base document.
+        if (preg_match('![/?#]!', $protocol)) {
+          break;
+        }
+        // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
+        // (URI Comparison) scheme comparison must be case-insensitive.
+        if (!isset($allowedProtocols[strtolower($protocol)])) {
+          $uri = substr($uri, $colonpos + 1);
+        }
+      }
+    } while ($before != $uri);
+
+    return $uri;
   }
   
   /**
@@ -1169,21 +1225,6 @@ class Main {
     $fp = \fopen("config/vars/" . $name . ".var", "w");
     \fwrite($fp, $content);
     \fclose($fp);
-  }
-  
-  /**
-   * Returns a configuration variable.
-   * @param string $name Name
-   * @param mixed $default Default value (returned if it does not exist)
-   * @return mixed Config value
-   */
-  public static function getCfg($name, $default = null) {
-    try {
-      return \config\Config::getInstance()->{$name};
-    }
-    catch (\system\exceptions\Error $ex) {
-      return $default;
-    }
   }
   
   /**
@@ -1331,5 +1372,13 @@ class Main {
    */
   public static function countMessages() {
     return \count(self::getMessages());
+  }
+  
+  /**
+   * Gets application settings
+   * @return \system\Settings Application settings
+   */
+  public static function settings() {
+    return \system\Settings::getInstance();
   }
 }

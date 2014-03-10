@@ -12,7 +12,7 @@ class WidgetSelectbox implements WidgetInterface {
     $options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
     
     // list of selected items (option keys)
-    $input['value'] = (array)$input['value'];
+    $input['state'] = (array)$input['state'];
     
     // input optional attributes
     $attributes = \cb\array_item('attributes', $input, array('default' => array(), 'type' => 'array'));
@@ -21,7 +21,6 @@ class WidgetSelectbox implements WidgetInterface {
     $args = array(
       'id' => \cb\array_item('id', $input, array('required' => true)),
       'name' => $input['name'],
-      'class' => 'de-input selectbox' . \cb\array_item('class', $input['attributes'], array('default' => '', 'prefix' => ' '))
     ) + $attributes;
     
     $output = '<select' . \cb\xml_arguments($args) . '>';
@@ -31,7 +30,7 @@ class WidgetSelectbox implements WidgetInterface {
       $output .= 
         '<option'
         . ' value="' . \cb\plaintext($k) . '"'
-        . (\in_array($k, $input['value']) ? ' selected="selected"' : '')
+        . (\in_array($k, $input['state']) ? ' selected="selected"' : '')
         . '>' . \cb\plaintext($v) . '</option>';
     }
     
@@ -39,6 +38,9 @@ class WidgetSelectbox implements WidgetInterface {
   }
 
   public function fetch($value, array $input) {
-    return $value;
+    if (\array_key_exists($value, $input['options'])) {
+      return $value;
+    }
+    return null;
   }
 }

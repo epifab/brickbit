@@ -3,11 +3,7 @@ namespace system\metatypes;
 
 class MetaBoolean extends MetaType {
   public function prog2Db($x) {
-    if ($x) {
-      return "1";
-    } else {
-      return 0;
-    }
+    return $x ? "1" : "0";
   }
   
   public function validate($x) {

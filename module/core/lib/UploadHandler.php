@@ -6,7 +6,7 @@ class UploadHandler extends JQueryFileUploadHandler {
     parent::__construct($options, false); // Force to not initialize
   }
   
-  public function post() {
+  public function post($print_response = false) {
     if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
       return $this->delete($print_response);
     }

@@ -14,17 +14,17 @@ class WidgetCheckbox implements WidgetInterface {
       'id' => $id,
       'type' => 'checkbox',
       'name' => $input['name'],
-      'value' => $input['value'],
-      'class' => 'de-input checkbox' . \cb\array_item('class', $input, array('default' => '', 'prefix' => ' '))
+      'value' => \cb\array_item('value', $input, array('default' => '1')),
     ) + $attributes;
     
-    if (!empty($input['checked'])) {
+    if (!empty($input['state'])) {
       $args['checked'] = 'checked';
     }
     
     return
-      '<input' . \cb\xml_arguments($args) . ' />'
-      . (isset($input['label']) ? ' <label for="' . $id . '">' . \cb\plaintext($input['label']) . '</label>' : '');
+      (isset($input['label']) ? ' <label class="checkbox-inline" for="' . $id . '">' : '')
+      . '<input' . \cb\xml_arguments($args) . ' />'
+      . (isset($input['label']) ? ' ' . \cb\plaintext($input['label']) . '</label>' : '');
   }
 
   public function fetch($value, array $input) {

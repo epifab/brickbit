@@ -56,7 +56,7 @@
                 <li class="divider"></li>
                 <li>
                   <?php $this->api->open('link', array(
-                    'url' => 'user/logout',
+                    'url' => $this->api->path('user/logout'),
                     'showResponse' => false
                   )); ?><span class="glyphicon glyphicon-off"></span> <?php echo $this->api->t('Logout'); ?><?php $this->api->close(); ?>
                 </li>
@@ -64,7 +64,6 @@
             </li>
           </ul>
         </div><!--/.nav-collapse -->
-
       <?php endif; ?>
     </div><!--/.navbar-collapse -->
   </div><!--/.container -->

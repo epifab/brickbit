@@ -11,7 +11,7 @@ class WidgetRadiobuttons implements WidgetInterface {
     $options = \cb\array_item('options', $input, array('required' => true, 'type' => 'array'));
     
     // list of active options (option keys)
-    $input['value'] = (array)$input['value'];
+    $input['state'] = (array)$input['state'];
     
     // input optional attributes
     $attributes = \cb\array_item('attributes', $input, array('default' => array(), 'type' => 'array'));
@@ -19,7 +19,7 @@ class WidgetRadiobuttons implements WidgetInterface {
     // the id needs to be changed while rendering each radio
     $baseId = \cb\array_item('id', $input, array('required' => true));
     
-    $output = '<div class="radiobuttons" id="' . \cb\plaintext($baseId) . '">';
+    $output = '<div class="radios" id="' . \cb\plaintext($baseId) . '">';
     
     // radio elements
     foreach ($options as $k => $v) {
@@ -28,10 +28,10 @@ class WidgetRadiobuttons implements WidgetInterface {
         'value' => $k,
         'id' => $baseId . '-option-' . \cb\plaintext($k),
         'label' => $v, // defining a label
-        'checked' => \in_array($k, $input['value']),
+        'state' => \in_array($k, $input['state']),
         'attributes' => $attributes
       );
-      $output .= '<div class="radiobutton">' . $radioWidget->render($inp2) . '</div>';
+      $output .= $radioWidget->render($inp2);
     }
     
     return $output . '</div>';

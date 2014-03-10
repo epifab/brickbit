@@ -89,6 +89,7 @@ abstract class Edit extends Component {
         if (\is_callable(array($this, 'submit' . $this->getAction()))) {
           \call_user_func(array($this, 'submit' . $this->getAction()));
         }
+        $form->destroy();
         return Component::RESPONSE_TYPE_NOTIFY;
       }
       catch (\system\exceptions\ValidationError $ex) {

@@ -96,6 +96,10 @@ class Field {
   public final function getName() {
     return $this->metaType->getName();
   }
+  
+  public function getLabel() {
+    return $this->metaType->getLabel();
+  }
 
   public final function getType() {
     return $this->metaType->getType();

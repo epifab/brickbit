@@ -40,6 +40,11 @@ class Form {
    * @return \system\view\Form
    */
   public static function initForm($id, $delegateClass = '\\system\\view\\Form') {
+    if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+      // Unless we are posting data, we destroy the form
+      self::destroyForm($id);
+    }
+
     $form = self::getForm($id);
     if (empty($form)) {
       if (!\class_exists($delegateClass)) {
@@ -54,6 +59,21 @@ class Form {
     // Make sure there are not previous validation errors
     $form->resetValidationErrors();
     return $form;
+  }
+  
+  /**
+   * Removes a form from the session.
+   * @param string $id Form ID
+   */
+  public static function destroyForm($id) {
+    Session::getInstance()->remove('forms', $id);
+  }
+  
+  /**
+   * Removes this form from the session
+   */
+  public function destroy() {
+    self::destroyForm($this->getId());
   }
   
   /**
@@ -72,7 +92,7 @@ class Form {
     }
     self::$instance = $form;
   }
-
+  
   /**
    * Closes the current form (after this has been started)
    */
@@ -121,14 +141,18 @@ class Form {
    */
   public function addInput($name, $widgetName, $defaultValue, array $input = array(), $metaType = null) {
     if (!isset($this->inputInfo[$name])) {
-      $this->inputInfo[$name] = array(
-        'name' => $name,
-        'value' => $defaultValue,
-        'widget' => $widgetName,
-        'metaType' => $metaType
-      ) + $input;
+      // Initialize the input
+      $this->inputInfo[$name] = array();
     }
-    return $this->inputInfo[$name]['value'];
+    
+    $this->inputInfo[$name] = array(
+      'name' => $name,
+      'state' => isset($this->inputInfo[$name]['state']) ? $this->inputInfo[$name]['state'] : $defaultValue,
+      'widget' => $widgetName,
+      'metaType' => $metaType
+    ) + $input + (!empty($metaType) ? $metaType->getAttributes() : array());
+    
+    return $this->inputInfo[$name]['state'];
   }
   
   /**
@@ -192,14 +216,14 @@ class Form {
    * @return mixed Input submitted value as returned by the widget fetch method
    */
   private static function getInputPostedValue(array $input) {
-    $haystack = $_REQUEST;
+    $haystack = &$_REQUEST;
     
     // Handles with input name like foo[bar][foo] -> $_REQUEST[foo][bar][foo]
     $needles = \preg_split('/(\[|\])+/', $input['name'], 0, PREG_SPLIT_NO_EMPTY);
     if (count($needles)) {
       foreach ($needles as $needle) {
         if (\array_key_exists($needle, $haystack)) {
-          $haystack = $haystack[$needle];
+          $haystack = &$haystack[$needle];
         }
         else {
           // Not transmitted
@@ -218,16 +242,16 @@ class Form {
    * @throws \system\exceptions\ValidationError
    */
   public function fetchInputValue($inputName) {
-    $input =& $this->inputInfo[$inputName];
+    $input = &$this->inputInfo[$inputName];
     
-    $input['value'] = self::getInputPostedValue($input);
+    $input['state'] = self::getInputPostedValue($input);
 
     if ($input['metaType']) {
       // Metatype validation
-      $input['metaType']->validate($input['value']);
+      $input['metaType']->validate($input['state']);
     }
     
-    return $input['value'];
+    return $input['state'];
   }
   
   /**
@@ -237,13 +261,13 @@ class Form {
     $this->errors = array(); // Reset errors
     
     foreach ($this->inputInfo as &$input) {
-      $input['value'] = self::getInputPostedValue($input);
+      $input['state'] = self::getInputPostedValue($input);
 
       $mt = $input['metaType'];
       if ($mt) {
         try {
           // Metatype validation
-          $mt->validate($input['value']);
+          $mt->validate($input['state']);
         }
         catch (\system\exceptions\ValidationError $ex) {
           $this->errors[$input['name']] = $ex->getMessage();
@@ -275,7 +299,7 @@ class Form {
    */
   public function getInputValue($inputName) {
     return isset($this->inputInfo[$inputName]) 
-      ? $this->inputInfo[$inputName]['value']
+      ? $this->inputInfo[$inputName]['state']
       : null;
   }
   
@@ -453,7 +477,7 @@ class Form {
     foreach ($this->recordsetsInfo as $recordsetInfo) {
       $recordset = $this->getRecordset($recordsetInfo['name']);
       foreach ($recordsetInfo['input'] as $path => $name) {
-        $recordset->setProg($path, $this->inputInfo[$name]['value']);
+        $recordset->setProg($path, $this->inputInfo[$name]['state']);
       }
     }
   }

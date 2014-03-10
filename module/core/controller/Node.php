@@ -2,16 +2,12 @@
 namespace module\core\controller;
 
 use \system\Component;
-use \system\model\Recordset;
 use \system\model\RecordsetBuilder;
 use \system\model\FilterClause;
-use \system\model\FilterClauseGroup;
-use \system\model\LimitClause;
-use \system\model\SortClause;
-use \system\model\SortClauseGroup;  
 
 class Node extends Edit {
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
+  
   /**
    * Check whether the user has access to the node identified by the $id
    *  parameter according to the $action parameter
@@ -148,31 +144,12 @@ class Node extends Edit {
   }
   ///</editor-fold>
   
-  protected function initNodeBuilder($node, $maxLevel = 5) {
-    if ($maxLevel < 1) {
-      return;
-    }
-    $node->using(
-      '*',
-      'record_mode.*',
-      'text.*',
-      'texts.*',
-      'files.*'
-    );
-    $maxLevel--;
-    
-    if ($maxLevel >= 1) {
-      $node->using('children');
-      $this->initNodeBuilder($node->children, $maxLevel);
-    }
-  }
-  
   /**
    * Returns the node builder
    * @return \system\model\RecordsetBuilder Node builder
    */
   protected function getNodeBuilder() {
-    $rsb = new \system\model\RecordsetBuilder('node');
+    $rsb = new RecordsetBuilder('node');
     $rsb->using(
       '*',
       'record_mode.*',
@@ -286,6 +263,7 @@ class Node extends Edit {
   }
   
   ///<editor-fold defaultstate="collapsed" desc="Editing stuff">
+  
   /**
    * Edit actions (add, add to a node, edit.
    * @return array List of available actions
@@ -301,7 +279,7 @@ class Node extends Edit {
   protected function formSubmission() {
     $form = $this->getForm();
     // Ignore disabled languages
-    foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
+    foreach (\config\settings()->LANGUAGES as $lang) {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
@@ -341,7 +319,7 @@ class Node extends Edit {
     $nodeTextBuilder = new RecordsetBuilder('node_text');
     $nodeTextBuilder->using('*');
     
-    foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
+    foreach (\config\settings()->LANGUAGES as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
         $nodeText = $node->texts[$lang];
@@ -410,10 +388,12 @@ class Node extends Edit {
     
     $node = $form->getRecordset('node');
     
+    \system\Main::pushMessage($node->toArray());
+    
     $da = \system\model\DataLayerCore::getInstance();
     
     try {
-      foreach (\system\Main::getCfg('LANGUAGES', array()) as $lang) {
+      foreach (\config\settings()->LANGUAGES as $lang) {
         $text = $form->getRecordset('node_' . $lang);
         
         if ($form->getInputValue('node_' . $lang . '_enable')) {
@@ -428,12 +408,12 @@ class Node extends Edit {
         }
         else {
           if ($text->isStored()) {
-            $this->addMessage("Deleting {$lang}");
             $text->delete();
           }
         }
       }
       $node->save();
+      \system\Main::pushMessage($node->toArray());
       
       $da->commitTransaction();
     }
@@ -475,7 +455,6 @@ class Node extends Edit {
 
   public function runRead() {
     $rsb = $this->getNodeBuilder();
-    $rsb->addFilter(new FilterClause($rsb->temp, '=', 0));
     $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
     $node = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
     if (!$node) {

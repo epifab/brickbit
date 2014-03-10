@@ -74,7 +74,7 @@ class MetaDateTime extends MetaType {
     $options = $this->getAttr('options');
     if ($options) {
       if (!\array_key_exists($x, $options)) {
-        throw new \system\exceptions\ValidationError('Invalid value for <me>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('Invalid <em>@name</em>.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }

@@ -77,7 +77,7 @@ class MetaString extends MetaType {
     $options = $this->getAttr('options', array('default' => null));
     if (!\is_null($options)) {
       if (!\array_key_exists($x, $options)) {
-        throw new \system\exceptions\ValidationError('Invalid value for <me>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('Invalid <me>@name</em>.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }
@@ -85,7 +85,7 @@ class MetaString extends MetaType {
     $regexp = $this->getAttr('regexp', array('default' => null));
     if (!\is_null($regexp)) {
       if (!@\preg_match($regexp, $x)) {
-        throw new \system\exceptions\ValidationError('Invalid value for <me>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('Invalid <me>@name</em>.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }
@@ -93,15 +93,15 @@ class MetaString extends MetaType {
     $maxlength = $this->getAttr('maxlength', array('default' => null));
     if (!\is_null($maxlength)) {
       if (\strlen($x) > $maxlength) {
-        throw new \system\exceptions\ValidationError('Too long value for <me>@name</em> field.', array(
+        throw new \system\exceptions\ValidationError('<me>@name</em> too long.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }
     }
     $minlength = $this->getAttr('minlength', array('default' => null));
     if ($minlength) {
-      if (\strlen($x) > $maxlength) {
-        throw new \system\exceptions\ValidationError('Too short value for <me>@name</em> field.', array(
+      if (\strlen($x) < $minlength) {
+        throw new \system\exceptions\ValidationError('<me>@name</em> too short.', array(
           '@name' => $this->getAttr('label', array('default' => $this->getName()))
         ));
       }

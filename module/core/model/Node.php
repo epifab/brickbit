@@ -1,6 +1,7 @@
 <?php
 namespace module\core\model;
 
+use system\Main;
 use system\model\RecordsetBuilder;
 use system\model\RecordsetInterface;
 use system\model\FilterClauseGroup;
@@ -29,7 +30,7 @@ class Node {
    * @return array List of node types
    */
   public static function getValidChildrenTypes(RecordsetInterface $node) {
-    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
+    $nodeTypes = Main::invokeStaticMethodAllMerge('nodeTypes');
     return $nodeTypes[$node->type]['children'];
   }
   
@@ -39,7 +40,7 @@ class Node {
    * @return array List of node types
    */
   public static function getValidFileKeys(RecordsetInterface $node) {
-    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
+    $nodeTypes = Main::invokeStaticMethodAllMerge('nodeTypes');
     return $nodeTypes[$node->type]['files'];
   }
   
@@ -95,21 +96,21 @@ class Node {
   public static function getUrl(\system\model\RecordsetInterface $recordset) {
     if ($recordset->text->urn) {
       if ($recordset->type == 'page') {
-        return $recordset->text->urn . '.html';
+        return Main::getUrl($recordset->text->urn . '.html');
       } else {
-        return 'content/' . $recordset->text->urn . '.html';
+        return Main::getUrl('content/' . $recordset->text->urn . '.html');
       }
     } else {
-      return 'content/' . $recordset->id;
+      return Main::getUrl('content/' . $recordset->id);
     }
   }
   
   public static function getEditUrl(\system\model\RecordsetInterface $recordset) {
-    return 'content/' . $recordset->id . '/edit';
+    return Main::getUrl('content/' . $recordset->id . '/edit');
   }
   
   public static function getDeleteUrl(\system\model\RecordsetInterface $recordset) {
-    return 'content/' . $recordset->id . '/delete';
+    return Main::getUrl('content/' . $recordset->id . '/delete');
   }
   
   public static function getTitle(RecordsetInterface $node) {

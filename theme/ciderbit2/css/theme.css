@@ -20,13 +20,16 @@ h3, h4 {
 }
 .container {
 }
+#main-menu-wrapper .nav.navbar-nav {
+  margin-left: -15px;
+}
 #main-menu-wrapper .nav.navbar-nav a {
 	font-weight: bold;
 	color: #5f7bb6;
 	font-size: 18pt;
 	text-transform: lowercase;
-	padding-left: 0px;
-	padding-right: 30px;
+	padding-left: 15px;
+	padding-right: 15px;
 	background: none;
 }
 #main-menu-wrapper .nav.navbar-nav a:hover,

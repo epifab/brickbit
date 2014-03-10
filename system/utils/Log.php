@@ -14,7 +14,7 @@ class Log {
    *  LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR
    * @return int Log id
    */
-  public static function create($code, $body, $args = array(), $level = \system\LOG_WARNING) {
+  public static function create($code, $body, array $args = array(), $level = \system\LOG_WARNING) {
     $builder = new \system\model\RecordsetBuilder('log');
     $builder->using("*");
     $rs = $builder->newRecordset();
