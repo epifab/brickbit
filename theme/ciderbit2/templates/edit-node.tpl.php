@@ -11,17 +11,19 @@
           <div>
             <?php foreach ($system['langs'] as $lang): ?>
               <a href="#" 
-                id="node-lang-<?php echo $lang; ?>" 
-                class="node-lang-control show-hide-class<?php if ($lang == $website['defaultLang']): ?> expanded<?php endif; ?>"
+                id="node-lang-control-<?php echo $lang; ?>" 
+                class="node-lang-control collapse-control"
+                data-target=".node-lang-<?php echo $lang; ?>"
                 data-lang="<?php echo $lang; ?>"><img src="<?php echo $this->api->themePath('img/lang/40/' . $lang . '.jpg'); ?>"/></a>
             <?php endforeach; ?>
             
             <?php echo $this->api->input(array(
               'id' => 'current-lang',
               'name' => 'current-lang',
-              'widget' => 'selectbox',
+              'widget' => 'textbox',
               'state' => $system['lang'],
-              'options' => array_combine($system['langs'], $system['langs'])
+              'options' => array_combine($system['langs'], $system['langs']),
+              'attributes' => array('class' => 'hide')
             )); ?>
           </div>
         </div>
@@ -31,7 +33,7 @@
           <?php $text = $form->getRecordset("node_{$lang}"); ?>
           
           <div class="row de-row">
-            <div class="col-md-2 col-sm-2 de-label-wrapper">
+            <div class="col-md-2 col-sm-2 de-label-wrapper hidden-xs">
               <img src="<?php echo $this->api->themePath('img/lang/40/' . $lang . '.jpg'); ?>"/>              
             </div>
             <div class="col-md-10 col-sm-10 de-input-wrapper">

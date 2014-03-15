@@ -23,7 +23,7 @@ class Lang {
   
   private static function initLang($langId = null) {
     self::$lang = empty($langId)
-      ? \system\Main::session('system', 'lang', \config\settings()->DEFAULT_LANG)
+      ? \system\Main::session('system', 'lang', \system\Main::setting('defaultLang'))
       : $langId;
     
     $callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
@@ -36,11 +36,11 @@ class Lang {
   }
   
   public static function langPath($langId) {
-    return 'http://' . $langId . \substr(\config\settings()->DOMAIN, \strpos($_SERVER["HTTP_HOST"], ".")) . $_SERVER["REQUEST_URI"];
+    return 'http://' . $langId . \substr(\system\Main::getDomain(), \strpos(\system\Main::getDomain(), ".")) . $_SERVER["REQUEST_URI"];
   }
   
   public static function setLang($langId) {
-    if (\in_array($langId, \config\settings()->LANGUAGES)) {
+    if (\in_array($langId, \system\Main::setting('languages'))) {
       \system\Main::setSession('system', 'lang', $langId);
       self::initLang();
     }

@@ -8,7 +8,7 @@ class Email {
   private $subject = "";
 
   function __construct() {
-    $this->setFrom(\config\settings()->GENERAL_EMAIL, \config\settings()->SITE_NAME);
+    $this->setFrom(\system\Main::setting('defaultEmail'), \system\Main::setting('siteName'));
   }
   function setFrom($email, $name="") {
     $this->from["email"] = $email;
@@ -31,14 +31,14 @@ class Email {
       . "\n";
     
 //    $mailBody =  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
-//    $mailBody .= "  " . \config\settings()->SITE_NAME . "\r\n";
+//    $mailBody .= "  " . Main::setting('siteName') . "\r\n";
 //    $mailBody .= "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n\r\n";
 
     $mailBody = $this->body ."\r\n\r\n";
 
     $mailBody .= "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
-    $mailBody .= "  " . \config\settings()->SITE_ADDRESS . " \r\n";
-    $mailBody .= "  " . \config\settings()->SITE_TITLE . "\r\n";
+    $mailBody .= "  " . \system\Main::getBaseUrl() . " \r\n";
+    $mailBody .= "  " . \system\Main::setting('siteTitle')  . "\r\n";
     $mailBody .= "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
     
     return @mail($this->to["email"], $this->subject, $mailBody, $mailHead);

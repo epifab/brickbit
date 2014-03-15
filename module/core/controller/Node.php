@@ -279,7 +279,7 @@ class Node extends Edit {
   protected function formSubmission() {
     $form = $this->getForm();
     // Ignore disabled languages
-    foreach (\config\settings()->LANGUAGES as $lang) {
+    foreach (\system\Main::setting('languages') as $lang) {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
@@ -319,7 +319,7 @@ class Node extends Edit {
     $nodeTextBuilder = new RecordsetBuilder('node_text');
     $nodeTextBuilder->using('*');
     
-    foreach (\config\settings()->LANGUAGES as $lang) {
+    foreach (\system\Main::setting('languages') as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
         $nodeText = $node->texts[$lang];
@@ -393,7 +393,7 @@ class Node extends Edit {
     $da = \system\model\DataLayerCore::getInstance();
     
     try {
-      foreach (\config\settings()->LANGUAGES as $lang) {
+      foreach (\system\Main::setting('languages') as $lang) {
         $text = $form->getRecordset('node_' . $lang);
         
         if ($form->getInputValue('node_' . $lang . '_enable')) {
@@ -450,7 +450,7 @@ class Node extends Edit {
     if ($node->text->title) {
       $this->setPageTitle($node->text->title);
     }
-    return Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
 
   public function runRead() {

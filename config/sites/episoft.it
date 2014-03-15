@@ -1,0 +1,22 @@
+<?php
+return array(
+  // Database
+  //'dbUser' => '',
+  //'dbPass' => '',
+  //'dbHost' => '',
+  //'dbName' => '',
+  //'dbType' => '',
+  
+  // Language
+  'defaultLang' => 'en',
+  // Theme
+  'defaultTheme' => 'ciderbit2',
+  // Base directory
+  'baseDir' => '/',
+    
+  'siteTitle' => 'CIDERbit',
+  'siteSubtitle' => 'OO MVC Framework',
+  'defaultPateTitle' => 'CIDERbit',
+    
+  'coreCache' => '',
+);

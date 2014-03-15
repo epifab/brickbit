@@ -29,7 +29,7 @@ class NodeImage extends \system\Component {
       // return default image?
     }
     else {
-      if (\file_exists(\config\settings()->BASE_DIR . 'temp/images/' . $version . '/' . $rs->id . '.' . $extension)) {
+      if (\file_exists(\system\Main::getBaseDir() . 'temp/images/' . $version . '/' . $rs->id . '.' . $extension)) {
         // read the cache
       } else {
         // create new version

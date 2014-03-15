@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-class Field {
+class Field implements RecordsetPropertyInterface {
   /**
    * @var \system\metatypes\MetaType
    */

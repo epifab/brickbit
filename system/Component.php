@@ -9,10 +9,6 @@ use system\exceptions\AuthorizationError;
 use system\exceptions\ValidationError;
 
 abstract class Component {
-  //  components stack
-  private static $components = array();
-  private static $mainComponent = null;
-  
   private $name = null;
   private $module = null;
   private $alias = null;
@@ -24,8 +20,6 @@ abstract class Component {
   private $requestType = null;
   private $nested = false;
   
-  protected $microTime = null;
-  
   /**
    * @var TemplateManager
    */
@@ -36,70 +30,15 @@ abstract class Component {
   protected $datamodel = array();
   
   /**
-   * Invio di una form per inserimento o modifica
-   */
-  const RESPONSE_TYPE_FORM = "FORM";
-  /**
-   * Messaggio di notifica per inserimento, modifica o cancellazione completata
-   */
-  const RESPONSE_TYPE_NOTIFY = "NOTIFY";
-  /**
-   * Invio di dati
-   */
-  const RESPONSE_TYPE_READ = "READ";
-  /**
-   * Invio di dati relativi ad un errore
-   */
-  const RESPONSE_TYPE_ERROR = "ERROR";
-    
-  public function getRequestTime() {
-    return \round($this->microTime, 0);
-  }
-  
-  public function getExecutionTime() {
-    return \round(\microtime(true) - $this->microTime, 3);
-  }
-  
-  /**
-   * @return Component[]
-   */
-  public static function getComponents() {
-    return self::$components;
-  }
-  /**
-   * @return Component
-   */
-  public static function getMainComponent() {
-    return self::$mainComponent;
-  }
-  /**
-   * @return Component
-   */
-  public static function getCurrentComponent() {
-    return \current(self::$components);
-  }
-
-  private static function pushComponent(Component $component) {
-    if (empty(self::$components)) {
-      self::$mainComponent = $component;
-    }
-    \array_push(self::$components, $component);
-  }
-  /**
-   * @return Component
-   */
-  private static function popComponent() {
-    return \array_pop(self::$components);
-  }
-
-  /**
    * Check user access for component/action(args)
    * Can be overriden by component extending classes declaring
    *   accessYourAction($urlArgs, $userId)
    *   access($action, $urlArgs, $userId)
-   * @param string $action action
-   * @param string $urlArgs url arguments
-   * @return boolean true if 
+   * @param string $class Component class
+   * @param string $action Action
+   * @param string $urlArgs URL arguments
+   * @param object $user User
+   * @return boolean True if $user is able to perform $action($urkArgs)
    */
   public static function access($class, $action, $urlArgs, $user) {
     if (\is_callable(array($class, "access" . $action))) {
@@ -109,7 +48,7 @@ abstract class Component {
   }
   
   /**
-   * This method is called whenever  
+   * Allows extending class to do something when the component is processed
    */
   protected function onInit() {
     
@@ -123,7 +62,7 @@ abstract class Component {
     if (!($exception instanceof \system\exceptions\Error)) {
       $exception = new InternalError($exception->getMessage());
     }
-    \system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, $this->getExecutionTime());
+    \system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, Main::getExecutionTime());
 
 //      if ($this->nested) {
 //        $pageOutput = \ob_get_clean();
@@ -140,15 +79,17 @@ abstract class Component {
 //      }
 //    }
   }
-  
-  protected function onProcess() { }
-  
+
+  /**
+   * Default process handler
+   * @throws \system\exceptions\PageNotFound
+   */
   protected function defaultRunHandler() {
     throw new \system\exceptions\PageNotFound();
   }
   
   /**
-   * Get the full datamodel
+   * Gets the full datamodel
    * @return array Datamodel
    */
   public function getDataModel() {
@@ -175,16 +116,14 @@ abstract class Component {
     $this->loadRequestId();
     $this->loadRequestType();
     
-    $this->nested = (bool)self::getCurrentComponent();
-    self::pushComponent($this);
+    $this->nested = (bool)Main::getActiveComponent();
     
     $this->alias = $this->name;
-    if (self::getCurrentComponent()) {
-      $this->alias = self::getCurrentComponent()->alias . '__' . $this->alias;
+    if (Main::getActiveComponent()) {
+      $this->alias = Main::getActiveComponent()->alias . '__' . $this->alias;
     }
     
-    // initializing the view layer
-    $this->initView();
+    $this->tplManager = Main::getTemplateManager();
     
     // setting the default outline and outline wrapper templates
     $this->setOutlineWrapperTemplate($this->getOutlineWrapperTemplate());
@@ -192,7 +131,7 @@ abstract class Component {
   }
   
   /**
-   * Get the request ID
+   * Gets the request ID
    * @return string Request id
    */
   public function getRequestId() {
@@ -200,7 +139,7 @@ abstract class Component {
   }
   
   /**
-   * Get the request type
+   * Gets the request type
    * @return string Request type
    */
   public function getRequestType() {
@@ -247,13 +186,12 @@ abstract class Component {
     }
   }
 
-  private function initView() {
-    $this->tplManager = Main::getTemplateManager();
-    $this->datamodel = Main::invokeMethodAllMerge('initDatamodel');
+  public function initDatamodel(array $datamodel = array()) {
+    $this->datamodel = $datamodel;
   }
   
   /**
-   * Add a js file
+   * Adds a js file to the list on the datamodel
    * @param string $js Path to the js file
    */
   public function addJs($js) {
@@ -263,7 +201,7 @@ abstract class Component {
   }
   
   /**
-   * Add a css file
+   * Adds a css file to the list on the datamodel
    * @param string $css Path to the css file
    */
   public function addCss($css) {
@@ -273,16 +211,7 @@ abstract class Component {
   }
   
   /**
-   * Add a message to be displayed
-   * @param string $message Message
-   * @param string $class Message class. Typical values are: success, info, warning, danger
-   */
-  public function addMessage($message, $class = 'info') {
-    \system\Main::pushMessage($message, $class);
-  }
-  
-  /**
-   * Add a meta tag
+   * Adds a meta tag to the list on the datamodel
    * @param string $meta Meta tag
    */
   public function addMeta($meta) {
@@ -290,7 +219,7 @@ abstract class Component {
   }
   
   /**
-   * Set the main template
+   * Sets the main template
    * @param string $template Template name
    */
   public function setMainTemplate($template) {
@@ -298,7 +227,7 @@ abstract class Component {
   }
   
   /**
-   * Set the outline template
+   * Sets the outline template
    * @param string $template Template name
    */
   public function setOutlineTemplate($template) {
@@ -306,7 +235,7 @@ abstract class Component {
   }
   
   /**
-   * Set a template
+   * Sets a template
    * @param string $template Template name
    * @param string $region Region where to add the template
    * @param int $weight Templates of a region are sorted by weight (ascending)
@@ -316,7 +245,7 @@ abstract class Component {
   }
   
   /**
-   * Set an outline wrapper template
+   * Sets an outline wrapper template
    * @param string $template Template name
    */
   public function setOutlineWrapperTemplate($template) {
@@ -328,7 +257,7 @@ abstract class Component {
   }
   
   /**
-   * Set the page title
+   * Sets the page title
    * @param string $pageTitle Page title
    * @param boolean $adding Whether to add the $pageTitle to the page title or to replace it
    */
@@ -337,7 +266,7 @@ abstract class Component {
   }
   
   /**
-   * Get module name
+   * Gets module name
    * @return string Module name
    */
   final public function getModule() {
@@ -345,7 +274,7 @@ abstract class Component {
   }
   
   /**
-   * Get component name
+   * Gets component name
    * @return string Component name
    */
   final public function getName() {
@@ -353,7 +282,7 @@ abstract class Component {
   }
   
   /**
-   * Get component alias
+   * Gets component alias
    * @return string Alias
    */
   final public function getAlias() {
@@ -361,7 +290,7 @@ abstract class Component {
   }
 
   /**
-   * Get component action
+   * Gets component action
    * @return string Action
    */
   final public function getAction() {
@@ -369,7 +298,7 @@ abstract class Component {
   }
   
   /**
-   * Get action URL
+   * Gets action URL
    * @return string Action URL
    */
   final public function getUrl() {
@@ -377,7 +306,7 @@ abstract class Component {
   }
   
   /**
-   * Get URL parameters
+   * Gets URL parameters
    * @return array URL parameters
    */
   final public function getUrlArgs() {
@@ -385,7 +314,7 @@ abstract class Component {
   }
   
   /**
-   * Get URL parameter
+   * Gets URL parameter
    * @param int $index URL parameter index (starting from 0)
    * @return mixed URL parameter corrisponding to index or null if it does not exist
    */
@@ -394,7 +323,7 @@ abstract class Component {
   }
   
   /**
-   * Get data attached to the request (usually $_REQUEST)
+   * Gets data attached to the request (usually $_REQUEST)
    * @return array Data attached to the request
    */
   final public function getRequestData() {
@@ -534,15 +463,12 @@ abstract class Component {
    * Processes the component.
    * 1) Calls the onInit event
    * 2) Checks permissions
-   * 2) Executes the "run action" method if defined in the derived class
+   * 2) Executes the "run action" method if defined on the derived class
    * 3) Displays a template according to the value returned by the "run action" method
    * *) If an error occurs the onError method is executed
    * Remove the current component from the components stack.
    */
   final public function process() {
-    
-    // initializing request time
-    $this->microTime = \microtime(true);
 
     // initializing the output buffer
     \ob_start();
@@ -575,10 +501,10 @@ abstract class Component {
         }
 
         switch ($responseType) {
-          case self::RESPONSE_TYPE_READ:
-          case self::RESPONSE_TYPE_NOTIFY:
-          case self::RESPONSE_TYPE_FORM:
-          case self::RESPONSE_TYPE_ERROR:
+          case \system\RESPONSE_TYPE_READ:
+          case \system\RESPONSE_TYPE_NOTIFY:
+          case \system\RESPONSE_TYPE_FORM:
+          case \system\RESPONSE_TYPE_ERROR:
             $this->setResponseType($responseType);
             break;
           case null:
@@ -653,8 +579,6 @@ abstract class Component {
       // onError event
       $this->onError($ex);
     }
-    
-    self::popComponent();
   }
   
   /**

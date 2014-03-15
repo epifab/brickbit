@@ -1,14 +1,19 @@
 <?php
 require_once 'lib/cb.php';
 
-require_once 'config/Config.php';
-require_once 'system/shortcuts.php';
+require_once 'system/Bootstrap.php';
 
-$session = \system\session\Session::getInstance();
-//if ($session->expire_time < \time()) {
-//  $session->destruct();
-//}
+use system\Bootstrap;
+use system\Main;
+use system\session\Session;
 
-\system\Main::run($_SERVER['REQUEST_URI']);
+// Initialize environment
+Bootstrap::init();
+
+// Initialize session
+$session = Session::getInstance();
+
+// Runs the main component
+Main::run();
 
 $session->commit();

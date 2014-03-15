@@ -24,13 +24,13 @@ class Theme {
   
   public static function getTheme() {
     if (\is_null(self::$theme)) {
-      self::setTheme(\config\settings()->DEFAULT_THEME);
+      self::setTheme(Main::setting('defaultTheme'));
     }
     return self::$theme;
   }
   
   public static function setTheme($theme) {
-    if (\in_array($theme, \config\settings()->THEMES)) {
+    if (\in_array($theme, Main::setting('themes'))) {
       self::$theme = $theme;
     } else {
       throw new \system\exceptions\InternalError('Theme <em>@name</em> not found.', array('@name' => $theme));
@@ -38,11 +38,11 @@ class Theme {
   }
   
   public static function getPath($path = '') {
-    return \config\settings()->BASE_DIR . 'theme/' . self::getTheme() . '/' . $path;
+    return Main::getBaseDir() . 'theme/' . self::getTheme() . '/' . $path;
   }
   
   public static function getAbsPath($path = '') {
-    return \config\settings()->BASE_DIR_ABS . 'theme/' . self::getTheme() . '/' . $path;
+    return Main::getBaseDirAbs() . 'theme/' . self::getTheme() . '/' . $path;
   }
   
   public static function preRun(\system\Component $compponent) {

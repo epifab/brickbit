@@ -84,9 +84,7 @@ abstract class MetaType {
     return $this->toProg($x);
   }
 
-  public function prog2Db($x) {
-    return $x;
-  }
+  abstract public function prog2Db($x);
 
   public function edit2Prog($x) {
     $x = $this->toProg($x);

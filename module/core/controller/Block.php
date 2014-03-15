@@ -26,7 +26,7 @@ class Block extends \system\Component {
     }
     $this->datamodel['mainMenu'] = $mm;
     $this->setMainTemplate('main-menu');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runAdminMenu() {
@@ -48,11 +48,11 @@ class Block extends \system\Component {
     }
     $this->datamodel['adminMenu'] = $am;
     $this->setMainTemplate('admin-menu');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runLoginControl() {
     $this->setMainTemplate('login-control');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
 }

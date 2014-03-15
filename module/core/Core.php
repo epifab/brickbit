@@ -5,6 +5,7 @@ use system\Component;
 use system\utils\Lang;
 use system\utils\HTMLHelpers;
 use system\utils\Login;
+use system\Main;
 use system\Theme;
 
 class Core {
@@ -13,29 +14,29 @@ class Core {
    */
   public static function initDatamodel() {
     $langsLabels = array();
-    foreach (\config\settings()->LANGUAGES as $lang) {
+    foreach (Main::settings()->languages as $lang) {
       $langsLabels[$lang] = \cb\t('@lang', array('@lang' => $lang));
     }
     return array(
       'system' => array(
-        'component' => self::initDatamodelComponentInfo(Component::getCurrentComponent()),
-        'mainComponent' => self::initDatamodelComponentInfo(Component::getMainComponent()),
+        'component' => self::initDatamodelComponentInfo(Main::getActiveComponent()),
+        'mainComponent' => self::initDatamodelComponentInfo(Main::getActiveComponentMain()),
         // Default response type
-        'responseType' => Component::RESPONSE_TYPE_READ,
+        'responseType' => \system\RESPONSE_TYPE_READ,
         'ajax' => HTMLHelpers::isAjaxRequest(),
         'ipAddress' => HTMLHelpers::getIpAddress(),
         'lang' => Lang::getLang(),
-        'langs' => \config\settings()->LANGUAGES,
+        'langs' => Main::setting('languages'),
         'langsLabels' => $langsLabels,
         'theme' => Theme::getTheme(),
-        'themes' => \config\settings()->THEMES,
+        'themes' => Main::setting('theme'),
         'messages' => array()
       ),
       'user' => Login::getLoggedUser(),
       'website' => self::initDatamodelWebsiteInfo(),
       'page' => array(
-        'title' => \config\settings()->DEFAULT_PAGE_TITLE,
-        'url' => Component::getMainComponent()->getUrl(),
+        'title' => Main::setting('defaultPageTitle'),
+        'url' => Main::getBaseUrl(),
         'meta' => array(),
         'js' => array(),
         'css' => array(),
@@ -54,7 +55,7 @@ class Core {
         'url' => $component->getUrl(),
         'urlArgs' => $component->getUrlArgs(),
         'requestId' => $component->getRequestId(),
-        'requestType' => $component->getRequestTime(),
+        'requestType' => $component->getRequestType(),
         'requestData' => $component->getRequestData(),
         'nested' => $component->isNested(),
         'alias' => $component->getAlias()
@@ -67,11 +68,11 @@ class Core {
     static $settings = null;
     if (\is_null($settings)) {
       $settings = array(
-        'title' => \config\settings()->SITE_TITLE,
-        'subtitle' => \config\settings()->SITE_SUBTITLE,
-        'domain' => \config\settings()->DOMAIN,
-        'base' => \config\settings()->SITE_ADDRESS,
-        'defaultLang' => \config\settings()->DEFAULT_LANG,
+        'title' => Main::setting('siteTitle'),
+        'subtitle' => Main::setting('siteSubtitle'),
+        'domain' => Main::getDomain(),
+        'base' => Main::getBaseUrl(),
+        'defaultLang' => Main::setting('defaultLang', 'en'),
       );
     }
     return $settings;

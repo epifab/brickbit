@@ -29,7 +29,7 @@ class Settings {
    */
   public static function getInstance() {
     if (\is_null(self::$instance)) {
-      self::$instance = new self($_SERVER['HTTP_HOST']);
+      self::$instance = new self(Main::getDomain());
     }
     return self::$instance;
   }
@@ -39,10 +39,28 @@ class Settings {
    * @param string $name Setting name
    * @return mixed Setting value
    */
-  public function __get($name) {
+  public function get($name, $default = null) {
     return (isset($this->settings[$name]))
       ? $this->settings[$name]
-      : null;
+      : $default;
+  }
+  
+  /**
+   * Gets a configuration variable.
+   * @param string $name Setting name
+   * @return mixed Setting value
+   */
+  public function __get($name) {
+    return $this->get($name, null);
+  }
+  
+  /**
+   * Sets a configuration variable.
+   * @param string $name Var name
+   * @param mixed $value Value
+   */
+  public function set($name, $value) {
+    $this->settings[$name] = $value;
   }
   
   /**
@@ -51,7 +69,7 @@ class Settings {
    * @param mixed $value Value
    */
   public function __set($name, $value) {
-    $this->settings[$name] = $value;
+    $this->set($name, $value);
   }
   
   /**

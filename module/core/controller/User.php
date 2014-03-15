@@ -86,10 +86,10 @@ class User extends Edit {
         'title' => \system\utils\Lang::translate('Logged in'),
         'body' => \system\utils\Lang::translate('<p>Welcome @name!</p>', array('@name' => $user->full_name))
       );
-      return \system\Component::RESPONSE_TYPE_NOTIFY;  
+      return \system\RESPONSE_TYPE_NOTIFY;  
     }
     else {
-      return \system\Component::RESPONSE_TYPE_FORM;
+      return \system\RESPONSE_TYPE_FORM;
     }
   }
   
@@ -101,7 +101,7 @@ class User extends Edit {
       'title' => \system\utils\Lang::translate('Logged out'),
       'body' => \system\utils\Lang::translate('You have been logged out.')
     );
-    return Component::RESPONSE_TYPE_NOTIFY;
+    return \system\RESPONSE_TYPE_NOTIFY;
   }
   
   public function runList() {
@@ -110,14 +110,14 @@ class User extends Edit {
     $this->datamodel['users'] = $users;
     $this->setPageTitle(\cb\t('Users'));
     $this->setMainTemplate('users');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   private function read($user) {
     $this->setPageTitle($user->full_name);
     $this->datamodel['u'] = $user;
     $this->setMainTemplate('user');
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runRead() {

@@ -157,7 +157,7 @@ class Login {
    */
   private function setLoginCookie() {
     $contents = \md5(\strtolower($this->user->email)) . "%%" . $this->user->password;
-    $domains = \array_reverse(\explode(".", $_SERVER["HTTP_HOST"]));
+    $domains = \array_reverse(\explode(".", \system\Main::getDomain()));
     // localhost          => localhost
     // ciderbit.local     => ciderbit.local
     // www.ciderbit.local => ciderbit.local
@@ -168,7 +168,7 @@ class Login {
    * Destroys login cookie
    */
   private static function unsetLoginCookie() {
-    $domains = \array_reverse(\explode('.', $_SERVER['HTTP_HOST']));
+    $domains = \array_reverse(\explode('.', \system\Main::getDomain()));
     // localhost          => localhost
     // ciderbit.local     => ciderbit.local
     // www.ciderbit.local => ciderbit.local

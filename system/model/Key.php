@@ -1,7 +1,7 @@
 <?php
 namespace system\model;
 
-class Key {
+class Key implements RecordsetPropertyInterface {
   private $fields = array();
   private $autoIncrement;
   private $primary;
@@ -45,6 +45,10 @@ class Key {
   
   public function getName() {
     return $this->name;
+  }
+  
+  public function getAlias() {
+    return $this->builder->getTableAlias() . '_' . $this->getName();
   }
   
   public function isAutoIncrement() {

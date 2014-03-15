@@ -11,7 +11,7 @@ use system\exceptions\SqlQueryError;
 class DataLayerCore {
   protected $connection = null;
   
-  private $dbmsType = \config\Config::DBMS_MYSQL;
+  private $dbmsType = \system\DBMS_MYSQL;
   private $dbName;
   private $dbHost;
   
@@ -58,11 +58,11 @@ class DataLayerCore {
   public static function getInstance() {
     if (\is_null(self::$instance)) {
       self::$instance = new DataLayerCore(
-        \config\settings()->DB_HOST,
-        \config\settings()->DB_USER,
-        \config\settings()->DB_PASS,
-        \config\settings()->DB_NAME,
-        \config\settings()->DB_TYPE
+        \system\Main::setting('dbHost'),
+        \system\Main::setting('dbUser'),
+        \system\Main::setting('dbPass'),
+        \system\Main::setting('dbName'),
+        \system\Main::setting('dbType')
       );
     }
     return self::$instance;
@@ -73,7 +73,7 @@ class DataLayerCore {
     $this->setDBMS($dbms);
 
     $this->connection = $this->sqlConnect($dbHost, $dbUser, $dbPass);
-    if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
+    if ($this->dbmsType == \system\DBMS_MSSQL) {
       if (ini_set('mssql.charset', 'utf-8') === false) {
         self::addLog('<p>Unable to set mssql.charset in php ini configuration file.</p>');
       }
@@ -81,7 +81,7 @@ class DataLayerCore {
     if (!$this->connection) {
       throw new SqlQueryError(null, $this->sqlError(), SqlQueryError::ACTION_CONNECTION);
     }
-    if ($this->dbmsType == \config\Config::DBMS_MYSQL && $this->sqlQuery("SET NAMES 'utf8'") === false) {
+    if ($this->dbmsType == \system\DBMS_MYSQL && $this->sqlQuery("SET NAMES 'utf8'") === false) {
       throw new SqlQueryError("SET NAMES 'utf8'", $this->connection);
     }
     if ($this->sqlSelectDb($dbName) === false) {
@@ -99,22 +99,22 @@ class DataLayerCore {
     $this->dbHost = $dbHost;
 
     self::addLog('<p>Connection to <em>@dbms</em> server at <em>@host</em>. User: <em>@user</em>.</p>', array(
-      '@dbms' => $this->dbmsType == \config\Config::DBMS_MSSQL ? "MySql" : "SqlServer",
+      '@dbms' => $this->dbmsType == \system\DBMS_MYSQL ? "MySql" : "SqlServer",
       '@host' => $dbHost,
       '@user' => $dbUser
     ));
 
-    $res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_connect($dbHost, $dbUser, $dbPass) : \mssql_connect($dbHost, $dbUser, $dbPass));
+    $res = ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_connect($dbHost, $dbUser, $dbPass) : \mssql_connect($dbHost, $dbUser, $dbPass));
     return $res;
   }
   private function sqlClose() {
-    $res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_close($this->connection) : \mssql_close($this->connection));
+    $res = ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_close($this->connection) : \mssql_close($this->connection));
     return $res;
   }
   private function sqlSelectDb($dbName) {
     $this->dbName = $dbName;
 
-    $res = ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
+    $res = ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_select_db($dbName, $this->connection) : \mssql_select_db($dbName, $this->connection));
     if ($res) {
       self::addLog('<p>Database <strong>@name</strong> has been selected</p>', array('@name' => $dbName));
     }
@@ -139,7 +139,7 @@ class DataLayerCore {
       '@query' => \system\utils\SqlFormatter::format($query)
     ));
 
-    if ($this->dbmsType == \config\Config::DBMS_MSSQL) {
+    if ($this->dbmsType == \system\DBMS_MSSQL) {
       return \mssql_query($query, $this->connection);
     } else {
       return \mysql_query($query, $this->connection);
@@ -151,7 +151,7 @@ class DataLayerCore {
    * @return bool Returns true on success or false on failure.
    */
   public function sqlFreeResult($result) {
-    return ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_free_result($result) : \mssql_free_result($result));
+    return ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_free_result($result) : \mssql_free_result($result));
   }
   /**
    * Recupera una riga dal risultato caricandola in un array associativo o con chiavi numeriche
@@ -164,7 +164,7 @@ class DataLayerCore {
    * Se e' settato a false verre' restituito un'array associativo
    */
   public function sqlFetchArray($result, $resultTypeNumerical=false) {
-    if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+    if ($this->dbmsType == \system\DBMS_MYSQL) {
       $resultType = $resultTypeNumerical ? \MYSQL_NUM : \MYSQL_ASSOC;
       return \mysql_fetch_array($result, $resultType);
     } else {
@@ -177,7 +177,7 @@ class DataLayerCore {
    * @return int Numero di righe coinvolte nell'esecuzione della query
    */
   public function sqlAffectedRows() {
-    return ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_affected_rows($this->connection) : \mssql_rows_affected($this->connection));
+    return ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_affected_rows($this->connection) : \mssql_rows_affected($this->connection));
   }
   /**
    * Restituisce il numero di righe risultante da una query SELECT, SHOW, DESCRIBE, EXPLAIN eseguita tramite il metodo sqlQuery
@@ -185,14 +185,14 @@ class DataLayerCore {
    * @return int Numero di righe del risultato o false in caso di errore
    */
   public function sqlNumRows($resource) {
-    return ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_num_rows($resource) : \mssql_num_rows($resource));
+    return ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_num_rows($resource) : \mssql_num_rows($resource));
   }
   /**
    * Recupera il messaggio di errore inviato dal DBMS
    * @return string Restituisce l'ultima stringa di errore inviata dal DBMS o una stringa vuota in caso non si sia verificato nessun errore
    */
   public function sqlError() {
-    return ($this->dbmsType == \config\Config::DBMS_MYSQL ? \mysql_error($this->connection) : \mssql_get_last_message());
+    return ($this->dbmsType == \system\DBMS_MYSQL ? \mysql_error($this->connection) : \mssql_get_last_message());
   }
 
   /**
@@ -200,7 +200,7 @@ class DataLayerCore {
    * @return integer l'ID generato per un campo AUTO_INCREMENT dalla precendete query, 0 se la precedente query non ha generato un valore AUTO_INCREMENT
    */
   public function sqlLastInsertId() {
-    if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+    if ($this->dbmsType == \system\DBMS_MYSQL) {
       return \mysql_insert_id($this->connection);
     } else {
       throw new SqlQueryError(null, "Impossibile recuperare l'ultimo ID generato su DBMS SqlServer");
@@ -208,7 +208,7 @@ class DataLayerCore {
   }
   
   public function sqlRealEscapeStrings($string) {
-    if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+    if ($this->dbmsType == \system\DBMS_MYSQL) {
       return \mysql_real_escape_string($string);
     } else {
       return \mb_ereg_replace("'", "''", $string);
@@ -218,8 +218,8 @@ class DataLayerCore {
 
   protected function setDBMS($dbms) {
     switch ($dbms) {
-      case \config\Config::DBMS_MYSQL:
-      case \config\Config::DBMS_MSSQL:
+      case \system\DBMS_MYSQL:
+      case \system\DBMS_MSSQL:
         $this->dbmsType = $dbms;
         break;
       default:
@@ -329,7 +329,7 @@ class DataLayerCore {
   
   public function beginTransaction() {
     if (!$this->transactionActive) {
-      if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+      if ($this->dbmsType == \system\DBMS_MYSQL) {
         $this->executeQuery("BEGIN");
       } else {
         $this->executeQuery("BEGIN TRANSACTION");
@@ -340,7 +340,7 @@ class DataLayerCore {
   
   public function commitTransaction() {
     if ($this->transactionActive) {
-      if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+      if ($this->dbmsType == \system\DBMS_MYSQL) {
         $this->executeQuery("COMMIT");
       } else {
         $this->executeQuery("COMMIT TRANSACTION");
@@ -351,7 +351,7 @@ class DataLayerCore {
   
   public function rollbackTransaction() {
     if ($this->transactionActive) {
-      if ($this->dbmsType == \config\Config::DBMS_MYSQL) {
+      if ($this->dbmsType == \system\DBMS_MYSQL) {
         $this->executeQuery("ROLLBACK");
       } else {
         $this->executeQuery("ROLLBACK TRANSACTION");

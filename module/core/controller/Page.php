@@ -12,6 +12,9 @@ class Page extends Node {
   
   public function runHome() {
     $this->setMainTemplate('home');
-    return \system\Component::RESPONSE_TYPE_READ;
+    
+    Main::pushMessage(Main::settings()->toArray());
+    
+    return \system\RESPONSE_TYPE_READ;
   }
 }

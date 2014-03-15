@@ -308,7 +308,7 @@ class RecordsetBuilder {
     // Automatically importing record mode
     if ($this->isRecordModed()) {
       $this->using("record_mode.*");
-      if (\config\settings()->RECORD_MODE_LOGS) {
+      if (\system\Main::setting('recordModeLogs')) {
         $this->using("record_mode.logs.*");
       }
     }

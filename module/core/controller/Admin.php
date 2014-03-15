@@ -35,7 +35,7 @@ class Admin extends \system\Component {
     $logs = $rsb->select();
     $this->datamodel['logs'] = $logs;
     
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runLogDetails() {
@@ -50,7 +50,7 @@ class Admin extends \system\Component {
     }
     $this->datamodel['log'] = $log;
     
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runLogsByKey() {
@@ -60,7 +60,7 @@ class Admin extends \system\Component {
     $logs = $rsb->selectBy(array('code' => $this->getUrlArg(0)));
     $this->datamodel['logs'] = $logs;
     
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   public function runLogsByType() {
@@ -87,7 +87,7 @@ class Admin extends \system\Component {
     $logs = $rsb->selectBy(array('type' => $type));
     $this->datamodel['logs'] = $logs;
     
-    return \system\Component::RESPONSE_TYPE_READ;
+    return \system\RESPONSE_TYPE_READ;
   }
   
   private static function rsb() {

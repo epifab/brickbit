@@ -78,7 +78,7 @@ class NodeFile extends \system\Component {
   }
   
   public static function getAbsDirPath() {
-    return \config\settings()->BASE_DIR_ABS . self::getDirPath();
+    return \system\Main::getBaseDirAbs() . self::getDirPath();
   }
   
   public function runUpload() {

@@ -19,7 +19,7 @@ class File extends \system\Component {
       
     }
     new \module\core\lib\CBUploaderHandler(array(
-      'upload_dir' => \config\settings()->BASE_DIR_ABS . 'temp' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR,
+      'upload_dir' => \system\Main::getBaseDirAbs() . 'temp/upload/',
       'upload_url' => '/file/',
       'script_url' => '/file',
       'user_dirs' => true
@@ -45,7 +45,7 @@ class File extends \system\Component {
     // Invio il file
     \header("Content-Type: image/" . $contentType);
     // Leggo il contenuto del file 
-    \readfile(\config\settings()->BASE_DIR_ABS . 'temp/upload/thumbnail/' . $this->getUrlArg(0) . '.' . $this->getUrlArg(1));
+    \readfile(\system\Main::getBaseDirAbs() . 'temp/upload/thumbnail/' . $this->getUrlArg(0) . '.' . $this->getUrlArg(1));
     return null; // no output
   }
   
@@ -53,7 +53,7 @@ class File extends \system\Component {
     print_r($this->getUrlArgs());
     die();
     $fileName = $this->getUrlArg(0) . '.' . $this->getUrlArg(1);
-    $filePath = \config\settings()->BASE_DIR_ABS . 'temp/upload/' . $fileName;
+    $filePath = \system\Main::getBaseDirAbs() . 'temp/upload/' . $fileName;
 //    if (is_file($filePath)) {
 //      if (!preg_match($this->options['inline_file_types'], $fileName)) {
         \header('Content-Description: File Transfer');

@@ -81,7 +81,7 @@ abstract class Edit extends Component {
     if (!$form->checkSubmission() || !$this->formSubmission()) {
       // Form not submitted or validation errors
       $this->setMainTemplate($this->getFormTemplate());
-      return Component::RESPONSE_TYPE_FORM;
+      return \system\RESPONSE_TYPE_FORM;
     }
     else {
       try {
@@ -90,11 +90,11 @@ abstract class Edit extends Component {
           \call_user_func(array($this, 'submit' . $this->getAction()));
         }
         $form->destroy();
-        return Component::RESPONSE_TYPE_NOTIFY;
+        return \system\RESPONSE_TYPE_NOTIFY;
       }
       catch (\system\exceptions\ValidationError $ex) {
         $this->setMainTemplate($this->getFormTemplate());
-        return Component::RESPONSE_TYPE_FORM;
+        return \system\RESPONSE_TYPE_FORM;
       }
     }
   }

@@ -4,6 +4,29 @@ namespace system;
 use system\Component;
 
 class Main {
+  private static $timeRequestStack = array();
+  private static $componentStack = array();
+  
+  /**
+   * @return int UNIX timestamp of the request
+   */
+  public static function getTimeRequest() {
+    return \round(\end(self::$timeRequestStack), 0);
+  }
+  
+  /**
+   * @param boolean $absolute TRUE if you wish to get the number of seconds from
+   *  the first time the 'run' method is called.
+   * @return float Number of seconds of the execution time (returns a float 
+   *  rounded to the 3rd decimal (representing microseconds)
+   */
+  public static function getExecutionTime($absolute = false) {
+    if (empty(self::$timeRequestStack)) {
+      return false;
+    }
+    return \round(\microtime() - ($absolute ? self::$timeRequestStack[0] : \end(self::$timeRequestStack)), 3);
+  }
+  
   /**
    * Loads the module configuration by parsng its info.yml file.
    * @param string $moduleName Module name
@@ -410,12 +433,12 @@ class Main {
   public static function configuration() {
     static $configuration = null;
     
-    if (\is_null($configuration) && \config\settings()->CORE_CACHE) {
+    if (\is_null($configuration) && self::setting('coreCache', true)) {
       $configuration = self::getVariable('system-configuration', null);
     }
     if (\is_null($configuration)) {
       $configuration = self::loadConfiguration();
-      if (\config\settings()->CORE_CACHE) {
+      if (self::setting('coreCache')) {
         self::setVariable('system-configuration', $configuration);
       }
     }
@@ -514,7 +537,7 @@ class Main {
    *  to this url.
    */
   public static function urlExists($url) {
-    return !\is_null(self::getComponent($url));
+    return !\is_null(self::getComponentInfoByUrl($url));
   }
   
   /**
@@ -533,13 +556,13 @@ class Main {
    * @return array Component info (null in case the URL doesn't match any 
    *  pattern defined by any active module)
    */
-  public static function getComponent($url) {
+  public static function getComponentInfoByUrl($url) {
     static $urls = null;
     
-    if ($url == \config\settings()->BASE_DIR) {
+    if ($url == self::getBaseDir()) {
       $url = '';
-    } else if (\substr($url, 0, \strlen(\config\settings()->BASE_DIR)) == \config\settings()->BASE_DIR) {
-      $url = \substr($url, \strlen(\config\settings()->BASE_DIR));
+    } else if (\substr($url, 0, \strlen(self::getBaseDir())) == self::getBaseDir()) {
+      $url = \substr($url, \strlen(self::getBaseDir()));
     }
     
     if (!empty($url)) {
@@ -550,9 +573,9 @@ class Main {
     }
     
     if (\is_null($urls)) {
-      if (\config\settings()->CORE_CACHE) {
+      if (self::setting('coreCache')) {
         // Url cache
-        $urls = self::getVariable("system-urls", array());
+        $urls = self::getVariable('system-urls', array());
       } else {
         $urls = array();
       }
@@ -570,7 +593,7 @@ class Main {
             'action' => $info['action'],
             'urlArgs' => $m
           );
-          if (\config\settings()->CORE_CACHE) {
+          if (self::setting('coreCache')) {
             self::setVariable("system-urls", $urls);
           }
           break;
@@ -578,6 +601,24 @@ class Main {
       }
     }
     return $urls[$url];
+  }
+  
+  /**
+   * Get the currently active component
+   * @return \system\Component The most recent component which is currently 
+   *  running or NULL if any component isn't running.
+   */
+  public static function getActiveComponent() {
+    return \end(self::$componentStack);
+  }
+  
+  /**
+   * Get the main active component
+   * @return \system\Component The oldest running component or NULL if any 
+   *  component isn't running.
+   */
+  public static function getActiveComponentMain() {
+    return empty(self::$componentStack) ? null : self::$componentStack[0];
   }
   
   /**
@@ -591,7 +632,7 @@ class Main {
       $user = \system\utils\Login::getLoggedUser();
     }
     if (self::urlExists($url)) {
-      $x = self::getComponent($url);
+      $x = self::getComponentInfoByUrl($url);
       return Component::access(
         $x['class'],
         $x['action'],
@@ -604,16 +645,20 @@ class Main {
   }
   
   /**
-   * Runs the application
-   * @param string $url URL
+   * Runs the component associated with the URL if any. Makes
+   * @param string $url URL (default to REQUEST_URI)
    * @param array $request Application request (default to $_REQUEST)
    */
-  public static function run($url, $request = null) {
+  public static function run($url = null, $request = null) {
+    if (\is_null($url)) {
+      $url = $_SERVER['REQUEST_URI'];
+    }
+    
     if (\is_null($request)) {
       $request = $_REQUEST;
     }
     
-    $component = self::getComponent($url);
+    $component = self::getComponentInfoByUrl($url);
     
     if (!\is_null($component)) {
       $componentClass = $component['class'];
@@ -627,18 +672,34 @@ class Main {
       );
     }
     else {
+      // No component associated with this URL
       $obj = new DefaultComponent($url);
     }
+    
+    \array_push(self::$timeRequestStack, \microtime(true));
+    \array_push(self::$componentStack, $obj);
 
-    if (!$obj->isNested()) {
-      // Allows the theme to do special stuff before modules
-      \system\Theme::preRun($obj);
-      // Raise event onRun
-      self::raiseControllerEvent('onRun', $obj);
-      \system\Theme::onRun($obj);
+    try {
+      $obj->initDatamodel(Main::invokeMethodAllMerge('initDatamodel'));
+      
+      if (!$obj->isNested()) {
+        // Allows the theme to do special stuff before modules
+        \system\Theme::preRun($obj);
+        // Raise event onRun
+        self::raiseControllerEvent('onRun', $obj);
+        \system\Theme::onRun($obj);
+      }
+
+      $obj->process();
     }
-
-    $obj->process();
+    catch (\Exception $ex) {
+      \array_pop(self::$componentStack);
+      \array_pop(self::$timeRequestStack);
+      throw $ex;
+    }
+    
+    \array_pop(self::$componentStack);
+    \array_pop(self::$timeRequestStack);
   }
   
   /**
@@ -1100,7 +1161,7 @@ class Main {
    * @return type
    */
   public static function tempPath($path = '') {
-    return \config\settings()->BASE_DIR_ABS . 'temp/' . self::prepareUrl($path);
+    return self::getBaseDirAbs() . 'temp/' . self::prepareUrl($path);
   }
   
   /**
@@ -1110,7 +1171,7 @@ class Main {
    * @return string Data path
    */
   public static function dataPath($path = '') {
-    return \config\settings()->BASE_DIR_ABS . 'data/' . self::prepareUrl($path);
+    return self::getBaseDirAbs() . 'data/' . self::prepareUrl($path);
   }
   
   /**
@@ -1120,7 +1181,7 @@ class Main {
    * @return string URL
    */
   public static function getUrl($path) {
-    return \config\settings()->BASE_DIR . self::prepareUrl($path);
+    return self::getBaseDir() . self::prepareUrl($path);
   }
   
   /**
@@ -1380,5 +1441,43 @@ class Main {
    */
   public static function settings() {
     return \system\Settings::getInstance();
+  }
+  
+  /**
+   * Gets a global setting
+   * @param string $name Name
+   * @param mixed $default Default value to be returned for undefined settings
+   * @return mixed Global setting value or $default for undefined settings
+   */
+  public static function setting($name, $default = null) {
+    return self::settings()->get($name, $default);
+  }
+  
+  /**
+   * @return string Path to the base directory
+   */
+  public static function getBaseDirAbs() {
+    return \str_replace('\\', '/', \dirname(\dirname(__FILE__))) . '/';
+  }
+  
+  /**
+   * @return string Path to the base directory relative to the web root
+   */
+  public static function getBaseDir() {
+    return self::setting('baseDir', '/');
+  }
+  
+  /**
+   * @return string Domain e.g. 'en.ciderbit.local'
+   */
+  public static function getDomain() {
+    return $_SERVER['HTTP_HOST'];
+  }
+  
+  /**
+   * @return string Home URL
+   */
+  public static function getBaseUrl() {
+    return self::getDomain() . self::getBaseDir();
   }
 }

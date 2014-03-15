@@ -22,7 +22,7 @@ abstract class Module {
    */
   public static function getAbsPath($moduleName, $path = '') {
     $module = \system\Main::getModule($moduleName);
-    return \config\settings()->BASE_DIR . $module['path'] . $path;
+    return Main::getBaseDir() . $module['path'] . $path;
   }
   
   /**

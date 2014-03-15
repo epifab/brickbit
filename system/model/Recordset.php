@@ -153,6 +153,11 @@ class Recordset implements RecordsetInterface {
     return $fieldsVal;
   }
   
+  /**
+   * Returns the current value of a given key
+   * @param string $keyName Key name
+   * @return array Associative array [field name] => [field value]
+   */
   public function getKey($keyName) {
     $key = $this->builder->getKey($keyName);
     if (!$key) {
@@ -167,6 +172,13 @@ class Recordset implements RecordsetInterface {
     }
   }
   
+  /**
+   * Searches for a property in the recordset
+   * @param string $path Property path (relative to the recordset)
+   * @param bool $required 
+   * @return 
+   * @throws \system\model\InternalError
+   */
   public function search($path, $required=false) {
     if (empty($path)) {
       return $this;
@@ -446,7 +458,7 @@ class Recordset implements RecordsetInterface {
     
     $recordMode->create();
     
-    if (\config\settings()->RECORD_MODE_LOGS) {
+    if (\system\Main::setting('recordModeLogs')) {
       $this->createRecordModeLog($recordMode);
     }
     
@@ -519,7 +531,7 @@ class Recordset implements RecordsetInterface {
     $recordMode->last_upd_date_time = \time();
     $recordMode->update();
     
-    if (\config\settings()->RECORD_MODE_LOGS) {
+    if (\system\Main::setting('recordModeLogs')) {
       $this->createRecordModeLog($recordMode);
     }
   }
