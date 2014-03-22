@@ -99,24 +99,37 @@ abstract class TableBase implements TableInterface {
    * </ul>
    */
   public function import() {
-    foreach (\func_get_args() as $arg) {
-      switch ($arg) {
-        case '**':
-          foreach ($this->tableInfo['relations'] as $name => $info) {
-            $this->importRelation($name)->import('*');
-          }
-          // Intentional no break here
-        case '*':
-          foreach ($this->tableInfo['fields'] as $name => $info) {
-            $this->importProperty($name);
-          }
-          foreach ($this->tableInfo['virtuals'] as $name => $info) {
-            $this->importProperty($name);
-          }
-          break;
-        default:
-          $this->importProperty($arg);
-          break;
+    foreach (\func_get_args() as $path) {
+      $dotPosition = \strpos($path, '.');
+
+      if ($dotPosition === false) {
+        // Property name (e.g. *, **, field or key name)
+        switch ($path) {
+          case '**':
+            foreach ($this->tableInfo['relations'] as $name => $info) {
+              $this->importRelation($name)->import('*');
+            }
+            // Intentional no break here
+          case '*':
+            foreach ($this->tableInfo['fields'] as $name => $info) {
+              $this->importProperty($name);
+            }
+            foreach ($this->tableInfo['virtuals'] as $name => $info) {
+              $this->importProperty($name);
+            }
+            break;
+          default:
+            $this->importProperty($path);
+            break;
+        }
+      }
+      else {
+        // Path (e.g. foo.bar.baz)
+        //  relationName: foo
+        $relationName = \substr($path, 0, $dotPosition);
+        $subpath = \substr($path, $dotPosition + 1);
+        
+        $this->importRelation($relationName)->import($subpath);
       }
     }
   }
@@ -232,7 +245,7 @@ abstract class TableBase implements TableInterface {
   public function importField($path) {
     $property = $this->importProperty($path);
     if (!($property instanceof FieldInterface)) {
-      throw new \system\exceptions\DataLayerError('Field not found');
+      throw new \system\exceptions\DataLayerError('Field <em>@field</em> not found', array('@field' => $path));
     }
     return $property;
   }
@@ -246,7 +259,7 @@ abstract class TableBase implements TableInterface {
   public function importKey($path) {
     $property = $this->importProperty($path);
     if (!($property instanceof KeyInterface)) {
-      throw new \system\exceptions\DataLayerError('Key not found');
+      throw new \system\exceptions\DataLayerError('Key <em>@key</em> not found', array('@key' => $path));
     }
     return $property;
   }
@@ -260,7 +273,7 @@ abstract class TableBase implements TableInterface {
   public function importRelation($path) {
     $property = $this->importProperty($path);
     if (!($property instanceof RelationInterface)) {
-      throw new \system\exceptions\DataLayerError('Relation not found');
+      throw new \system\exceptions\DataLayerError('Relation <em>@relation</em> not found', array('@relation' => $path));
     }
     return $property;
   }
@@ -274,7 +287,7 @@ abstract class TableBase implements TableInterface {
   public function importVirtual($path) {
     $property = $this->importProperty($path);
     if (!($property instanceof VirtualInterface)) {
-      throw new \system\exceptions\DataLayerError('Virtual not found');
+      throw new \system\exceptions\DataLayerError('Virtual property <em>@virtual</em> not found', array('@virtual' => $path));
     }
     return $property;
   }
@@ -288,6 +301,7 @@ abstract class TableBase implements TableInterface {
   public function getProperty($path) {
     if ($this->autoImport) {
       try {
+        // Try to import the property
         return $this->importProperty($path);
       }
       catch (\Exception $ex) {
@@ -442,7 +456,9 @@ abstract class TableBase implements TableInterface {
    *  Returns the serial field defined for this table (if any, NULL otherwise)
    */
   public function getAutoIncrementField() {
-    throw new \system\exceptions\UnderDevelopment('To be implemented');
+    return ($this->getPrimaryKey()->isAutoIncrement())
+      ? \current($this->getPrimaryKey()->getFields())
+      : null;
   }
 
   /**
@@ -451,7 +467,7 @@ abstract class TableBase implements TableInterface {
    *  TRUE if there is a serial field defined for the table
    */
   public function isAutoIncrement() {
-    throw new \system\exceptions\UnderDevelopment('To be implemented');
+    return $this->getPrimaryKey()->isAutoIncrement();
   }
 
   /**

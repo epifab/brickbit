@@ -3,7 +3,7 @@ namespace system\model2;
 
 use \system\Main;
 
-class Relation extends Table implements RelationInterface {
+class Relation extends TableWrapper implements RelationInterface {
   /**
    * @var TableInterface Parent table
    */
@@ -28,9 +28,13 @@ class Relation extends Table implements RelationInterface {
    * @var bool Lazy loading
    */
   protected $lazyLoading = false;
+  /**
+   * @var \system\utils\Handler Additional filter handler
+   */
+  protected $filterHandler = null;
   
   protected function __construct($name, \system\model2\TableInterface $parent, array $info, array $tableInfo) {
-    parent::__construct($info['table'], $tableInfo);
+    parent::__construct($info['table']);
     
     $this->parent = $parent;
     $this->relationInfo = $info;
@@ -63,6 +67,15 @@ class Relation extends Table implements RelationInterface {
     // Forces has many relations to be loaded on request (to avoid rows 
     //  duplication) and allows has one relations to be optionally lazy loaded
     $this->lazyLoading = $this->isHasMany() || !empty($info['lazyLoading']);
+    
+    if (isset($info['selectKey'])) {
+      // Override the table default select key
+      $this->setSelectKey($this->importField($info['selectKey']));
+    }
+    
+//    if (isset($info['filterHandler'])) {
+//      $this->filterHandler = new \system\utils\Handler($info['filterHandler']);
+//    }
   }
   
   /**
@@ -152,17 +165,20 @@ class Relation extends Table implements RelationInterface {
   
   /**
    * Gets the join clause
-   * @param \system\model2\RecordsetInterface $recordset Parent recordset (lazy loading)
+   * @param \system\model2\RecordsetInterface $parent Parent recordset (lazy loading)
    * @return clauses\FilterClauseGroup Join clause
    */
-  public function getJoinClause(RecordsetInterface $recordset = null) {
+  public function getJoinClause(RecordsetInterface $parent = null) {
     $join = $this->filterGroup('AND');
     foreach ($this->clauses as $clause) {
       $join->addClauses(new clauses\FilterClause(
         $clause->getChildField(),
         '=',
-        (empty($recordset) ? $clause->getParentField() : $recordset->{$clause->getParentField()->getName()})
+        (empty($parent) ? $clause->getParentField() : $parent->{$clause->getParentField()->getName()})
       ));
+    }
+    if (!empty($this->filterHandler)) {
+      $join->addClauses($this->filterHandler->run($this, $parent));
     }
     return $join;
   }
@@ -174,7 +190,30 @@ class Relation extends Table implements RelationInterface {
    */
   public function selectByParent(RecordsetInterface $parent) {
     $query = $this->selectQueryByParent($parent);
-    return $this->executeSelect($query);
+    
+    Main::pushMessage(\system\utils\SqlFormatter::format($query));
+    
+    $dataAccess = DataLayerCore::getInstance();
+    $result = $dataAccess->executeQuery($query);
+    
+    $recordsets = array();
+    
+    while (($data = $dataAccess->sqlFetchArray($result))) {
+      $recordset = $this->newRecordset($data);
+      if ($this->getSelectKey()) {
+        $recordsets[$recordset->{$this->getSelectKey()->getName()}] = $recordset;
+      }
+      elseif ($this->isAutoIncrement()) {
+        $recordsets[$recordset->{$this->getAutoIncrementField()->getName()}] = $recordset;
+      }
+      else {
+        $recordsets[] = $recordset;
+      }
+    }
+    
+    $dataAccess->sqlFreeResult($result);
+    
+    return $recordsets;
   }
   
   /**
@@ -189,14 +228,14 @@ class Relation extends Table implements RelationInterface {
     $query = "SELECT {$q1} FROM {$q2}";
     
     $query .= ' WHERE ' . $this->getJoinClause($parent)->getQuery();
-    if (!$this->filterGroupClause->isEmpty()) {
-      $query .= ' AND (' . $this->filterGroupClause->getQuery() . ')';
+    if (!$this->getFilter()->isEmpty()) {
+      $query .= ' AND (' . $this->getFilter()->getQuery() . ')';
     }
-    if (!$this->sortGroupClause->isEmpty()) {
-      $query .= ' ORDER BY ' . $this->sortGroupClause->getQuery();
+    if (!$this->getFilter()->isEmpty()) {
+      $query .= ' ORDER BY ' . $this->getFilter()->getQuery();
     }
-    if (!empty($this->limitClause)) {
-      $query .= ' LIMIT ' . $this->limitClause->getQuery();
+    if ($this->getLimit()) {
+      $query .= ' LIMIT ' . $this->getLimit()->getQuery();
     }
     
     return $query;
@@ -210,7 +249,7 @@ class Relation extends Table implements RelationInterface {
   public function selectFirstByParent(RecordsetInterface $parent) {
     $oldLimit = $this->limitClause;
     
-    $this->setLimit(1);
+    $this->setLimit($this->limit(1));
     $result = $this->selectByParent($parent);
     
     $this->limitClause = $oldLimit;

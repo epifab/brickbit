@@ -52,6 +52,9 @@ class Table extends TableBase {
     }
     $this->filterGroupClause = new clauses\FilterClauseGroup('AND');
     $this->sortGroupClause = new clauses\SortClauseGroup();
+    
+    $this->resetFilter();
+    $this->resetSort();
   }
   
   /**
@@ -69,7 +72,7 @@ class Table extends TableBase {
    *  implements the \system\model2\clauses\FilterClauseInterface
    */
   public function addFilters() {
-    foreach (func_get_args() as $filter) {
+    foreach (\func_get_args() as $filter) {
       if (!($filter instanceof clauses\FilterClauseInterface)) {
         throw new \system\exceptions\InternalError('Invalid filter parameter');
       }
@@ -82,7 +85,7 @@ class Table extends TableBase {
    *  implements the \system\model2\clauses\SortClauseInterface
    */
   public function addSorts() {
-    foreach (func_get_args() as $sort) {
+    foreach (\func_get_args() as $sort) {
       if (!($sort instanceof clauses\SortClauseInterface)) {
         throw new \system\exceptions\InternalError('Invalid sort parameter');
       }
@@ -167,8 +170,14 @@ class Table extends TableBase {
   public function resetSort() {
     $this->sortGroupClause->resetClauses();
   }
-  
-  protected function executeSelect($query) {
+
+  /**
+   * Performs the query and returns a list of recordsets.
+   * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
+   */
+  public function select() {
+    $query = $this->selectQuery();
+    
     Main::pushMessage(\system\utils\SqlFormatter::format($query));
     
     $dataAccess = DataLayerCore::getInstance();
@@ -177,10 +186,16 @@ class Table extends TableBase {
     $recordsets = array();
     
     while (($data = $dataAccess->sqlFetchArray($result))) {
-      $model2 = $this->newRecordset($data);
-      empty($this->selectKey)
-        ? $recordsets[] = $model2
-        : $recordsets[$model2->{$this->selectKey->getName()}] = $model2;
+      $recordset = $this->newRecordset($data);
+      if ($this->getSelectKey()) {
+        $recordsets[$recordset->{$this->getSelectKey()->getName()}] = $recordset;
+      }
+      elseif ($this->isAutoIncrement()) {
+        $recordsets[$recordset->{$this->getAutoIncrementField()->getName()}] = $recordset;
+      }
+      else {
+        $recordsets[] = $recordset;
+      }
     }
     
     $dataAccess->sqlFreeResult($result);
@@ -189,25 +204,14 @@ class Table extends TableBase {
   }
 
   /**
-   * Performs the query and returns a list of recordsets.
-   * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
-   */
-  public function select() {
-    return $this->executeSelect($this->selectQuery()) ;
-  }
-
-  /**
    * Performs the query limiting the results to the first and returns the 
    *  recordset. NULL in case the query produced no results
    * @return \system\model2\RecordsetInterface Recordset
    */
   public function selectFirst() {
-    $oldLimit = $this->limitClause;
+    $this->setLimit($this->limit(1));
     
-    $this->setLimit(1);
     $result = $this->select();
-    
-    $this->limitClause = $oldLimit;
     
     if (empty($result)) {
       return null;
@@ -272,21 +276,11 @@ class Table extends TableBase {
   }
 
   /**
-   * Sets the limit clause.
-   * @param int $limit Maximum number of records
-   * @param int $offset Offset
+   * Sets the limit clause
+   * @param clauses\LimitClause $limit Limit clause
    */
-  public function setLimit($limit, $offset = 0) {
-    $this->limitClause = new clauses\LimitClause($limit, $offset);
-  }
-
-  /**
-   * Sets the limit clause.
-   * @param int $pageSize Size of a page
-   * @param int $page Page offset
-   */
-  public function setPage($pageSize, $page = 0) {
-    $this->limitClause = new clauses\LimitClause($pageSize, $pageSize * $page);
+  public function setLimit(\system\model2\clauses\LimitClause $limit) {
+    $this->limitClause = $limit;
   }
 
   /**
@@ -295,6 +289,48 @@ class Table extends TableBase {
    */
   public function sort($path, $eq = 'ASC') {
     return new \system\model2\clauses\SortClause($this->importField($path), $eq);
+  }
+
+  /**
+   * Sets the limit clause.
+   * @param int $limit Maximum number of records
+   * @param int $offset Offset
+   * @return clauses\LimitClause Limit clause
+   */
+  public function limit($limit, $offset = 0) {
+    return new clauses\LimitClause($limit, $offset);
+  }
+
+  /**
+   * Sets the limit clause.
+   * @param int $pageSize Size of a page
+   * @param int $page Page offset
+   * @return clauses\LimitClause Limit clause
+   */
+  public function pageLimits($pageSize, $page = 0) {
+    return new clauses\LimitClause($pageSize, $pageSize * $page);
+  }
+  
+  /**
+   * Gets the select key
+   * @return FieldInterface Select key or NULL if not set
+   */
+  public function getSelectKey() {
+    return $this->selectKey;
+  }
+  /**
+   * Sets the select key
+   * @param FieldInterface $name Field to be used as the select key
+   */
+  public function setSelectKey(FieldInterface $field) {
+    $this->selectKey = $field;
+  }
+
+  /**
+   * Resets the limit clause to its original state
+   */
+  public function resetLimit() {
+    $this->limitClause = null;
   }
   
   /**
@@ -306,10 +342,16 @@ class Table extends TableBase {
   public static function loadTable($tableName) {
     $tableInfo = Main::getTable($tableName);
     if (isset($tableInfo['class'])) {
+      if (!\class_exists($tableInfo['class'])) {
+        throw new \system\exceptions\InternalError('Class <em>@class</em> not found.', array(
+          '@class' => $tableInfo['class']
+        ));
+      }
       $table = new $tableInfo['class']($tableName, $tableInfo);
       if (!($table instanceof TableInterface)) {
-        throw new \system\exceptions\InternalError('Invalid class for table <em>@table</em>', array(
-          '@table' => $parent->getTableName()
+        throw new \system\exceptions\InternalError('Invalid class <em>@class</em> for table <em>@table</em>', array(
+          '@class' => $tableInfo['class'],
+          '@table' => $tableName
         ));
       }
     }

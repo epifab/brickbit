@@ -12,7 +12,7 @@ interface RelationInterface extends TableInterface {
    * @return string INNER, LEFT or RIGHT
    */
   public function getJoinType();
-
+  
   /**
    * Is this a * to 1 relationship?
    * @return boolean TRUE if this is a * to 1 relationship

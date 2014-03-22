@@ -5,8 +5,10 @@ namespace system\model2;
  * Recordset.
  */
 class Recordset implements RecordsetInterface {
+  /**
+   * @var TableInterface Table
+   */
   private $table;
-  
   /**
    * @var array Stored fields values
    */
@@ -42,7 +44,7 @@ class Recordset implements RecordsetInterface {
     if ($this->stored) {
       // We check that the primary key fields are actually not null before 
       //  concluding that the record is stored.
-      $primaryKey = $this->table->getPrimaryKey();
+      $primaryKey = $this->getTable()->getPrimaryKey();
       foreach ($primaryKey->getFields() as $field) {
         if (empty($data[$field->getAlias()])) {
           // Empty field. We assume this record doesn't exist yet
@@ -53,13 +55,13 @@ class Recordset implements RecordsetInterface {
     }
     
     // Fields initialization
-    foreach ($this->table->getFields() as $name => $field) {
+    foreach ($this->getTable()->getFields() as $name => $field) {
       $this->fields[$name] = (!\is_null($data) && \array_key_exists($field->getAlias(), $data))
         ? $field->getMetatype()->db2Prog($data[$field->getAlias()])
         : $field->getMetatype()->getDefaultValue();
     }
 
-    foreach ($this->table->getHasOneRelations() as $name => $relation) {
+    foreach ($this->getTable()->getHasOneRelations() as $name => $relation) {
       if (!$relation->isLazyLoading()) {
         $this->hasOneRelations[$name] = $relation->newRecordset($data);
       }
@@ -122,8 +124,8 @@ class Recordset implements RecordsetInterface {
 
     // Unknown property
     if (\is_null($property)) {
-      throw new \system\exceptions\InternalError('Unreachable path <em>@path</em> from table <em>@table</em>', array('@path' => $name, '@table' => $this->getTable()->getTableName()));
-    }
+      throw new \system\exceptions\InternalError('Unknown property <em>@name</em> (table <em>@table</em>)', array('@name' => $name, '@table' => $this->getTable()->getTableName()));
+    } 
     
     // Field
     elseif ($property instanceof FieldInterface) {
@@ -168,6 +170,40 @@ class Recordset implements RecordsetInterface {
     }
   }
 
+  public function __set($name, $value) {
+    $property = $this->getTable()->getProperty($name);
+
+    // Unknown property
+    if (\is_null($property)) {
+      throw new \system\exceptions\InternalError('Unknown property <em>@name</em> (table <em>@table</em>)', array('@name' => $name, '@table' => $this->getTable()->getTableName()));
+    } 
+    
+    // Field
+    elseif ($property instanceof FieldInterface) {
+      return $this->modifiedFields[$name] = $value;
+    }
+    
+    // Relation
+    elseif ($property instanceof RelationInterface) {
+      if ($property->isHasMany()) {
+        $this->hasManyRelations[$name] = $value;
+      }
+      else {
+        return $this->hasOneRelations[$name] = $value;
+      }
+    }
+    
+    // Virtual property
+    elseif ($property instanceof VirtualInterface) {
+      throw new \system\exceptions\InternalError('Cannot set a virtual property value');
+    }
+    
+    // Key
+    elseif ($property instanceof KeyInterface) {
+      throw new \system\exceptions\InternalError('Cannot set a key value');
+    }
+  }
+  
   /**
    * Adds meta data to the recordset.
    * @param string $key Key
@@ -187,12 +223,106 @@ class Recordset implements RecordsetInterface {
       : null;
   }
   
+  /**
+   * Assunig the primary key is <em>foo, bar</em> and this record has 
+   *  fields[foo] => 2 fields[bar] => 3, then <em>foo = 2 AND bar = 3</em>
+   *  is returned.
+   * @return string e.g. id = 3
+   */
+  private function filterByPrimary() {
+    $query = '';
+    foreach ($this->table->getPrimaryKey()->getFields() as $field) {
+      $query .= 
+        (empty($query) ? '' : ' AND ')
+        . $field->getName() . ' = ' . $field->getMetatype()->prog2Db($this->fields[$field->getName()]);
+    }
+    return $query;
+  }
+  
+  /**
+   * Creates the record
+   */
   public function create() {
-    throw new \system\exceptions\UnderDevelopment();
+    \system\Main::raiseModelEvent('onCreate', $this);
+    
+    $q1 = '';
+    $q2 = '';
+
+    foreach ($this->getTable()->getFields() as $name => $field) {
+      if (\array_key_exists($name, $this->fields)) {
+        $value = $field->getMetatype()->prog2Db(\array_key_exists($name, $this->modifiedFields)
+          ? $this->modifiedFields[$name]
+          : $this->fields[$name]
+        );
+        $q1 .= (empty($q1) ? '' : ', ') . $name;
+        $q2 .= (empty($q2) ? '' : ', ') . $value;
+      }
+    }
+    
+    if (empty($q1)) {
+      throw new \system\exceptions\DataLayerError('Cannot create a record with no fields.');
+    }
+
+    $query = "INSERT INTO {$this->getTable()->getTableName()} ({$q1}) VALUES ({$q2})";
+
+    $dataAccess = DataLayerCore::getInstance();
+    $dataAccess->executeUpdate($query);
+    
+    foreach ($this->modifiedFields as $k => $v) {
+      $this->fields[$k] = $v;
+    }
+    $this->modifiedFields = array();
+    
+    if ($this->getTable()->isAutoIncrement()) {
+      $serial = $this->getTable()->getAutoIncrementField();
+      $this->fields[$serial->getName()] = $dataAccess->sqlLastInsertId();
+    }
+
+    $this->stored = true;
   }
 
+  /**
+   * Updates the record
+   */
+  public function update() {
+    $q1 = '';
+    
+    if (!$this->isStored()) {
+      throw new \system\exceptions\InternalError('Recordset does not exist.');
+    }
+
+    \system\Main::raiseModelEvent('onUpdate', $this);
+
+    if (!empty($this->modifiedFields)) {
+      foreach ($this->modifiedFields as $name => $value) {
+        $field = $this->getTable()->getField($name);
+        $q1 .= (empty($q1) ? '' : ', ')
+          . $name . ' = '
+          . $field->getMetatype()->prog2Db($this->modifiedFields[$name]);
+      }
+
+      $query = "UPDATE {$this->getTable()->getTableName()} SET {$q1} WHERE {$this->filterByPrimary()}";
+      
+      $dataAccess = DataLayerCore::getInstance();
+      $dataAccess->executeUpdate($query);
+    }
+  }
+
+  /**
+   * Deletes the record
+   */
   public function delete() {
-    throw new \system\exceptions\UnderDevelopment();
+    if (!$this->isStored()) {
+      return;
+    }
+    \system\Main::raiseModelEvent('onDelete', $this);
+    
+    $query = "DELETE FROM {$this->getTable()->getTableName()} WHERE {$this->filterByPrimary()}";
+    
+    $dataAccess = DataLayerCore::getInstance();
+    $dataAccess->executeUpdate($query);
+
+    $this->stored = false;
   }
 
   /**
@@ -201,8 +331,27 @@ class Recordset implements RecordsetInterface {
   public function save() {
     return $this->isStored() ? $this->update() : $this->create();
   }
-
-  public function update() {
-    throw new \system\exceptions\UnderDevelopment();
+  
+  /**
+   * Recordset as array
+   */
+  public function toArray() {
+    $array = array();
+    foreach ($this->fields as $name => $value) {
+      $array[$name] = $value;
+    }
+    foreach ($this->modifiedFields as $name => $value) {
+      $array[$name] = $value;
+    }
+    foreach ($this->hasOneRelations as $name => $relation) {
+      $array[$name] = $relation->toArray();
+    }
+    foreach ($this->hasManyRelations as $name => $relations) {
+      $array[$name] = array();
+      foreach ($relations as $key => $relation) {
+        $array[$name][$key] = $relation->toArray();
+      }
+    }
+    return $array;
   }
 }

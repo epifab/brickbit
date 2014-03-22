@@ -7,6 +7,13 @@ interface QueryInterface {
    * @return string SQL query
    */
   public function selectQuery();
+
+  /*
+   * Initializes the select query.
+   * @param string $q1 Select field list
+   * @param string $q2 Select tables
+   */
+  public function initQuery(&$q1, &$q2);
   /**
    * Performs the query and returns a list of recordsets.
    * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
@@ -32,14 +39,6 @@ interface QueryInterface {
   public function countPages($pageSize);
   
   /**
-   * Resets the filter clause to its original state
-   */
-  public function resetFilter();
-  /**
-   * Resets the sort clause to its original state
-   */
-  public function resetSort();
-  /**
    * Sort clauses
    * @return \system\model2\clauses\SortClauseGroup
    */
@@ -55,6 +54,18 @@ interface QueryInterface {
    */
   public function getLimit();
   /**
+   * Resets the filter clause to its original state
+   */
+  public function resetFilter();
+  /**
+   * Resets the sort clause to its original state
+   */
+  public function resetSort();
+  /**
+   * Resets the limit clause to its original state
+   */
+  public function resetLimit();
+  /**
    * Adds filters to the clause.
    * This take an unlimited number of filter clauses. Each clause is expected to
    *  implements the \system\model2\clauses\FilterClauseInterface
@@ -66,40 +77,45 @@ interface QueryInterface {
    *  implements the \system\model2\clauses\SortClauseInterface
    */
   public function addSorts();
-
   /**
-   * Initializes a custom filter clause
-   * @return \system\model2\clauses\FilterClauseInterface Custom filter clasue
+   * Sets the limit clause
+   * @param clauses\LimitClause $limit Limit clause
    */
-  public function filterCustom($query, array $args = array());
+  public function setLimit(\system\model2\clauses\LimitClause $limit);
+
   /**
    * Initializes a filter clause
    * @return \system\model2\clauses\FilterClauseInterface Filter clause
    */
   public function filter($path, $value, $eq = '=');
   /**
-   * Initializes a sort clause
-   * @return \system\model2\clauses\SortClauseInterface Sort clause
+   * Initializes a custom filter clause
+   * @return \system\model2\clauses\FilterClauseInterface Custom filter clasue
    */
-  public function sort($path, $eq = 'ASC');
-  
+  public function filterCustom($query, array $args = array());
   /**
    * Initializes a filter clause group
    * @param string $type Logic operator (AND, OR)
    * @return \system\model2\clauses\FilterClauseGroup Filter clause group
    */
   public function filterGroup($type = 'AND');
-  
+  /**
+   * Initializes a sort clause
+   * @return \system\model2\clauses\SortClauseInterface Sort clause
+   */
+  public function sort($path, $eq = 'ASC');
   /**
    * Sets the limit clause.
    * @param int $limit Maximum number of records
    * @param int $offset Offset
+   * @return clauses\LimitClause Limit clause
    */
-  public function setLimit($limit, $offset = 0);
+  public function limit($limit, $offset = 0);
   /**
    * Sets the limit clause.
    * @param int $pageSize Size of a page
    * @param int $page Page offset
+   * @return clauses\LimitClause Limit clause
    */
-  public function setPage($pageSize, $page = 0);
+  public function pageLimits($pageSize, $page = 0);
 }

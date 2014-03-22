@@ -52,4 +52,9 @@ interface RecordsetInterface {
    * @return mixed Meta data
    */
   public function getMetaData($key);
+  
+  /**
+   * Recordset as array
+   */
+  public function toArray();
 }

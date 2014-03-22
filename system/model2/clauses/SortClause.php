@@ -4,7 +4,7 @@ namespace system\model2\clauses;
 /**
  * Sort clauses
  */
-class SortClause implements ClauseInterface {
+class SortClause implements SortClauseInterface {
   /**
    * Ordinamento crescente
    */
