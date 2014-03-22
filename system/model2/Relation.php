@@ -42,12 +42,12 @@ class Relation extends TableWrapper implements RelationInterface {
     $this->relationName = $name;
     
     // Import fields involved in the clauses
-    foreach ($info['clauses'] as $c) {
+    foreach ($info['clauses'] as $parent => $child) {
       $this->clauses[] = new RelationClause(
         // Parent
-        $this->parent->importField(\key($c)),
+        $this->parent->importField($parent),
         // Child
-        $this->importField(\current($c))
+        $this->importField($child)
       );
     }
     

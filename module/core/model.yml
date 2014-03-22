@@ -1,4 +1,122 @@
 tables:
+  record_mode:
+    fields:
+      id:
+        type: integer
+      owner_id:
+        type: integer
+      last_modifier_id:
+        type: integer
+      ins_date_time:
+        type: datetime
+      last_upd_date_time:
+        type: datetime
+      read_mode:
+        type: integer
+        options:
+#          0: Nobody
+#          1: Superuser
+          2: Owner only
+          3: Administrators
+          4: Registered users
+          5: Anyone
+        label: Read mode
+      edit_mode:
+        type: integer
+        options:
+#          0: Nobody
+          1: Superuser
+          2: Owner only
+          3: Administrators
+          4: Registered users
+#          5: Anyone
+        label: Edit mode
+      delete_mode:
+        type: integer
+        options:
+  #        0: Nobody
+          1: Superuser
+          2: Owner only
+          3: Administrators
+          4: Registered users
+#          5: Anyone
+        label: Delete mode
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      logs:
+        table: record_mode_log
+        type: 1-N
+        clauses: {id: record_mode_id}
+      owner:
+        table: user
+        type: N-1
+        clauses: {owner_id: id}
+      users:
+        table: record_mode_user
+        type: 1-N
+        clauses: {id: record_mode_id}
+      roles:
+        table: record_mode_role
+        type: 1-N
+        clauses: {id: record_mode_id}
+  record_mode_log:
+    fields:
+      id:
+        type: integer
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+      upd_date_time:
+        type: datetime
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}
+  record_mode_role:
+    fields:
+      record_mode_id:
+        type: integer
+      role_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, role_id]
+    relations:
+      role:
+        table: role
+        type: N-1
+        clauses: {role_id: id}
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}
+  record_mode_user:
+    fields:
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, user_id]
+    relations:
+      user:
+        table: user
+        type: N-1
+        clauses: {user_id: id}
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}
   dir:
     fields:
       id:
@@ -16,7 +134,7 @@ tables:
     relations:
       files:
         table: file
-        clauses: [id: dir_id]
+        clauses: {id: dir_id}
         type: 1-N
   file:
     fields:
@@ -42,11 +160,11 @@ tables:
     relations:
       dir:
         table: dir
-        clauses: [dir_id: id]
+        clauses: {dir_id: id}
         type: N-1
       node:
         table: node_file
-        clauses: [id: file_id]
+        clauses: {id: file_id}
         type: 1-1
     virtuals:
       path:
@@ -87,7 +205,7 @@ tables:
     relations:
       terms:
         table: term
-        clauses: [id: vocabulary_id]
+        clauses: {id: vocabulary_id}
         type: 1-N
   term:
     fields:
@@ -125,15 +243,15 @@ tables:
       vocabulary:
         table: vocabulary
         type: N-1
-        clauses: [vocabulary_id: id]
+        clauses: {vocabulary_id: id}
       parent:
         table: term
         type: N-1
-        clauses: [parent_id: id]
+        clauses: {parent_id: id}
       children:
         table: term
         type: 1-N
-        clauses: [id: parent_id]
+        clauses: {id: parent_id}
         onDelete: CASCADE
         selectKey: id
       ancestors:
@@ -149,7 +267,7 @@ tables:
       nodes:
         table: node_term
         type: 1-N
-        clauses: [id: term_id]
+        clauses: {id: term_id}
         onDelete: CASCADE
         selectKey: node_id
   node_term:
@@ -168,11 +286,11 @@ tables:
       node:
         table: node
         type: N-1
-        clauses: [node_id: id]
+        clauses: {node_id: id}
       term:
         table: term
         type: N-1
-        clauses: [term_id: id]
+        clauses: {term_id: id}
   node_text:
     fields:
       node_id:
@@ -229,7 +347,7 @@ tables:
       node:
         type: N-1
         table: node
-        clauses: [node_id: id]
+        clauses: {node_id: id}
 #  menu:
 #    fields:
 #      id:
@@ -311,15 +429,15 @@ tables:
       record_mode:
         table: record_mode
         type: 1-1
-        clauses: [record_mode_id: id]
+        clauses: {record_mode_id: id}
       parent:
         table: node
         type: N-1
-        clauses: [parent_id: id]
+        clauses: {parent_id: id}
       children:
         table: node
         type: 1-N
-        clauses: [id: parent_id]
+        clauses: {id: parent_id}
         onDelete: CASCADE
       ancestors:
         table: node
@@ -335,26 +453,26 @@ tables:
       terms:
         table: node_term
         type: 1-N
-        clauses: [id: node_id]
+        clauses: {id: node_id}
         onDelete: CASCADE
         selectKey: term_id
       # TRANSLATIONS
       texts:
         table: node_text
         type: 1-N
-        clauses: [id: node_id]
+        clauses: {id: node_id}
         onDelete: CASCADE
         selectKey: lang
       text:
         table: node_text
         type: 1-1
-        clauses: [id: node_id]
+        clauses: {id: node_id}
         filterHandler: [\module\core\model\Node, textFilter]
       # FILES
       files:
         table: node_file
         type: 1-N
-        clauses: [id: node_id]
+        clauses: {id: node_id}
         onDelete: CASCADE
         selectKey: file_id
     virtuals:
@@ -433,11 +551,11 @@ tables:
       node:
         type: N-1
         table: node
-        clauses: [node_id: id]
+        clauses: {node_id: id}
       file:
         type: 1-1
         table: file
-        clauses: [file_id: id]
+        clauses: {file_id: id}
         onDelete: CASCADE
     virtuals:
       url:
