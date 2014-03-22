@@ -203,8 +203,6 @@ class Table extends TableBase {
       $this->filterGroupClause->popClause();
     }
     
-    Main::pushMessage(\system\utils\SqlFormatter::format($query));
-    
     $dataAccess = DataLayerCore::getInstance();
     $result = $dataAccess->executeQuery($query);
     
