@@ -8,6 +8,7 @@ class Main {
   private static $componentStack = array();
   
   /**
+   * Time of the request
    * @return int UNIX timestamp of the request
    */
   public static function getTimeRequest() {
@@ -15,6 +16,7 @@ class Main {
   }
   
   /**
+   * Gets the execution time
    * @param boolean $absolute TRUE if you wish to get the number of seconds from
    *  the first time the 'run' method is called.
    * @return float Number of seconds of the execution time (returns a float 
@@ -24,7 +26,7 @@ class Main {
     if (empty(self::$timeRequestStack)) {
       return false;
     }
-    return \round(\microtime() - ($absolute ? self::$timeRequestStack[0] : \end(self::$timeRequestStack)), 3);
+    return \round(\microtime(true) - ($absolute ? self::$timeRequestStack[0] : \end(self::$timeRequestStack)), 3);
   }
   
   /**
@@ -299,6 +301,10 @@ class Main {
       $virtuals = \cb\array_item('virtuals', $table, array('default' => array(), 'type' => 'array'));
       foreach ($virtuals as $virtualName => $virtual) {
         $TABLES[$tableName]['virtuals'][$virtualName] = $virtual;
+      }
+      
+      if (isset($table['class'])) {
+        $TABLES[$tableName]['class'] = $table['class'];
       }
     }
   }
@@ -686,7 +692,7 @@ class Main {
         // Allows the theme to do special stuff before modules
         \system\Theme::preRun($obj);
         // Raise event onRun
-        self::raiseControllerEvent('onRun', $obj);
+        SystemEvents::onRun($obj);
         \system\Theme::onRun($obj);
       }
 

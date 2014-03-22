@@ -2,6 +2,7 @@
 namespace system\view;
 
 use system\session\Session;
+use system\model2\RecordsetInterface;
 
 class Form {
   /**
@@ -13,7 +14,7 @@ class Form {
    * Caches the form recordsets.
    * This has been made static in order not to serialize the entire recordsets
    *  with their builders into the session.
-   * @var \system\model\RecordsetInterface[][]
+   * @var RecordsetInterface[][]
    */
   private static $formRecordsets = array();
   
@@ -373,9 +374,9 @@ class Form {
   /**
    * Attach a recordset to the form
    * @param string $name Recordset name
-   * @param \system\model\RecordsetInterface $recordset
+   * @param RecordsetInterface $recordset
    */
-  public function addRecordset($name, \system\model\RecordsetInterface $recordset) {
+  public function addRecordset($name, RecordsetInterface $recordset) {
     // Caching the recordset
     self::$formRecordsets[$this->getId()][$name] = $recordset;
     
@@ -385,10 +386,9 @@ class Form {
     if (!isset($this->recordsetsInfo[$name])) {
       $this->recordsetsInfo[$name] = array(
         'name' => $name,
-        // Saving the recordset table name and its primary key, we wil be able to
-        //  re-build it. No need to save the entire recordset object (and the 
-        //  related recordset builder)
-        'table' => $recordset->getBuilder()->getTableName(),
+        // Saving the recordset table name and its primary key, we wil be able 
+        //  to re-build it. No need to save the entire recordset object
+        'table' => $recordset->getTable()->getTableName(),
         'key' => $recordset->getPrimaryKey(),
         // All the form input which are related to the recordset
         // This array will contain an association path => name, where name
@@ -441,7 +441,7 @@ class Form {
   
   /**
    * Returns recordsets attached to this form
-   * @return \system\model\RecordsetInterface[] Recordset list
+   * @return RecordsetInterface[] Recordset list
    */
   public function getRecordsets() {
     return self::$formRecordsets[$this->getId()];
@@ -450,7 +450,7 @@ class Form {
   /**
    * Returns a recordset attached to this form
    * @param string $name Recordset name
-   * @return \system\model\RecordsetInterface Recordset
+   * @return RecordsetInterface Recordset
    */
   public function getRecordset($name) {
     return (isset(self::$formRecordsets[$this->getId()][$name]))
@@ -477,7 +477,7 @@ class Form {
     foreach ($this->recordsetsInfo as $recordsetInfo) {
       $recordset = $this->getRecordset($recordsetInfo['name']);
       foreach ($recordsetInfo['input'] as $path => $name) {
-        $recordset->setProg($path, $this->inputInfo[$name]['state']);
+        $recordset->set($path, $this->inputInfo[$name]['state']);
       }
     }
   }

@@ -1,7 +1,8 @@
 <?php
 namespace system\session;
 
-use system\model\RecordsetBuilder;
+use system\model2\Table;
+use system\model2\RecordsetInterface;
 use system\utils\Login;
 
 \session_start();
@@ -13,7 +14,7 @@ class Session {
   private $data;
     
   /**
-   * @var \system\model\Recordset Session object
+   * @var RecordsetInterface Session object
    */
   private $session;
   
@@ -29,19 +30,19 @@ class Session {
   
   private function __construct() {
     
-    $rsb = new RecordsetBuilder('session');
-    $rsb->using('*');
+    $table = Table::loadTable('session');
+    $table->import('*');
     
     $userId = \system\utils\Login::getLoggedUserId();
     $sessionId = \session_id();
     
-    $this->session = $rsb->selectFirstBy(array(
-      'user_id' => $userId,
-      'session_id' => $sessionId
+    $this->session = $table->selectFirst($table->filterGroup('AND')->addClauses(
+      $table->filter('user_id', $userId),
+      $table->filter('session_id', $sessionId)
     ));
     
     if (!$this->session) {
-      $this->session = $rsb->newRecordset();
+      $this->session = $table->newRecordset();
       $this->session->user_id = $userId;
       $this->session->session_id = $sessionId;
       $this->session->create_time = \time();
@@ -110,14 +111,13 @@ class Session {
     
     if (\is_null($users)) {
       $users = array();
-      $rsb = new RecordsetBuilder('session');
-      $rsb->using('user.*');
-      $rsb->setFilter(new \system\model\FilterClauseGroup(
-        new \system\model\FilterClause($rsb->update_time, '>', \strtotime('-10 minutes', \time())),
-        'AND',
-        new \system\model\FilterClause($rsb->user_id, '<>', 0)
-      ));
-      $sessions = $rsb->select();
+      $table = Table::loadTable('session');
+      $table->import('user.*');
+      $table->addFilters(
+        $table->filter('update_time', \strtotime('-10 minutes', \time()), '>'),
+        $table->filter('user_id', 0, '<>')
+      );
+      $sessions = $table->select();
       foreach ($sessions as $session) {
         $users[$session->user->id] = $session->user;
       }

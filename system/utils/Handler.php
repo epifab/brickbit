@@ -5,7 +5,7 @@ class Handler implements \Serializable {
   private $handler;
   private $_handler;
   
-  public function __construct($handler, $serialized=null) {
+  public function __construct($handler) {
     $this->handler = $handler;
     if (\is_array($handler)) {
       if (\is_callable($handler)) {
@@ -16,15 +16,17 @@ class Handler implements \Serializable {
           '@class' => $handler[0]
         ));
       }
-    } elseif (empty($handler)) {
+    }
+    elseif (empty($handler)) {
       throw new \system\exceptions\InternalError('Empty handler');
-    } else {
+    }
+    elseif (is_string($handler)) {
       eval('$this->_handler = ' . $handler . ';');
     }
   }
   
   public function run() {
-    \call_user_func_array($this->_handler, func_get_args());
+    return \call_user_func_array($this->_handler, func_get_args());
   }
   
   public function getHandler() {

@@ -58,18 +58,14 @@ class Bootstrap {
         break;
     }
     
-    Main::invokeMethodAll('watchdog', 'system', '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
-      '@description' => $description, 
-      '@file' => $file, 
-      '@line' => $line
-    ), $level);
-
-//    if ($level == 'error') {
-//      echo '<h1>' . $description . '</h1>';
-//      echo '<p>File: ' . $file . ' Line: ' . $line . '</p>';
-//      echo \system\utils\Utils::backtraceInfo();
-//      die();
-//    }
+    SystemEvents::watchdog(
+      'system', 
+      '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+        '@description' => $description, 
+        '@file' => $file,
+        '@line' => $line
+      ), $level
+    );
   }
   
   // caricamento automatico di classi del framework ciderbit

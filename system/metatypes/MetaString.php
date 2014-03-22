@@ -3,7 +3,7 @@ namespace system\metatypes;
 
 class MetaString extends MetaType {
   public static function stdProg2Db($x) {
-    return "'" . \system\model\DataLayerCore::getInstance()->sqlRealEscapeStrings($x) . "'";
+    return "'" . \system\model2\DataLayerCore::getInstance()->sqlRealEscapeStrings($x) . "'";
   }
   
   public function prog2Db($x) {

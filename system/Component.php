@@ -1,12 +1,10 @@
 <?php
 namespace system;
 
-use system\model\RecordsetBuilder;
 use system\utils\HTMLHelpers;
 use system\TemplateManager;
 use system\exceptions\InternalError;
 use system\exceptions\AuthorizationError;
-use system\exceptions\ValidationError;
 
 abstract class Component {
   private $name = null;
@@ -337,127 +335,6 @@ abstract class Component {
   final public function isNested() {
     return $this->nested;
   }
-
-  ///<editor-fold defaultstate="collapsed" desc="Metodi standard per inizializzazione di clausole">
-  protected function loadStdFilters(RecordsetBuilder $builder, $prefix="") {
-    $index = $prefix . "filters";
-    
-    $lastLop = null;
-
-    if (\array_key_exists($index, $this->requestData) && \is_array($this->requestData[$index])) {
-      $filterGroup = null;
-      
-      foreach ($this->requestData[$index] as $filter) {
-
-        if (empty($filter) || !\is_array($filter) || !\array_key_exists("path", $filter) || empty($filter["path"])) {
-          continue;
-        }
-        
-        $path = $filter["path"];
-        
-        if (!\array_key_exists("rop", $filter)) {
-          $rop = "=";
-        } else {
-          $rop = $filter["rop"];
-        }
-        if (!\array_key_exists("value", $filter)) {
-          $value = "";
-        } else {
-          $value = $filter["value"];
-        }
-        if (!\array_key_exists("lop", $filter) || empty($filter["lop"])) {
-          $lastLop = "AND";
-        } else {
-          $lastLop = $filter["lop"];
-        }
-        
-        $field = $builder->searchField($path);
-        if (\is_null($field)) {
-          throw new InternalError('Invalid filter parameter (field @path has not been imported)', array('@path' => $path));
-        }
-        $field instanceof Field;
-        try {
-          $progValue = $field->edit2Prog($value);
-        } catch (ValidationError $ex) {
-          throw $ex;
-        }
-
-        $filter = new FilterClause($field, $rop, $progValue);
-
-        if (\is_null($filterGroup)) {
-          $filterGroup = new FilterClauseGroup($filter);
-        } else {
-          $filterGroup->addClauses($lastLop, $filter);
-        }
-      }
-      
-      $builder->setFilter($filterGroup);
-    }
-  }
-  
-  protected function loadStdSorts(RecordsetBuilder $builder, $prefix="") {
-    $index = $prefix . "sorts";
-
-    $sorts = null;
-    if (\array_key_exists($index, $this->requestData) && \is_array($this->requestData[$index])) {
-      foreach ($this->requestData[$index] as $sort) {
-        
-        if (empty($sort)) {
-          continue;
-        }
-        
-        $args = @\explode("|", $sort);
-        if (\count($args) != 2) {
-          throw new InternalError('Invalid sort parameter.');
-        }
-        $field = $builder->searchField($args[0]);
-        if (\is_null($field)) {
-          throw new InternalError('Invalid filter parameter (field @path has not been imported)', array('@path' => $args[0]));
-        }
-
-        $sc = new SortClause($field, $args[1]);
-        if (\is_null($sorts)) {
-          $sorts = new SortClauseGroup($sc);
-        } else {
-          $sorts->addClauses($sc);
-        }
-      }
-      $builder->setSort($sorts);
-    }
-  }
-  
-  protected function loadStdLimits(RecordsetBuilder $builder, $pageSize=100, $prefix="") {
-    $index = $prefix . "paging";
-    
-    if (!\array_key_exists($index, $this->requestData) || !\is_array($this->requestData[$index])) {
-      $this->requestData[$index] = array();
-      $this->requestData[$index]["size"] = $pageSize;
-      $this->requestData[$index]["page"] = 0;
-    } else {
-      if (!\array_key_exists("size", $this->requestData[$index])) {
-        $this->requestData[$index]["size"] = $pageSize;
-      }
-      if (!\array_key_exists("page", $this->requestData[$index])) {
-        $this->requestData[$index]["page"] = 0;
-      }
-    }
-    
-    if (!\is_numeric($this->requestData[$index]["page"]) || ((int)$this->requestData[$index]["page"]) < 0) {
-      throw new InternalError('Invalid page parameter');
-    }
-    if (!\is_numeric($this->requestData[$index]["size"]) || ((int)$this->requestData[$index]["size"]) < 0) {
-      throw new InternalError('Invalid page parameter');
-    }
-    
-    if ($this->requestData[$index]["size"] == 0) {
-      return;
-    } else {
-      $page = intval($this->requestData[$index]["page"]);
-      $size = intval($this->requestData[$index]["size"]);
-      $builder->setLimit(new LimitClause($size, $page*$size));
-    }
-  }
-  ///</editor-fold>
 
   /**
    * Processes the component.

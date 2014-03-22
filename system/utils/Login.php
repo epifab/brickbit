@@ -2,6 +2,9 @@
 namespace system\utils;
 
 use system\exceptions\LoginError;
+use system\model2\Table;
+use system\model2\RecordsetInterface;
+use system\metatypes\MetaString;
 
 define("LOGIN_COOKIE_TIME", (time()+(3600*24*5))); // 5 giorni
 
@@ -76,9 +79,9 @@ class Login {
   public static function getAnonymousUser() {
     static $rs = null;
     if (!$rs) {
-      $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->using('*');
-      $rs = $rsb->newRecordset();
+      $table = Table::loadTable('user');
+      $table->import('*');
+      $rs = $table->newRecordset();
     }
     return $rs;
   }
@@ -98,16 +101,12 @@ class Login {
         return null;
       }
     } else {
-      $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->using('*');
-
-      $rsb->setFilter(new \system\model\FilterClauseGroup(
-        new \system\model\FilterClause($rsb->password, "=", $cryptedPassword),
-        "AND",
-        new \system\model\CustomClause("MD5(LOWER(" . $rsb->email->getSelectExpression() . ")) = " . \system\metatypes\MetaString::stdProg2Db($cryptedEmail))
+      $table = Table::loadTable('user');
+      $table->import('*');
+      $user = $table->selectFirst($table->filterGroup('AND')->addClauses(
+        $table->filter('password', $cryptedPassword),
+        $table->filterCustom("MD5(LOWER({$table->email->getSelectExpression()})) = @email", array('@email' => MetaString::stdProg2Db($cryptedEmail)))
       ));
-
-      $user = $rsb->selectFirst();
       if ($user) {
         self::$users[$user->id] = $user;
         self::$usersByEmail[$cryptedEmail] = $user;
@@ -123,9 +122,9 @@ class Login {
       return self::$users[$uid];
     }
     else {
-      $rsb = new \system\model\RecordsetBuilder('user');
-      $rsb->using('*');
-      self::$users[$uid] = $rsb->selectFirstBy(array('id' => $uid));
+      $table = Table::loadTable('user');
+      $table->import('*');
+      self::$users[$uid] = $table->selectFirst($table->filter('id', $uid));
       if (self::$users[$uid]) {
         self::$usersByEmail[self::$users[$uid]->email] = self::$users[$uid];
       }
@@ -211,7 +210,7 @@ class Login {
 
   /**
    * Validate login input data.
-   * @return \system\model\RecordsetInterface The user object if login data are 
+   * @return RecordsetInterface The user object if login data are 
    *  correct, null otherwise
    */
   public static function login($loginData) {
@@ -249,7 +248,7 @@ class Login {
   
   /**
    * Changes the logged in user
-   * @param \system\model\RecordsetInterface $user User object
+   * @param RecordsetInterface $user User object
    */
   public static function forceLogin($user) {
     self::getInstance()->user = $user;

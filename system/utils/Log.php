@@ -1,6 +1,8 @@
 <?php
 namespace system\utils;
 
+use system\model2\Table;
+
 class Log {
   private static $debugInfo = array();
   
@@ -15,9 +17,9 @@ class Log {
    * @return int Log id
    */
   public static function create($code, $body, array $args = array(), $level = \system\LOG_WARNING) {
-    $builder = new \system\model\RecordsetBuilder('log');
-    $builder->using("*");
-    $rs = $builder->newRecordset();
+    $table = Table::loadTable('log');
+    $table->import('*');
+    $rs = $table->newRecordset();
     
     $rs->url = $_SERVER['REQUEST_URI'];
     $rs->code = $code;
