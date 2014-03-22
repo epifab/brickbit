@@ -135,9 +135,11 @@ class FilterClause implements FilterClauseInterface {
         case 'CONTAINS':
           $this->type = self::OP_CONTAINS;
           break;
+        case 'NULL':
         case 'IS_NULL':
           $this->type = self::OP_IS_NULL;
           break;
+        case 'NOT_NULL':
         case 'IS_NOT_NULL':
           $this->type = self::OP_IS_NOT_NULL;
           break;

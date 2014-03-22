@@ -35,9 +35,17 @@ class FilterClauseGroup implements FilterClauseInterface {
       if (!\is_object($arg) || !($arg instanceof FilterClauseInterface)) {
         throw new \system\exceptions\InternalError('Invalid arg parameter. A FilterClause or FilterClauseGroup instance was expected.');
       }
-      $this->clauses[] = $arg;
+      \array_push($this->clauses, $arg);
     }
     return $this;
+  }
+  
+  public function pushClause(FilterClauseInterface $clause) {
+    \array_push($this->clauses, $clause);
+  }
+  
+  public function popClause() {
+    return \array_pop($this->clauses);
   }
   
   /**

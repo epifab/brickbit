@@ -1,6 +1,6 @@
 <?php
 namespace system\model2\clauses;
 
-interface SortClauseInterface extends \system\model\SelectClauseInterface {
+interface SortClauseInterface extends ClauseInterface {
   
 }

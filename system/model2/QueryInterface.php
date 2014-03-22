@@ -16,21 +16,26 @@ interface QueryInterface {
   public function initQuery(&$q1, &$q2);
   /**
    * Performs the query and returns a list of recordsets.
-   * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
+   * @param clauses\FilterClauseInterface $tmpFilter Temporary filter to be 
+   *  applied on selection
+   * @return \system\model2\RecordsetInterface[] List of recordsets returned by 
+   *  the query
    */
-  public function select();
+  public function select(clauses\FilterClauseInterface $tmpFilter = null);
   /**
    * Performs the query limiting the results to the first and returns the 
    *  recordset. NULL in case the query produced no results
+   * @param clauses\FilterClauseInterface $tmpFilter Temporary filter to be 
+   *  applied on selection
    * @return \system\model2\RecordsetInterface Recordset
    */
-  public function selectFirst();
+  public function selectFirst(clauses\FilterClauseInterface $tmpFilter = null);
   
   /**
    * Counts the number of results which would be produced by the query.
    * @return int Number of results
    */
-  public function countResults();
+  public function countRecords();
   /**
    * Counts the number of pages which would be produced by the query.
    * @param int $pageSize Page size
@@ -81,7 +86,7 @@ interface QueryInterface {
    * Sets the limit clause
    * @param clauses\LimitClause $limit Limit clause
    */
-  public function setLimit(\system\model2\clauses\LimitClause $limit);
+  public function setLimit(\system\model2\clauses\LimitClause $limit = null);
 
   /**
    * Initializes a filter clause
@@ -117,5 +122,15 @@ interface QueryInterface {
    * @param int $page Page offset
    * @return clauses\LimitClause Limit clause
    */
-  public function pageLimits($pageSize, $page = 0);
+  public function pageLimit($pageSize, $page = 0);
+  /**
+   * Gets the select key
+   * @return FieldInterface Select key or NULL if not set
+   */
+  public function getSelectKey();
+  /**
+   * Sets the select key
+   * @param FieldInterface $name Field to be used as the select key
+   */
+  public function setSelectKey(FieldInterface $field);
 }

@@ -33,6 +33,10 @@ class Table extends TableBase {
    */
   protected $filterGroupClause = null;
   /**
+   * @var clauses\FilterClauseInterface Temporary filter clause
+   */
+  protected $tmpFilterClause = null;
+  /**
    * @var \system\model2\clauses\SortClauseGroup
    */
   protected $sortGroupClause = null;
@@ -76,7 +80,7 @@ class Table extends TableBase {
       if (!($filter instanceof clauses\FilterClauseInterface)) {
         throw new \system\exceptions\InternalError('Invalid filter parameter');
       }
-      $this->filterGroupClause->addClauses($filter);
+      $this->filterGroupClause->pushClause($filter);
     }
   }
   /**
@@ -123,15 +127,27 @@ class Table extends TableBase {
    * @return int Number of pages
    */
   public function countPages($pageSize) {
-    throw new \system\exceptions\UnderDevelopment();
+    $numRecords = $this->countRecords();
+    return \ceil($numRecords / $pageSize);
   }
 
   /**
    * Counts the number of results which would be produced by the query.
    * @return int Number of results
    */
-  public function countResults() {
-    throw new \system\exceptions\UnderDevelopment();
+  public function countRecords() {
+    $q1 = '';
+    $q2 = '';
+    
+    $this->initQuery($q1, $q2);
+    
+    $query = "SELECT COUNT(*) FROM {$q2}";
+    
+    $query .= $this->getFilter()->isEmpty() ? '' : ' WHERE ' . $this->getFilter()->getQuery();
+    
+    $dataAccess = DataLayerCore::getInstance();
+    
+    return $dataAccess->executeScalar($query);
   }
 
   /**
@@ -173,10 +189,19 @@ class Table extends TableBase {
 
   /**
    * Performs the query and returns a list of recordsets.
-   * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
+   * @param clauses\FilterClauseInterface $tmpFilter Temporary filter to be 
+   *  applied on selection
+   * @return \system\model2\RecordsetInterface[] List of recordsets returned by 
+   *  the query
    */
-  public function select() {
+  public function select(clauses\FilterClauseInterface $tmpFilter = null) {
+    if (!empty($tmpFilter)) {
+      $this->filterGroupClause->pushClause($tmpFilter);
+    }
     $query = $this->selectQuery();
+    if (!empty($tmpFilter)) {
+      $this->filterGroupClause->popClause();
+    }
     
     Main::pushMessage(\system\utils\SqlFormatter::format($query));
     
@@ -206,12 +231,18 @@ class Table extends TableBase {
   /**
    * Performs the query limiting the results to the first and returns the 
    *  recordset. NULL in case the query produced no results
+   * @param clauses\FilterClauseInterface $tmpFilter Temporary filter to be 
+   *  applied on selection
    * @return \system\model2\RecordsetInterface Recordset
    */
-  public function selectFirst() {
-    $this->setLimit($this->limit(1));
+  public function selectFirst(clauses\FilterClauseInterface $tmpFilter = null) {
+    $oldLimit = $this->getLimit();
     
-    $result = $this->select();
+    $this->setLimit($this->limit(1));
+
+    $result = $this->select($tmpFilter);
+    
+    $this->setLimit($oldLimit);
     
     if (empty($result)) {
       return null;
@@ -279,7 +310,7 @@ class Table extends TableBase {
    * Sets the limit clause
    * @param clauses\LimitClause $limit Limit clause
    */
-  public function setLimit(\system\model2\clauses\LimitClause $limit) {
+  public function setLimit(\system\model2\clauses\LimitClause $limit = null) {
     $this->limitClause = $limit;
   }
 
@@ -307,7 +338,7 @@ class Table extends TableBase {
    * @param int $page Page offset
    * @return clauses\LimitClause Limit clause
    */
-  public function pageLimits($pageSize, $page = 0) {
+  public function pageLimit($pageSize, $page = 0) {
     return new clauses\LimitClause($pageSize, $pageSize * $page);
   }
   

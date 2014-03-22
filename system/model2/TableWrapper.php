@@ -30,9 +30,9 @@ abstract class TableWrapper implements \system\model2\TableInterface {
     //return $this->table->countPages($pageSize);    
   }
 
-  public function countResults() {
-    return \call_user_func_array(array($this->table, 'countResults'), \func_get_args());
-    //return $this->table->countResults();    
+  public function countRecords() {
+    return \call_user_func_array(array($this->table, 'countRecords'), \func_get_args());
+    //return $this->table->countRecords();    
   }
 
   public function filter($path, $value, $eq = '=') {
@@ -229,12 +229,12 @@ abstract class TableWrapper implements \system\model2\TableInterface {
     //return $this->table->resetSort();    
   }
 
-  public function select() {
+  public function select(clauses\FilterClauseInterface $tmpFilter = null) {
     return \call_user_func_array(array($this->table, 'select'), \func_get_args());
     //return $this->table->select();    
   }
 
-  public function selectFirst() {
+  public function selectFirst(clauses\FilterClauseInterface $tmpFilter = null) {
     return \call_user_func_array(array($this->table, 'selectFirst'), \func_get_args());
     //return $this->table->selectFirst();    
   }
@@ -249,7 +249,7 @@ abstract class TableWrapper implements \system\model2\TableInterface {
     //return $this->table->setAutoImport($autoImport);    
   }
 
-  public function setLimit(\system\model2\clauses\LimitClause $limit) {
+  public function setLimit(\system\model2\clauses\LimitClause $limit = null) {
     return \call_user_func_array(array($this->table, 'setLimit'), \func_get_args());
     //return $this->table->setLimit($limit);    
   }
@@ -269,16 +269,18 @@ abstract class TableWrapper implements \system\model2\TableInterface {
     //return $this->table->limit($limit, $offset = 0);    
   }
 
-  public function pageLimits($pageSize, $page = 0) {
-    return \call_user_func_array(array($this->table, 'pageLimits'), \func_get_args());
-    //return $this->table->pageLimits($pageSize, $page = 0);    
+  public function pageLimit($pageSize, $page = 0) {
+    return \call_user_func_array(array($this->table, 'pageLimit'), \func_get_args());
+    //return $this->table->pageLimit($pageSize, $page = 0);    
   }
   
   public function getSelectKey() {
     return \call_user_func_array(array($this->table, 'getSelectKey'), \func_get_args());
+    //return $this->table->getSelectKey();
   }
   
   public function setSelectKey(FieldInterface $field) {
     return \call_user_func_array(array($this->table, 'setSelectKey'), \func_get_args());
+    //return $this->table->setSelectKey($field);
   }
 }

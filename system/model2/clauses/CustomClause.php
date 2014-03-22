@@ -4,7 +4,7 @@ namespace system\model2\clauses;
 /**
  * Custom clause
  */
-class CustomClause implements ClauseInterface {
+class CustomClause implements FilterClauseInterface {
   /**
    * @var string Query
    */

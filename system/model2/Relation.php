@@ -189,56 +189,7 @@ class Relation extends TableWrapper implements RelationInterface {
    * @return \system\model2\RecordsetInterface[] List of recordsets returned by the query
    */
   public function selectByParent(RecordsetInterface $parent) {
-    $query = $this->selectQueryByParent($parent);
-    
-    Main::pushMessage(\system\utils\SqlFormatter::format($query));
-    
-    $dataAccess = DataLayerCore::getInstance();
-    $result = $dataAccess->executeQuery($query);
-    
-    $recordsets = array();
-    
-    while (($data = $dataAccess->sqlFetchArray($result))) {
-      $recordset = $this->newRecordset($data);
-      if ($this->getSelectKey()) {
-        $recordsets[$recordset->{$this->getSelectKey()->getName()}] = $recordset;
-      }
-      elseif ($this->isAutoIncrement()) {
-        $recordsets[$recordset->{$this->getAutoIncrementField()->getName()}] = $recordset;
-      }
-      else {
-        $recordsets[] = $recordset;
-      }
-    }
-    
-    $dataAccess->sqlFreeResult($result);
-    
-    return $recordsets;
-  }
-  
-  /**
-   * Returns the select query
-   * @return string SQL query
-   */
-  public function selectQueryByParent(RecordsetInterface $parent) {
-    $q1 = '';
-    $q2 = '';
-    $this->initQuery($q1, $q2);
-    
-    $query = "SELECT {$q1} FROM {$q2}";
-    
-    $query .= ' WHERE ' . $this->getJoinClause($parent)->getQuery();
-    if (!$this->getFilter()->isEmpty()) {
-      $query .= ' AND (' . $this->getFilter()->getQuery() . ')';
-    }
-    if (!$this->getFilter()->isEmpty()) {
-      $query .= ' ORDER BY ' . $this->getFilter()->getQuery();
-    }
-    if ($this->getLimit()) {
-      $query .= ' LIMIT ' . $this->getLimit()->getQuery();
-    }
-    
-    return $query;
+    return $this->select($this->getJoinClause($parent));
   }
   
   /**
@@ -247,18 +198,7 @@ class Relation extends TableWrapper implements RelationInterface {
    * @return \system\model2\RecordsetInterface First result
    */
   public function selectFirstByParent(RecordsetInterface $parent) {
-    $oldLimit = $this->limitClause;
-    
-    $this->setLimit($this->limit(1));
-    $result = $this->selectByParent($parent);
-    
-    $this->limitClause = $oldLimit;
-    
-    if (empty($result)) {
-      return null;
-    } else {
-      return \reset($result);
-    }
+    return $this->selectFirst($this->getJoinClause($parent));
   }
   
   /**

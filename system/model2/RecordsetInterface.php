@@ -45,13 +45,33 @@ interface RecordsetInterface {
    * @param string $key Key
    * @param mixed $value Value
    */
-  public function setMetaData($key, $value);
+  public function setExtra($key, $value);
   
   /**
    * Gets recordset meta data
    * @return mixed Meta data
    */
-  public function getMetaData($key);
+  public function getExtra($key);
+  
+  /**
+   * Gets recordset primary key value
+   * @return array Primary key
+   */
+  public function getPrimaryKey();
+  
+  /**
+   * Gets a recordset property
+   * @param string $path Property path
+   * @return mixed Property value
+   */
+  public function get($path);
+  
+  /**
+   * Sets a recordset property
+   * @param string $path Property path
+   * @param mixed $value Property value
+   */
+  public function set($path, $value);
   
   /**
    * Recordset as array

@@ -173,14 +173,4 @@ interface TableInterface extends PropertyInterface, QueryInterface {
    * @return \system\model2\RecordsetInterface Recordset
    */
   public function newRecordset($data = null);
-  /**
-   * Gets the select key
-   * @return FieldInterface Select key or NULL if not set
-   */
-  public function getSelectKey();
-  /**
-   * Sets the select key
-   * @param FieldInterface $name Field to be used as the select key
-   */
-  public function setSelectKey(FieldInterface $field);
 }
