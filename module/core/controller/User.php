@@ -1,14 +1,7 @@
 <?php
 namespace module\core\controller;
 
-use \system\Component;
-use \system\model\Recordset;
-use \system\model\RecordsetBuilder;
-use \system\model\FilterClause;
-use \system\model\FilterClauseGroup;
-use \system\model\LimitClause;
-use \system\model\SortClause;
-use \system\model\SortClauseGroup;
+use \system\model2\Table;
 
 class User extends Edit {
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
@@ -57,10 +50,10 @@ class User extends Edit {
   }
   ///</editor-fold>
   
-  private function getUserBuilder() {
-    $userBuilder = new \system\model\RecordsetBuilder('user');
-    $userBuilder->using('*');
-    return $userBuilder;
+  private function getUserTable() {
+    $table = Table::loadTable('user');
+    $table->import('*');
+    return $table;
   }
   
   public function runLogin() {
@@ -105,8 +98,8 @@ class User extends Edit {
   }
   
   public function runList() {
-    $userBuilder = $this->getUserBuilder();
-    $users = $userBuilder->select();
+    $table = $this->getUserTable();
+    $users = $table->select();
     $this->datamodel['users'] = $users;
     $this->setPageTitle(\cb\t('Users'));
     $this->setMainTemplate('users');
@@ -121,7 +114,8 @@ class User extends Edit {
   }
   
   public function runRead() {
-    return $this->read($this->getUserBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0))));
+    $table = $this->getUserTable();
+    return $this->read($table->selectFirst($table->filter('id', $this->getUrlArg(0))));
   }
   
   public function runDelete() {
@@ -139,14 +133,15 @@ class User extends Edit {
   
   protected function getEditRecordsets() {
     $user = null;
+    $table = $this->getUserTable();
     switch ($this->getAction()) {
       case 'Add':
       case 'Register':
-        $user = $this->getUserBuilder()->newRecordset();
+        $user = $table->newRecordset();
         break;
 
       case 'Edit':
-        $user = $this->getUserBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0)));
+        $user = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
         break;
     }
     $recordsets = array('user' => $user);

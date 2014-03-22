@@ -1,6 +1,8 @@
 <?php
 namespace module\core\controller;
 
+use system\model2\Table;
+
 class Admin extends \system\Component {
   public static function accessLogsReset($urlArgs, $user) {
     return $user && $user->superuser;
@@ -31,8 +33,8 @@ class Admin extends \system\Component {
     
     $this->setMainTemplate('logs');
 
-    $rsb = self::rsb();
-    $logs = $rsb->select();
+    $table = self::getLogTable();
+    $logs = $table->select();
     $this->datamodel['logs'] = $logs;
     
     return \system\RESPONSE_TYPE_READ;
@@ -43,8 +45,8 @@ class Admin extends \system\Component {
     
     $this->setMainTemplate('log');
 
-    $rsb = self::rsb();
-    $log = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
+    $table = self::getLogTable();
+    $log = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
     if (empty($log)) {
       throw new \system\exceptions\PageNotFound();
     }
@@ -56,8 +58,8 @@ class Admin extends \system\Component {
   public function runLogsByKey() {
     $this->setMainTemplate('logs');
     
-    $rsb = self::rsb();
-    $logs = $rsb->selectBy(array('code' => $this->getUrlArg(0)));
+    $table = self::getLogTable();
+    $logs = $table->select($table->filter('code', $this->getUrlArg(0)));
     $this->datamodel['logs'] = $logs;
     
     return \system\RESPONSE_TYPE_READ;
@@ -83,24 +85,24 @@ class Admin extends \system\Component {
     }
     $this->setMainTemplate('logs');
     
-    $rsb = self::rsb();
-    $logs = $rsb->selectBy(array('type' => $type));
+    $table = self::getLogTable();
+    $logs = $table->select($table->filter('type', $type));
     $this->datamodel['logs'] = $logs;
     
     return \system\RESPONSE_TYPE_READ;
   }
   
-  private static function rsb() {
+  private static function getLogTable() {
     $pageSize = 30;
     
-    $rsb = new \system\model\RecordsetBuilder('log');
-    $rsb->using('*');
-    $pages = $rsb->countPages($pageSize);
+    $table = Table::loadTable('log');
+    $table->import('*');
+    $pages = $table->countPages($pageSize);
     $page = isset($_REQUEST['page']) && $_REQUEST['page'] > 0 && $_REQUEST['page'] < $pages
       ? intval($_REQUEST['page'])
       : 0;
-    $rsb->setLimit(new \system\model\LimitClause($pageSize, ($pageSize * $page)));
-    $rsb->setSort(new \system\model\SortClause($rsb->date_time_request, 'DESC'));
-    return $rsb;
+    $table->setLimit($table->limit($pageSize, ($pageSize * $page)));
+    $table->addSorts($table->sort('date_time_request', 'DESC'));
+    return $table;
   }
 }

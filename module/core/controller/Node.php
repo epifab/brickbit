@@ -1,9 +1,15 @@
 <?php
 namespace module\core\controller;
 
-use \system\Component;
-use \system\model\RecordsetBuilder;
-use \system\model\FilterClause;
+use system\Main;
+use system\exceptions\InternalError;
+use system\exceptions\InputOutputError;
+use system\model2\DataLayerCore;
+use system\model2\RecordsetInterface;
+use system\model2\Table;
+use system\session\Session;
+use system\utils\Login;
+use module\core\model\RecordMode;
 
 class Node extends Edit {
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
@@ -17,24 +23,25 @@ class Node extends Edit {
    * @return boolean True if the user has access to the node
    */
   private static function accessRED($action, $id, $user) {
-    $rsb = new RecordsetBuilder('node');
-    $rsb->addFilter(new FilterClause($rsb->id, '=', $id));
+    $table = Table::loadTable('node');
     
-    if ($rsb->countRecords() > 0) {
+    $table->addFilters($table->filter('id', $id));
+    
+    if ($table->countRecords() > 0) {
       switch ($action) {
         case "READ":
-          $rsb->addReadModeFilters($user);
+          RecordMode::addReadModeFilters($table, $user);
           break;
         case "EDIT":
-          $rsb->addEditModeFilters($user);
+          RecordMode::addEditModeFilters($table, $user);
           break;
         case "DELETE":
-          $rsb->addDeleteModeFilters($user);
+          RecordMode::addDeleteModeFilters($table, $user);
           break;
         default:
-          throw new \system\exceptions\InternalError('Invalid @name parameter', array('@name' => 'action'));
+          throw new InternalError('Invalid @name parameter', array('@name' => 'action'));
       }
-      return $rsb->countRecords() > 0;
+      return $table->countRecords() > 0;
     }
     return true;
   }
@@ -44,13 +51,13 @@ class Node extends Edit {
    * @param array $urlArgs URL arguments
    * @param object $user User
    * @return boolean TRUE if the user is able to create a root node
-   * @throws \system\exceptions\InputOutputError
+   * @throws InputOutputError
    */
   public static function accessAdd($urlArgs, $user) {
-    $nodeTypes = \system\Main::moduleConfig('nodeTypes', true);
+    $nodeTypes = Main::moduleConfig('nodeTypes', true);
     
     if (!isset($nodeTypes[$urlArgs[0]])) {
-      throw new \system\exceptions\InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
+      throw new InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
     }
     if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
       return false;
@@ -65,21 +72,23 @@ class Node extends Edit {
    * @param array $urlArgs URL arguments
    * @param object $user User
    * @return boolean TRUE if the user is able to create the node
-   * @throws \system\exceptions\InputOutputError
+   * @throws InputOutputError
    */
   public static function accessAdd2Node($urlArgs, $user) {
-    $nodeTypes = \system\Main::invokeStaticMethodAllMerge('nodeTypes');
+    $nodeTypes = Main::invokeStaticMethodAllMerge('nodeTypes');
     
     if (!isset($nodeTypes[$urlArgs[1]])) {
-      throw new \system\exceptions\InputOutputError('Invalid node type.');
+      throw new InputOutputError('Invalid node type.');
     }
     
     // get the parent node
-    $rsb = new RecordsetBuilder('node');
-    $rsb->using('type');
-    $rsb->addFilter(new FilterClause($rsb->id, '=', $urlArgs[0]));
-    $rsb->addEditModeFilters($user); // Check if the logged user has sufficient permissions to edit the parent node
-    $parentNode = $rsb->selectFirst();
+    $table = Table::loadTable('node');
+    $table->import('type');
+    $table->addFilters($table->filter('id', $urlArgs[0]));
+    // Check if the logged user has sufficient permissions 
+    //  to edit the parent node
+    RecordMode::addEditModeFilters($table, $user);
+    $parentNode = $table->selectFirst();
     
     if (!$parentNode) {
       return false;
@@ -112,13 +121,13 @@ class Node extends Edit {
   public static function accessReadByUrn($urlArgs, $user) {
     list($urn) = $urlArgs;
     
-    $rsb = new RecordsetBuilder('node');
-    $rsb->using("text.urn");
-    $rsb->addFilter(new FilterClause($rsb->text->urn, '=', $urn));
+    $table = Table::loadTable('node');
+    $table->import('text.urn');
+    $table->addFilters($table->filter('text.urn', $urn));
     
-    if ($rsb->countRecords() > 0) {
-      $rsb->addReadModeFilters($user);
-      return $rsb->countRecords() > 0;
+    if ($table->countRecords() > 0) {
+      RecordMode::addReadModeFilters($table, $user);
+      return $table->countRecords() > 0;
     }
     return true;
   }
@@ -146,57 +155,57 @@ class Node extends Edit {
   
   /**
    * Returns the node builder
-   * @return \system\model\RecordsetBuilder Node builder
+   * @return Table Node builder
    */
-  protected function getNodeBuilder() {
-    $rsb = new RecordsetBuilder('node');
-    $rsb->using(
+  protected function getNodeTable() {
+    $table = Table::loadTable('node');
+    $table->import(
       '*',
       'record_mode.*',
       'text.*',
       'texts.*',
       'files.*'
     );
-    return $rsb;
+    return $table;
   }
   
   /**
    * Creates a new (temporary) node recordset
    * @param string $type Recordset type
    * @param int $parentId Parent node id
-   * @return \system\model\RecordsetInterface
-   * @throws \system\exceptions\InputOutputError
+   * @return RecordsetInterface
+   * @throws InputOutputError
    */
   private function getTmpRecordset($type, $parentId=null) {
     $parentNode = null;
     if ($parentId) {
       // Initialize parent node (if any)
-      $prsb = new \system\model\RecordsetBuilder('node');
-      $prsb->using('*');
-      $parentNode = $prsb->selectFirstBy(array('id' => $parentId));
+      $ptable = Table::loadTable('node');
+      $ptable->import('*');
+      $parentNode = $ptable->selectFirst($ptable->filter('id', $parentId));
       if (empty($parentNode)) {
         // Parent node not found
-        throw new \system\exceptions\InputOutputError('The node you were looking for was not found.');
+        throw new InputOutputError('The node you were looking for was not found.');
       }
     }
     
     // Initialize node builder
-    $rsb = $this->getNodeBuilder();
+    $table = $this->getNodeTable();
     
     $node = null;
 
     // Always handles with a temporary node
     // Get the temp node id from the session
-    $nodeId = \system\session\Session::getInstance()->get('core::EditNode', 'temp_node_id');
+    $nodeId = Session::getInstance()->get('core::EditNode', 'temp_node_id');
     // If the node ID exists..
     if ($nodeId) {
       // Load the node
-      $node = $rsb->selectFirstBy(array('id' => $nodeId));
+      $node = $table->selectFirst($table->filter('id', $nodeId));
       if (!$node || !$node->temp) {
         // Node not found or "temp" field set to 0
         $node = null;
       }
-      else if ($node->record_mode->owner_id != \system\utils\Login::getLoggedUserId()) {
+      else if ($node->record_mode->owner_id != Login::getLoggedUserId()) {
         // The node owner must be the current logged in user
         $node->delete(); // This should never happen!
         $node = null;
@@ -211,11 +220,11 @@ class Node extends Edit {
     if (empty($node)) {
       // If the temp node is invalid or does not exist we need to create a new 
       //  one
-      $da = \system\model\DataLayerCore::getInstance();
+      $da = DataLayerCore::getInstance();
       $da->beginTransaction();
       
       try {
-        $node = $rsb->newRecordset();
+        $node = $table->newRecordset();
         
         $node->temp = true;
         $node->type = $type;
@@ -242,12 +251,8 @@ class Node extends Edit {
           $node->sort_index = 1 + $da->executeScalar("SELECT MAX(sort_index) FROM node WHERE parent_id = " . $parentNode->id);
         }
 
-        $node->save(
-          // default record mode options
-          \system\model\RecordMode::MODE_SU_OWNER_ADMINS,
-          \system\model\RecordMode::MODE_SU_OWNER_ADMINS,
-          \system\model\RecordMode::MODE_SU_OWNER
-        );
+        RecordMode::saveRecordMode($node);
+        $node->save();
         
         \system\session\Session::getInstance()->set('core::EditNode', 'temp_node_id', $node->id);
         
@@ -279,7 +284,7 @@ class Node extends Edit {
   protected function formSubmission() {
     $form = $this->getForm();
     // Ignore disabled languages
-    foreach (\system\Main::setting('languages') as $lang) {
+    foreach (Main::setting('languages') as $lang) {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
@@ -291,7 +296,7 @@ class Node extends Edit {
   
   /**
    * Returns editable recordsets
-   * @return \system\model\RecordsetInterface
+   * @return RecordsetInterface
    * @throws \system\exceptions\InputOutputError
    */
   protected function getEditRecordsets() {
@@ -299,14 +304,18 @@ class Node extends Edit {
     switch ($this->getAction()) {
       case 'Add':
         $node = $this->getTmpRecordset($this->getUrlArg(0));
+        $this->setPageTitle(\cb\t('Add a new @title', array('@title' => $node->type)));
         break;
 
       case 'Add2Node':
         $node = $this->getTmpRecordset($this->getUrlArg(1), $this->getUrlArg(0));
+        $this->setPageTitle(\cb\t('Add a new @title', array('@title' => $node->type)));
         break;
 
       case 'Edit':
-        $node = $this->getNodeBuilder()->selectFirstBy(array('id' => $this->getUrlArg(0)));
+        $table = $this->getNodeTable();
+        $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
+        $this->setPageTitle(\cb\t('Edit @title', array('@title' => $node->title)));
         break;
     }
     
@@ -316,17 +325,17 @@ class Node extends Edit {
     );
     
     // This is used for text which aren't stored in the DB
-    $nodeTextBuilder = new RecordsetBuilder('node_text');
-    $nodeTextBuilder->using('*');
+    $nodeTextTable = Table::loadTable('node_text');
+    $nodeTextTable->import('*');
     
-    foreach (\system\Main::setting('languages') as $lang) {
+    foreach (Main::setting('languages') as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
         $nodeText = $node->texts[$lang];
       }
       else {
         // Translation does not exist... Need to add a new recordset to the form
-        $nodeText = $nodeTextBuilder->newRecordset();
+        $nodeText = $nodeTextTable->newRecordset();
         // Initialize primary key
         $nodeText->lang = $lang;
         $nodeText->node_id = $node->id;
@@ -368,11 +377,11 @@ class Node extends Edit {
       'edit-node'
     );
     foreach ($templates as $t) {
-      if (\system\Main::templateExists($t)) {
+      if (Main::templateExists($t)) {
         return $t;
       }
     }
-    throw new \system\exceptions\InternalError(
+    throw new InternalError(
       'No suitable editing template found for this node.'
       . '<p>Possible template suggestions are:</p>'
       . '<ul>'
@@ -388,12 +397,12 @@ class Node extends Edit {
     
     $node = $form->getRecordset('node');
     
-    \system\Main::pushMessage($node->toArray());
+    Main::pushMessage($node->toArray());
     
-    $da = \system\model\DataLayerCore::getInstance();
+    $da = DataLayerCore::getInstance();
     
     try {
-      foreach (\system\Main::setting('languages') as $lang) {
+      foreach (Main::setting('languages') as $lang) {
         $text = $form->getRecordset('node_' . $lang);
         
         if ($form->getInputValue('node_' . $lang . '_enable')) {
@@ -412,8 +421,9 @@ class Node extends Edit {
           }
         }
       }
+      
+      RecordMode::saveRecordMode($node);
       $node->save();
-      \system\Main::pushMessage($node->toArray());
       
       $da->commitTransaction();
     }
@@ -454,9 +464,9 @@ class Node extends Edit {
   }
 
   public function runRead() {
-    $rsb = $this->getNodeBuilder();
-    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
-    $node = $rsb->selectFirstBy(array('id' => $this->getUrlArg(0)));
+    $table = $this->getNodeTable();
+    RecordMode::addReadModeFilters($table, Login::getLoggedUser());
+    $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
     if (!$node) {
       throw new \system\exceptions\PageNotFound();
     }
@@ -464,9 +474,9 @@ class Node extends Edit {
   }
   
   public function runReadByUrn() {
-    $rsb = $this->getNodeBuilder();
-    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
-    $node = $rsb->selectFirstBy(array('text.urn' => $this->getUrlArg(0)));
+    $table = $this->getNodeTable();
+    RecordMode::addReadModeFilters($table, Login::getLoggedUser());
+    $node = $table->selectFirst($table->filter('text.urn', $this->getUrlArg(0)));
     if (!$node) {
       throw new \system\exceptions\PageNotFound();
     }
@@ -474,6 +484,6 @@ class Node extends Edit {
   }
   
   public function runDelete() {
-    throw new \system\exceptions\InternalError('Not yet implemented');
+    throw new InternalError('Not yet implemented');
   }
 }

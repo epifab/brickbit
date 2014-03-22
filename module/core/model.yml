@@ -11,6 +11,7 @@ tables:
     keys:
       primary:
         fields: [id]
+        primary: 1
         autoIncrement: 1
     relations:
       files:
@@ -36,6 +37,7 @@ tables:
     keys:
       primary:
         fields: [id]
+        primary: 1
         autoIncrement: 1
     relations:
       dir:
@@ -51,21 +53,21 @@ tables:
         dependencies: [dir.path, name]
         label: File path
         handler: |
-          function(\system\model\RecordsetInterface $file) {
+          function($file) {
             return $file->dir->path . $file->name;
           }
       extension:
         dependencies: [name]
         label: File extension
         handler: |
-          function(\system\model\RecordsetInterface $file) {
+          function($file) {
             return \system\File::getExtension($file->name);
           }
       last_update:
         dependencies: [path]
         label: Last update
         handler: |
-          function(\system\model\RecordsetInterface $file) {
+          function($file) {
             return \filetime($file->path);
           }
   vocabulary:
@@ -80,6 +82,7 @@ tables:
     keys:
       primary:
         fields: [id]
+        primary: 1
         autoIncrement: 1
     relations:
       terms:
@@ -116,6 +119,7 @@ tables:
     keys:
       primary:
         fields: [id]
+        primary: 1
         autoIncrement: 1
     relations:
       vocabulary:
@@ -159,6 +163,7 @@ tables:
     keys:
       primary:
         fields: [node_id, term_id]
+        primary: 1
     relations:
       node:
         table: node
@@ -181,13 +186,14 @@ tables:
       urn:
         type: plaintext
         label: URN
-        validation:
-          - regexp: /^[A-Za-z0-9_-]+$/
-            message: Invalid @label
-          - minlength: 3
-            message: @label too short
-          - maxlength: 32
-            message: @label too long
+#        Ideas to improve metatypes validation..
+#        validation:
+#          - regexp: /^[A-Za-z0-9_-]+$/
+#            message: Invalid @label
+#          - minlength: 3
+#            message: @label too short
+#          - maxlength: 32
+#            message: @label too long
         regexp: /^[A-Za-z0-9_-]+$/
         minlength: 3
         maxlength: 32
@@ -214,8 +220,9 @@ tables:
         # allow just a limited number of tags and attributes
         html: filtered
     keys:
-      primary_key:
+      primary:
         fields: [node_id, lang]
+        primary: 1
       urn_key:
         fields: [urn, lang]
     relations:
@@ -296,9 +303,10 @@ tables:
         type: boolean
         label: Temp content
     keys:
-      primary_key:
+      primary:
         fields: [id]
         autoIncrement: 1
+        primary: 1
     relations:
       record_mode:
         table: record_mode
@@ -323,14 +331,14 @@ tables:
         clauses: []
         type: 1-N
         filterHandler: [\module\core\model\Tree, descendantsFilter]
-  # TERMS
+      # TERMS
       terms:
         table: node_term
         type: 1-N
         clauses: [id: node_id]
         onDelete: CASCADE
         selectKey: term_id
-  # TRANSLATIONS
+      # TRANSLATIONS
       texts:
         table: node_text
         type: 1-N
@@ -342,7 +350,7 @@ tables:
         type: 1-1
         clauses: [id: node_id]
         filterHandler: [\module\core\model\Node, textFilter]
-  # FILES
+      # FILES
       files:
         table: node_file
         type: 1-N
@@ -378,15 +386,7 @@ tables:
         label: Delete URL
         dependencies: [id]
         handler: [\module\core\model\Node, getDeleteUrl]
-      # texts
-#      text:
-#        label: Text (undeterminate)
-#        dependencies: [texts]
-#        handler: [\module\core\model\Node, getText]
-#      text_und:
-#        label: Text (undeterminate)
-#        dependencies: [texts]
-#        handler: [\module\core\model\Node, getTextUnd]
+      # title
       title:
         label: Title
         dependencies: [text.title]
@@ -425,6 +425,8 @@ tables:
     keys:
       primary:
         fields: [file_id]
+        primary: 1
+        autoIncrement: 1
       node_key:
         fields: [node_id, node_index, virtual_name]
     relations:
@@ -438,18 +440,18 @@ tables:
         clauses: [file_id: id]
         onDelete: CASCADE
     virtuals:
-      urn:
-        label: Text (undeterminate)
+      url:
+        label: URL
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\core\model\NodeFile, getUrn]
-      edit_urn:
-        label: Text (undeterminate)
+        handler: [\module\core\model\NodeFile, getUrl]
+      edit_url:
+        label: Edit URL
         dependencies: [file_id]
-        handler: [\module\core\model\NodeFile, getEditUrn]
-      delete_urn:
-        label: Text (undeterminate)
+        handler: [\module\core\model\NodeFile, getEditUrl]
+      delete_url:
+        label: Delete URL
         dependencies: [file_id]
-        handler: [\module\core\model\NodeFile, getDeleteUrn]
+        handler: [\module\core\model\NodeFile, getDeleteUrl]
       download_path:
         handler: |
           function($recordset) {
@@ -466,12 +468,12 @@ tables:
     virtuals:
       superuser:
         handler: |
-          function(\system\model\Recordset $user) {
+          function($user) {
             return $user->id == 1;
           }
       anonymous:
         handler: |
-          function(\system\model\Recordset $user) {
+          function($user) {
             return $user->id == 0;
           }
       url:

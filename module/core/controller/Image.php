@@ -2,13 +2,7 @@
 namespace module\core\controller;
 
 use \system\Component;
-use \system\model\Recordset;
-use \system\model\RecordsetBuilder;
-use \system\model\FilterClause;
-use \system\model\FilterClauseGroup;
-use \system\model\LimitClause;
-use \system\model\SortClause;
-use \system\model\SortClauseGroup;  
+use system\model2\Table;
 
 class Image extends Component {
   
@@ -17,9 +11,13 @@ class Image extends Component {
     if (!\array_key_exists($version, \system\Main::invokeStaticMethodAllMerge('imageVersionMakers'))) {
       throw new \system\exceptions\PageNotFound();
     }
-    $rsb = new RecordsetBuilder('node_file');
-    $rsb->usingAll('*');
-    $nodeFile = $rsb->selectFirstBy(array('node_id(' => $nodeId, 'node_index' => $nodeIndex, 'virtual_name' => $virtualName));
+    $table = Table::loadTable('node_file');
+    $table->import('*');
+    $nodeFile = $table->selectFirst($table->filterGroup('AND')->addClauses(
+      $table->filter('node_id', $nodeId),
+      $table->filter('node_index', $nodeIndex),
+      $table->filter('virtual_name', $virtualName)
+    ));
     if (!$nodeFile) {
       throw new \system\exceptions\PageNotFound();
     }

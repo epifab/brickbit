@@ -1,6 +1,8 @@
 <?php
 namespace module\core\controller;
 
+use system\model2\Table;
+
 class NodeImage extends \system\Component {
   
   public function runGetVersion() {
@@ -17,12 +19,13 @@ class NodeImage extends \system\Component {
       }
     }
     
-    $rsb = new \system\model\RecordsetBuilder('node_file');
-    $rsb->using('*');
-    $rsb->addFilter(new \system\model\FilterClause($rb->node_id, '=', $nodeId));
-    $rsb->addFilter(new \system\model\FilterClause($rb->node_index, '=', $nodeIndex));
-    $rsb->addFilter(new \system\model\FilterClause($rb->virtual_name, '=', $virtualName));
-    
+    $rsb = Table::loadTable('node_file');
+    $rsb->import('*');
+    $rsb->addFilters(
+      $rsb->filter('node_id', $nodeId),
+      $rsb->filter('node_index', $nodeIndex),
+      $rsb->filter('virtual_name', $virtualName)
+    );
     $rs = $rsb->selectFirst();
     
     if (!$rs) {

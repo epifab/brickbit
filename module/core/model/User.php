@@ -2,17 +2,33 @@
 namespace module\core\model;
 
 use \system\Main;
+use \system\model2\RecordsetInterface;
 
 class User {
-  public static function getUrl(\system\model\RecordsetInterface $recordset) {
+  /**
+   * User edit URL
+   * @param \system\model2\RecordsetInterface $recordset User recordset
+   * @return string Edit URL
+   */
+  public static function getUrl(RecordsetInterface $recordset) {
     return Main::getUrl("user/{$recordset->id}");
   }
   
-  public static function getEditUrl(\system\model\RecordsetInterface $recordset) {
+  /**
+   * User edit URL
+   * @param \system\model2\RecordsetInterface $recordset User recordset
+   * @return string Edit URL
+   */
+  public static function getEditUrl(RecordsetInterface $recordset) {
     return Main::getUrl("user/{$recordset->id}/edit");
   }
   
-  public static function getDeleteUrl(\system\model\RecordsetInterface $recordset) {
+  /**
+   * User delete URL
+   * @param \system\model2\RecordsetInterface $recordset User recordset
+   * @return string Delete URL
+   */
+  public static function getDeleteUrl(RecordsetInterface $recordset) {
     return Main::getUrl("user/{$recordset->id}/delete");
   }
 }

@@ -1,6 +1,8 @@
 <?php
 namespace module\core\controller;
 
+use system\model2\Table;
+
 class NodeFile extends \system\Component {
   
   public function createFile($fileName) {
@@ -36,11 +38,11 @@ class NodeFile extends \system\Component {
       $virtualName = $name . $i . '.' . $ext;
     }
     
-    $rsb = new \system\model\RecordsetBuilder('node_file');
-    $rsb->using('*', 'file.*');
+    $table = Table::loadTable('node_file');
+    $table->import('*', 'file.*');
     
     // init the recordset
-    $rs = $rsb->newRecordset();
+    $rs = $table->newRecordset();
 
     $rs->file->dir_id = self::getDirId();
     $rs->file->name = $fileName;
@@ -58,12 +60,12 @@ class NodeFile extends \system\Component {
   public static function getDirId() {
     $dirId = \system\Main::getVariable('core-nodefile-dir-id', null);
     if (!$dirId) {
-      $rsb = new \system\model\RecordsetBuilder('dir');
-      $rsb->using('*');
+      $table = Table::loadTable('dir');
+      $table->import('*');
       
-      $rs = $rsb->selectFirstBy(array('path' => self::getDirPath()));
+      $rs = $table->selectFirst($table->filter('path', self::getDirPath()));
       if (!$rs) {
-        $rs = $rsb->newRecordset();
+        $rs = $table->newRecordset();
         $rs->path = self::getDirPath();
         $rs->save();
       }
@@ -248,13 +250,13 @@ class NodeFile extends \system\Component {
     $nodeIndex = $this->getUrlArg(1);
     $virtualName = $this->getUrlArg(2);
     
-    $rsb = new \system\model\RecordsetBuilder('node_file');
-    $rsb->using('*', 'file.path');
+    $table = Table::loadTable('node_file');
+    $table->import('*', 'file.path');
     
-    $nodeFile = $rsb->selectFirstBy(array(
-      'node_id' => $nodeId,
-      'node_index' => $nodeIndex,
-      'virtual_name' => $virtualName
+    $nodeFile = $table->selectFirst($table->filterGroup('AND')->addClauses(
+      $table->filter('node_id', $nodeId),
+      $table->filter('node_index', $nodeIndex),
+      $table->filter('virtual_name', $virtualName)
     ));
     
     if (empty($nodeFile)) {

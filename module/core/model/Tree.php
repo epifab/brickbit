@@ -1,33 +1,27 @@
-<?php
+  <?php
 namespace module\core\model;
 
-use system\model\RecordsetBuilder;
-use system\model\RecordsetInterface;
-use system\model\FilterClauseGroup;
-use system\model\FilterClause;
-use system\model\SortClause;
+use system\model2\RelationInterface;
+use system\model2\RecordsetInterface;
 
 class Tree {
-  public static function ancestorsFilter(RecordsetInterface $recordset, RecordsetBuilder $ancestors) {
-    $ancestors->setFilter(new FilterClauseGroup(
-      new FilterClause($ancestors->rdel, '>', $recordset->rdel),
-      'AND',
-      new FilterClause($ancestors->ldel, '<', $recordset->ldel)
-    ));
-    $ancestors->setSort(new SortClause(
-      $ancestors->ldel, 'DESC'
-    ));
+  public static function ancestorsFilter(RelationInterface $ancestors, RecordsetInterface $parent = null) {
+    if (empty($parent)) {
+      $parent = $ancestors->getParentTable();
+    }
+    return $ancestors->filterGroup('AND')->addClauses(
+      $ancestors->filter('rdel', $parent->rdel, '>'),
+      $ancestors->filter('ldel', $parent->rdel, '<')
+    );
   }
   
-  public static function descendantsFilter(RecordsetInterface $recordset, RecordsetBuilder $descendants) {
-    $descendants->setFilter(new FilterClauseGroup(
-      new FilterClause($descendants->rdel, '<', $recordset->rdel),
-      'AND',
-      new FilterClause($descendants->ldel, '>', $recordset->ldel)
-    ));
-    $descendants->setSort(new SortClause(
-      $descendants->rdel, 'DESC'
-    ));
+  public static function descendantsFilter(RelationInterface $descendants, RecordsetInterface $parent = null) {
+    if (empty($parent)) {
+      $parent = $descendants->getParentTable();
+    }
+    return $descendants->filterGroup('AND')->addClauses(
+      $descendants->filter('rdel', $parent->rdel, '<'),
+      $descendants->filter('ldel', $parent->rdel, '>')
+    );
   }
-
 }

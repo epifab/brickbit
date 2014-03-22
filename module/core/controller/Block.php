@@ -8,15 +8,17 @@ class Block extends \system\Component {
   public function runMainMenu() {
     $mm = array();
     
-    $rsb = new \system\model\RecordsetBuilder('node');
-    $rsb->using(
+    $table = \system\model2\Table::loadTable('node');
+    $table->import(
       'id', 'type', 'url', 'text.title'
     );
-    $rsb->addFilter(new \system\model\FilterClause($rsb->type, '=', 'page'));
-    $rsb->addFilter(new \system\model\FilterClause($rsb->text->title, 'IS_NOT_NULL'));
-    $rsb->addReadModeFilters(\system\utils\Login::getLoggedUser());
+    $table->addFilters(
+      $table->filter('type', 'page'),
+      $table->filter('text.title', null, 'NOT_NULL')
+    );
+    \module\core\model\RecordMode::addReadModeFilters($table, \system\utils\Login::getLoggedUser());
     
-    $rs = $rsb->select();
+    $rs = $table->select();
     foreach ($rs as $r) {
       $mm[$r->id] = array(
         'id' => $r->id,

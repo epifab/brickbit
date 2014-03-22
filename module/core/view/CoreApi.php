@@ -105,17 +105,17 @@ class CoreApi {
       
       $path = \cb\array_item('path', $params, array('required' => true, 'type' => 'string'));
       
-      $field = $recordset->getBuilder()->searchField($path, true);
+      $field = $recordset->getTable()->importField($path);
       
       $defaultName = 'recordset--' . $params['recordset'] . '--' . str_replace('.', '--', $path);
       $defaultMetatype = $field->getMetaType();
-      $defaultWidget = $field->getEditWidget();
-      $defaultLabel = $field->getLabel();
+      $defaultWidget = $defaultMetatype->getEditWidget();
+      $defaultLabel = $defaultMetatype->getLabel();
       
       if (!isset($params['name'])) {
         $params['name'] = $defaultName;
       }
-      $params['state'] = $recordset->getProg($path);
+      $params['state'] = $recordset->{$path};
       $params['metatype'] = $defaultMetatype;
       if (!isset($params['widget'])) {
         // Widget can be overriden
@@ -332,10 +332,10 @@ class CoreApi {
     static $userBuilder = null;
     if (!isset($users[$userId])) {
       if (empty($userBuilder)) {
-        $userBuilder = new \system\model\RecordsetBuilder('user');
-        $userBuilder->using('full_name');
+        $table = \system\model2\Table::loadTable('user');
+        $table->import('full_name');
       }
-      $users[$userId] = $userBuilder->selectFirstBy(array('id' => $userId));
+      $users[$userId] = $table->selectFirst($table->filter('id', $userId));
     }
     return !empty($users[$userId]) ? $users[$userId]->full_name : 'Anonymous';
   }

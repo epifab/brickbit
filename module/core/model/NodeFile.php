@@ -1,34 +1,45 @@
 <?php
 namespace module\core\model;
 
-use system\model\RecordsetBuilder;
-use system\model\RecordsetInterface;
-use system\model\FilterClauseGroup;
-use system\model\FilterClause;
-use system\model\SortClause;
+use system\Main;
+use system\model2\RecordsetInterface;
 
 class NodeFile {
-  public static function getUrn(RecordsetInterface $rs) {
-    if (!$rs->node_id) {
-      return 'content/file/' . $rs->file_id . '.' . $rs->file->extension;
-    } else {
-      return 'content/' . $rs->node_id . '/file/' . $rs->node_index . '/' . $rs->virtual_name;
-    }
+  /**
+   * Node URL
+   * @param RecordsetInterface $recordset Node file recordset
+   * @return string URL
+   */
+  public static function getUrl(RecordsetInterface $recordset) {
+    $urn = empty($recordset->node_id)
+      ? 'content/file/' . $recordset->file_id . '.' . $recordset->file->extension
+      : 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->virtual_name;
+    return Main::getUrl($urn);
   }
   
-  public static function getEditUrn(RecordsetInterface $recordset) {
-    return 'content/file/' . $recordset->file_id . '/edit';
+  /**
+   * Node edit URL
+   * @param RecordsetInterface $recordset Node recordset
+   * @return string Edit URL
+   */
+  public static function getEditUrl(RecordsetInterface $recordset) {
+    return Main::getUrl('content/file/' . $recordset->file_id . '/edit');
   }
   
-  public static function getDeleteUrn(RecordsetInterface $recordset) {
-    return 'content/file/' . $recordset->file_id . '/delete';
+  /**
+   * Node delete URL
+   * @param RecordsetInterface $recordset Node recordset
+   * @return string Delete URL
+   */
+  public static function getDeleteUrl(RecordsetInterface $recordset) {
+    return Main::getUrl('content/file/' . $recordset->file_id . '/delete');
   }
   
-  public static function getImages(RecordsetInterface $rs) {
+  public static function getImages(RecordsetInterface $recordset) {
     $imgVersions = \array_keys(\system\Main::invokeStaticMethodAllMerge('imageVersionMakers'));
     $versions = array();
     foreach ($imgVersions as $version) {
-      $versions[$version] = 'content/' . $rs->node_id . '/img-' . $version . '/' . $rs->node_index . '/' . $rs->virtual_name;
+      $versions[$version] = 'content/' . $recordset->node_id . '/img-' . $version . '/' . $recordset->node_index . '/' . $recordset->virtual_name;
     }
   }
 }
