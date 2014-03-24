@@ -1,6 +1,7 @@
 <?php
 namespace system\model2;
 
+use system\Main;
 use system\exceptions\SqlQueryError;
 
 /**
@@ -33,7 +34,11 @@ class DataLayerCore {
    * @param type $args
    */
   private static function addLog($message, $args = array()) {
-    self::$logs[] = \cb\t($message, $args);
+    $log = \cb\t($message, $args);
+    self::$logs[] = $log;
+    if (Main::setting('debug')) {
+      Main::pushMessage($log);
+    }
   }
   
   /**

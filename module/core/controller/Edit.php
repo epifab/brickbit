@@ -1,7 +1,9 @@
 <?php
 namespace module\core\controller;
 
-use system\Component as Component;
+use system\model2\RecordsetInterface;
+use system\view\Form;
+use system\Component;
 
 /**
  * Generic base recordset editing component
@@ -13,7 +15,7 @@ abstract class Edit extends Component {
   abstract protected function getEditActions();
   /**
    * Returns a list of editable recordsets keyed by a recordset name.
-   * @return \system\model\RecordsetInterface[] Edit recordsets
+   * @return RecordsetInterface[] Edit recordsets
    */
   abstract protected function getEditRecordsets();
   /**
@@ -28,18 +30,18 @@ abstract class Edit extends Component {
   abstract protected function getFormTemplate();
 
   /**
-   * @var \system\view\Form Form object
+   * @var Form Form object
    */
   private $form = null;
   
   /**
    * Returns the form object
-   * @return \system\view\Form Form object
+   * @return Form Form object
    */
   public function getForm() {
     if (empty($this->form)) {
       // Initialize the form
-      $this->form = \system\view\Form::initForm($this->getFormId());
+      $this->form = Form::initForm($this->getFormId());
       foreach ($this->getEditRecordsets() as $name => $recordset) {
         // Attach the recordsets to the form
         $this->form->addRecordset($name, $recordset);

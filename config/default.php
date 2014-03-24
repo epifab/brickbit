@@ -24,5 +24,6 @@ return array(
   
   'defaultPateTitle' => 'CIDERbit',
     
-  'coreCache' => false,
+  'coreCache' => true,
+  'debug' => true
 );

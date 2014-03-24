@@ -1,15 +1,20 @@
 <?php
 namespace module\core\controller;
 
-use \system\Component;
+use system\Component;
+use system\Main;
+use system\exceptions\InputOutputError;
+use system\exceptions\PageNotFound;
 use system\model2\Table;
+use system\model2\RecordsetInterface;
+use system\utils\File;
 
 class Image extends Component {
   
   public static function runVersion() {
     list($version, $nodeId, $nodeIndex, $virtualName, $ext) = $this->getUrlArgs();
-    if (!\array_key_exists($version, \system\Main::invokeStaticMethodAllMerge('imageVersionMakers'))) {
-      throw new \system\exceptions\PageNotFound();
+    if (!\array_key_exists($version, Main::invokeStaticMethodAllMerge('imageVersionMakers'))) {
+      throw new PageNotFound();
     }
     $table = Table::loadTable('node_file');
     $table->import('*');
@@ -19,13 +24,13 @@ class Image extends Component {
       $table->filter('virtual_name', $virtualName)
     ));
     if (!$nodeFile) {
-      throw new \system\exceptions\PageNotFound();
+      throw new PageNotFound();
     }
     if (!\in_array($nodeFile->file->extension, array('gif', 'jpg', 'jpeg', 'png'))) {
-      throw new \system\exceptions\PageNotFound();
+      throw new PageNotFound();
     }
     // controlla che non esista una versione dell'immagine
-    $dir = \system\Main::dataPath() . 'img/' . $version;
+    $dir = Main::dataPath() . 'img/' . $version;
     if (!\file_exists($dir)) {
       @\mkdir($dir);
     }
@@ -33,9 +38,9 @@ class Image extends Component {
     
     if (!\file_exists($fileName) || \filetime($fileName) < $nodeFile->file->last_update) {
       // file version doesn't exist or outdated
-      $handler = \system\Main::invokeStaticMethodAllMerge('imageVersionMakers');
+      $handler = Main::invokeStaticMethodAllMerge('imageVersionMakers');
       if (!isset($handler[$version])) {
-        throw new \system\exceptions\PageNotFound();
+        throw new PageNotFound();
       } else {
         \call_user_func($handler[$version], $fileName, $nodeFile);
       }
@@ -54,29 +59,29 @@ class Image extends Component {
           break;
           break;
         default:
-          throw new \system\exceptions\InputOutputError('Invalid image extension <em>@ext</em>', array('@ext' => $ext));
+          throw new InputOutputError('Invalid image extension <em>@ext</em>', array('@ext' => $ext));
       }
       \header('Content-Length:' . \filesize($fileName));
       \readfile($fileName);
     }
     else {
-      throw new \system\exceptions\InputOutputError('File <em>@name</em> not foud', array('@name' => $fileName));
+      throw new InputOutputError('File <em>@name</em> not foud', array('@name' => $fileName));
     }
   }
   
-  public static function imageVersionMaker50x50($fileName, \system\model\RecordsetInterface $nodeFile) {
-    \system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
+  public static function imageVersionMaker50x50($fileName, RecordsetInterface $nodeFile) {
+    File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
   }
   
-  public static function imageVersionMaker100x100($fileName, \system\model\RecordsetInterface $nodeFile) {
-    \system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
+  public static function imageVersionMaker100x100($fileName, RecordsetInterface $nodeFile) {
+    File::createImageFixedSize($nodeFile->file->path, $fileName, 100, 100);
   }
   
-  public static function imageVersionMaker300x300($fileName, \system\model\RecordsetInterface $nodeFile) {
-    \system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 300, 300);
+  public static function imageVersionMaker300x300($fileName, RecordsetInterface $nodeFile) {
+    File::createImageFixedSize($nodeFile->file->path, $fileName, 300, 300);
   }
   
-  public static function imageVersionMaker500x500($fileName, \system\model\RecordsetInterface $nodeFile) {
-    \system\utils\File::createImageFixedSize($nodeFile->file->path, $fileName, 500, 500);
+  public static function imageVersionMaker500x500($fileName, RecordsetInterface $nodeFile) {
+    File::createImageFixedSize($nodeFile->file->path, $fileName, 500, 500);
   }
 }

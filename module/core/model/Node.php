@@ -25,7 +25,6 @@ class Node {
    */
   public static function getChildrenRecursive(RecordsetInterface $node) {
     if ($node->getExtra('children_recursive', false) === false) {
-      \system\model\DataLayerCore::resetLogs();
       $table = $node->getTable();
       $node->setExtra('children_recursive', $table->select($table->filter('parent_id', $node->id)));
     }

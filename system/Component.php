@@ -3,8 +3,13 @@ namespace system;
 
 use system\utils\HTMLHelpers;
 use system\TemplateManager;
-use system\exceptions\InternalError;
 use system\exceptions\AuthorizationError;
+use system\exceptions\Error;
+use system\exceptions\InternalError;
+use system\exceptions\PageNotFound;
+use system\exceptions\Redirect;
+use system\exceptions\UnderDevelopment;
+use system\utils\Login;
 
 abstract class Component {
   private $name = null;
@@ -57,10 +62,10 @@ abstract class Component {
    * @param \Exception $exception Exception to handle with
    */
   protected function onError($exception) {
-    if (!($exception instanceof \system\exceptions\Error)) {
+    if (!($exception instanceof Error)) {
       $exception = new InternalError($exception->getMessage());
     }
-    \system\utils\HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, Main::getExecutionTime());
+    HTMLHelpers::makeErrorPage($this->tplManager, $this->datamodel, $exception, Main::getExecutionTime());
 
 //      if ($this->nested) {
 //        $pageOutput = \ob_get_clean();
@@ -80,10 +85,10 @@ abstract class Component {
 
   /**
    * Default process handler
-   * @throws \system\exceptions\PageNotFound
+   * @throws PageNotFound
    */
   protected function defaultRunHandler() {
-    throw new \system\exceptions\PageNotFound();
+    throw new PageNotFound();
   }
   
   /**
@@ -358,7 +363,7 @@ abstract class Component {
         $this->onInit();
 
         // checking permission
-        if (!self::access(\get_class($this), $this->action, $this->urlArgs, \system\utils\Login::getLoggedUser())) {
+        if (!self::access(\get_class($this), $this->action, $this->urlArgs, Login::getLoggedUser())) {
           throw new AuthorizationError();
         }
 
@@ -409,12 +414,12 @@ abstract class Component {
         }
       }
 
-      catch (\system\exceptions\Redirect $ex) {
+      catch (Redirect $ex) {
         Main::run($ex->getUrl());
       }
     }
     
-    catch (\system\exceptions\AuthorizationError $ex) {
+    catch (AuthorizationError $ex) {
       while (\ob_get_clean());
       \header("HTTP/1.1 403 Forbidden");
       $this->setPageTitle('Access denied');
@@ -425,7 +430,7 @@ abstract class Component {
       catch (\Exception $ex) { }
     }
     
-    catch (\system\exceptions\PageNotFound $ex) {
+    catch (PageNotFound $ex) {
       while (\ob_get_clean());
       \header("HTTP/1.0 404 Not Found");
       $this->setMainTemplate('404');
@@ -436,7 +441,7 @@ abstract class Component {
       catch (\Exception $ex) { }
     }
     
-    catch (\system\exceptions\UnderDevelopment $ex) {
+    catch (UnderDevelopment $ex) {
       while (\ob_get_clean());
       \header("HTTP/1.1 501 Not implemented");
       $this->setMainTemplate('501');

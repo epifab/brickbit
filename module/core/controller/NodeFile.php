@@ -1,35 +1,43 @@
 <?php
 namespace module\core\controller;
 
+use system\Component;
+use system\Main;
+use system\exceptions\PageNotFound;
+use system\metatypes\MetaString;
+use system\model2\DataLayerCore;
 use system\model2\Table;
+use system\utils\File;
+use system\utils\Log;
+use system\utils\Utils;
 
-class NodeFile extends \system\Component {
+class NodeFile extends Component {
   
   public function createFile($fileName) {
-    \system\utils\Log::create(__CLASS__, 'File upload complete. Node id: <em>@id</em>, index: <em>@index</em>', array('@id' => $this->getUrlArg(0), '@index' => $this->getUrlArg(1)), \system\LOG_DEBUG);
+    Log::create(__CLASS__, 'File upload complete. Node id: <em>@id</em>, index: <em>@index</em>', array('@id' => $this->getUrlArg(0), '@index' => $this->getUrlArg(1)), \system\LOG_DEBUG);
     
     $nodeId = $this->getUrlArg(0);
     $nodeIndex = $this->getUrlArg(1);
     
-    $dataAccess = \system\model\DataLayerCore::getInstance();
+    $dataAccess = DataLayerCore::getInstance();
     
     $nodeIndexQuery = 
       'SELECT MAX(sort_index) + 1'
       . ' FROM node_file'
       . ' WHERE node_id = ' . $nodeId
-      . ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex);
+      . ' AND node_index = ' . MetaString::stdProg2Db($nodeIndex);
     
-    $virtualName = \system\utils\File::getSafeFilename($fileName);
+    $virtualName = File::getSafeFilename($fileName);
     
-    $name = \system\utils\File::stripExtension($virtualName);
-    $ext = \system\utils\File::getExtension($virtualName);
+    $name = File::stripExtension($virtualName);
+    $ext = File::getExtension($virtualName);
 
     $virtualNamesQuery = 
       'SELECT virtual_name'
       . ' FROM node_file'
       . ' WHERE node_id = ' . $nodeId
-      . ' AND node_index = ' . \system\metatypes\MetaString::stdProg2Db($nodeIndex)
-      . ' AND virtual_name LIKE ' . \system\metatypes\MetaString::stdProg2Db($name . '%');
+      . ' AND node_index = ' . MetaString::stdProg2Db($nodeIndex)
+      . ' AND virtual_name LIKE ' . MetaString::stdProg2Db($name . '%');
     
     $virtualNames = $dataAccess->executeQueryArray($virtualNamesQuery);
     
@@ -58,7 +66,7 @@ class NodeFile extends \system\Component {
   }
   
   public static function getDirId() {
-    $dirId = \system\Main::getVariable('core-nodefile-dir-id', null);
+    $dirId = Main::getVariable('core-nodefile-dir-id', null);
     if (!$dirId) {
       $table = Table::loadTable('dir');
       $table->import('*');
@@ -70,7 +78,7 @@ class NodeFile extends \system\Component {
         $rs->save();
       }
       $dirId = $rs->id;
-      \system\Main::setVariable('core-nodefile-dir-id', $rs->id);
+      Main::setVariable('core-nodefile-dir-id', $rs->id);
     }
     return $dirId;
   }
@@ -80,14 +88,14 @@ class NodeFile extends \system\Component {
   }
   
   public static function getAbsDirPath() {
-    return \system\Main::getBaseDirAbs() . self::getDirPath();
+    return Main::getBaseDirAbs() . self::getDirPath();
   }
   
   public function runUpload() {
     $upload = new \module\core\lib\UploadHandler(
       array(
         'script_url' => $this->getUrl(),
-        'upload_dir' => \system\Main::dataPath('nodes/'),
+        'upload_dir' => Main::dataPath('nodes/'),
         'upload_url' => $this->getUrl(),
         // Defines which files (based on their names) are accepted for upload:
         'accept_file_types' => '/.+$/i',
@@ -103,7 +111,7 @@ class NodeFile extends \system\Component {
     $files = $upload->post();
     
     foreach ($files as $file) {
-      \system\utils\Log::create(__CLASS__, \system\utils\Utils::varDump($file), array(), \system\LOG_DEBUG);
+      Log::create(__CLASS__, Utils::varDump($file), array(), \system\LOG_DEBUG);
       $this->createFile($file->name);
     }
     
@@ -260,7 +268,7 @@ class NodeFile extends \system\Component {
     ));
     
     if (empty($nodeFile)) {
-      throw new \system\exceptions\PageNotFound();
+      throw new PageNotFound();
     }
 
     while (\ob_get_clean());

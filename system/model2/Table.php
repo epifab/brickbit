@@ -115,7 +115,7 @@ class Table extends TableBase {
   
   /**
    * Limit clause
-   * @return \system\model\LimitClause
+   * @return \system\model2\clauses\LimitClause
    */
   public function getLimit() {
     return $this->limitClause;

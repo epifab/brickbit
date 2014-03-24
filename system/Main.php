@@ -436,7 +436,7 @@ class Main {
    * </pre>
    * @return array
    */
-  public static function configuration() {
+  private static function configuration() {
     static $configuration = null;
     
     if (\is_null($configuration) && self::setting('coreCache', true)) {
@@ -702,6 +702,14 @@ class Main {
       \array_pop(self::$componentStack);
       \array_pop(self::$timeRequestStack);
       throw $ex;
+    }
+    
+    if (self::setting('debug', false)) {
+      self::pushMessage(\cb\t('Execution time component <em>@component</em>::<em>@action</em>: @time sec.</b>', array(
+          '@component' => $obj->getName(),
+          '@action' => $obj->getAction(),
+          '@time' => self::getExecutionTime()
+      )));
     }
     
     \array_pop(self::$componentStack);

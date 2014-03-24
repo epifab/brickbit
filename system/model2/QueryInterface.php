@@ -55,7 +55,7 @@ interface QueryInterface {
   public function getFilter();
   /**
    * Limit clause
-   * @return \system\model\LimitClause
+   * @return \system\model2\clauses\LimitClause
    */
   public function getLimit();
   /**

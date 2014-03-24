@@ -1,7 +1,7 @@
 <?php
 namespace module\core;
 
-use system\Component;
+use system\model2\RecordsetInterface;
 use system\utils\Lang;
 use system\utils\HTMLHelpers;
 use system\utils\Login;
@@ -213,7 +213,7 @@ class Core {
   /**
    * Implements controller event imageVersion()
    */
-  public static function imageVersion($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+  public static function imageVersion($version, $fileName, RecordsetInterface $nodeFile) {
     switch ($version) {
       case 'thumb':
         return self::imageVersionFixedSizes('60x60', $fileName, $nodeFile);
@@ -233,17 +233,17 @@ class Core {
     }
   }
   
-  public static function imageVersionFixedSizes($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+  public static function imageVersionFixedSizes($version, $fileName, RecordsetInterface $nodeFile) {
     list($x, $y) = \explode('x', $version);
     \system\utils\File::saveImageFixedSize($nodeFile->file->path, $fileName, $x, $y);
   }
   
-  public static function imageVersionFixedWidth($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+  public static function imageVersionFixedWidth($version, $fileName, RecordsetInterface $nodeFile) {
     list($x, ) = \explode('-', $version);
     \system\utils\File::saveImage($nodeFile->file->path, $fileName, $x);
   }
   
-  public static function imageVersionFixedHeight($version, $fileName, \system\model\RecordsetInterface $nodeFile) {
+  public static function imageVersionFixedHeight($version, $fileName, RecordsetInterface $nodeFile) {
     list(, $y) = \explode('-', $version);
     \system\utils\File::saveImage($nodeFile->file->path, $fileName, 0, $y);
   }
