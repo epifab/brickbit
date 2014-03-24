@@ -19,41 +19,46 @@ function type($value, $type) {
       }
       break;
     case 'int':
-      return \intval($value);
-      break;
-    case 'float':
-    case 'double':
-      return \floatval($value);
-      break;
-    case 'bool':
-      return (bool)$value;
-      break;
-    case 'string':
-      return (string)$value;
-      break;
-    case 'plaintext':
-      return \cb\plaintext($value);
-      break;
-    case 'time':
-      if (\is_int($value)) {
-        return $value;
-      } else if (\is_string($value)) {
-        $value = \strtotime($value);
-        if ($value === false) {
-          throw new \system\exceptions\ConversionError('Unable to convert the variable');
-        } else {
-          return $value;
-        }
-      } else {
+      if (!\is_numeric($value)) {
         throw new \system\exceptions\ConversionError('Unable to convert the variable');
       }
+      return \intval($value);
       break;
+    
+    case 'float':
+    case 'double':
+      if (!\is_numeric($value)) {
+        throw new \system\exceptions\ConversionError('Unable to convert the variable');
+      }
+      return \floatval($value);
+      break;
+      
+    case 'bool':
+      if (!\is_bool($value) && !\is_numeric($value)) {
+        throw new \system\exceptions\ConversionError('Unable to convert the variable');
+      }
+      return (bool)$value;
+      break;
+      
+    case 'string':
+      switch (\gettype($value)) {
+        case 'array':
+        case 'object':
+        case 'resource':
+          throw new \system\exceptions\ConversionError('Unable to convert the variable');
+          break;
+        default:
+          return (string)$value;
+      }
+      break;
+    
     case 'object':
       if (!\is_object($value)) {
         throw new \system\exceptions\ConversionError('Unable to convert the variable');
-      } else {
-        return $value;
-      }
+      } 
+      return $value;
+      break;
+      
     default:
       throw new \system\exceptions\InternalError('Invalid type paremeter');
   }
