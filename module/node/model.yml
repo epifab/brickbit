@@ -1,0 +1,213 @@
+tables:
+  node:
+    fields:
+      id:
+        type: integer
+        label: Id
+      record_mode_id:
+        type: integer
+        label: Record mode id
+      ldel:
+        type: integer
+        label: Left delimiter
+      rdel:
+        type: integer
+        label: Right delimiter
+      parent_id:
+        type: integer
+        label: Parent id
+      type:
+        type: plaintext
+        label: Type
+        maxlength: 16
+      subtype:
+        type: plaintext
+        label: Subtype
+        maxlength: 16
+      sort_index:
+        type: integer
+        label: Sort index
+      temp:
+        type: boolean
+        label: Temp content
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+        primary: 1
+    relations:
+      record_mode:
+        table: record_mode
+        type: 1-1
+        clauses: {record_mode_id: id}
+      parent:
+        table: node
+        type: N-1
+        clauses: {parent_id: id}
+      children:
+        table: node
+        type: 1-N
+        clauses: {id: parent_id}
+        onDelete: CASCADE
+      ancestors:
+        table: node
+        clauses: []
+        type: 1-N
+        filterHandler: [\module\node\NodeEntity, ancestorsFilter]
+      descendants:
+        table: node
+        clauses: []
+        type: 1-N
+        filterHandler: [\module\node\NodeEntity, descendantsFilter]
+      # TERMS
+      terms:
+        table: node_term
+        type: 1-N
+        clauses: {id: node_id}
+        onDelete: CASCADE
+        selectKey: term_id
+      # TRANSLATIONS
+      texts:
+        table: node_text
+        type: 1-N
+        clauses: {id: node_id}
+        onDelete: CASCADE
+        selectKey: lang
+      text:
+        table: node_text
+        type: 1-1
+        clauses: {id: node_id}
+        filterHandler: [\module\node\NodeEntity, textFilter]
+    virtuals:
+      # 'children recursive' can be used instead of children
+      # it automatically loads the same fields and relations used for the parent
+      #  node
+      children_recursive:
+        dependencies: [id]
+        handler: [\module\node\NodeEntity, getChildrenRecursive]
+      children_grouped_by_type:
+        dependencies: [children]
+        handler: [\module\node\NodeEntity, getChildrenGroupedByType]
+      valid_children_types:
+        dependencies: [type]
+        handler: [\module\node\NodeEntity, getValidChildrenTypes]
+      # urls
+      url:
+        label: URL
+        dependencies: [id, text]
+        handler: [\module\node\NodeEntity, getUrl]
+      edit_url:
+        label: Edit URL
+        dependencies: [id]
+        handler: [\module\node\NodeEntity, getEditUrl]
+      delete_url:
+        label: Delete URL
+        dependencies: [id]
+        handler: [\module\node\NodeEntity, getDeleteUrl]
+      # title
+      title:
+        label: Title
+        dependencies: [text.title]
+        handler: [\module\node\NodeEntity, getTitle]
+      # content
+      content:
+        label: Content
+        dependencies: [id, type]
+        handler: [\module\node\NodeEntity, getContent]
+  node_text:
+    fields:
+      node_id:
+        type: integer
+        label: Node id
+      lang:
+        type: plaintext
+        label: Language
+        minlength: 2
+        maxlength: 2
+      urn:
+        type: plaintext
+        label: URN
+#        validation:
+#          - regexp: /^[A-Za-z0-9_-]+$/
+#            message: Invalid @label
+#          - minlength: 3
+#            message: @label too short
+#          - maxlength: 32
+#            message: @label too long
+        regexp: /^[A-Za-z0-9_-]+$/
+        minlength: 3
+        maxlength: 32
+      description:
+        type: plaintext
+        label: Description
+        maxlength: 128
+      title:
+        type: plaintext
+        label: Title
+        maxlength: 64
+      subtitle:
+        type: plaintext
+        label: Subtitle
+        maxlength: 128
+      preview:
+        type: html
+        label: Preview
+        # allow just a limited number of tags and attributes
+        html: filtered
+      body:
+        type: html
+        label: Body
+        # allow just a limited number of tags and attributes
+        html: filtered
+    keys:
+      primary:
+        fields: [node_id, lang]
+        primary: 1
+      urn_key:
+        fields: [urn, lang]
+    relations:
+      node:
+        type: N-1
+        table: node
+        clauses: {node_id: id}
+#  menu:
+#    fields:
+#      id:
+#        type: integer
+#        label: Id
+#      name:
+#        type: string
+#        size: 32
+#    keys:
+#      primary:
+#        fields: [id]
+#        autoIncrement: 1
+#    relations:
+#      items:
+#        table: menu_item
+#        type: 1-N
+#        onDelete: CASCADE
+#  menu_item:
+#    fields:
+#      id:
+#        type: integer
+#        label: Id
+#      menu_id:
+#        type: integer
+#        label: Menu Id
+#      url:
+#        type: string
+#        size: 32
+#      title:
+#        type: string
+#        size: 64
+#      sort_index:
+#        type: integer
+#    keys:
+#      primary:
+#        fields: [id]
+#        autoIncrement: 1
+#    relations:
+#      menu:
+#        table: menu
+#        type: N-1

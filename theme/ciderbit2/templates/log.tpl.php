@@ -6,7 +6,7 @@
       <dt>Timestamp:</dt>
       <dd><?php echo $this->api->dateTimeFormat($log->date_time_request); ?></dd>
       <dt>User:</dt>
-      <dd><?php echo $this->api->userName($log->user_id); ?></dd>
+      <dd><?php echo $log->user->full_name; ?></dd>
     </dl>
     
     <div class="alert alert-info">

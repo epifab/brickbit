@@ -41,7 +41,7 @@
             <?php endforeach; ?>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo $this->api->t('Hi, @name', array('@name' => $this->api->userName($user->id))); ?> <b class="caret"></b></a>
+            <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo $this->api->t('Hi, @name', array('@name' => $user->full_name)); ?> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li>
                   <?php $this->api->open('link', array('url' => $user->url, 'ajax' => false)); ?>
@@ -49,7 +49,7 @@
                   <?php echo $this->api->close(); ?>
                 </li>
                 <li>
-                  <?php $this->api->open('link', array('url' => $user->edit_url, 'ajax' => false)); ?>
+                  <?php $this->api->open('link', array('url' => $user->edit_url, 'ajax' => true)); ?>
                     <span class="glyphicon glyphicon-pencil"></span> <?php echo $this->api->t('Edir profile'); ?>
                   <?php echo $this->api->close(); ?>
                 </li>

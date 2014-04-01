@@ -68,6 +68,15 @@ class Lang {
     }
     if (!empty($args)) {
       foreach ($args as $key => $value) {
+        switch (substr($key, 0, 1)) {
+          case '@':
+            $value = \htmlentities($value);
+            break;
+          case '%':
+            break;
+          case '!':
+            break;
+        }
         $sentence = \str_replace($key, $value, $sentence);
       }
     }

@@ -305,12 +305,14 @@ class Recordset implements RecordsetInterface {
   
   /**
    * Gets recordset meta data
+   * @param string $key Extra key
+   * @param mixed $default Default value
    * @return mixed Meta data
    */
-  public function getExtra($key) {
+  public function getExtra($key, $default = null) {
     return isset($this->extra[$key])
       ? $this->extra[$key]
-      : null;
+      : $default;
   }
   
   /**

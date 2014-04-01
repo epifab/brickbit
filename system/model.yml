@@ -230,29 +230,43 @@ tables:
     fields:
       id:
         type: integer
+        label: Id
       url:
         type: string
         size: 1024
+        label: URL
       level:
         type: integer
+        label: Level
       code:
         type: string
         size: 64
+        label: Code
       body:
         type: string
+        label: Body
       trace:
         type: string
+        label: Trace
       date_time_request:
         type: datetime
+        label: Request date
       user_id:
         type: integer
+        label: User id
       ip_address:
         type: string
         size: 16
+        label: IP address
     keys:
       primary:
         fields: [id]
         autoIncrement: 1
+    relations:
+      user:
+        type: N-1
+        table: user
+        clauses: {user_id: id}
     virtuals:
        level_class:
           type: string

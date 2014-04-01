@@ -1,0 +1,10 @@
+class: CrudModule
+weight: 2
+enabled: 1
+#modelNs: 
+#modelClass: CrudModel
+#viewNs: 
+viewClass: CrudView
+#templatesPath: templates
+#componentsNs: controller
+#components:

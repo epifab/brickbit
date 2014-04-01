@@ -1,0 +1,104 @@
+tables:
+  vocabulary:
+    fields:
+      id:
+        type: integer
+        label: Id
+      name:
+        type: plaintext
+        label: Vocabulary
+        maxlength: 32
+    keys:
+      primary:
+        fields: [id]
+        primary: 1
+        autoIncrement: 1
+    relations:
+      terms:
+        table: term
+        clauses: {id: vocabulary_id}
+        type: 1-N
+  term:
+    fields:
+      id:
+        type: integer
+        label: Id
+      vocabulary_id:
+        type: integer
+        label: Vocabulary
+      parent_id:
+        type: integer
+        label: Parent term
+      ldel:
+        type: integer
+        label: Left delimiter
+      rdel:
+        type: integer
+        label: Right delimiter
+      urn:
+        type: plaintext
+        label: Term URN
+        maxlength: 32
+        regexp: /^[A-Za-z0-9_-]+$/
+      value:
+        type: plaintext
+        label: Label
+        minlength: 1
+        maxlength: 64
+    keys:
+      primary:
+        fields: [id]
+        primary: 1
+        autoIncrement: 1
+    relations:
+      vocabulary:
+        table: vocabulary
+        type: N-1
+        clauses: {vocabulary_id: id}
+      parent:
+        table: term
+        type: N-1
+        clauses: {parent_id: id}
+      children:
+        table: term
+        type: 1-N
+        clauses: {id: parent_id}
+        onDelete: CASCADE
+        selectKey: id
+      ancestors:
+        table: term
+        clauses: []
+        type: 1-N
+        filterHandler: [\module\core\model\Tree, ancestorsFilter]
+      descendants:
+        table: term
+        clauses: []
+        type: 1-N
+        filterHandler: [\module\core\model\Tree, descendantsFilter]
+      nodes:
+        table: node_term
+        type: 1-N
+        clauses: {id: term_id}
+        onDelete: CASCADE
+        selectKey: node_id
+  node_term:
+    fields:
+      node_id:
+        type: integer
+        label: Node id
+      term_id:
+        type: integer
+        label: Term id
+    keys:
+      primary:
+        fields: [node_id, term_id]
+        primary: 1
+    relations:
+      node:
+        table: node
+        type: N-1
+        clauses: {node_id: id}
+      term:
+        table: term
+        type: N-1
+        clauses: {term_id: id}

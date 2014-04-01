@@ -50,7 +50,7 @@ class Session {
     }
     else {
       $this->session->update_time = \time();
-      $this->data = \unserialize($this->session->data);
+      $this->data = $this->session->data;
     }
     $this->session->expire_time = \strtotime(($userId ? '+3 months' : '+2 days'), \time());
   }
@@ -60,7 +60,7 @@ class Session {
   }
   
   public function commit() {
-    $this->session->data = \serialize($this->data);
+    $this->session->data = $this->data;
     $this->session->save();
     \system\Main::invokeMethodAll('sessionCommit');
   }

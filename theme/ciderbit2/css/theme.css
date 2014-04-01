@@ -33,7 +33,7 @@ h3, h4 {
 	background: none;
 }
 #main-menu-wrapper .nav.navbar-nav a:hover,
-#main-menu-wrapper .nav.navbar-nav .primary a:hover {
+#main-menu-wrapper .nav.navbar-nav li.primary a {
 	color: #ff004e;
 	background: none;
 }
@@ -294,9 +294,21 @@ body.signin {
   margin: 10px 0px;
 }
 
-.node > .edit-controls > div {
-  visibility: hidden;
+.node {
+  position: relative;
 }
-.node:hover > .edit-controls > div {
-  visibility: visible;
+.node > .edit-controls-top {
+  display: none;
+  top: 0px;
+  right: 0px;
+  position: absolute;
+}
+.node > .edit-controls-bottom {
+  display: none;
+  bottom: 0px;
+  right: 0px;
+  position: absolute;
+}
+.node:hover > .edit-controls-top {
+  display: block;
 }

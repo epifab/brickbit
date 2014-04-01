@@ -1,0 +1,28 @@
+tables:
+  user:
+    fields:
+      password:
+        type: password
+    virtuals:
+      superuser:
+        handler: |
+          function($user) {
+            return $user->id == 1;
+          }
+      anonymous:
+        handler: |
+          function($user) {
+            return $user->id == 0;
+          }
+      url:
+        label: URL
+        dependencies: [id]
+        handler: [\module\user\UserEntity, getUrl]
+      edit_url:
+        label: Edit URL
+        dependencies: [id]
+        handler: [\module\user\UserEntity, getEditUrl]
+      delete_url:
+        label: Delete URL
+        dependencies: [id]
+        handler: [\module\user\UserEntity, getDeleteUrl]

@@ -11,14 +11,14 @@ class Settings {
   }
 
   private static function getDefaultSettings() {
-    return require 'config/default.php';
+    return require 'config/default/config.php';
   }
   
   private static function getDomainSettings($host) {
     $domains = require 'config/domains.php';
     
     return (isset($domains[$host]))
-      ? require 'config/sites/' . $domains[$host] . '.php'
+      ? require 'config/' . $domains[$host] . '/config.php'
       : array();
   }
   

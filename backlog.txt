@@ -1,0 +1,51 @@
+SPRINT 1
+31-mar 13-apr
+
+SPRINT 2
+14-apr 20-apr
+
+SPRINT 3
+28 apr 11-may 
+
+SPRINT 4
+12 may 25-may
+
+SPRINT 5
+26-may 8-jun
+
+
+# break down the core module [story points: 2]
+The core module needs to be broken down
+                priority  done (0-10)
+ - autocomplete 2         0
+ - block        1         10
+ - crud         1         10
+ - node         1         6
+ - node_file    3         4
+ - node_image   4         4
+ - node_term    4         0
+ - user         1         4
+
+# (system) implement module dependencies [story points: 2]
+Allows modules to declare dependencies to other modules and implement it
+
+# (system) user login and security [story points: 2]
+Usage of md5 should be avoided. Better to look at a sha algorithms to store the
+ user password.
+
+# (node_file) file upload [story points: 5]
+The jquery file upload plugin should be integrated with the NodeFile component.
+Files should be properly linked to their node.
+ - As even on node creation we have a node id (temporary nodes) we can always
+   associate a file with its node.
+ - File virtual name should be worked out from the file name and be editable by
+   the user. Ideally, we have some textboxes displayed on the file upload plugin
+   for editing the file name?
+
+# (autocomplete) implement autocomplete for users and nodes [story points 3]
+This module must be implemented. A autocomplete widget should be also provided.
+
+# (user) reset password functionality [story points 3]
+Implement the reset pssword functionality - link to reset password should be
+ sent via email.
+

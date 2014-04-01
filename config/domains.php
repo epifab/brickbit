@@ -1,8 +1,8 @@
 <?php
 // Maps domain to configuration file
 return array(
-  'ciderbit.local' => 'en.ciderbit',
-  'it.ciderbit.local' => 'it.ciderbit',
-  'en.ciderbit.local' => 'en.ciderbit',
-  'episoft.it' => 'episoft'
+  'ciderbit.local' => 'ciderbit.en',
+  'it.ciderbit.local' => 'ciderbit.it',
+  'en.ciderbit.local' => 'ciderbit.en',
+  'episoft.it' => 'episoft.it'
 );

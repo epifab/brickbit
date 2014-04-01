@@ -1,0 +1,30 @@
+class: AdminModule
+weight: 1
+enabled: 1
+#modelNs: 
+#modelClass: 
+#viewNs: 
+#viewClass: 
+#templatesPath: templates
+#componentsNs: 
+components:
+  menu:
+    class: AdminController
+    pages:
+      - url: admin
+        action: AdminMenu
+      - url: admin/cache/flush
+        action: FlushCache
+  logs:
+    class: LogController
+    pages:
+      - url: admin/logs
+        action: Logs
+      - url: admin/logs/([0-9]+)
+        action: LogDetails
+      - url: admin/logs/reset
+        action: LogsReset
+      - url: admin/logs/level/([0-9]+)
+        action: LogsByType
+      - url: admin/logs/code/(@strid)
+        action: LogsByKey

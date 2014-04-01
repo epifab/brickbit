@@ -57,7 +57,7 @@
             <span class="preview"></span>
         </td>
         <td>
-            <p class="name">{%=file.name%}</p>
+            <p class="name"><input type="text" name="name" value="{%=file.name%}" class="form-control" /></p>
             <strong class="error text-danger"></strong>
         </td>
         <td>

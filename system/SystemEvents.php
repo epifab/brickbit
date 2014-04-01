@@ -25,4 +25,28 @@ class SystemEvents {
   public static function onRun(Component $component) {
     Main::invokeMethodAll('onRun', $component);
   }
+  
+  /**
+   * Raises the dateFormat event.
+   * @return array Array of date formats
+   */
+  public static function dateFormat() {
+    return Main::invokeStaticMethodAllMerge('dateFormat', false);
+  }
+  
+  /**
+   * Raises the dateTimeFormat event.
+   * @return array Array of date time formats
+   */
+  public static function dateTimeFormat() {
+    return Main::invokeStaticMethodAllMerge('dateTimeFormat', false);
+  }
+  
+  /**
+   * Raises the timeFormat event.
+   * @return array Array of time formats
+   */
+  public static function timeFormat() {
+    return Main::invokeStaticMethodAllMerge('timeFormat', false);
+  }
 }

@@ -2,6 +2,12 @@
 namespace system;
 
 use system\Component;
+use system\Settings;
+use system\Theme;
+use system\exceptions\InternalError;
+use system\utils\Login;
+use system\view\TemplateManager;
+use system\yaml\Yaml;
 
 class Main {
   private static $timeRequestStack = array();
@@ -41,7 +47,7 @@ class Main {
       $infoPath = $moduleDir . 'info.yml';
       if (\file_exists($infoPath)) {
         try {
-          $info = \system\yaml\Yaml::parse($infoPath);
+          $info = Yaml::parse($infoPath);
           return array(
             'name' => $moduleName,
             'dir' => $moduleDir,
@@ -100,7 +106,7 @@ class Main {
       
       try {
         if (!\is_array($moduleInfo)) {
-          throw new \system\exceptions\InternalError('Unable to parse <em>@name</em> module info.', array('@name' => $moduleName));
+          throw new InternalError('Unable to parse <em>@name</em> module info.', array('@name' => $moduleName));
         }
 
         $enabled = \cb\array_item('enabled', $moduleInfo, array('default' => true));
@@ -113,7 +119,7 @@ class Main {
         $moduleClass = $moduleNs . \cb\array_item('class', $moduleInfo, array('required' => true));
 
         if (!\class_exists($moduleClass)) {
-          throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
+          throw new InternalError('Class <em>@name</em> does not exist.', array('@name' => $moduleClass));
         }
 
         $weight = (int)\cb\array_item('weight', $moduleInfo, array('default' => 0));
@@ -127,7 +133,7 @@ class Main {
           'prefix' => $modelNs
         ));
         if (!\is_null($modelClass) && !\class_exists($modelClass)) {
-          throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
+          throw new InternalError('Class <em>@name</em> does not exist.', array('@name' => $modelClass));
         }
         // templates class (API)
         $viewNs = $moduleNs . (isset($moduleInfo['viewNs'])
@@ -138,7 +144,7 @@ class Main {
           'prefix' => $viewNs
         ));
         if (!\is_null($viewClass) && !\class_exists($viewClass)) {
-          throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
+          throw new InternalError('Class <em>@name</em> does not exist.', array('@name' => $viewClass));
         }
 
         $templatesPath = \cb\array_item('templatesPath', $moduleInfo, array(
@@ -146,7 +152,7 @@ class Main {
           'prefix' => $moduleDir
         ));
         if (!\is_null($templatesPath) && !\is_dir($templatesPath)) {
-          throw new \system\exceptions\InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
+          throw new InternalError('Directory <em>@path</em> not found', array('@path' => $templatesPath));
         }
         $templatesPath = str_replace('\\', '/', $templatesPath);
         if (substr($templatesPath, -1) != '/') {
@@ -165,7 +171,7 @@ class Main {
               'prefix' => $componentsNs
           ));
           if (!\class_exists($componentClass)) {
-            throw new \system\exceptions\InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
+            throw new InternalError('Class <em>@name</em> does not exist.', array('@name' => $componentClass));
             unset($components[$componentName]);
             continue;
           }
@@ -325,7 +331,7 @@ class Main {
     foreach ($modules as $module) {
       if (\file_exists($module['path'] . 'model.yml')) {
         try {
-          $model = \system\yaml\Yaml::parse($module['path'] . "model.yml");
+          $model = Yaml::parse($module['path'] . "model.yml");
           self::setTables(
             \cb\array_item('tables', $model, array('required' => true)),
             $TABLES
@@ -363,7 +369,7 @@ class Main {
       }
     }
 
-    $themeTplPath = \system\Theme::getAbsPath('templates/');
+    $themeTplPath = Theme::getAbsPath('templates/');
     if (!\is_null($themeTplPath) && \is_dir($themeTplPath)) {
       $d = \opendir($themeTplPath);
       while (($fileName = \readdir($d))) {
@@ -440,12 +446,12 @@ class Main {
     static $configuration = null;
     
     if (\is_null($configuration) && self::setting('coreCache', true)) {
-      $configuration = self::getVariable('system-configuration', null);
+      $configuration = self::getCache('system-configuration', null);
     }
     if (\is_null($configuration)) {
       $configuration = self::loadConfiguration();
       if (self::setting('coreCache')) {
-        self::setVariable('system-configuration', $configuration);
+        self::setCache('system-configuration', $configuration);
       }
     }
     return $configuration;
@@ -465,7 +471,7 @@ class Main {
    * Returns the module configuration.
    * @param string $moduleName Module name
    * @return array Module configuration array
-   * @throws \system\exceptions\InternalError In case the module does not exist
+   * @throws InternalError In case the module does not exist
    *  or is not enabled.
    */
   public static function getModule($moduleName) {
@@ -476,7 +482,7 @@ class Main {
     if (isset($config['modules'][$moduleName])) {
       return $config['modules'][$moduleName];
     } else {
-      throw new \system\exceptions\InternalError('Module <em>@name</em> not found.', array('@name' => $moduleName));
+      throw new InternalError('Module <em>@name</em> not found.', array('@name' => $moduleName));
     }
   }
 
@@ -495,7 +501,7 @@ class Main {
    * Returns a template file path.
    * @param string $templateName Template name
    * @return string Template full path
-   * @throws \system\exceptions\InternalError In case the template doesn't exist
+   * @throws InternalError In case the template doesn't exist
    */
   public static function getTemplate($templateName) {
     if (\is_null($templateName)) {
@@ -505,7 +511,7 @@ class Main {
     if (isset($config['templates'][$templateName])) {
       return $config['templates'][$templateName];
     } else {
-      throw new \system\exceptions\InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
+      throw new InternalError('Template <em>@name</em> not found.', array('@name' => $templateName));
     }
   }
 
@@ -524,7 +530,7 @@ class Main {
    * Returns a table configuration.
    * @param string $tableName
    * @return array Table configuration
-   * @throws \system\exceptions\InternalError In case the table does not exist
+   * @throws InternalError In case the table does not exist
    *  or its defining module isn't enabled.
    */
   public static function getTable($tableName) {
@@ -532,7 +538,7 @@ class Main {
       $c = self::configuration();
       return $c['tables'][$tableName];
     } else {
-      throw new \system\exceptions\InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
+      throw new InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
     }
   }
   
@@ -581,7 +587,7 @@ class Main {
     if (\is_null($urls)) {
       if (self::setting('coreCache')) {
         // Url cache
-        $urls = self::getVariable('system-urls', array());
+        $urls = self::getCache('system-urls', array());
       } else {
         $urls = array();
       }
@@ -600,7 +606,7 @@ class Main {
             'urlArgs' => $m
           );
           if (self::setting('coreCache')) {
-            self::setVariable("system-urls", $urls);
+            self::setCache("system-urls", $urls);
           }
           break;
         }
@@ -611,7 +617,7 @@ class Main {
   
   /**
    * Get the currently active component
-   * @return \system\Component The most recent component which is currently 
+   * @return Component The most recent component which is currently 
    *  running or NULL if any component isn't running.
    */
   public static function getActiveComponent() {
@@ -620,7 +626,7 @@ class Main {
   
   /**
    * Get the main active component
-   * @return \system\Component The oldest running component or NULL if any 
+   * @return Component The oldest running component or NULL if any 
    *  component isn't running.
    */
   public static function getActiveComponentMain() {
@@ -635,7 +641,7 @@ class Main {
    */
   public static function checkAccess($url, $user=false) {
     if ($user === false) {
-      $user = \system\utils\Login::getLoggedUser();
+      $user = Login::getLoggedUser();
     }
     if (self::urlExists($url)) {
       $x = self::getComponentInfoByUrl($url);
@@ -690,10 +696,10 @@ class Main {
       
       if (!$obj->isNested()) {
         // Allows the theme to do special stuff before modules
-        \system\Theme::preRun($obj);
+        Theme::preRun($obj);
         // Raise event onRun
         SystemEvents::onRun($obj);
-        \system\Theme::onRun($obj);
+        Theme::onRun($obj);
       }
 
       $obj->process();
@@ -731,15 +737,15 @@ class Main {
   public static function invokeStaticMethodAllMerge($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
     
-    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-all-merge-' . $methodName)) {
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-all-merge-' . $methodName)) {
       // Cache level 2
-      $results[$methodName] = self::getVariable('system-static-method-all-merge-' . $methodName);
+      $results[$methodName] = self::getCache('system-static-method-all-merge-' . $methodName);
     }
     
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethodAllMerge($methodName, $staticCache);
       if ($staticCache) {
-        self::setVariable('system-static-method-all-merge-' . $methodName, $results[$methodName]);
+        self::setCache('system-static-method-all-merge-' . $methodName, $results[$methodName]);
       }
     }
     return $results[$methodName];
@@ -752,22 +758,22 @@ class Main {
    *  argument to pass to the controller methods.</p>
    * @param string $methodName Method name
    * @param boolean $staticCache TRUE if you wish to caches the results on the
-   *  file system (cache is implemented by using getVariable and setVariable 
+   *  file system (cache is implemented by using getCache and setCache 
    *  methods)
    * @return mixed Result
    */
   public static function invokeStaticMethod($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
     
-    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-' . $methodName)) {
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-' . $methodName)) {
       // Cache level 2
-      $results[$methodName] = self::getVariable('system-static-method-' . $methodName);
+      $results[$methodName] = self::getCache('system-static-method-' . $methodName);
     }
     
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethod($methodName);
       if ($staticCache) {
-        self::setVariable('system-static-method-' . $methodName, $results[$methodName]);
+        self::setCache('system-static-method-' . $methodName, $results[$methodName]);
       }
     }
     return $results[$methodName];
@@ -780,22 +786,22 @@ class Main {
    *  argument to pass to the controller methods.</p>
    * @param string $methodName Method name
    * @param boolean $staticCache TRUE if you wish to caches the results on the
-   *  file system (cache is implemented by using getVariable and setVariable 
+   *  file system (cache is implemented by using getCache and setCache 
    *  methods)
    * @return mixed Result
    */
   public static function invokeStaticMethodAll($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
     
-    if (!\array_key_exists($methodName, $results) && $staticCache && self::variableExists('system-static-method-all-' . $methodName)) {
+    if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-all-' . $methodName)) {
       // Cache level 2
-      $results[$methodName] = self::getVariable('system-static-method-all-' . $methodName);
+      $results[$methodName] = self::getCache('system-static-method-all-' . $methodName);
     }
     
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethodAll($methodName);
       if ($staticCache) {
-        self::setVariable('system-static-method-all-' . $methodName, $results[$methodName]);
+        self::setCache('system-static-method-all-' . $methodName, $results[$methodName]);
       }
     }
     return $results[$methodName];
@@ -861,7 +867,7 @@ class Main {
    * array('a' => 'module1', 'b' => 'module1')
    * </pre>
    * @param string $methodName Name of the module class method
-   * @return Returns the implementing method results.
+   * @return array Returns the implementing method results.
    */
   public static function invokeMethod($methodName) {
     static $modules = null;
@@ -1053,7 +1059,7 @@ class Main {
    * )
    * </pre>
    * @param string $methodName Name of the module class method
-   * @return Returns an array of non-null values returned by module classes
+   * @return array Returns an array of non-null values returned by module classes
    */
   public static function invokeMethodAllMerge($methodName) {
     // Cache - array ('method name' => callable[])
@@ -1099,7 +1105,7 @@ class Main {
    * <p>Every argument (apart from the method name) is passed to the module 
    *  class method.</p>
    * @param string $methodName Name of the module class method
-   * @return Returns an array of non-null values returned by model classes
+   * @return array Returns an array of non-null values returned by model classes
    */
   public static function raiseModelEvent($methodName) {
     // Cache - array ('method name' => callable[])
@@ -1158,12 +1164,12 @@ class Main {
    * Returns an instance of the template manager.
    * <p>Implements the singleton design pattern always returning the same 
    *  instance.</p>
-   * @return \system\view\TemplateManager Template manager
+   * @return TemplateManager Template manager
    */
   public static function getTemplateManager() {
     static $tpl = null;
     if (\is_null($tpl)) {
-      $tpl = new \system\view\TemplateManager();
+      $tpl = new TemplateManager();
     }
     return $tpl;
   }
@@ -1172,7 +1178,7 @@ class Main {
    * Returns the absolute path to the temp folder. 
    * <p>Typically this is used for temporary application data.</p>
    * @param string $path Path relative to the data folder
-   * @return type
+   * @return string Temp path
    */
   public static function tempPath($path = '') {
     return self::getBaseDirAbs() . 'temp/' . self::prepareUrl($path);
@@ -1225,7 +1231,7 @@ class Main {
 
     if (!isset($allowedProtocols)) {
       $allowedProtocols = array_flip(
-        self::getVariable('system-filter-allowed-protocols', array(
+        self::getCache('system-filter-allowed-protocols', array(
           'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 
           'sftp', 'ssh', 'tel', 'telnet', 'webcal'
         ))
@@ -1256,26 +1262,34 @@ class Main {
     return $uri;
   }
   
+  private static function cachePath($name) {
+    $cacheDir = self::setting('cacheDir');
+    return !empty($cacheDir) ? $cacheDir . $name . '.var' : false;
+  }
+  
   /**
    * Checks whether a cached variable exist.
    * @param string $name Variable name
    * @return boolean TRUE if the variable exists
    */
-  public static function variableExists($name) {
-    return \file_exists("config/vars/{$name}.var");
+  public static function cacheExists($name) {
+    $cacheDir = self::setting('cacheDir');
+    return !empty($cacheDir) 
+      ? \file_exists(self::cachePath($name))
+      : false;
   }
   
   /**
    * Gets a cached variable. Variable are stored in the file system via method 
-   *  setVariable.
+   *  setCache.
    * @param string $name Key
    * @param mixed $default Default value (returned in case the variable is not
    *  defined)
    * @return mixed Value
    */
-  public static function getVariable($name, $default = null) {
-    if (self::variableExists($name)) {
-      $fp = \fopen("config/vars/" . $name . ".var", "r");
+  public static function getCache($name, $default = null) {
+    if (self::cacheExists($name)) {
+      $fp = \fopen(self::cachePath($name), 'r');
       $content = "";
       while ($s = \fread($fp, 4096)) {
         $content .= $s;
@@ -1290,16 +1304,41 @@ class Main {
   
   /**
    * Caches a variable. Variables are stored in the file system and can be 
-   *  accessed via method getVariable.
-   * @param string $name Key
+   *  accessed via method getCache.
+   * @param string $name Variable name
    * @param mixed $value Value
    */
-  public static function setVariable($name, $value) {
+  public static function setCache($name, $value) {
     $content = \serialize($value);
-
-    $fp = \fopen("config/vars/" . $name . ".var", "w");
-    \fwrite($fp, $content);
-    \fclose($fp);
+    $cacheDir = self::setting('cacheDir');
+    if (!empty($cacheDir)) {
+      $fp = \fopen(self::cachePath($name), 'w');
+      \fwrite($fp, $content);
+      \fclose($fp);
+    }
+  }
+  
+  /**
+   * Deletes a cached variable.
+   * @param string $name Variable name
+   */
+  public static function delCache($name) {
+    if (self::cacheExists($name)) {
+      \unlink(self::cachePath($name));
+    }
+  }
+  
+  /**
+   * Flushes the cache
+   */
+  public static function flushCache() {
+    if (self::setting('cacheDir')) {
+      foreach (\glob(self::setting('cacheDir') . '/*') as $file) {
+        if (\is_file($file) && \substr($file, -4) == '.var') {
+          \unlink($file);
+        }
+      }
+    }
   }
   
   /**
@@ -1347,7 +1386,7 @@ class Main {
         // Key has been transmitted
         if (!isset($_SESSION['ciderbit'][$module][$key])) {
           // Initialize if does not exist
-          $_SESSION['ciderbit'][$module][$key]= $default;
+          $_SESSION['ciderbit'][$module][$key] = $default;
         }
         // Return the key value
         return $_SESSION['ciderbit'][$module][$key];
@@ -1451,10 +1490,10 @@ class Main {
   
   /**
    * Gets application settings
-   * @return \system\Settings Application settings
+   * @return Settings Application settings
    */
   public static function settings() {
-    return \system\Settings::getInstance();
+    return Settings::getInstance();
   }
   
   /**

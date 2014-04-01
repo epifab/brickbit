@@ -1,0 +1,37 @@
+class: NodeFileModule
+weight: 1
+enabled: 1
+#modelNs: 
+#modelClass: 
+viewNs: view
+#viewClass: 
+#templatesPath: templates
+#componentsNs: 
+dependencies:
+  - node
+components:
+  node_file:
+    class: NodeFileController
+    pages:
+      # content/123/file/images/about-me.jpg
+      - url: content/([0-9]+)/file/(@strid)/(@strid\.@strid)
+        action: Download
+      - url: content/([0-9]+)/image/(@strid)/(@strid\.@strid)
+        action: DownloadImage
+      - url: content/([0-9]+)/file/(@strid)/upload
+        action: Upload
+#      - url: content/([0-9]+)/file/replace
+#        action: ReplaceNode
+#      - url: content/([0-9]+)/file/delete
+#        action: DeleteNode
+      - url: content/file/([0-9]+)/replace
+        action: Replace
+      - url: content/file/([0-9]+)/delete
+        action: Delete
+  node_image:
+    class: NodeImageController
+    pages:
+# content/123/img-type/images/testing-image.jpg
+      # content/123/img-thumb/gallery/about-me.jpg
+      - url: content/([0-9]+)/img-(@strid)/(@strid)/(@strid)\.(jpe?g|png|gif)
+        action: GetVersion

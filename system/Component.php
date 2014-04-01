@@ -47,7 +47,7 @@ abstract class Component {
     if (\is_callable(array($class, "access" . $action))) {
       return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $user);
     } 
-    return true;
+    return false;
   }
   
   /**
@@ -160,7 +160,8 @@ abstract class Component {
           : 1;
       
       $this->requestId = $this->name . $requestIds[$this->name];
-    } else {
+    }
+    else {
       $this->requestId = $this->requestData['system']['requestId'];
     }
   }
@@ -420,6 +421,8 @@ abstract class Component {
     }
     
     catch (AuthorizationError $ex) {
+      $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
+      // Cleaning the buffer
       while (\ob_get_clean());
       \header("HTTP/1.1 403 Forbidden");
       $this->setPageTitle('Access denied');
@@ -431,6 +434,8 @@ abstract class Component {
     }
     
     catch (PageNotFound $ex) {
+      $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
+      // Cleaning the buffer
       while (\ob_get_clean());
       \header("HTTP/1.0 404 Not Found");
       $this->setMainTemplate('404');
@@ -442,6 +447,8 @@ abstract class Component {
     }
     
     catch (UnderDevelopment $ex) {
+      $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
+      // Cleaning the buffer
       while (\ob_get_clean());
       \header("HTTP/1.1 501 Not implemented");
       $this->setMainTemplate('501');
@@ -453,8 +460,8 @@ abstract class Component {
     }
     
     catch (\Exception $ex) {
-      // Uncaught exception
-      
+      $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
+
       // Cleaning the buffer
       while (\ob_get_clean());
 

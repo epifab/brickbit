@@ -49,9 +49,11 @@ interface RecordsetInterface {
   
   /**
    * Gets recordset meta data
+   * @param string $key Extra key
+   * @param mixed $default Default value
    * @return mixed Meta data
    */
-  public function getExtra($key);
+  public function getExtra($key, $default = null);
   
   /**
    * Gets recordset primary key value

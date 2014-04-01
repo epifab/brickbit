@@ -1,0 +1,41 @@
+class: NodeModule
+weight: 2
+enabled: 1
+#modelNs: 
+#modelClass: 
+#viewNs: 
+viewClass: NodeView
+#templatesPath: templates
+#componentsNs: controller
+dependencies:
+  - crud
+components:
+  node:
+    class: NodeCrudController
+    pages:
+      # content/search
+#      - url: content/search
+#        action: Search
+      # content/123
+#      - url: content/([0-9]+)
+#        action: Read
+      # content/about-me
+      - url: content/(@strid)\.html
+        action: ReadByUrn
+      - url: content/([0-9]+)
+        action: Read
+      # content/123/move/after/234
+      - url: content/([0-9]+)/move/(before|after)/([0-9]+)
+        action: Move
+      # content/add/article
+      - url: content/add/(@strid)
+        action: Add
+      # content/123/add/article
+      - url: content/([0-9]+)/add/(@strid)
+        action: Add2Node
+      # content/123/edit
+      - url: content/([0-9]+)/edit
+        action: Edit
+      # content/123/delete
+      - url: content/([0-9]+)/delete
+        action: Delete

@@ -10,7 +10,7 @@ ciderbit.setBehavior('tinymce', function() {
           "insertdatetime media table contextmenu paste"
       ],
       menubar: "",
-      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | fullscreen"
   });
 ////  $('textarea.wysiwyg').tinymce({
 //    // Location of TinyMCE script

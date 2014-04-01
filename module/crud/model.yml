@@ -1,0 +1,113 @@
+tables:
+  record_mode:
+    fields:
+      id:
+        type: integer
+      owner_id:
+        type: integer
+      last_modifier_id:
+        type: integer
+      ins_date_time:
+        type: datetime
+      last_upd_date_time:
+        type: datetime
+      read_mode:
+        type: integer
+        options:
+          2: Owner only
+          3: Administrators
+          4: Registered users
+          5: Anyone
+        label: Read mode
+      edit_mode:
+        type: integer
+        options:
+          1: Superuser
+          2: Owner only
+          3: Administrators
+          4: Registered users
+        label: Edit mode
+      delete_mode:
+        type: integer
+        options:
+          1: Superuser
+          2: Owner only
+          3: Administrators
+          4: Registered users
+        label: Delete mode
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      logs:
+        table: record_mode_log
+        type: 1-N
+        clauses: {id: record_mode_id}
+      owner:
+        table: user
+        type: N-1
+        clauses: {owner_id: id}
+      users:
+        table: record_mode_user
+        type: 1-N
+        clauses: {id: record_mode_id}
+      roles:
+        table: record_mode_role
+        type: 1-N
+        clauses: {id: record_mode_id}
+  record_mode_log:
+    fields:
+      id:
+        type: integer
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+      upd_date_time:
+        type: datetime
+    keys:
+      primary:
+        fields: [id]
+        autoIncrement: 1
+    relations:
+      rm:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}
+  record_mode_role:
+    fields:
+      record_mode_id:
+        type: integer
+      role_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, role_id]
+    relations:
+      role:
+        table: role
+        type: N-1
+        clauses: {role_id: id}
+      record_mode:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}
+  record_mode_user:
+    fields:
+      record_mode_id:
+        type: integer
+      user_id:
+        type: integer
+    keys:
+      primary:
+        fields: [record_mode_id, user_id]
+    relations:
+      user:
+        table: user
+        type: N-1
+        clauses: {user_id: id}
+      record_mode:
+        table: record_mode
+        type: N-1
+        clauses: {record_mode_id: id}

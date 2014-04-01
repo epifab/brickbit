@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="<?php echo $this->api->Path('favicon.ico'); ?>">
     <meta name="description" content="<?php echo isset($page['description']) ? $page['description'] : ''; ?>">
     <meta name="author" content="<?php echo isset($page['author']) ? $page['author'] : ''; ?>">
     <title><?php echo $page['title']; ?></title>
@@ -24,14 +24,14 @@
   
   <body class="<?php echo (isset($page['bodyClass']) ? $page['bodyClass'] : ''); ?>">
 
-    <?php $this->api->loadBlock('admin-menu-wrapper', 'system/block/admin-menu'); ?>
+    <?php $this->api->loadBlock('admin-menu-wrapper', 'admin'); ?>
     <div id="header-wrapper">
       <header class="container" role="main">
         <!-- Main jumbotron for a primary marketing message or call to action -->
         <div class="header">
           <h1>
             <?php $this->api->open('link', array(
-              'url' => '',
+              'url' => '/',
               'ajax' => false
             )); ?><img src="<?php echo $this->api->themePath('img/layout/ciderbit.png'); ?>" alt="<?php echo $website['title']; ?>"/><?php echo $this->api->close(); ?>
             <div class="hide"><?php echo $website['title']; ?></div>
@@ -70,6 +70,6 @@
     <?php $this->api->open('block', array('url' => '/admin/logs', 'name' => 'logs')); ?>
     <?php endif; ?>
     
-    <script type="text/javascript"><?php $this->api->jss(); ?></script>
+    <script type="text/javascript"><?php // $this->api->jss(); ?></script>
   </body>
 </html>

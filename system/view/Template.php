@@ -8,7 +8,7 @@ class Template {
   private $api;
   
   /**
-   * @return \system\view\Api
+   * @return View
    */
   public static function getApi() {
     return self::current()->api;
@@ -27,7 +27,7 @@ class Template {
       throw new \system\exceptions\InternalError('Template @name not found.', array('@name' => $tplName));
     }
     $this->vars = $vars;
-    $this->api = Api::getInstance();
+    $this->api = View::getInstance();
   }
 
   public function getVars() {

@@ -1,0 +1,47 @@
+class: UserModule
+weight: 1
+enabled: 1
+#modelNs: 
+#modelClass: 
+#viewNs: 
+#viewClass: 
+#templatesPath: templates
+#componentsNs: 
+components:
+  role:
+    class: RoleController
+    pages:
+      - url: role/list
+        action: List
+      - url: role/add
+        action: Add
+      - url: role/delete
+        action: Delete
+  user:
+    class: UserCrudController
+    pages:
+      - url: user/register
+        action: Register
+      - url: user/add
+        action: Add
+      - url: user/([0-9]+)/edit
+        action: Edit
+      - url: user/([0-9]+)/delete
+        action: Delete
+      - url: user/list
+        action: List
+      - url: user/([0-9]+)
+        action: Read
+      - url: user/([0-9]+)/add-role/([0-9]+)
+        action: AddRole
+      - url: user/([0-9]+)/delete-role/([0-9]+)
+        action: DeleteRole
+  login:
+    class: LoginController
+    pages:
+      - url: user/login
+        action: Login
+      - url: user/login-control
+        action: LoginControl
+      - url: user/logout
+        action: Logout

@@ -9,7 +9,7 @@ class MetaString extends MetaType {
   public function prog2Db($x) {
     if ($this->getAttr('multiple', array('default' => false))) {
       $x = $this->toArray($x);
-      return self::stdProg2Db(\serialize($x));
+      return self::stdProg2Db(\base64_encode(\serialize($x)));
     }
     if (empty($x)) {
       if ($this->getAttr('nullable', array('default' => true)) && \is_null($x)) {
@@ -24,7 +24,7 @@ class MetaString extends MetaType {
   
   public function db2Prog($x) {
     if ($this->getAttr('multiple', array('default' => false))) {
-      $x = \unserialize($x);
+      $x = \base64_decode(\unserialize($x));
       $x = $this->toArray($x);
       foreach ($x as $k => $v) {
         $x[$k] = $this->toProg($v);

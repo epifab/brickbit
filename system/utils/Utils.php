@@ -107,6 +107,9 @@ class Utils {
       $msg .= 'null';
     }
     else if (\is_string($arg)) {
+      $arg = str_replace("\r", "\\r", $arg);
+      $arg = str_replace("\n", "\\n", $arg);
+      $arg = htmlentities($arg);
       $msg .= '"' . $arg . '"';
     }
     else if ($arg === false) {
@@ -163,9 +166,9 @@ class Utils {
   }
   
   public static function resetLogs() {
-    self::setVariable('system-logs', array());
-    self::setVariable('system-logs-by-key', array());
-    self::setVariable('system-logs-by-type', array());
+    self::setCache('system-logs', array());
+    self::setCache('system-logs-by-key', array());
+    self::setCache('system-logs-by-type', array());
   }
 
   public static function php2Js($args) {
