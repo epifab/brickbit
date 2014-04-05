@@ -5,6 +5,19 @@ use system\exceptions\InternalError;
 use system\exceptions\ValidationError;
 
 class File {
+  public static function isImage($fileName) {
+    switch (self::getExtension($fileName)) {
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'png':
+        return true;
+        break;
+      default:
+        return false;
+    }
+  }
+  
   public static function getExtension($fileName, $tolowercase=true) {
     if (($posDot = \strrpos($fileName, ".")) === false ) {
       return "";
@@ -117,6 +130,13 @@ class File {
       throw new InternalError('Invalid parameter @name', array('@name' => 'maxHeight'));
     }
     
+    $destinationDir = dirname($destinationPath);
+    if (!\is_dir($destinationDir)) {
+      if (!\mkdir($destinationDir)) {
+        throw new InternalError('Unable to create the directory');
+      }
+    }
+    
     if (!\copy($sourcePath, $destinationPath)) {
       throw new InternalError('Unable to create the file');
     }
@@ -216,11 +236,15 @@ class File {
   
   
   public static function saveImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
+    $targetDir = dirname($destinationPath);
+    if (!is_dir($targetDir)) {
+      mkdir($targetDir);
+    }
 
     if (!\copy($sourcePath, $destinationPath)) {
       throw new InternalError("Unable to copy the file");
     }
-    \chmod($destinationPath, octdec('0666'));
+    \chmod($destinationPath, \octdec('0666'));
 
     list($originalWidth, $originalHeight) = \getimagesize($destinationPath);
 
@@ -330,114 +354,18 @@ class File {
     \imagedestroy($smallerImg);
     \imagedestroy($targetImg);
   }
-
-//  public static function resizeAndSaveFixedSizeImg($inputName, $destinationPath, $maxWidth, $maxHeight) {
-//
-//    $maxWidth = (int)$maxWidth;
-//    if ($maxWidth <= 0) {
-//      throw new InternalError("Parametro maxWidth non valido");
-//    }
-//    $maxHeight = (int)$maxHeight;
-//    if ($maxHeight <= 0) {
-//      throw new InternalError("Parametro maxHeight non valido");
-//    }
-//
-//    if (!\array_key_exists($inputName, $_FILES) || empty($_FILES[$inputName]['name'])) {
-//      throw new InternalError("Nessun file caricato");
-//    }
-//    
-//    $name = $_FILES[$inputName]['name'];
-//    $tmp = $_FILES[$inputName]['tmp_name'];
-//    $size = $_FILES[$inputName]['size'];
-//    $type = $_FILES[$inputName]['type'];
-//
-//    if (!\copy($tmp, $destinationPath)) {
-//      throw new InternalError("Impossibile copiare il file caricato");
-//    }
-//    \chmod($destinationPath, octdec('0666'));
-//
-//    list($originalWidth, $originalHeight) = \getimagesize($destinationPath);
-//
-//    if ($originalWidth > $originalHeight) {
-//      $newHeight = $squareSize;
-//      $newWidth = $newHeight*($originalWidth/$originalHeight);
-//    }
-//    if ($originalHeight > $originalWidth) {
-//      $newWidth = $squareSize;
-//      $newHeight = $newWidth*($originalHeight/$originalWidth);
-//    }
-//    if ($originalHeight == $originalWidth) {
-//      $newWidth = $squareSize;
-//      $newHeight = $squareSize;
-//    }
-//
-//    $newWidth = round($newWidth);
-//    $newHeight = round($newHeight);
-//    
-//    $ext = self::getExtension($destinationPath);
-//    switch ($ext) {
-//      case "jpg":
-//      case "jpeg":
-//        $originalImg = \imagecreatefromjpeg($destinationPath);
-//        break;
-//
-//      case "gif":
-//        $originalImg = \imagecreatefromgif($destinationPath);
-//        break;
-//
-//      case "png":
-//        $originalImg = \imagecreatefrompng($destinationPath);
-//        break;
-//
-//      default:
-//        throw new InternalError("Estensione immagine non riconosciuta");        
-//    }
-//
-//    if (!$originalImg) {
-//      throw new InternalError("Errore durante il caricamento dell'immagine");
-//    }
-//    
-//    $smallerImg = \imagecreatetruecolor($newWidth, $newHeight);
-//    $squareImg = \imagecreatetruecolor($squareSize, $squareSize);
-//
-//    \imagecopyresampled($smallerImg, $originalImg, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
-//
-//    if ($newWidth > $newHeight) {
-//      $difference = $newWidth-$newHeight;
-//      $halfDifference =  round($difference/2);
-//      \imagecopyresampled($squareImg, $smallerImg, 0-$halfDifference+1, 0, 0, 0, $squareSize+$difference, $squareSize, $newWidth, $newHeight);
-//    }
-//    if ($newHeight > $newWidth) {
-//      $difference = $newHeight-$newWidth;
-//      $halfDifference =  round($difference/2);
-//      \imagecopyresampled($squareImg, $smallerImg, 0, 0-$halfDifference+1, 0, 0, $squareSize, $squareSize+$difference, $newWidth, $newHeight);
-//    }
-//    if ($newHeight == $newWidth) {
-//      \imagecopyresampled($squareImg, $smallerImg, 0, 0, 0, 0, $squareSize, $squareSize, $newWidth, $newHeight);
-//    }
-//
-//
-//    switch ($ext) {
-//      case "jpg":
-//      case "jpeg":
-//        $result = \imagejpeg($squareImg,$destinationPath,100);
-//        break;
-//
-//      case "gif":
-//        $result = \imagegif($squareImg,$destinationPath);
-//        break;
-//
-//      case "png":
-//        $result = \imagepng($squareImg,$destinationPath,9);
-//        break;
-//    }
-//
-//    if (!$result) {
-//      throw new InternalError("Impossibile salvare l'immagine caricata");
-//    }
-//
-//    \imagedestroy($originalImg);
-//    \imagedestroy($smallerImg);
-//    \imagedestroy($squareImg);
-//  }
+  
+  public static function getContentType($fileName) {
+    switch (self::getExtension($fileName)) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+        break;
+      case 'gif':
+        return 'image/gif';
+        break;
+      default:
+        return 'application/octet-stream';
+    }
+  }
 }
