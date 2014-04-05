@@ -103,6 +103,14 @@ class Relation extends TableWrapper implements RelationInterface {
   }
   
   /**
+   * Sets the join type
+   * @param string $joinType Either 'INNER' or 'LEFT' or 'RIGHT'
+   */
+  public function setJoinType($joinType) {
+    $this->joinType = $joinType;
+  }
+  
+  /**
    * Parent table
    * @return TableInterface Relation parent table
    */
@@ -164,6 +172,14 @@ class Relation extends TableWrapper implements RelationInterface {
   }
   
   /**
+   * Sets lazy loading
+   * @param bool $lazyLoading TRUE if the relation should be lazy loaded
+   */
+  public function setLazyLoading($lazyLoading) {
+    $this->lazyLoading = (bool)$lazyLoading;
+  }
+  
+  /**
    * Gets the join clause
    * @param \system\model2\RecordsetInterface $parent Parent recordset (lazy loading)
    * @return clauses\FilterClauseGroup Join clause
@@ -199,6 +215,14 @@ class Relation extends TableWrapper implements RelationInterface {
    */
   public function selectFirstByParent(RecordsetInterface $parent) {
     return $this->selectFirst($this->getJoinClause($parent));
+  }
+  
+  /**
+   * When the parent record gets deleted then all its children should be deleted
+   * @return bool TRUE if children should be deleted along with their parent
+   */
+  public function deleteCascade() {
+    return isset($this->relationInfo['onDelete']) && strtoupper($this->relationInfo['onDelete']) == 'CASCADE';
   }
   
   /**

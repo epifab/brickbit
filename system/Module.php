@@ -3,9 +3,17 @@ namespace system;
 
 use system\Main;
 use system\Theme;
+use system\exceptions\InternalError;
 use system\yaml\Yaml;
 
 class Module {
+  public static function modulePaths() {
+    return array(
+      array('ns' => 'system\module', 'path' => 'system/module'),
+      array('ns' => 'module', 'path' => 'module'),
+    );
+  }
+  
   /**
    * Generates the module configuration array.
    * <p>Parses each info.yml looking for active modules.</p>
@@ -21,26 +29,29 @@ class Module {
     $CONTROLLER_CLASSES = array();
     $URLS = array();
     
-    $modulesNs = 'module';
-    $modulesDir = 'module';
+    $modulePaths = self::modulePaths();
     
     $modules = array();
 
-    $d = \opendir($modulesDir);
-    while (($moduleName = \readdir($d))) {
-      if ($moduleName != 'system') {
+    foreach ($modulePaths as $modulePath) {
+      $modulesNs = $modulePath['ns'];
+      $modulesDir = $modulePath['path'];
+      
+      $d = \opendir($modulesDir);
+      while (($moduleName = \readdir($d))) {
+        if (isset($modules[$moduleName])) {
+          throw new InternalError('Module <em>@name</em> already defined', array('@name' => $moduleName));
+        }
         $module = self::loadModuleInfo(
           $moduleName, 
           $modulesNs . '\\' . $moduleName . '\\',
           $modulesDir . '/' . $moduleName . '/'
         );
-        if ($module) {
+        if (!empty($module)) {
           $modules[$moduleName] = $module;
         }
       }
     }
-    
-    $modules['system'] = self::loadModuleInfo('system', 'system\\', 'system/');
     
     foreach ($modules as $module) {
       $moduleName = $module['name'];

@@ -1,6 +1,8 @@
 <?php
 namespace system\metatypes;
 
+use system\SystemApi;
+
 abstract class MetaType implements MetaTypeInterface {
 
   protected $name;
@@ -25,12 +27,8 @@ abstract class MetaType implements MetaTypeInterface {
 //    return self::newMetaType($data['name'], $data['type'], $data['attributes']);
 //  }
   
-  public static function getMetaTypesMap() {
-    return \system\Main::invokeStaticMethodAllMerge('metaTypesMap');
-  }
-  
   public static function newMetaType($name, $type, $attributes = array()) {
-    $fmap = self::getMetaTypesMap();
+    $fmap = SystemApi::metaTypesMap();
     
     if (!\array_key_exists($type, $fmap)) {
       throw new \system\exceptions\InternalError('Unknown metatype <em>@name</em>', array('@name' => $type));

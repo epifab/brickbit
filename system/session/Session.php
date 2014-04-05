@@ -62,7 +62,6 @@ class Session {
   public function commit() {
     $this->session->data = $this->data;
     $this->session->save();
-    \system\Main::invokeMethodAll('sessionCommit');
   }
   
   /**

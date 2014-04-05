@@ -7,7 +7,7 @@ interface WidgetInterface {
    */
   public function render(array $input);
   /**
-   * Fetch the widget value
+   * Fetches an input value generated from the widget
    */
   public function fetch($value, array $input);
 }

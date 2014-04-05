@@ -12,9 +12,10 @@ interface TableInterface extends PropertyInterface, QueryInterface {
   /**
    * Imports a set of properties.<br/>
    * Takes an unlimited number of property paths as arguments.<br/>
-   * Notes:<br/>
-   * '*' imports every field and virtual property.<br/>
-   * '**' imports every field and virtual property for every relation.<br/>
+   * <ul>
+   *  <li>'*' imports every field and virtual property.</li>
+   *  <li>'**' imports every field and virtual property and relation.</li>
+   * </ul>
    */
   public function import();
   /**

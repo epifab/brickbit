@@ -1,7 +1,7 @@
 <?php
 namespace system;
 
-class SystemEvents {
+class SystemApi {
   
   /**
    * Raises the whatchdog event.
@@ -14,6 +14,14 @@ class SystemEvents {
   public static function watchdog($code, $message, array $messageArgs, $level = system\LOG_NOTICE) {
     Main::invokeMethodAll('watchdog', $code, $message, $messageArgs, $level);
   }
+  
+  /**
+   * Returns the initial datamodel for every template
+   * @return array Default datamodel
+   */
+  public static function initDatamodel() {
+    return Main::invokeMethodAllMerge('initDatamodel');
+  }
 
   /**
    * Raises the onRun event.
@@ -24,6 +32,15 @@ class SystemEvents {
    */
   public static function onRun(Component $component) {
     Main::invokeMethodAll('onRun', $component);
+  }
+  
+  /**
+   * Raises the onInit event.
+   * This is fired when bootstrap completed its initialization before running
+   *  any component.
+   */
+  public static function onInit() {
+    Main::invokeMethodAll();
   }
   
   /**
@@ -48,5 +65,21 @@ class SystemEvents {
    */
   public static function timeFormat() {
     return Main::invokeStaticMethodAllMerge('timeFormat', false);
+  }
+  
+  /**
+   * Raises the metaTypesMap event.
+   * @return array Associative array 'metatype name' => 'metatype class'
+   */
+  public static function metaTypesMap() {
+    return Main::invokeStaticMethodAllMerge('metaTypesMap');
+  }
+  
+  /**
+   * Raises the widgetsMap event.
+   * @return array Associative array 'widget name' => 'widget class'
+   */
+  public static function widgetsMap() {
+    return Main::invokeStaticMethodAllMerge('metaTypesMap');
   }
 }

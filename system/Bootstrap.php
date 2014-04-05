@@ -21,7 +21,7 @@ class Bootstrap {
     \set_exception_handler('\system\Bootstrap::exceptionHandler');
     \spl_autoload_register('\system\Bootstrap::autoload');
     
-    Main::invokeMethodAll('onInit');
+    SystemApi::onInit('onInit');
   }
   
   public static function exceptionHandler(\Exception $ex) {
@@ -53,7 +53,7 @@ class Bootstrap {
         break;
     }
     
-    SystemEvents::watchdog(
+    SystemApi::watchdog(
       'system', 
       '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
         '@description' => $description, 

@@ -345,13 +345,13 @@ class Main {
     \array_push(self::$componentStack, $obj);
 
     try {
-      $obj->initDatamodel(Main::invokeMethodAllMerge('initDatamodel'));
+      $obj->initDatamodel(SystemApi::initDatamodel());
       
       if (!$obj->isNested()) {
         // Allows the theme to do special stuff before modules
         Theme::preRun($obj);
         // Raise event onRun
-        SystemEvents::onRun($obj);
+        SystemApi::onRun($obj);
         Theme::onRun($obj);
       }
 

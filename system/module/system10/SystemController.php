@@ -1,7 +1,10 @@
 <?php
-namespace system;
+namespace system\module\system10;
 
-class SystemModule {
+class SystemController {
+  /**
+   * Implements widgetsMap() controller event
+   */
   public static function widgetsMap() {
     return array(
       'hidden' => '\system\view\WidgetHidden',
@@ -15,7 +18,10 @@ class SystemModule {
       'password' => '\system\view\WidgetPassword',
     );
   }
-  
+
+  /**
+   * Implements metaTypesMap() controller event
+   */
   public static function metaTypesMap() {
     return array(
       'integer' => '\system\metatypes\MetaInteger',

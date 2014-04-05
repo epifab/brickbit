@@ -1,6 +1,8 @@
 <?php
 namespace system\view;
 
+use system\SystemApi;
+
 class Widget {
   public static $widgets = array();
   
@@ -15,7 +17,7 @@ class Widget {
       return self::$widgets[$name];
     }
 
-    $wmap = \system\Main::invokeStaticMethodAllMerge('widgetsMap');
+    $wmap = SystemApi::widgetsMap();
     
     if (!\array_key_exists($name, $wmap)) {
       throw new \system\exceptions\InternalError('Unknown widget <em>@name</em>', array('@name' => $name));

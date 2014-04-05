@@ -83,19 +83,9 @@ abstract class TableBase implements TableInterface {
   /**
    * Imports a set of properties.<br/>
    * Takes an unlimited number of property paths as arguments.<br/>
-   * Notes:<br/>
    * <ul>
    *  <li>'*' imports every field and virtual property.</li>
-   *  <li>'**' imports every field and virtual property for every relation.<br/>
-   *    This is equivalent to:<br/>
-   *    <pre>
-   * $x->import('*');
-   * $tableInfo = $x->getInfo();
-   * foreach ($tableInfo['relations'] as $relationName => $relationInfo) {
-   *  $x->importRelation($relationName)->import('*');
-   * }
-   *    </pre>
-   *  </li>
+   *  <li>'**' imports every relation.</li>
    * </ul>
    */
   public function import() {
@@ -107,9 +97,9 @@ abstract class TableBase implements TableInterface {
         switch ($path) {
           case '**':
             foreach ($this->tableInfo['relations'] as $name => $info) {
-              $this->importRelation($name)->import('*');
+              $this->importRelation($name);
             }
-            // Intentional no break here
+            break;
           case '*':
             foreach ($this->tableInfo['fields'] as $name => $info) {
               $this->importProperty($name);

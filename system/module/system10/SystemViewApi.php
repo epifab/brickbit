@@ -1,15 +1,17 @@
 <?php
-namespace system\view;
+namespace system\module\system10;
 
-use system\SystemEvents;
+use system\SystemApi;
 use system\Main;
 use system\Module;
 use system\Theme;
 use system\exceptions\InternalError;
 use system\utils\Utils;
 use system\utils\Lang;
+use system\view\View;
+use system\view\Template;
 
-class SystemView {
+class SystemViewApi {
   private static $blocks = array();
   
   public static function open($callback, $args = array()) {
@@ -207,7 +209,7 @@ class SystemView {
   }
   
   public static function dateTimeFormat($time, $key = 'medium') {
-    $formats = SystemEvents::dateTimeFormat();
+    $formats = SystemApi::dateTimeFormat();
     $format = (isset($formats[$key]))
       ? $formats[$key]
       : 'Y/m/d H:i:s';
@@ -215,7 +217,7 @@ class SystemView {
   }
   
   public static function dateFormat($time, $key = 'medium') {
-    $formats = SystemEvents::dateFormat();
+    $formats = SystemApi::dateFormat();
     $format = (isset($formats[$key]))
       ? $formats[$key]
       : 'Y/m/d';
@@ -223,7 +225,7 @@ class SystemView {
   }
   
   public static function timeFormat($time, $key = 'medium') {
-    $formats = SystemEvents::timeFormat();
+    $formats = SystemApi::timeFormat();
     $format = (isset($formats[$key]))
       ? $formats[$key]
       : 'Y/m/d';

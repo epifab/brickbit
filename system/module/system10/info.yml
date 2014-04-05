@@ -1,11 +1,11 @@
-class: SystemModule
+class: SystemController
 version: 1.0
 weight: 0
 enabled: 1
-modelNs: model
-modelClass: ModelEvents
-viewNs: view
-viewClass: SystemView
+#modelNs: 
+modelClass: SystemModel
+#viewNs: 
+viewClass: SystemViewApi
 #templatesPath: view/templates
 #componentsNs: components
 #components:

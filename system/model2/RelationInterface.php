@@ -12,6 +12,11 @@ interface RelationInterface extends TableInterface {
    * @return string INNER, LEFT or RIGHT
    */
   public function getJoinType();
+  /**
+   * Sets the join type
+   * @param string $joinType Either 'INNER' or 'LEFT' or 'RIGHT'
+   */
+  public function setJoinType($joinType);
   
   /**
    * Is this a * to 1 relationship?
@@ -42,10 +47,15 @@ interface RelationInterface extends TableInterface {
   public function getClauses();
   
   /**
-   *  Lazy loading
+   * Lazy loading
    * @return bool TRUE if the relation is loaded on request
    */
   public function isLazyLoading();
+  /**
+   * Sets lazy loading
+   * @param bool $lazyLoading TRUE if the relation should be lazy loaded
+   */
+  public function setLazyLoading($lazyLoading);
   
   /**
    * Lazy loading
@@ -62,9 +72,15 @@ interface RelationInterface extends TableInterface {
   public function selectFirstByParent(RecordsetInterface $parent);
   
   /**
-   * Get the join clause
+   * Gets the join clause
    * @param RecordsetInterface $recordset Recordset (for lazy loading)
    * @return clauses\FilterClauseInterface Join clause string
    */
   public function getJoinClause(RecordsetInterface $recordset = null);
+  
+  /**
+   * When the parent record gets deleted then all its children should be deleted
+   * @return bool TRUE if children should be deleted along with their parent
+   */
+  public function deleteCascade();
 }

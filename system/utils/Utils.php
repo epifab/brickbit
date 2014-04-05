@@ -4,11 +4,6 @@ namespace system\utils;
 use system\exceptions\InternalError;
 
 class Utils {
-  const LOG_ERROR = 1;
-  const LOG_WARNING = 2;
-  const LOG_INFO = 3;
-  const LOG_DEBUG = 4;
-  
   public static function backtraceInfo($trace = null) {
     $traceDesc = '<ol>';
     if (empty($trace)) {
@@ -40,38 +35,6 @@ class Utils {
     
     return $traceDesc;
   }
-  
-//  public static function log($key, $message, $type=self::LOG_INFO) {
-//    $logs = self::get('system-logs', array());
-//    $logsByKey = self::get('system-logs-by-key', array());
-//    $logsByType = self::get('system-logs-by-type', array());
-//
-//    // because of the reverse array order
-//    // the first element key is the greatest one
-//    $index = 1 + \key($logs);
-//
-//    $traceDesc = self::backtraceInfo();
-//    
-//    $logs[$index] = array(
-//      'id' => $index,
-//      'time' => \time(),
-//      'key' => $key,
-//      'message' => $message,
-//      'type' => $type,
-//      'trace' => $traceDesc
-//    );
-//    
-//    $logsByKey[$key][] = $index;
-//    $logsByType[$type][] = $index;
-//    
-//    \arsort($logs);
-//    \arsort($logsByKey[$key]);
-//    \arsort($logsByType[$type]);
-//    
-//    self::set('system-logs', $logs);
-//    self::set('system-logs-by-key', $logsByKey);
-//    self::set('system-logs-by-type', $logsByType);
-//  }
   
   public static function lightVarDump($arg, $maxLevel = 5, $indent = '') {
     $msg = '';
@@ -126,103 +89,6 @@ class Utils {
 
   public static function varDump($arg) {
     return self::lightVarDump($arg);
-  }
-  
-  public static function getLogs($page=0, $size=10) {
-    $logs = self::get('system-logs', array());
-    if ($page < 0) {
-      return $logs;
-    } else {
-      return \array_slice($logs, ($page * $size), $size);
-    }
-  }
-  
-  public static function getLogsByKey($key) {
-    $logs = self::get('system-logs', array());
-    $logsByKey = self::get('system-logs-by-key', array());
-    
-    $return = array();
-    
-    if (isset($logsByKey[$key])) {
-      foreach ($logsByKey[$key] as $index) {
-        $return[] = $logs[$index];
-      }
-    }
-    return $return;
-  }
-  
-  public static function getLogsByType($type) {
-    $logs = self::get('system-logs', array());
-    $logsByType = self::get('system-logs-by-type', array());
-    
-    $return = array();
-    
-    if (isset($logsByType[$type])) {
-      foreach ($logsByType[$type] as $index) {
-        $return[] = $logs[$index];
-      }
-    }
-    return $return;
-  }
-  
-  public static function resetLogs() {
-    self::setCache('system-logs', array());
-    self::setCache('system-logs-by-key', array());
-    self::setCache('system-logs-by-type', array());
-  }
-
-  public static function php2Js($args) {
-    if (empty($args)) {
-      return '{}';
-    }
-    $jsVars = "{";
-    foreach ($args as $k => $v) {
-      !isset($first) ? $first = true : $jsVars .= ",";
-      $jsVars .= "'" . $k . "': ";
-      if (\is_array($v)) {
-        $jsVars .= self::php2Js($v);
-      } else {
-        if (is_bool($v)) {
-          $jsVars .= $v ? "true" : "false";
-        } else if (is_integer($v)) {
-          $jsVars .= $v;
-        } else if (substr(trim($v),0,8) == "function") {
-          $jsVars .= $v;
-        } else {
-          $jsVars .= "'" . addslashes($v) . "'";
-        }
-      }
-    }
-    return $jsVars . "}";
-  }
-  
-  public static function addUrlArgs($url, $args) {
-    $first = !\strpos($url, '?', true);
-    foreach ($args as $k => $v) {
-      if ($first) {
-        $first = false;
-        $url .= "?";
-      } else {
-        $url .= "&amp;";
-      }
-      $url .= urlencode($k) . '=' . urlencode($v);
-    }
-    return $url;
-  }
-  
-  public static function escape($x, $char) {
-    $str = "";
-    $escape = false;
-    for ($i = 0; $i < \strlen($i); $i++) {
-      if ($x{$i} == $char) {
-        $str .= (!$escape ? "\\" : "");
-        $escape = false;
-      } else if ($x{$i} == "\\") {
-        $escape = !$escape;
-      } else {
-        $escape = false;
-      }
-    }
   }
   
   public static function arg2Input(&$results, $prefix, $value) {
@@ -292,5 +158,30 @@ class Utils {
       }
     }
     return $h;
+  }
+  
+  public static function php2Js($args) {
+    if (empty($args)) {
+      return '{}';
+    }
+    $jsVars = "{";
+    foreach ($args as $k => $v) {
+      !isset($first) ? $first = true : $jsVars .= ",";
+      $jsVars .= "'" . $k . "': ";
+      if (\is_array($v)) {
+        $jsVars .= self::php2Js($v);
+      } else {
+        if (is_bool($v)) {
+          $jsVars .= $v ? "true" : "false";
+        } else if (is_integer($v)) {
+          $jsVars .= $v;
+        } else if (substr(trim($v),0,8) == "function") {
+          $jsVars .= $v;
+        } else {
+          $jsVars .= "'" . addslashes($v) . "'";
+        }
+      }
+    }
+    return $jsVars . "}";
   }
 }
