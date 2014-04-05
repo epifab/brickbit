@@ -1,6 +1,13 @@
 <h3>Resources</h3>
 <?php foreach ($form->getRecordset('node')->valid_file_keys as $fileKey): ?>
-  <form class="dataedit fileupload" id="fileupload-<?php echo $fileKey; ?>" data-filekey="<?php echo $fileKey; ?>" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
+  <form 
+    class="dataedit fileupload" 
+    id="fileupload-<?php echo $fileKey; ?>" 
+    data-filekey="<?php echo $fileKey; ?>" 
+    data-filekeyurl="<?php echo $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey); ?>" 
+    action="<?php echo $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey . '/upload'); ?>" 
+    method="POST" 
+    enctype="multipart/form-data">
     <fieldset>
       <legend><?php echo $fileKey; ?></legend>
       <div class="row de-row">
@@ -158,37 +165,25 @@ $(function () {
     // Initialize the jQuery File Upload widget:
     $('.fileupload').each(function() {
       $(this).fileupload({
-        url: '/content/<?php echo $form->getRecordset('node')->id; ?>/file/' + $(this).data('filekey') + '/upload',
-        max_file_size : '50mb',
-        chunk_size : '1mb',
+        url: $(this).attr('action'),
+        maxChunkSize : 2000000
       });
+      
+      $(this).addClass('fileupload-processing');
+      $.ajax({
+          // Uncomment the following to send cross-domain cookies:
+          //xhrFields: {withCredentials: true},
+          url: $(this).data('filekeyurl'),
+          dataType: 'json',
+          context: $(this)[0]
+      }).always(function () {
+          $(this).removeClass('fileupload-processing');
+      }).done(function (result) {
+          $(this).fileupload('option', 'done')
+              .call(this, $.Event('done'), {result: result});
+      });
+      
     });
-
-    // Enable iframe cross-domain access via redirect option:
-    $('#fileupload').fileupload(
-        'option',
-        'redirect',
-        window.location.href.replace(
-            /\/[^\/]*$/,
-            '/cors/result.html?%s'
-        )
-    );
-
-    // Load existing files:
-    $('#fileupload').addClass('fileupload-processing');
-    $.ajax({
-        // Uncomment the following to send cross-domain cookies:
-        //xhrFields: {withCredentials: true},
-        url: $('#fileupload').fileupload('option', 'url'),
-        dataType: 'json',
-        context: $('#fileupload')[0]
-    }).always(function () {
-        $(this).removeClass('fileupload-processing');
-    }).done(function (result) {
-        $(this).fileupload('option', 'done')
-            .call(this, $.Event('done'), {result: result});
-    });
-//  });
 });
 </script>
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
