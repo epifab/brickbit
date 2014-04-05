@@ -1,6 +1,5 @@
 <?php
-
-namespace module\core\lib;
+namespace module\node_file\lib;
 
 use \stdClass;
 use system\utils\Utils;

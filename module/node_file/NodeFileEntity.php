@@ -11,9 +11,7 @@ class NodeFileEntity {
    * @return string URL
    */
   public static function getUrl(RecordsetInterface $recordset) {
-    $urn = empty($recordset->node_id)
-      ? 'content/file/' . $recordset->file_id . '.' . $recordset->file->extension
-      : 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->virtual_name;
+    $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->virtual_name;
     return Main::getUrl($urn);
   }
   
@@ -23,7 +21,8 @@ class NodeFileEntity {
    * @return string Edit URL
    */
   public static function getEditUrl(RecordsetInterface $recordset) {
-    return Main::getUrl('content/file/' . $recordset->file_id . '/edit');
+    $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->file_id . '/update';
+    return Main::getUrl($urn);
   }
   
   /**
@@ -32,14 +31,16 @@ class NodeFileEntity {
    * @return string Delete URL
    */
   public static function getDeleteUrl(RecordsetInterface $recordset) {
-    return Main::getUrl('content/file/' . $recordset->file_id . '/delete');
+    $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->file_id . '/delete';
+    return Main::getUrl($urn);
   }
   
   public static function getImages(RecordsetInterface $recordset) {
-    $imgVersions = \array_keys(\system\Main::invokeStaticMethodAllMerge('imageVersionMakers'));
+    $imgVersions = NodeFileApi::imageVersionHandlers();
     $versions = array();
-    foreach ($imgVersions as $version) {
-      $versions[$version] = 'content/' . $recordset->node_id . '/img-' . $version . '/' . $recordset->node_index . '/' . $recordset->virtual_name;
+    foreach ($imgVersions as $version => $handler) {
+      $versions[$version] = Main::getUrl("content/{$recordset->node_id}/file/{$recordset->node_index}/{$version}/{$recordset->virtual_name}");
     }
+    return $versions;
   }
 }

@@ -1,6 +1,8 @@
 <?php
 namespace module\admin;
 
+use system\Main;
+
 class AdminModule {
   /**
    * Implements controller event watchdog()
@@ -27,9 +29,11 @@ class AdminModule {
         break;
     }
     
-    //\system\utils\Log::create($code, $message, $args, $level);
+//    Log::create($code, $message, $args, $level);
     
-    \system\Main::pushMessage(\cb\t($message, $args), $class);
+    \error_log(\cb\t($message, $args));
+    
+    Main::pushMessage(\cb\t($message, $args), $class);
     
     $levelIndexes[$level]++;
   }

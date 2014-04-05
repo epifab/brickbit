@@ -12,7 +12,7 @@ class RecordMode {
   const MODE_SU_OWNER_ADMINS = 3;
   const MODE_REGISTERED = 4;
   const MODE_ANYONE = 5;
-
+  
   /**
    * Adds filter to a record moded table to implement read permission.
    * @param \system\model2\TableInterface $table Record moded table
@@ -41,19 +41,21 @@ class RecordMode {
   }
   
   private static function addRecordModeFilters($modeType, TableInterface $table, $user = null) {
+    $table->addFilters(self::getRecordModeFilters($modeType, $table->record_mode, $user));
+  }
+  
+  private static function getRecordModeFilters($modeType, TableInterface $recordMode, $user = null) {
     $mode = "{$modeType}_mode";
 
     if (empty($user) || $user->anonymous) {
       // NOT LOGGED -> not logged user can access the recordset only when 
       //  record mode is = MODE_ANYONE
-      $table->addFilters($table->filter("record_mode.{$mode}", self::MODE_ANYONE, '>='));
-      return;
+      return $recordMode->filter($mode, self::MODE_ANYONE, '>=');
     }
 
     else if ($user->superuser) {
       // SUPERUSER -> just make sure the record mode is >= than MODE_SU
-      $table->addFilters($table->filter("record_mode.{$mode}", self::MODE_SU, '>='));
-      return;
+      return $recordMode->filter($mode, self::MODE_SU, '>=');
     }
 
     else {
@@ -66,19 +68,19 @@ class RecordMode {
       //      and the record mode is >= than MODE_SU_OWNER_ADMINS 
       //   3) the record mode is >= than MODE_REGISTERED 
       
-      $table->addFilters($table->filterGroup('OR')->addClauses(
+      return $recordMode->filterGroup('OR')->addClauses(
         // Registered
-        $table->filter("record_mode.{$mode}", self::MODE_REGISTERED, '>='),
+        $recordMode->filter($mode, self::MODE_REGISTERED, '>='),
 
         // User is an administrator
-        $table->filterGroup('AND')->addClauses(
-          $table->filter("record_mode.{$mode}", self::MODE_SU_OWNER_ADMINS, '>='),
-          $table->filterGroup('OR')->addClauses(
-            $table->filterCustom(
+        $recordMode->filterGroup('AND')->addClauses(
+          $recordMode->filter($mode, self::MODE_SU_OWNER_ADMINS, '>='),
+          $recordMode->filterGroup('OR')->addClauses(
+            $recordMode->filterCustom(
               "@uid IN ("
               . "SELECT user_id"
               . " FROM record_mode_user rmu"
-              . " WHERE rmu.record_mode_id = {$table->getField('record_mode_id')->getSelectExpression()}"
+              . " WHERE rmu.record_mode_id = {$recordMode->getField('id')->getSelectExpression()}"
               . ")", array('@uid' => $user->id)
             ),
             $table->filterCustom(
@@ -86,19 +88,18 @@ class RecordMode {
               . "SELECT ur.user_id"
               . " FROM record_mode_role rmr"
               . " INNER JOIN user_role ur ON ur.role_id = rmr.role_id"
-              . " WHERE rmr.record_mode_id = {$table->getField('record_mode_id')->getSelectExpression()}"
+              . " WHERE rmr.record_mode_id = {$recordMode->getField('id')->getSelectExpression()}"
               . ")", array('@uid' => $user->id)
             )
           )
         ),
 
         // User is the owner
-        $table->filterGroup('AND')->addClauses(
-          $table->filter("record_mode.{$mode}", self::MODE_SU_OWNER, '>='),
-          $table->filter("record_mode.owner_id", $user->id)
+        $recordMode->filterGroup('AND')->addClauses(
+          $recordMode->filter($mode, self::MODE_SU_OWNER, '>='),
+          $recordMode->filter("owner_id", $user->id)
         )
-      ));
-      return;
+      );
     }
   }
   

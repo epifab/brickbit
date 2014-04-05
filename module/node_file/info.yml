@@ -13,20 +13,41 @@ components:
   node_file:
     class: NodeFileController
     pages:
-      # content/123/file/images/about-me.jpg
+      ### 'about-me.pdf' file download
+      # content/123/file/attachments/about-me.pdf
+      - url: content/([0-9]+)/file
+        action: List
+        
+      ### list of all node files whose index is 'attachments'
+      # content/123/file/list/attachments
+      - url: content/([0-9]+)/file/list/(@strid)
+        action: List
+
+      ### list of all node files
+      # content/123/file/list
+      - url: content/([0-9]+)/file/list
+        action: List
+
+      ### 'about-me.pdf' file download
+      # content/123/file/attachments/foo-bar.pdf
       - url: content/([0-9]+)/file/(@strid)/(@strid\.@strid)
         action: Download
-      - url: content/([0-9]+)/image/(@strid)/(@strid\.@strid)
+
+      ### image versions of a file
+      # content/123/file/attachments/thumbnails/about-me.jpg
+      # content/123/file/images/300x300/about-me.jpg
+      - url: content/([0-9]+)/file/(@strid)/(@strid)/(@strid\.(?:jpg|jpeg|gif|png))
         action: DownloadImage
+
+      ### upload a file to the attachments
+      # content/123/file/attachments/upload
       - url: content/([0-9]+)/file/(@strid)/upload
         action: Upload
-#      - url: content/([0-9]+)/file/replace
-#        action: ReplaceNode
-#      - url: content/([0-9]+)/file/delete
-#        action: DeleteNode
-      - url: content/file/([0-9]+)/replace
-        action: Replace
-      - url: content/file/([0-9]+)/delete
+
+      - url: content/([0-9]+)/file/(@strid)/([0-1]+)/update
+        action: Update
+        
+      - url: content/([0-9]+)/file/(@strid)/([0-1]+)/delete
         action: Delete
   node_image:
     class: NodeImageController

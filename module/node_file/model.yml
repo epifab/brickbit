@@ -1,67 +1,49 @@
 tables:
-  dir:
-    fields:
-      id:
-        type: integer
-        label: Id
-      path:
-        type: plaintext
-        label: Path
-        maxlength: 32
-    keys:
-      primary:
-        fields: [id]
-        primary: 1
-        autoIncrement: 1
-    relations:
-      files:
-        table: file
-        clauses: {id: dir_id}
-        type: 1-N
   file:
     fields:
       id:
         type: integer
         label: Id
-      dir_id:
-        type: integer
-        label: Dir Id
+      directory:
+        type: string
+        label: Directory
+        maxlength: 64
       name:
         type: plaintext
         label: File name
-        maxlength: 32
+        maxlength: 64
         regexp: /^[a-zA-Z0-9._-]+$/
       size:
         type: integer
         label: Bytes
+      type:
+        type: string
+        label: Directory
+        maxlength: 32
     keys:
       primary:
         fields: [id]
         primary: 1
         autoIncrement: 1
     relations:
-      dir:
-        table: dir
-        clauses: {dir_id: id}
-        type: N-1
       node:
         table: node_file
         clauses: {id: file_id}
         type: 1-1
     virtuals:
       path:
-        dependencies: [dir.path, name]
+        dependencies: [directory, name]
         label: File path
         handler: |
           function($file) {
-            return $file->dir->path . $file->name;
+            return $file->directory . $file->name;
           }
       extension:
         dependencies: [name]
         label: File extension
         handler: |
           function($file) {
-            return \system\File::getExtension($file->name);
+            return \system\Utils\File::getExtension($file->name);
           }
       last_update:
         dependencies: [path]
@@ -96,7 +78,7 @@ tables:
         type: integer
       virtual_name:
         type: plaintext
-        maxlength: 32
+        maxlength: 64
       preview_file_path:
         type: plaintext
         maxlength: 32
@@ -139,11 +121,6 @@ tables:
         label: Delete URL
         dependencies: [file_id]
         handler: [\module\node_file\NodeFileEntity, getDeleteUrl]
-      download_path:
-        handler: |
-          function($recordset) {
-            return $recordset->virtual_name;
-          }
       images:
         label: Images
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
