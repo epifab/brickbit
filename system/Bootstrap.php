@@ -25,12 +25,7 @@ class Bootstrap {
   }
   
   public static function exceptionHandler(\Exception $ex) {
-    echo '<h3>' . $ex->getMessage() . '</h3>';
-    if ($ex instanceof \system\exceptions\Error) {
-      echo '<div>' . $ex->getDetails() . '</div>';
-      echo '<div>' . \system\utils\Utils::backtraceInfo($ex->getTrace()) . '</div>';
-    }
-    die();
+    return self::errorHandler(E_ERROR, $ex->getMessage(), $ex->getFile(), $ex->getLine());
   }
   
   public static function errorHandler($code, $description, $file, $line) {
@@ -66,6 +61,10 @@ class Bootstrap {
         '@line' => $line
       ), $level
     );
+    
+    if ($level == \system\LOG_ERROR) {
+      die();
+    }
   }
   
   // caricamento automatico di classi del framework ciderbit
