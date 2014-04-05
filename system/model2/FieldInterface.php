@@ -4,7 +4,7 @@ namespace system\model2;
 interface FieldInterface extends TablePropertyInterface {
   /**
    * Metatype associated with the field.
-   * @return \system\metatypes\MetaType
+   * @return \system\metatypes\MetaTypeInterface
    */
   public function getMetatype();
   /**

@@ -1,7 +1,7 @@
 <?php
 namespace system\metatypes;
 
-abstract class MetaType {
+abstract class MetaType implements MetaTypeInterface {
 
   protected $name;
   protected $type;

@@ -18,7 +18,7 @@ class Field extends TableProperty implements FieldInterface {
   
   /**
    * Metatype associated with the field.
-   * @return \system\metatypes\MetaType
+   * @return \system\metatypes\MetaTypeInterface
    */
   public function getMetaType() {
     return $this->metaType;
