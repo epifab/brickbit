@@ -53,17 +53,14 @@ class Lang {
     return self::$lang;
   }
   
-  public static function translate($sentence, $args = null) {
-    // Make sure the vocabulary has been loaded
-    self::getLang();
-    
-    if (\array_key_exists($sentence, self::$vocabulary)) {
-      if (\is_callable(self::$vocabulary[$sentence])) {
+  public static function format($sentence, $args = array(), $vocabulary = array()) {
+    if (\array_key_exists($sentence, $vocabulary)) {
+      if (\is_callable($vocabulary[$sentence])) {
         // The vocabulary may contain function for dynamic sentence translations
-        $sentence = \call_user_func(self::$vocabulary[$sentence], $args);
+        $sentence = \call_user_func($vocabulary[$sentence], $args);
       } else {
         // Simple translation
-        $sentence = self::$vocabulary[$sentence];
+        $sentence = $vocabulary[$sentence];
       }
     }
     if (!empty($args)) {
@@ -81,5 +78,11 @@ class Lang {
       }
     }
     return $sentence;
+  }
+  
+  public static function translate($sentence, $args = null) {
+    // Make sure the vocabulary has been loaded
+    self::getLang();
+    return self::format($sentence, $args, self::$vocabulary);
   }
 }
