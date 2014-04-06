@@ -28,21 +28,21 @@
               <ul class="dropdown-menu">
                 <?php if ($this->api->access($user->url)): ?>
                   <li>
-                    <a href="<?php echo $this->api->path($user->url); ?>">
+                    <a href="<?php echo $user->url; ?>">
                       <span class="glyphicon glyphicon-user"></span> <?php echo $this->api->t('View profile'); ?>
                     </a>
                   </li>
                 <?php endif; ?>
                 <?php if ($this->api->access($user->edit_url)): ?>
                   <li>
-                    <a href="<?php echo $this->api->path($user->edit_url); ?>">
+                    <a href="<?php echo $user->edit_url; ?>">
                       <span class="glyphicon glyphicon-pencil"></span> <?php echo $this->api->t('Edit user'); ?>
                     </a>
                   </li>
                 <?php endif; ?>
                 <?php if ($this->api->access($user->delete_url)): ?>
                   <li>
-                    <a href="<?php echo $this->api->path($user->delete_url); ?>">
+                    <a href="<?php echo $user->delete_url; ?>">
                       <span class="glyphicon glyphicon-trash"></span> <?php echo $this->api->t('Delete user'); ?>
                     </a>
                   </li>
