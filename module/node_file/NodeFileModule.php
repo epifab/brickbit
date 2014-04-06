@@ -1,13 +1,12 @@
 <?php
 namespace module\node_file;
 
-use system\Main;
 use system\Module;
+use system\exceptions\InternalError;
 use system\model2\RecordsetInterface;
 use system\utils\File;
 
 class NodeFileModule {
-  
   /**
    * Implements controller event imageVersionHandlers()
    */
@@ -19,6 +18,8 @@ class NodeFileModule {
       'medium' => array(get_class(), 'imageVersion'),
       'large' => array(get_class(), 'imageVersion'),
       'xlarge' => array(get_class(), 'imageVersion'),
+
+      'teaser-large' => array(get_class(), 'imageVersion')
     );
     
     return $handlers;
@@ -44,11 +45,16 @@ class NodeFileModule {
       case 'xlarge':
         return self::imageVersionFixedWidth('960-Y', $targetFilePath, $nodeFile);
         break;
+      case 'teaser-large':
+        return self::imageVersionFixedSizes('680-120', $targetFilePath, $nodeFile);
+        break;
+      default:
+        throw new InternalError('Unknown image version <em>@version</em>', array('@version' => $version));
     }
   }
   
   public static function imageVersionFixedSizes($version, $targetFilePath, RecordsetInterface $nodeFile) {
-    list($x, $y) = \explode('x', $version);
+    list($x, $y) = \explode('-', $version);
     File::saveImageFixedSize($nodeFile->file->path, $targetFilePath, $x, $y);
   }
   

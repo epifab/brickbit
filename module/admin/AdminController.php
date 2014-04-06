@@ -23,7 +23,7 @@ class AdminController extends Component {
       $am[] = array('url' => Main::getUrl('system/settings'), 'title' => Lang::translate('settings'));
       $am[] = array('title' => Lang::translate('admin'), 'items' => array(
         'logs' => array('title' => Lang::translate('Logs'), 'url' => Main::getUrl('admin/logs'), 'ajax' => false),
-        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getUrl('admin/cache/flush'), 'ajax' => true)
+        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getUrl('admin/cache/flush'), 'ajax' => true, 'showResponse' => false)
       ));
     }
     $this->datamodel['adminMenu'] = $am;

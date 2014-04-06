@@ -4,7 +4,7 @@ enabled: 1
 #modelNs: 
 #modelClass: 
 #viewNs: 
-viewClass: NodeView
+viewClass: NodeViewApi
 #templatesPath: templates
 #componentsNs: controller
 dependencies:

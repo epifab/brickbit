@@ -40,6 +40,7 @@ tables:
         table: record_mode
         type: 1-1
         clauses: {record_mode_id: id}
+        onDelete: CASCADE
       parent:
         table: node
         type: N-1
@@ -49,16 +50,16 @@ tables:
         type: 1-N
         clauses: {id: parent_id}
         onDelete: CASCADE
-      ancestors:
-        table: node
-        clauses: []
-        type: 1-N
-        filterHandler: [\module\node\NodeEntity, ancestorsFilter]
-      descendants:
-        table: node
-        clauses: []
-        type: 1-N
-        filterHandler: [\module\node\NodeEntity, descendantsFilter]
+#      ancestors:
+#        table: node
+#        clauses: []
+#        type: 1-N
+#        filterHandler: [\module\node\NodeEntity, ancestorsFilter]
+#      descendants:
+#        table: node
+#        clauses: []
+#        type: 1-N
+#        filterHandler: [\module\node\NodeEntity, descendantsFilter]
       # TERMS
       terms:
         table: node_term

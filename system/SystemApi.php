@@ -40,7 +40,7 @@ class SystemApi {
    *  any component.
    */
   public static function onInit() {
-    Main::invokeMethodAll();
+    Main::invokeStaticMethodAll('onInit');
   }
   
   /**
@@ -80,6 +80,6 @@ class SystemApi {
    * @return array Associative array 'widget name' => 'widget class'
    */
   public static function widgetsMap() {
-    return Main::invokeStaticMethodAllMerge('metaTypesMap');
+    return Main::invokeStaticMethodAllMerge('widgetsMap');
   }
 }

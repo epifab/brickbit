@@ -1,7 +1,7 @@
 <?php
 namespace module\node;
 
-use \system\utils\Lang;
+use system\utils\Lang;
 
 class NodeModule {
   public static function cron() {

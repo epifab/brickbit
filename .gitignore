@@ -6,3 +6,6 @@
 /sql-formatter-master/
 /config/vars/
 /_test/
+/config/ciderbit.en/cache/
+/config/ciderbit.en/files/
+/temp/

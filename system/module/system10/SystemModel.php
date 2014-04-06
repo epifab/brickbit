@@ -20,6 +20,7 @@ class SystemModel {
     
     foreach ($table->getRelations() as $relation) {
       if ($relation->deleteCascade()) {
+        $relation->import('*');
         // Always load the parent
         $relation->setJoinType('LEFT');
         // We'll have to delete children
@@ -45,7 +46,7 @@ class SystemModel {
       }
       
       foreach ($relationsToDelete as $relation) {
-        $children = $table->{$relation->getName()};
+        $children = $rs->{$relation->getName()};
 
         if (!empty($children)) {
           if (\is_array($children)) {

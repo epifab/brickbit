@@ -38,7 +38,7 @@ class NodeEntity {
    * @return array List of node types
    */
   public static function getValidChildrenTypes(RecordsetInterface $node) {
-    $nodeTypes = NodeEvents::nodeTypes();
+    $nodeTypes = NodeApi::nodeTypes();
     return $nodeTypes[$node->type]['children'];
   }
   
@@ -48,7 +48,7 @@ class NodeEntity {
    * @return array List of node file types
    */
   public static function getValidFileKeys(RecordsetInterface $node) {
-    $nodeTypes = NodeEvents::nodeTypes();
+    $nodeTypes = NodeApi::nodeTypes();
     return $nodeTypes[$node->type]['files'];
   }
   

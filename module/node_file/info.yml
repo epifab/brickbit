@@ -2,8 +2,8 @@ class: NodeFileModule
 weight: 1
 enabled: 1
 #modelNs: 
-#modelClass: 
-viewNs: view
+modelClass: NodeFileModel
+#viewNs: view
 #viewClass: 
 #templatesPath: templates
 #componentsNs: 
@@ -14,18 +14,8 @@ components:
     class: NodeFileController
     pages:
       ### 'about-me.pdf' file download
-      # content/123/file/attachments/about-me.pdf
-      - url: content/([0-9]+)/file
-        action: List
-        
-      ### list of all node files whose index is 'attachments'
-      # content/123/file/list/attachments
-      - url: content/([0-9]+)/file/list/(@strid)
-        action: List
-
-      ### list of all node files
-      # content/123/file/list
-      - url: content/([0-9]+)/file/list
+      # content/123/file/attachments
+      - url: content/([0-9]+)/file/(@strid)
         action: List
 
       ### 'about-me.pdf' file download
@@ -34,8 +24,7 @@ components:
         action: Download
 
       ### image versions of a file
-      # content/123/file/attachments/thumbnails/about-me.jpg
-      # content/123/file/images/300x300/about-me.jpg
+      # content/123/file/attachments/thumbs/about-me.jpg
       - url: content/([0-9]+)/file/(@strid)/(@strid)/(@strid\.(?:jpg|jpeg|gif|png))
         action: DownloadImage
 
@@ -44,11 +33,12 @@ components:
       - url: content/([0-9]+)/file/(@strid)/upload
         action: Upload
 
-      - url: content/([0-9]+)/file/(@strid)/([0-1]+)/update
+      - url: content/([0-9]+)/file/(@strid)/([0-9]+)/update
         action: Update
         
-      - url: content/([0-9]+)/file/(@strid)/([0-1]+)/delete
+      - url: content/([0-9]+)/file/(@strid)/([0-9]+)/delete
         action: Delete
+        
   node_image:
     class: NodeImageController
     pages:

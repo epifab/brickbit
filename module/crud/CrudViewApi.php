@@ -1,7 +1,9 @@
 <?php
 namespace module\crud;
 
-class CrudView {
+use system\view\Widget;
+
+class CrudViewApi {
   //////////////////////
   // BLOCKS
   //////////////////////
@@ -115,7 +117,7 @@ class CrudView {
 
     $inputError = $form->getValidationError($inputName);
     
-    $widgetObject = \system\view\Widget::getWidget($inputWidget);
+    $widgetObject = Widget::getWidget($inputWidget);
     
     // Checkboxes and radio buttons widgets displays the label
     $inlineLabel = 

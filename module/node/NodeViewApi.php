@@ -4,7 +4,7 @@ namespace module\node;
 use system\Main;
 use system\view\View;
 
-class NodeView {
+class NodeViewApi {
   public static function displayNode($node, $display = 'default') {
     $templates = array(
       'node-'. $display . '--' . $node->id,

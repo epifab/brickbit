@@ -55,7 +55,7 @@ class NodeCrudController extends CrudController {
    * @throws InputOutputError
    */
   public static function accessAdd($urlArgs, $user) {
-    $nodeTypes = NodeEvents::nodeTypes();
+    $nodeTypes = NodeApi::nodeTypes();
     
     if (!isset($nodeTypes[$urlArgs[0]])) {
       throw new InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
@@ -76,7 +76,7 @@ class NodeCrudController extends CrudController {
    * @throws InputOutputError
    */
   public static function accessAdd2Node($urlArgs, $user) {
-    $nodeTypes = NodeEvents::nodeTypes();
+    $nodeTypes = NodeApi::nodeTypes();
     
     if (!isset($nodeTypes[$urlArgs[1]])) {
       throw new InputOutputError('Invalid node type.');
@@ -164,8 +164,7 @@ class NodeCrudController extends CrudController {
       '*',
       'record_mode.*',
       'text.*',
-      'texts.*',
-      'files.*'
+      'texts.*'
     );
     return $table;
   }

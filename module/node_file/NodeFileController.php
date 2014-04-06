@@ -8,10 +8,12 @@ use system\metatypes\MetaString;
 use system\model2\DataLayerCore;
 use system\model2\RecordsetInterface;
 use system\model2\Table;
+use system\model2\TableInterface;
 use system\utils\File;
 use module\node\NodeCrudController;
 
 class NodeFileController extends Component {
+  ///<editor-fold defaultstate="collapsed" desc="Access methods">
   public static function accessUpload($urlArgs, RecordsetInterface $user) {
     // Checking the user has permissions to edit the node
     return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
@@ -28,6 +30,15 @@ class NodeFileController extends Component {
   public static function accessDownloadImage($urlArgs, RecordsetInterface $user) {
     return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
   }
+  
+  public static function accessUpdate($urlArgs, RecordsetInterface $user) {
+    return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
+  }
+  
+  public static function accessDelete($urlArgs, RecordsetInterface $user) {
+    return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
+  }
+  ///</editor-fold>
   
   protected function createFile($nodeId, $nodeIndex, $virtualName, $directory, $fileName) {
     $dataAccess = DataLayerCore::getInstance();
@@ -57,6 +68,7 @@ class NodeFileController extends Component {
     $rs->file->directory = $directory;
     $rs->file->name = $fileName;
     $rs->file->size = \filesize($directory . $fileName);
+    $rs->file->type = File::getContentType($fileName);
     $rs->file->save();
     
     $nodeIndexQuery = 
@@ -70,7 +82,6 @@ class NodeFileController extends Component {
     $rs->node_index = $nodeIndex;
     $rs->sort_index = 1 + \intval($dataAccess->executeScalar($nodeIndexQuery));
     $rs->virtual_name = $virtualName;
-    
     $rs->save();
     
     return $rs;
@@ -131,9 +142,15 @@ class NodeFileController extends Component {
     list($nodeId, $nodeIndex) = $this->getUrlArgs();
     
     $data = $this->getRequestData();
-    $virtualName = File::getSafeFilename($data['name']);
     
-    $upload = new lib\FileUploadHandler(uniqid() . '.' . File::getExtension($virtualName), array(
+    $virtualName = File::getSafeFilename($data['name']);
+    if (strlen($virtualName) > 50) {
+      $virtualName = 
+        \substr(File::stripExtension($virtualName), 0, 50 - strlen($virtualName)) 
+        . '.' . File::getExtension($virtualName);
+    }
+    
+    $upload = new lib\FileUploadHandler($virtualName, array(
       'script_url' => Main::getActiveComponent()->getUrl(),
       'upload_dir' => Main::dataPath('content/'),
       'upload_url' => Main::getActiveComponent()->getUrl(),
@@ -167,10 +184,17 @@ class NodeFileController extends Component {
     return null;
   }
   
-  private function download($nodeId, $nodeIndex, $virtualName, $contentType = 'application/octet-stream', $version = null) {
+  /**
+   * @return TableInterface Table
+   */
+  private function nodeFileTable() {
     $table = Table::loadTable('node_file');
     $table->import('*', 'file.path');
-    
+    return $table;
+  }
+  
+  private function download($nodeId, $nodeIndex, $virtualName, $contentType = 'application/octet-stream', $version = null) {
+    $table = $this->nodeFileTable();
     $nodeFile = $table->selectFirst($table->filterGroup('AND')->addClauses(
       $table->filter('node_id', $nodeId),
       $table->filter('node_index', $nodeIndex),
@@ -205,7 +229,7 @@ class NodeFileController extends Component {
   }
   
   public function runDownload() {
-    list($nodeId, $nodeIndex, $virtualName) = $this->getUrlArg(0);
+    list($nodeId, $nodeIndex, $virtualName) = $this->getUrlArgs();
     return $this->download($nodeId, $nodeIndex, $virtualName);
   }
   
@@ -219,6 +243,24 @@ class NodeFileController extends Component {
   }
   
   public function runDelete() {
+    list($nodeId, $nodeIndex, $fileId) = $this->getUrlArgs();
     
+    $t = $this->nodeFileTable();
+    
+    $nodeFile = $t->selectFirst($t->filterGroup('AND')->addClauses(
+      $t->filter('node_id', $nodeId),
+      $t->filter('node_index', $nodeIndex),
+      $t->filter('file_id', $fileId)
+    ));
+    
+    if (empty($nodeFile)) {
+      throw new PageNotFound();
+    }
+    
+    $nodeFile->delete();
+    
+    echo json_encode(array('files' => array($nodeFile->virtual_name => true)));
+    
+    return null;
   }
 }

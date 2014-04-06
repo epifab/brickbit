@@ -20,8 +20,9 @@
       </div>
     <?php endif; ?>
 
-    <?php if (count($node->files)): ?>
-
+    <?php if (!empty($node->files['image'])): ?>
+      <?php $images = isset($node->files['image']) ? $node->files['image'] : array(); ?>
+      <img src="<?php echo \current($images)->version_urls['teaser-large']; ?>" />
     <?php endif; ?>
 
     <?php if (count($node->children_recursive)): ?>
