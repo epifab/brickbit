@@ -1,10 +1,10 @@
 <?php
 namespace module\admin;
 
-use \system\Component;
-use \system\Main;
-use \system\utils\Lang;
-use \system\utils\Login;
+use system\Component;
+use system\Main;
+use system\utils\Lang;
+use system\utils\Login;
 
 class AdminController extends Component {
   public static function accessAdminMenu($urlArgs, $user) {
@@ -19,11 +19,11 @@ class AdminController extends Component {
   public function runAdminMenu() {
     $am = array();
     if (Login::isSuperuser()) {
-      $am[] = array('url' => Main::getUrl('user/list'), 'title' => Lang::translate('users'), 'ajax' => false);
-      $am[] = array('url' => Main::getUrl('system/settings'), 'title' => Lang::translate('settings'));
+      $am[] = array('url' => Main::getPathRelative('user/list'), 'title' => Lang::translate('users'), 'ajax' => false);
+      $am[] = array('url' => Main::getPathRelative('system/settings'), 'title' => Lang::translate('settings'));
       $am[] = array('title' => Lang::translate('admin'), 'items' => array(
-        'logs' => array('title' => Lang::translate('Logs'), 'url' => Main::getUrl('admin/logs'), 'ajax' => false),
-        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getUrl('admin/cache/flush'), 'ajax' => true, 'showResponse' => false)
+        'logs' => array('title' => Lang::translate('Logs'), 'url' => Main::getPathRelative('admin/logs'), 'ajax' => false),
+        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getPathRelative('admin/cache/flush'), 'ajax' => true, 'showResponse' => false)
       ));
     }
     $this->datamodel['adminMenu'] = $am;

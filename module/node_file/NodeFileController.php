@@ -152,7 +152,7 @@ class NodeFileController extends Component {
     
     $upload = new lib\FileUploadHandler($virtualName, array(
       'script_url' => Main::getActiveComponent()->getUrl(),
-      'upload_dir' => Main::dataPath('content/'),
+      'upload_dir' => NodeFileApi::getUploadDirectory(),
       'upload_url' => Main::getActiveComponent()->getUrl(),
       // Defines which files (based on their names) are accepted for upload:
       'accept_file_types' => '/.+$/i',

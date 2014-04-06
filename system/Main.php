@@ -3,7 +3,7 @@ namespace system;
 
 use system\Component;
 use system\Settings;
-use system\Theme;
+use system\ThemeApi;
 use system\exceptions\InternalError;
 use system\utils\Login;
 use system\view\TemplateManager;
@@ -101,7 +101,7 @@ class Main {
         $configuration = self::getCache('system-configuration', null);
       }
       if (\is_null($configuration)) {
-        $configuration = Module::loadConfiguration();
+        $configuration = SystemConfiguration::loadConfiguration();
         if (self::setting('coreCache')) {
           self::setCache('system-configuration', $configuration);
         }
@@ -349,10 +349,10 @@ class Main {
       
       if (!$obj->isNested()) {
         // Allows the theme to do special stuff before modules
-        Theme::preRun($obj);
+        ThemeApi::preRun($obj);
         // Raise event onRun
         SystemApi::onRun($obj);
-        Theme::onRun($obj);
+        ThemeApi::onRun($obj);
       }
 
       $obj->process();
@@ -365,9 +365,9 @@ class Main {
     
     if (self::setting('debug', false)) {
       self::pushMessage(\cb\t('Execution time component <em>@component</em>::<em>@action</em>: @time sec.</b>', array(
-          '@component' => $obj->getName(),
-          '@action' => $obj->getAction(),
-          '@time' => self::getExecutionTime()
+        '@component' => $obj->getName(),
+        '@action' => $obj->getAction(),
+        '@time' => self::getExecutionTime()
       )));
     }
     
@@ -757,7 +757,7 @@ class Main {
    * <p>This function takes an unlimited number of arguments.</p>
    * <p>Every argument (apart from the method name) is passed to the module 
    *  class method.</p>
-   * @param string $methodName Name of the module class method
+   * @param string $methodName Name of the model class method
    * @return array Returns an array of non-null values returned by model classes
    */
   public static function raiseModelEvent($methodName) {
@@ -796,6 +796,23 @@ class Main {
   }
   
   /**
+   * Invokes a theme method.
+   * <p>Runs the method $methodName in the current theme class.</p>
+   * <p>This function takes an unlimited number of arguments.</p>
+   * <p>Every argument (apart from the method name) is passed to the theme
+   *  class method.</p>
+   * @param string $methodName Name of the theme class method
+   */
+  public static function raiseThemeEvent($methodName) {
+    $args = \func_get_args();
+    array_shift($args);
+    $cname = '\theme\\' . self::getTheme() . '\\Theme';
+    if (\class_exists($cname) && \is_callable($cname . '::' . $methodName)) {
+      \call_user_func_array($cname . '::' . $methodName, $args);
+    }
+  }
+  
+  /**
    * Returns every 'model class' declard in active modules.
    * @return array List of model classes
    */
@@ -830,43 +847,191 @@ class Main {
   /**
    * Returns the absolute path to the temp folder. 
    * <p>Typically this is used for temporary application data.</p>
-   * @param string $path Path relative to the data folder
+   * @param string $path Subpath
+   * @return string Temp path
+   */
+  public static function tempPathAbs($path = '') {
+    return self::getPathAbsolute('temp/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the relative path to the temp folder. 
+   * <p>Typically this is used for temporary application data.</p>
+   * @param string $path Subpath
+   * @return string Temp path
+   */
+  public static function tempPathRel($path = '') {
+    return self::getPathRelative('temp/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the internal path to the temp folder. 
+   * <p>Typically this is used for temporary application data.</p>
+   * @param string $path Subpath
    * @return string Temp path
    */
   public static function tempPath($path = '') {
-    return self::getBaseDirAbs() . 'temp/' . self::prepareUrl($path);
+    return self::getPathInternal('temp/' . self::stripInitialSlash($path));
   }
   
   /**
    * Returns the absolute path to the data folder. 
    * <p>Typically this is used for file upload and other application data.</p>
-   * @param string $path Path relative to the data folder
+   * @param string $path Subpath
    * @return string Data path
    */
-  public static function dataPath($path = '') {
-    return self::getBaseDirAbs() . 'data/' . self::prepareUrl($path);
+  public static function dataPathAbs($path = '') {
+    return self::getPathAbsolute('data/' . self::stripInitialSlash($path));
   }
   
   /**
-   * Returns the path for a resource inside the module directory.
-   * The path is relative to the project root directory.
+   * Returns the relative path to the data folder. 
+   * <p>Typically this is used for file upload and other application data.</p>
+   * @param string $path Subpath
+   * @return string Data path
+   */
+  public static function dataPathRel($path = '') {
+    return self::getPathRelative('data/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the internal path to the data folder. 
+   * <p>Typically this is used for file upload and other application data.</p>
+   * @param string $path Subpath
+   * @return string Data path
+   */
+  public static function dataPath($path = '') {
+    return self::getPathInternal('data/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the absolute path for a resource inside the module directory.
+   * @param string $moduleName Module name
+   * @param string $path Path relative to the module directory
+   * @return string Path
+   */
+  public static function modulePathAbs($moduleName, $path = '') {
+    $module = self::getModule($moduleName);
+    return self::getPathAbsolute($module['path'] . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the relative path for a resource inside the module directory.
+   * @param string $moduleName Module name
+   * @param string $path Path relative to the module directory
+   * @return string Path
+   */
+  public static function modulePathRel($moduleName, $path = '') {
+    $module = self::getModule($moduleName);
+    return self::getPathRelative($module['path'] . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the internal path for a resource inside the module directory.
    * @param string $moduleName Module name
    * @param string $path Path relative to the module directory
    * @return string Path
    */
   public static function modulePath($moduleName, $path = '') {
     $module = self::getModule($moduleName);
-    return self::getUrl($module['path'] . self::prepareUrl($path));
+    return self::getPathInternal($module['path'] . self::stripInitialSlash($path));
   }
   
   /**
-   * Returns an internal URL
-   * @param string $path Path is assumed to be relative to the ciderbit root 
-   *  directory.
-   * @return string URL
+   * Returns the module namespace.
+   * Usage example:
+   * <code>
+   * // The following code will print: \module\core\controller\
+   * echo \system\Module::getNamespace('core', 'controller');
+   * </code>
+   * @param string $moduleName Module name
+   * @return string Module namespace
    */
-  public static function getUrl($path) {
-    return self::getBaseDir() . self::prepareUrl($path);
+  public static function moduleNamespace($moduleName) {
+    $subpaths = func_get_args();
+    unset($subpaths[0]);
+    $module = self::getModule($moduleName);
+    $namespace = $module['ns'];
+    foreach ($subpaths as $subpath) {
+      $namespace .= $subpath . '\\';
+    }
+    return $namespace;
+  }
+  
+  /**
+   * Returns the absolute path for a resource inside the theme directory.
+   * @param string $path Path relative to the theme directory
+   * @return string Path
+   */
+  public static function themePathAbs($path = '') {
+    return self::getPathAbsolute('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the relative path for a resource inside the theme directory.
+   * @param string $path Path relative to the theme directory
+   * @return string Path
+   */
+  public static function themePathRel($path = '') {
+    return self::getPathRelative('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the internal path for a resource inside the theme directory.
+   * @param string $path Path relative to the theme directory
+   * @return string Path
+   */
+  public static function themePath($path = '') {
+    return self::getPathInternal('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
+  }
+  
+  /**
+   * Returns the theme
+   * @return string Theme in use
+   */
+  public static function getTheme() {
+    if (!self::setting('theme', false)) {
+      throw new InternalError('Undefined theme');
+    }
+    return self::setting('theme');
+  }
+  
+  /**
+   * Returns an internal path.
+   * @param string $path Path is assumed to be internal
+   * @return string Internal path
+   */
+  public static function getPathInternal($path) {
+    str_replace('\\', '/', $path);
+    return self::stripInitialSlash($path);
+  }
+  
+  /**
+   * Returns a path relative to the ciderbit root directory
+   * @param string $path Path is assumed to be internal
+   * @return string Relative path
+   */
+  public static function getPathRelative($path) {
+    return self::getBaseDir() . self::getPathInternal($path);
+  }
+
+  /**
+   * Returns the real path
+   * @param string $path Path is assumed to be internal
+   * @return string Real path
+   */
+  public static function getPathAbsolute($path) {
+    str_replace('\\', '/', $path);
+    return self::getBaseDirAbs() . self::getPathInternal($path);
+  }
+  
+  /**
+   * Removes the initial and the final slashes from a string
+   * @param string $path Path
+   * @return string Path
+   */
+  private static function stripTrailingSlashes($path) {
+    return self::stripFinalSlash(self::stripInitialSlash($path));
   }
   
   /**
@@ -874,59 +1039,23 @@ class Main {
    * @param string $path Path
    * @return string Path
    */
-  private static function prepareUrl($path) {
-    $path = str_replace('\\', '/', $path);
+  private static function stripInitialSlash($path) {
     return (!empty($path) && substr($path, 0, 1) == '/')
       ? substr($path, 1)
       : $path;
   }
   
-  private static function urlIsExternal($uri) {
-    // Return an external link if $path contains an allowed absolute URL. Only
-    // call the slow drupal_strip_dangerous_protocols() if $path contains a ':'
-    // before any / ? or #. Note: we could use url_is_external($path) here, but
-    // that would require another function call, and performance inside url() is
-    // critical.
-    $colonpos = strpos($path, ':');
-    return ($colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && self::urlStripDangerousProtocols($path) == $path);
+  /**
+   * Removes the final slash and replace backslashes with shashes
+   * @param string $path Path
+   * @return string Path
+   */
+  private static function stripFinalSlash($path) {
+    return (!empty($path) && substr($path, -1, 1) == '/')
+      ? substr($path, 0, -1)
+      : $path;
   }
-  
-  private static function urlStripDangerousProtocols($uri) {
-    static $allowedProtocols;
 
-    if (!isset($allowedProtocols)) {
-      $allowedProtocols = array_flip(
-        self::getCache('system-filter-allowed-protocols', array(
-          'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 
-          'sftp', 'ssh', 'tel', 'telnet', 'webcal'
-        ))
-      );
-    }
-
-    // Iteratively remove any invalid protocol found.
-    do {
-      $before = $uri;
-      $colonpos = strpos($uri, ':');
-      if ($colonpos > 0) {
-        // We found a colon, possibly a protocol. Verify.
-        $protocol = substr($uri, 0, $colonpos);
-        // If a colon is preceded by a slash, question mark or hash, it cannot
-        // possibly be part of the URL scheme. This must be a relative URL, which
-        // inherits the (safe) protocol of the base document.
-        if (preg_match('![/?#]!', $protocol)) {
-          break;
-        }
-        // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
-        // (URI Comparison) scheme comparison must be case-insensitive.
-        if (!isset($allowedProtocols[strtolower($protocol)])) {
-          $uri = substr($uri, $colonpos + 1);
-        }
-      }
-    } while ($before != $uri);
-
-    return $uri;
-  }
-  
   private static function cachePath($name) {
     $cacheDir = self::setting('cacheDir');
     return !empty($cacheDir) ? $cacheDir . $name . '.var' : false;
@@ -1074,7 +1203,7 @@ class Main {
    * @param mixed $default Default value
    * @return mixed Variable value
    */
-  public static function &getSession($module, $key, $default = null) {
+  public static function getSession($module, $key, $default = null) {
     return self::session($module, $key, $default);
   }
   
@@ -1094,7 +1223,7 @@ class Main {
    * @param string $module Module name
    * @param string $key Variable name
    */
-  public static function unsetSession($module, $key=null) {
+  public static function delSession($module, $key=null) {
     if (empty($key)) {
       $session = &self::session();
       unset($session[$module]);
@@ -1172,6 +1301,25 @@ class Main {
   }
   
   /**
+   * Gets a site setting
+   * @param string $name Name
+   * @param mixed $default Default value to be returned for undefined settings
+   * @return mixed Global setting value or $default for undefined settings
+   */
+  public static function getSetting($name, $value) {
+    self::settings()->set($name, $value);
+  }
+  
+  /**
+   * Sets a site setting
+   * @param string $name Name
+   * @param mixed $value Value to set
+   */
+  public static function setSetting($name, $value) {
+    self::settings()->set($name, $value);
+  }
+  
+  /**
    * @return string Path to the base directory
    */
   public static function getBaseDirAbs() {
@@ -1182,7 +1330,13 @@ class Main {
    * @return string Path to the base directory relative to the web root
    */
   public static function getBaseDir() {
-    return self::setting('baseDir', '/');
+    $baseDir = str_replace('\\', '/', self::setting('baseDir', '/'));
+    if (empty($baseDir) || $baseDir == '/') {
+      return '/';
+    }
+    else {
+      return '/' . self::stripTrailingSlashes($baseDir) . '/';
+    }
   }
   
   /**

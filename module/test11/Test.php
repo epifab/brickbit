@@ -1,7 +1,7 @@
 <?php
 namespace module\test11;
 
-class Test extends \system\Module {
+class Test {
   
   public static function test() {
     return array(

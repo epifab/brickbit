@@ -148,7 +148,7 @@ class Login {
    * Destroys login session
    */
   private static function unsetLoginSession() {
-    \system\Main::unsetSession('system', 'login');
+    \system\Main::delSession('system', 'login');
   }
 
   /**

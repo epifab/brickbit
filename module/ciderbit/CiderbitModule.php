@@ -2,7 +2,6 @@
 namespace module\ciderbit;
 
 use system\Main;
-use system\Theme;
 use system\utils\Lang;
 use system\utils\HTMLHelpers;
 use system\utils\Login;
@@ -27,8 +26,8 @@ class CiderbitModule {
         'lang' => Lang::getLang(),
         'langs' => Main::setting('languages'),
         'langsLabels' => $langsLabels,
-        'theme' => Theme::getTheme(),
-        'themes' => Main::setting('theme'),
+        'theme' => Main::getTheme(),
+        'themes' => Main::setting('themes'),
         'messages' => array()
       ),
       'user' => Login::getLoggedUser(),
@@ -92,7 +91,5 @@ class CiderbitModule {
     $component->addTemplate('langs-control', 'header-sidebar');
     $component->addTemplate('footer', 'footer');
     //$component->addTemplate('sidebar', 'sidebar');
-    
-    //$component->addJs(\system\Module::getAbsPath('core') . 'js/core.js');
   }
 }

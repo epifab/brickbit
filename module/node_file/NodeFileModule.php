@@ -1,7 +1,7 @@
 <?php
 namespace module\node_file;
 
-use system\Module;
+use system\Main;
 use system\exceptions\InternalError;
 use system\model2\RecordsetInterface;
 use system\utils\File;
@@ -28,7 +28,7 @@ class NodeFileModule {
   public static function imageVersion($version, $targetFilePath, RecordsetInterface $nodeFile) {
     switch ($version) {
       case 'thumb':
-        return self::imageVersionFixedSizes('60x60', $targetFilePath, $nodeFile);
+        return self::imageVersionFixedSizes('60-60', $targetFilePath, $nodeFile);
         break;
       case 'xsmall':
         return self::imageVersionFixedWidth('60-Y', $targetFilePath, $nodeFile);
@@ -70,11 +70,11 @@ class NodeFileModule {
   
   public static function fileTypeIcons() {
     return array(
-      'image' => Module::getPath('node_file', 'img/icon/image-x-generic.png'),
-      'audio' => Module::getPath('node_file', 'img/icon/audio-x-generic.png'),
-      'video' => Module::getPath('node_file', 'img/icon/video-x-generic.png'),
-      'document' => Module::getPath('node_file', 'img/icon/application-octet-stream.png'),
-      'unknown' => Module::getPath('node_file', 'img/icon/application-octet-stream.png'),
+      'image' => Main::modulePathRel('node_file', 'img/icon/image-x-generic.png'),
+      'audio' => Main::modulePathRel('node_file', 'img/icon/audio-x-generic.png'),
+      'video' => Main::modulePathRel('node_file', 'img/icon/video-x-generic.png'),
+      'document' => Main::modulePathRel('node_file', 'img/icon/application-octet-stream.png'),
+      'unknown' => Main::modulePathRel('node_file', 'img/icon/application-octet-stream.png'),
     );
   }
 }

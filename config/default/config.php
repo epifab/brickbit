@@ -21,7 +21,7 @@ return array(
   'languages' => array('en', 'it'),
 
   // Theme
-  'defaultTheme' => 'ciderbit2',
+  'theme' => 'ciderbit2',
   'themes' => array('ciderbit2'),
   
   // Base directory

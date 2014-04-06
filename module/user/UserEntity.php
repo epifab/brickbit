@@ -11,7 +11,7 @@ class UserEntity {
    * @return string Edit URL
    */
   public static function getUrl(RecordsetInterface $recordset) {
-    return Main::getUrl("user/{$recordset->id}");
+    return Main::getPathRelative("user/{$recordset->id}");
   }
   
   /**
@@ -20,7 +20,7 @@ class UserEntity {
    * @return string Edit URL
    */
   public static function getEditUrl(RecordsetInterface $recordset) {
-    return Main::getUrl("user/{$recordset->id}/edit");
+    return Main::getPathRelative("user/{$recordset->id}/edit");
   }
   
   /**
@@ -29,6 +29,6 @@ class UserEntity {
    * @return string Delete URL
    */
   public static function getDeleteUrl(RecordsetInterface $recordset) {
-    return Main::getUrl("user/{$recordset->id}/delete");
+    return Main::getPathRelative("user/{$recordset->id}/delete");
   }
 }

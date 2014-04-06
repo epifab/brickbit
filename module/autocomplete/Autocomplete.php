@@ -1,10 +1,12 @@
 <?php
 namespace module\autocomplete;
 
-class Autocomplete extends \system\Module {
+use system\Main;
+
+class Autocomplete {
   public static function widgetsMap() {
     return array(
-      'autocomplete' => \system\Module::getNamespace('autocomplete') . 'Widget'
+      'autocomplete' => Main::moduleNamespace('autocomplete') . 'Widget'
     );
   }
   

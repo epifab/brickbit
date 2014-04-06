@@ -35,11 +35,7 @@ abstract class MetaType implements MetaTypeInterface {
     }
     $metaTypeClass = $fmap[$type];
     
-    return new $metaTypeClass(
-      $name,
-      $type,
-      $attributes
-    );
+    return new $metaTypeClass($name, $type, $attributes);
   }
   
   public abstract function toProg($x);
@@ -110,4 +106,3 @@ abstract class MetaType implements MetaTypeInterface {
     }
   }
 }
-

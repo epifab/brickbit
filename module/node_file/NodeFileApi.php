@@ -76,8 +76,8 @@ class NodeFileApi {
   
   public static function getUploadDirectory($version = null) {
     return empty($version)
-      ? Main::dataPath('content/')
-      : Main::dataPath('images/' . $version . '/');
+      ? Main::dataPathAbs('content/')
+      : Main::dataPathAbs('images/' . $version . '/');
   }
   
   public static function fileTypeIcons() {

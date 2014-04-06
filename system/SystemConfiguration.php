@@ -2,11 +2,14 @@
 namespace system;
 
 use system\Main;
-use system\Theme;
 use system\exceptions\InternalError;
 use system\yaml\Yaml;
 
-class Module {
+class SystemConfiguration {
+  /**
+   * Modules main directories
+   * @return array
+   */
   public static function modulePaths() {
     return array(
       array('ns' => 'system\module', 'path' => 'system/module'),
@@ -39,6 +42,9 @@ class Module {
       
       $d = \opendir($modulesDir);
       while (($moduleName = \readdir($d))) {
+        if ($moduleName == '.' || $moduleName == '..' || !\is_dir($modulesDir . '/' . $moduleName)) {
+          continue;
+        }
         if (isset($modules[$moduleName])) {
           throw new InternalError('Module <em>@name</em> already defined', array('@name' => $moduleName));
         }
@@ -351,7 +357,7 @@ class Module {
       }
     }
 
-    $themeTplPath = Theme::getAbsPath('templates/');
+    $themeTplPath = Main::themePath('templates/');
     if (!\is_null($themeTplPath) && \is_dir($themeTplPath)) {
       $d = \opendir($themeTplPath);
       while (($fileName = \readdir($d))) {
@@ -363,48 +369,5 @@ class Module {
       \closedir($d);
     }
     return $TEMPLATES;
-  }
-
-  /**
-   * Returns the path for a resource inside the module directory.
-   * The path is relative to the project root directory.
-   * @param string $moduleName Module name
-   * @param string $path Path relative to the module directory
-   * @return string Path
-   */
-  public static function getPath($moduleName, $path = '') {
-    return Main::modulePath($moduleName, $path);
-  }
-  
-  /**
-   * Returns the absolute path for a given resource inside the module directory.
-   * @param string $moduleName Module name
-   * @param string $path Path relative to the module directory
-   * @return string Path
-   */
-  public static function getAbsPath($moduleName, $path = '') {
-    $module = Main::getModule($moduleName);
-    return Main::getBaseDir() . $module['path'] . $path;
-  }
-  
-  /**
-   * Returns the module namespace.
-   * Usage example:
-   * <code>
-   * // The following code will print: \module\core\controller\
-   * echo \system\Module::getNamespace('core', 'controller');
-   * </code>
-   * @param type $moduleName
-   * @return string
-   */
-  public static function getNamespace($moduleName) {
-    $subpaths = func_get_args();
-    unset($subpaths[0]);
-    $module = Main::getModule($moduleName);
-    $namespace = $module['ns'];
-    foreach ($subpaths as $subpath) {
-      $namespace .= $subpath . '\\';
-    }
-    return $namespace;
   }
 }

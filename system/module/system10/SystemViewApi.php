@@ -3,8 +3,6 @@ namespace system\module\system10;
 
 use system\SystemApi;
 use system\Main;
-use system\Module;
-use system\Theme;
 use system\exceptions\InternalError;
 use system\utils\Utils;
 use system\utils\Lang;
@@ -38,15 +36,15 @@ class SystemViewApi {
   }
 
   public static function path($url) {
-    return Main::getUrl($url);
+    return Main::getPathRelative($url);
   }
 
   public static function modulePath($module, $url) {
-    return Module::getAbsPath($module, $url);
+    return Main::modulePathRel($module, $url);
   }
 
   public static function themePath($url) {
-    return Theme::getPath($url);
+    return Main::themePathRel($url);
   }
 
   public static function langPath($lang) {

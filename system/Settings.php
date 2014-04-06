@@ -25,7 +25,7 @@ class Settings {
   /**
    * Gets the settings instance.
    * Implements singleton design pattern.
-   * @return \system\Settings Settings
+   * @return Settings Settings
    */
   public static function getInstance() {
     if (\is_null(self::$instance)) {

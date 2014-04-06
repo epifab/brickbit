@@ -3,7 +3,7 @@ namespace module\test10;
 
 use \system\Main;
 
-class Test extends \system\Module {
+class Test {
   
   public static function test() {
     return array(
