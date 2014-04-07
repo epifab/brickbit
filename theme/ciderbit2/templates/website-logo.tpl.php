@@ -1,6 +1,6 @@
 <h1 id="header-title">
   <?php $this->api->open('link', array(
-    'url' => '',
+    'url' => $this->api->path(),
     'ajax' => false
   )); ?><img src="<?php echo $this->api->themePath('img/header-logo.png'); ?>" alt="<?php echo $website['title']; ?>"/>
   <?php echo $this->api->close(); ?>

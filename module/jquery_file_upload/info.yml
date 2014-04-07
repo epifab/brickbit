@@ -1,0 +1,4 @@
+class: JQueryFileUploadModule
+weight: 2
+enabled: 1
+templatesPath: templates

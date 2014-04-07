@@ -17,8 +17,8 @@ const DBMS_MSSQL = 'sqlserver';
 
 class Bootstrap {
   public static function init() {
-//    \set_error_handler('\system\Bootstrap::errorHandler');
-//    \set_exception_handler('\system\Bootstrap::exceptionHandler');
+    \set_error_handler('\system\Bootstrap::errorHandler');
+    \set_exception_handler('\system\Bootstrap::exceptionHandler');
     \spl_autoload_register('\system\Bootstrap::autoload');
     
     SystemApi::onInit('onInit');

@@ -11,6 +11,7 @@ use system\model2\Table;
 use system\model2\TableInterface;
 use system\utils\File;
 use module\node\NodeCrudController;
+use module\jquery_file_upload\FileUploadHandler;
 
 class NodeFileController extends Component {
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
@@ -150,7 +151,7 @@ class NodeFileController extends Component {
         . '.' . File::getExtension($virtualName);
     }
     
-    $upload = new lib\FileUploadHandler($virtualName, array(
+    $upload = new FileUploadHandler($virtualName, array(
       'script_url' => Main::getActiveComponent()->getUrl(),
       'upload_dir' => NodeFileApi::getUploadDirectory(),
       'upload_url' => Main::getActiveComponent()->getUrl(),
