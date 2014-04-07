@@ -130,23 +130,33 @@ tables:
         handler: [\module\node_file\NodeEntity, getFiles]
   node_file:
     fields:
+      id:
+        type: integer
+        label: Id
       node_id:
         type: integer
+        label: Node id
       node_index:
         type: plaintext
+        label: Node index
         maxlength: 32
       sort_index:
         type: integer
+        label: Sort index
       file_id:
         type: integer
+        label: File id
       virtual_name:
         type: plaintext
         maxlength: 64
+        label: Virtual name
       preview_file_path:
         type: plaintext
         maxlength: 32
+        label: Preview file path
       download_mode:
         type: integer
+        label: Download access
         options:
 #          0: Nobody
 #          1: Superuser
@@ -156,8 +166,9 @@ tables:
           5: Anyone
     keys:
       primary:
-        fields: [file_id]
+        fields: [id]
         primary: 1
+        autoIncrement: 1
       node_key:
         fields: [node_id, node_index, virtual_name]
     relations:

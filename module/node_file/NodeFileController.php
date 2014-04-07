@@ -29,15 +29,7 @@ class NodeFileController extends Component {
   }
   
   public static function accessDownloadImage($urlArgs, RecordsetInterface $user) {
-    return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
-  }
-  
-  public static function accessUpdate($urlArgs, RecordsetInterface $user) {
-    return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
-  }
-  
-  public static function accessDelete($urlArgs, RecordsetInterface $user) {
-    return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
+    return NodeCrudController::accessRead(array($urlArgs[0]), $user);
   }
   ///</editor-fold>
   
@@ -237,31 +229,5 @@ class NodeFileController extends Component {
   public function runDownloadImage() {
     list($nodeId, $nodeIndex, $version, $virtualName) = $this->getUrlArgs();
     return $this->download($nodeId, $nodeIndex, $virtualName, File::getContentType($virtualName), $version);
-  }
-  
-  public function runUpdate() {
-    
-  }
-  
-  public function runDelete() {
-    list($nodeId, $nodeIndex, $fileId) = $this->getUrlArgs();
-    
-    $t = $this->nodeFileTable();
-    
-    $nodeFile = $t->selectFirst($t->filterGroup('AND')->addClauses(
-      $t->filter('node_id', $nodeId),
-      $t->filter('node_index', $nodeIndex),
-      $t->filter('file_id', $fileId)
-    ));
-    
-    if (empty($nodeFile)) {
-      throw new PageNotFound();
-    }
-    
-    $nodeFile->delete();
-    
-    echo json_encode(array('files' => array($nodeFile->virtual_name => true)));
-    
-    return null;
   }
 }

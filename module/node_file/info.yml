@@ -32,13 +32,14 @@ components:
       # content/123/file/attachments/upload
       - url: content/([0-9]+)/file/(@strid)/upload
         action: Upload
-
+  node_file_crud:
+    class: NodeFileCrudController
+    pages:
       - url: content/([0-9]+)/file/(@strid)/([0-9]+)/update
         action: Update
         
       - url: content/([0-9]+)/file/(@strid)/([0-9]+)/delete
         action: Delete
-        
   node_image:
     class: NodeImageController
     pages:

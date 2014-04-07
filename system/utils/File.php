@@ -132,7 +132,7 @@ class File {
     
     $destinationDir = dirname($destinationPath);
     if (!\is_dir($destinationDir)) {
-      if (!\mkdir($destinationDir)) {
+      if (!\mkdir($destinationDir, 0777, true)) {
         throw new InternalError('Unable to create the directory');
       }
     }
@@ -237,8 +237,8 @@ class File {
   
   public static function saveImageFixedSize($sourcePath, $destinationPath, $fixedWidth, $fixedHeight) {
     $targetDir = dirname($destinationPath);
-    if (!is_dir($targetDir)) {
-      mkdir($targetDir);
+    if (!\is_dir($targetDir)) {
+      \mkdir($targetDir, 0777, true);
     }
 
     if (!\copy($sourcePath, $destinationPath)) {

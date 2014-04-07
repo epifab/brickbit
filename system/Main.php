@@ -881,7 +881,7 @@ class Main {
    * @return string Data path
    */
   public static function dataPathAbs($path = '') {
-    return self::getPathAbsolute('data/' . self::stripInitialSlash($path));
+    return self::getPathAbsolute(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
   
   /**
@@ -891,7 +891,7 @@ class Main {
    * @return string Data path
    */
   public static function dataPathRel($path = '') {
-    return self::getPathRelative('data/' . self::stripInitialSlash($path));
+    return self::getPathRelative(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
   
   /**
@@ -901,7 +901,7 @@ class Main {
    * @return string Data path
    */
   public static function dataPath($path = '') {
-    return self::getPathInternal('data/' . self::stripInitialSlash($path));
+    return self::getPathInternal(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
   
   /**
@@ -1344,6 +1344,13 @@ class Main {
    */
   public static function getDomain() {
     return $_SERVER['HTTP_HOST'];
+  }
+  
+  /**
+   * @return string Domain e.g. 'en.ciderbit.local'
+   */
+  public static function getRequestUri() {
+    return self::stripInitialSlash($_SERVER['REQUEST_URI']);
   }
   
   /**

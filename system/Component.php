@@ -399,6 +399,8 @@ abstract class Component {
               '@module' => $this->module
             ));
         }
+        
+        $asd = $this->getName() . '::' . $this->getAction() . '(' . implode(', ', $this->getUrlArgs()) . ')';
 
         if (!\is_null($responseType)) {
           // Adding the output to the buffer
@@ -413,6 +415,10 @@ abstract class Component {
 
       catch (Redirect $ex) {
         Main::run($ex->getUrl());
+      }
+      
+      catch (\Exception $ex) {
+        $this->onError($ex);
       }
     }
     

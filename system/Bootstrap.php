@@ -53,16 +53,20 @@ class Bootstrap {
         break;
     }
     
-    SystemApi::watchdog(
-      'system', 
-      '<p><strong>@description</strong><p>File: @file, line: @line</p>', array(
+    $msg = array(
+      'body' => '<p><strong>@description</strong><p>File: @file, line: @line</p>',
+      'args' => array(
         '@description' => $description, 
         '@file' => $file,
         '@line' => $line
-      ), $level
+      )
     );
     
+    SystemApi::watchdog('system', $msg['body'], $msg['args'], $level);
+    
     if ($level == \system\LOG_ERROR) {
+      echo '<h1>Fatal error</h1>';
+      echo utils\Lang::format($msg['body'], $msg['args']);
       die();
     }
   }

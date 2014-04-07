@@ -6,20 +6,26 @@ class Settings {
   
   private $settings = array();
   
-  private function __construct($host) {
-    $this->settings = self::getDomainSettings($host) + self::getDefaultSettings();
+  private function __construct($host, $context) {
+    $this->settings = self::getDomainSettings($host, $context);
   }
 
-  private static function getDefaultSettings() {
-    return require 'config/default/config.php';
-  }
-  
-  private static function getDomainSettings($host) {
-    $domains = require 'config/domains.php';
-    
-    return (isset($domains[$host]))
-      ? require 'config/' . $domains[$host] . '/config.php'
-      : array();
+  private static function getDomainSettings($host, $context) {
+    foreach (require 'appdata/domains.php' as $d => $directory) {
+      $slashPos = strpos($d, '/');
+      if ($slashPos) {
+        $dHost = substr($d, 0, $slashPos);
+        $dContext = substr($d, $slashPos + 1);
+      }
+      else {
+        $dHost = $d;
+        $dContext = '';
+      }
+      if ($host == $dHost && (empty($dContext) || strpos($context, $dContext) === 0)) {
+        return require 'appdata/' . $directory . '/config.php';
+      }
+    }
+    return require 'appdata/default/config.php';
   }
   
   /**
@@ -29,7 +35,7 @@ class Settings {
    */
   public static function getInstance() {
     if (\is_null(self::$instance)) {
-      self::$instance = new self(Main::getDomain());
+      self::$instance = new self(Main::getDomain(), Main::getRequestUri());
     }
     return self::$instance;
   }

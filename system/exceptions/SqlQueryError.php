@@ -1,6 +1,8 @@
 <?php
 namespace system\exceptions;
 
+use system\utils\SqlFormatter;
+
 /**
  * Classe per la gestione di eccezioni verificatesi sullo strato di accesso ai dati.
  * @author Fabio Epifani
@@ -20,41 +22,11 @@ class SqlQueryError extends DataLayerError {
 
   public function __construct($query, $sqlError=null, $action=SqlQueryError::ACTION_STANDARD) {
     parent::__construct('Data access error');
-
     $this->query = $query;
     $this->sqlError = $sqlError;
     $this->action = $action;
   }
   
-//  public function getTxtMessage() {
-//    if (empty($this->message)) {
-//      $this->message =
-//        \system\utils\Lang::translate("Data access error.") . "\r\n" .
-//        "\r\nFile ". (!empty($this->file) ? $this->file : "?") .", Line ". (!empty($this->line) ? $this->line : "?") .".\r\n\r\n";
-//
-//      switch ($this->action) {
-//        case SqlQueryError::ACTION_CONNECTION:
-//          $this->message .= \system\utils\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
-//          break;
-//        case SqlQueryError::ACTION_DB_SELECTION:
-//          $this->message .= \system\utils\Lang::translate("Unable to connect to the DBMS.") . "\r\n";
-//          break;
-//        case SqlQueryError::ACTION_RETRIEVE_ID:
-//          $this->message .= \system\utils\Lang::translate("Unable to retrieve the last inserted id.") . "\r\n";
-//          break;
-//        default:
-//          break;
-//      }
-//      if (!empty($this->sqlError)) {
-//        $this->message .= \system\utils\Lang::translate("Sql error details: @details", array('@details' => $this->sqlError)) . "\r\n\r\n";
-//      }
-//      if (!empty($this->query)) {
-//        $this->message .= \system\utils\Lang::translate("Sql query: @query", array('@query' => $this->query)) . "\r\n\r\n";
-//      }
-//    }
-//    return $this->message;
-//  }
-
   public function getDetails() {
     $message = '';
 
@@ -75,7 +47,7 @@ class SqlQueryError extends DataLayerError {
       $message .= '<p>Sql error details: ' . $this->sqlError . '</p>';
     }
     if (!empty($this->query)) {
-      $message .= '<p>Sql query: ' . $this->query . '</p>';
+      $message .= '<p>Sql query:</p>' . SqlFormatter::format($this->query);
     }
     return $message;
   }

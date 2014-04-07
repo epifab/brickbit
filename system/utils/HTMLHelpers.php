@@ -115,7 +115,8 @@ class HTMLHelpers {
       $title = \system\utils\Lang::translate('500 Internal error');
       $msg = 
         '<div>'
-        . '<h3>' . $exception->getMessage() . '</h3>'
+        . '<h3 class="warning warning-danger">' . $exception->getMessage() . '</h3>'
+        . $exception->getDetails()
         . '<div class="trace">' . $traceString . '</div>'
         . '<div class="execution-time">' . $executionTimeString . '</div>'
         . '</div>';

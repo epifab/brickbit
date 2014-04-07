@@ -6,7 +6,7 @@ use system\Main;
 class Autocomplete {
   public static function widgetsMap() {
     return array(
-      'autocomplete' => Main::moduleNamespace('autocomplete') . 'Widget'
+      'autocomplete' => __NAMESPACE__ . 'Widget'
     );
   }
   

@@ -7,6 +7,7 @@
 <?php if (isset($user) && $user->superuser): ?>
   <div class="alert alert-warning">
     <h3>Debug info</h3>
+    <div><?php echo $error['body']; ?></div>
     <div><?php echo $error['trace']; ?></div>
   </div>
 <?php endif; ?>

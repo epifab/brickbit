@@ -1,6 +1,8 @@
 <?php
 namespace system\model2;
 
+use system\SystemApi;
+
 /**
  * Recordset.
  */
@@ -367,7 +369,18 @@ class Recordset implements RecordsetInterface {
     
     if ($this->getTable()->isAutoIncrement()) {
       $serial = $this->getTable()->getAutoIncrementField();
-      $this->fields[$serial->getName()] = $dataAccess->sqlLastInsertId();
+      $lid = $dataAccess->sqlLastInsertId();
+      if (!empty($lid)) {
+        $this->fields[$serial->getName()] = $lid;
+      }
+      else {
+        SystemApi::watchdog(
+          'model', 
+          'Unable to retrieve the "last insert id" for table <em>@table</em>', 
+          array('@table' => $this->getTable()->getTableName()),
+          \system\LOG_WARNING
+        );
+      }
     }
 
     $this->stored = true;

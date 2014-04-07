@@ -1,5 +1,4 @@
 <?php
-
 return array(
   // Database connection
   'dbUser' => 'root',
@@ -7,17 +6,9 @@ return array(
   'dbHost' => 'localhost',
   'dbName' => 'cider',
   'dbType' => 'mysql',
-  'databases' => array(
-    'default' => array(
-      'user' => 'root',
-      'password' => '',
-      'host' => 'localhost',
-      'driver' => 'mysql'
-    )
-  ),
   
   // Language
-  'defaultLang' => 'en',
+  'defaultLang' => 'it',
   'languages' => array('en', 'it'),
 
   // Theme
@@ -35,6 +26,6 @@ return array(
   'coreCache' => false,
   'debug' => false,
     
-  'cacheDir' => dirname(__FILE__) . '/cache/',
-  'filesDir' => dirname(__FILE__) . '/files/'
+  'cacheDir' => 'appdata/ciderbit.local_en/cache/',
+  'filesDir' => 'appdata/ciderbit.local_en/files/',
 );
