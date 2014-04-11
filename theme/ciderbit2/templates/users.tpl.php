@@ -1,6 +1,6 @@
 <div class="container">
   <div class="edit-controls btn-toolbar">
-    <a href="<?php echo $this->api->path('user/add'); ?>" class="btn btn-primary">
+    <a href="<?php echo $this->api->vpath('user/add'); ?>" class="btn btn-primary">
       <span class="glyphicon glyphicon-user"></span> Create a new user
     </a>
   </div>

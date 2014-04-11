@@ -2,8 +2,8 @@
 <?php foreach ($form->getRecordset('node')->valid_file_keys as $fileKey): ?>
   <?php $this->api->import('file-upload-form', array(
     'uploaderId' => $fileKey,
-    'uploaderUrl' => $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey . '/upload'),
-    'uploaderFileListUrl' => $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey),
+    'uploaderUrl' => $this->api->vpath('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey . '/upload'),
+    'uploaderFileListUrl' => $this->api->vpath('content/' . $form->getRecordset('node')->id . '/file/' . $fileKey),
   )); ?>
 <?php endforeach; ?>
 

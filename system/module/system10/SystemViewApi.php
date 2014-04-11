@@ -39,6 +39,10 @@ class SystemViewApi {
     return Main::getPathRelative($url);
   }
 
+  public static function vpath($url) {
+    return Main::getPathVirtual($url);
+  }
+
   public static function modulePath($module, $url) {
     return Main::modulePathRel($module, $url);
   }

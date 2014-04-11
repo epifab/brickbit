@@ -1,8 +1,8 @@
 <?php
 namespace module\user;
 
-use \system\Main;
-use \system\model2\RecordsetInterface;
+use system\Main;
+use system\model2\RecordsetInterface;
 
 class UserEntity {
   /**
@@ -11,7 +11,7 @@ class UserEntity {
    * @return string Edit URL
    */
   public static function getUrl(RecordsetInterface $recordset) {
-    return Main::getPathRelative("user/{$recordset->id}");
+    return Main::getPathVirtual("user/{$recordset->id}");
   }
   
   /**
@@ -20,7 +20,7 @@ class UserEntity {
    * @return string Edit URL
    */
   public static function getEditUrl(RecordsetInterface $recordset) {
-    return Main::getPathRelative("user/{$recordset->id}/edit");
+    return Main::getPathVirtual("user/{$recordset->id}/edit");
   }
   
   /**
@@ -29,6 +29,6 @@ class UserEntity {
    * @return string Delete URL
    */
   public static function getDeleteUrl(RecordsetInterface $recordset) {
-    return Main::getPathRelative("user/{$recordset->id}/delete");
+    return Main::getPathVirtual("user/{$recordset->id}/delete");
   }
 }

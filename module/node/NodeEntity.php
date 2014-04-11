@@ -105,7 +105,7 @@ class NodeEntity {
     } else {
       $urn = 'content/' . $recordset->id;
     }
-    return Main::getPathRelative($urn);
+    return Main::getPathVirtual($urn);
   }
   
   /**
@@ -114,7 +114,7 @@ class NodeEntity {
    * @return string Edit URL
    */
   public static function getEditUrl(RecordsetInterface $recordset) {
-    return Main::getPathRelative('content/' . $recordset->id . '/edit');
+    return Main::getPathVirtual('content/' . $recordset->id . '/edit');
   }
   
   /**
@@ -123,7 +123,7 @@ class NodeEntity {
    * @return string Delete URL
    */
   public static function getDeleteUrl(RecordsetInterface $recordset) {
-    return Main::getPathRelative('content/' . $recordset->id . '/delete');
+    return Main::getPathVirtual('content/' . $recordset->id . '/delete');
   }
   
   /**

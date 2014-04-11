@@ -224,10 +224,15 @@ class Main {
   public static function getComponentInfoByUrl($url) {
     static $urls = null;
     
-    if ($url == self::getBaseDir()) {
-      $url = '';
-    } else if (\substr($url, 0, \strlen(self::getBaseDir())) == self::getBaseDir()) {
-      $url = \substr($url, \strlen(self::getBaseDir()));
+    $basePath = self::getBaseDir() . self::getVirtualBaseDir();
+    
+    if (\substr($url, 0, \strlen($basePath)) == $basePath) {
+      // Stripping base dir and virtual path
+      $url = \substr($url, \strlen($basePath));
+    }
+    else {
+      // Invalid url
+      return null;
     }
     
     if (!empty($url)) {
@@ -1007,6 +1012,15 @@ class Main {
   }
   
   /**
+   * Returns a virtual path.
+   * @param string $path Path is assumed to be internal
+   * @return string Internal path
+   */
+  public static function getPathVirtual($path) {
+    return self::getBaseDir() . self::getVirtualBaseDir() . self::getPathInternal($path);
+  }
+  
+  /**
    * Returns a path relative to the ciderbit root directory
    * @param string $path Path is assumed to be internal
    * @return string Relative path
@@ -1322,20 +1336,33 @@ class Main {
   /**
    * @return string Path to the base directory
    */
-  public static function getBaseDirAbs() {
+  private static function getBaseDirAbs() {
     return \str_replace('\\', '/', \dirname(\dirname(__FILE__))) . '/';
   }
   
   /**
    * @return string Path to the base directory relative to the web root
    */
-  public static function getBaseDir() {
+  private static function getBaseDir() {
     $baseDir = str_replace('\\', '/', self::setting('baseDir', '/'));
     if (empty($baseDir) || $baseDir == '/') {
       return '/';
     }
     else {
       return '/' . self::stripTrailingSlashes($baseDir) . '/';
+    }
+  }
+  
+  /**
+   * @return string Virtual directory appended to the URL
+   */
+  private static function getVirtualBaseDir() {
+    $baseDir = str_replace('\\', '/', self::setting('virtualDir', ''));
+    if (empty($baseDir) || $baseDir == '/') {
+      return '';
+    }
+    else {
+      return self::stripTrailingSlashes($baseDir) . '/';
     }
   }
   
