@@ -7,11 +7,11 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="<?php echo $this->api->path(''); ?>"><?php echo $website['title']; ?></a>
+      <a class="navbar-brand" href="<?php echo $this->api->vpath(''); ?>"><?php echo $website['title']; ?></a>
     </div>
     <div class="navbar-collapse collapse">
       <?php if (empty($user) || $user->anonymous): ?>
-        <form id="login-header" class="navbar-form navbar-right" role="form" action="<?php echo $this->api->path('user/login'); ?>" method="post">
+        <form id="login-header" class="navbar-form navbar-right" role="form" action="<?php echo $this->api->vpath('user/login'); ?>" method="post">
           <input type="hidden" name="login_form" value="1" />
           <div class="form-group">
             <input type="text" placeholder="Email" class="form-control" name="login[name]"/>
@@ -56,7 +56,7 @@
                 <li class="divider"></li>
                 <li>
                   <?php $this->api->open('link', array(
-                    'url' => $this->api->path('user/logout'),
+                    'url' => $this->api->vpath('user/logout'),
                     'showResponse' => false
                   )); ?><span class="glyphicon glyphicon-off"></span> <?php echo $this->api->t('Logout'); ?><?php $this->api->close(); ?>
                 </li>

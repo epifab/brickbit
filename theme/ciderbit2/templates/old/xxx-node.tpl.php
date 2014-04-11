@@ -97,7 +97,7 @@ $(function() {
 <div id="<?php echo $system['component']['requestId']; ?>-plupload-image" class="plupload" title="image"></div>
 
 <?php /*
-<form class="dataedit" id="fileupload" action="<?php echo $this->api->path("file/upload"); ?>" method="POST" enctype="multipart/form-data">
+<form class="dataedit" id="fileupload" action="<?php echo $this->api->vpath("file/upload"); ?>" method="POST" enctype="multipart/form-data">
   <fieldset>
     <legend><?php echo $this->api->t("Image"); ?></legend>
     <div class="de-row">

@@ -13,7 +13,7 @@ class CiderbitModule {
   public static function initDatamodel() {
     $langsLabels = array();
     foreach (Main::settings()->languages as $lang) {
-      $langsLabels[$lang] = \cb\t('@lang', array('@lang' => $lang));
+      $langsLabels[$lang] = Lang::translate('@lang', array('@lang' => $lang));
     }
     return array(
       'system' => array(

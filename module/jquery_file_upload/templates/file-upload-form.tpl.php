@@ -1,8 +1,8 @@
 <?php
 /**
  * @param string $uploaderId ID (fileKey)
- * @param string $uploaderFileListUrl $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $uploaderId))
- * @param string $uploaderUrl URL $this->api->path('content/' . $form->getRecordset('node')->id . '/file/' . $uploaderId . '/upload')
+ * @param string $uploaderFileListUrl $this->api->vpath('content/' . $form->getRecordset('node')->id . '/file/' . $uploaderId))
+ * @param string $uploaderUrl URL $this->api->vpath('content/' . $form->getRecordset('node')->id . '/file/' . $uploaderId . '/upload')
  */
 ?>
 

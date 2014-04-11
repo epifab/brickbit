@@ -12,7 +12,7 @@ class NodeFileEntity {
    */
   public static function getUrl(RecordsetInterface $recordset) {
     $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->virtual_name;
-    return Main::getPathRelative($urn);
+    return Main::getPathVirtual($urn);
   }
   
   /**
@@ -22,7 +22,7 @@ class NodeFileEntity {
    */
   public static function getEditUrl(RecordsetInterface $recordset) {
     $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->file_id . '/update';
-    return Main::getPathRelative($urn);
+    return Main::getPathVirtual($urn);
   }
   
   /**
@@ -32,14 +32,14 @@ class NodeFileEntity {
    */
   public static function getDeleteUrl(RecordsetInterface $recordset) {
     $urn = 'content/' . $recordset->node_id . '/file/' . $recordset->node_index . '/' . $recordset->file_id . '/delete';
-    return Main::getPathRelative($urn);
+    return Main::getPathVirtual($urn);
   }
   
   public static function getImages(RecordsetInterface $recordset) {
     $imgVersions = NodeFileApi::imageVersionHandlers();
     $versions = array();
     foreach ($imgVersions as $version => $handler) {
-      $versions[$version] = Main::getPathRelative("content/{$recordset->node_id}/file/{$recordset->node_index}/{$version}/{$recordset->virtual_name}");
+      $versions[$version] = Main::getPathVirtual("content/{$recordset->node_id}/file/{$recordset->node_index}/{$version}/{$recordset->virtual_name}");
     }
     return $versions;
   }

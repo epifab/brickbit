@@ -36,7 +36,7 @@ class NodeImageController extends Component {
       // return default image?
     }
     else {
-      if (\file_exists(Main::getBaseDir() . 'temp/images/' . $version . '/' . $rs->id . '.' . $extension)) {
+      if (\file_exists(Main::getTempPath('images/' . $version . '/' . $rs->id . '.' . $extension))) {
         // read the cache
       } else {
         // create new version
