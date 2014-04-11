@@ -40,10 +40,3 @@ components:
         
       - url: content/([0-9]+)/file/(@strid)/([0-9]+)/delete
         action: Delete
-  node_image:
-    class: NodeImageController
-    pages:
-# content/123/img-type/images/testing-image.jpg
-      # content/123/img-thumb/gallery/about-me.jpg
-      - url: content/([0-9]+)/img-(@strid)/(@strid)/(@strid)\.(jpe?g|png|gif)
-        action: GetVersion
