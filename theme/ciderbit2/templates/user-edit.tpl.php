@@ -11,7 +11,7 @@
         <?php echo $this->api->input(array(
           'recordset' => 'user',
           'path' => 'full_name',
-          'columns' => true
+          'display' => 'columns'
         )); ?>
       </div>
       
@@ -19,7 +19,7 @@
         <?php echo $this->api->input(array(
           'recordset' => 'user',
           'path' => 'email',
-          'columns' => true
+          'display' => 'columns'
         )); ?>
       </div>
 
@@ -30,7 +30,7 @@
           'id' => 'edit-user-password',
           'state' => '',
           'label' => $this->api->t('Password'),
-          'columns' => true
+          'display' => 'columns'
         )); ?>
       </div>
 
@@ -41,7 +41,7 @@
           'id' => 'edit-user-password2',
           'state' => '',
           'label' => $this->api->t('Password confirm'),
-          'columns' => true
+          'display' => 'columns'
         )); ?>
       </div>
     </fieldset>

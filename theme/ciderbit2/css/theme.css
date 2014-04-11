@@ -207,8 +207,10 @@ h3, h4 {
   margin: 2px 0px;
 }
 .de-label-wrapper {
-  text-align: right;
   padding: 17px 10px 10px 10px;
+}
+.de-label-wrapper.col {
+  text-align: right;
 }
 .de-input-wrapper {
   background-color: #e9e9e9;
@@ -311,4 +313,22 @@ body.signin {
 }
 .node:hover > .edit-controls-top {
   display: block;
+}
+
+input.form-control.xl {
+  font-size: 18pt;
+  height: 40px;
+}
+input.form-control.xxl {
+  font-size: 24pt;
+  height: 70px;
+}
+
+.mce-content-body {
+  font-size: 12pt;
+}
+
+img {
+  height: auto;
+  max-width: 100%;
 }

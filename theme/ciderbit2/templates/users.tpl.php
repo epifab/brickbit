@@ -14,8 +14,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <?php foreach ($users as $user): ?>
+      <?php foreach ($users as $user): ?>
+        <tr>
           <td><?php echo $user->id; ?></td>
           <td><?php echo $user->full_name; ?></td>
           <td><?php echo $user->email; ?></td>
@@ -49,10 +49,9 @@
                 <?php endif; ?>
               </ul>
             </div>
-
           </td>
-        <?php endforeach; ?>
-      </tr>
+        </tr>
+      <?php endforeach; ?>
     </tbody>
   </table>
 </div>

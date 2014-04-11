@@ -33,10 +33,10 @@
           <?php $text = $form->getRecordset("node_{$lang}"); ?>
           
           <div class="row de-row">
-            <div class="col-md-2 col-sm-2 de-label-wrapper hidden-xs">
+            <div class="col col-md-2 col-sm-2 de-label-wrapper hidden-xs">
               <img src="<?php echo $this->api->themePath('img/lang/40/' . $lang . '.jpg'); ?>"/>              
             </div>
-            <div class="col-md-10 col-sm-10 de-input-wrapper">
+            <div class="col col-md-10 col-sm-10 de-input-wrapper">
               <?php echo $this->api->input(array(
                 'id' => "node-lang-{$lang}-enable",
                 'name' => "node_{$lang}_enable",
@@ -69,7 +69,8 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'title',
-                'columns' => true
+                'display' => 'columns',
+                'attributes' => array('class' => 'xxl')
               )); ?>
             </div>
 
@@ -77,7 +78,8 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'subtitle',
-                'columns' => true
+                'display' => 'columns',
+                'attributes' => array('class' => 'xl')
               )); ?>
             </div>
 
@@ -85,7 +87,7 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'body',
-                'columns' => true,
+                'display' => 'columns',
                 'attributes' => array('class' => 'wysiwyg')
               )); ?>
             </div>
@@ -94,7 +96,7 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'preview',
-                'columns' => true,
+                'display' => 'columns',
                 'attributes' => array('class' => 'wysiwyg')
               )); ?>
             </div>
@@ -103,7 +105,7 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'urn',
-                'columns' => true,
+                'display' => 'columns',
                 'info' => 
                   '<p>' 
                   . $this->api->t("Once you choose a URN you shouldn't change it anymore.") . '<br/>'
@@ -120,7 +122,7 @@
               <?php echo $this->api->input(array(
                 'recordset' => 'node_' . $lang,
                 'path' => 'description',
-                'columns' => true,
+                'display' => 'columns',
                 'info' => $this->api->t("The description is not directly shown to the user but it's used as a meta-data for search engines purposes.")
               )); ?>
             </div>
@@ -139,7 +141,7 @@
        'widget' => 'textbox',
        'state' => 'to be implemented',
        'labels' => $this->api->t('Tags'),
-       'columns' => true,
+       'display' => 'columns',
        'layout' => array(
          'xs' => array(12, 12),
         )
@@ -157,7 +159,7 @@
           'widget' => 'textbox',
           'state' => 'to be implemented',
           'label' => $this->api->t('Content administrators'),
-          'columns' => true,
+          'display' => 'columns',
           'layout' => array(
             //'xs' => array(5, 7),
             'sm' => array(4, 8),
@@ -170,7 +172,7 @@
         <?php echo $this->api->input(array(
           'recordset' => 'node',
           'path' => 'record_mode.read_mode',
-          'columns' => true,
+          'display' => 'columns',
           'layout' => array(
             'xs' => array(5, 7),
             'sm' => array(4, 8),
@@ -181,7 +183,7 @@
         <?php echo $this->api->input(array(
           'recordset' => 'node',
           'path' => 'record_mode.edit_mode',
-          'columns' => true,
+          'display' => 'columns',
           'layout' => array(
             'xs' => array(5, 7),
             'sm' => array(4, 8),
@@ -192,7 +194,7 @@
         <?php echo $this->api->input(array(
           'recordset' => 'node',
           'path' => 'record_mode.delete_mode',
-          'columns' => true,
+          'display' => 'columns',
           'layout' => array(
             'xs' => array(5, 7),
             'sm' => array(4, 8),
