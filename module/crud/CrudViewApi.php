@@ -152,53 +152,72 @@ class CrudViewApi {
       $form->addRecordsetInput($params['recordset'], $inputName, $params['path']);
     }
 
-    if (\cb\array_item('columns', $params, array('default' => false))) {
-      // Displays a columned structure with the input label
-      if (!isset($params['layout'])) {
-        $params['layout'] = array();
-      }
-      $params['layout'] = $params['layout'];
+    switch (\cb\array_item('display', $params, array('default' => 'input-only'))) {
+      case 'all':
+        $labelWrapperClasses = 'de-label-wrapper';
+        $inputWrapperClasses = 'de-input-wrapper' . ($inputError ? ' has-error' : '');
+        return
+            '<div class="' . $labelWrapperClasses . '">'
+          . ($outlineLabel ? '<label class="de-label" for="' . $inputId . '">' . $inputLabel . '</label>' : '')
+          . ($inlineLabel ? '<span class="de-label">' . $inputLabel . '</span>' : '')
+          . '</div>'
+          . '<div class="' . $inputWrapperClasses . '">'
+          . $form->renderInput($inputName)
+          . ($inputInfo ? '<div class="de-input-info alert alert-info">' . $inputInfo . '</div>' : '')
+          . ($inputError ? '<div class="de-input-error alert alert-danger">' . $inputError . '</div>' : '')
+          . '</div>';
+        break;
       
-      $layoutDefaults = array(
-        //////////////label input
-        'xs' => array(12,   12),
-        'sm' => array(3,    9),
-        'md' => array(2,    10),
-        //'lg' => array(2,    10),
-      );
-      
-      // Initialising the layout
-      foreach ($layoutDefaults as $size => $layoutDefault) {
-        if (isset($params['layout'][$size])) {
-          // Stops at the first size definition (mobile first approach)
-          break;
+      case 'columns':
+        // Displays a columned structure with the input label
+        if (!isset($params['layout'])) {
+          $params['layout'] = array();
         }
-        else {
-          // Sets a default
-          $params['layout'][$size] = $layoutDefault;
+        $params['layout'] = $params['layout'];
+
+        $layoutDefaults = array(
+          //////////////label input
+          'xs' => array(12,   12),
+          'sm' => array(3,    9),
+          'md' => array(2,    10),
+          //'lg' => array(2,    10),
+        );
+
+        // Initialising the layout
+        foreach ($layoutDefaults as $size => $layoutDefault) {
+          if (isset($params['layout'][$size])) {
+            // Stops at the first size definition (mobile first approach)
+            break;
+          }
+          else {
+            // Sets a default
+            $params['layout'][$size] = $layoutDefault;
+          }
         }
-      }
-      
-      $labelWrapperClasses = 'de-label-wrapper';
-      $inputWrapperClasses = 'de-input-wrapper' . ($inputError ? ' has-error' : '');
-      foreach ($params['layout'] as $size => $layout) {
-        $labelWrapperClasses .= ' col-' . $size . '-' . $layout[0];
-        $inputWrapperClasses .= ' col-' . $size . '-' . $layout[1];
-      }
-      
-      return
-          '<div class="' . $labelWrapperClasses . '">'
-        . ($outlineLabel ? '<label class="de-label" for="' . $inputId . '">' . $inputLabel . '</label>' : '')
-        . ($inlineLabel ? '<span class="de-label">' . $inputLabel . '</span>' : '')
-        . '</div>'
-        . '<div class="' . $inputWrapperClasses . '">'
-        . $form->renderInput($inputName)
-        . ($inputInfo ? '<div class="de-input-info alert alert-info">' . $inputInfo . '</div>' : '')
-        . ($inputError ? '<div class="de-input-error alert alert-danger">' . $inputError . '</div>' : '')
-        . '</div>';
-    }
-    else {
-      return $form->renderInput($inputName);
+
+        $labelWrapperClasses = 'de-label-wrapper col';
+        $inputWrapperClasses = 'de-input-wrapper col' . ($inputError ? ' has-error' : '');
+        foreach ($params['layout'] as $size => $layout) {
+          $labelWrapperClasses .= ' col-' . $size . '-' . $layout[0];
+          $inputWrapperClasses .= ' col-' . $size . '-' . $layout[1];
+        }
+
+        return
+            '<div class="' . $labelWrapperClasses . '">'
+          . ($outlineLabel ? '<label class="de-label" for="' . $inputId . '">' . $inputLabel . '</label>' : '')
+          . ($inlineLabel ? '<span class="de-label">' . $inputLabel . '</span>' : '')
+          . '</div>'
+          . '<div class="' . $inputWrapperClasses . '">'
+          . $form->renderInput($inputName)
+          . ($inputInfo ? '<div class="de-input-info alert alert-info">' . $inputInfo . '</div>' : '')
+          . ($inputError ? '<div class="de-input-error alert alert-danger">' . $inputError . '</div>' : '')
+          . '</div>';
+        break;
+
+      default:
+      case 'input-only':
+        return $form->renderInput($inputName);
+        break;
     }
   }
 }

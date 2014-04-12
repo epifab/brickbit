@@ -224,22 +224,26 @@ class Main {
   public static function getComponentInfoByUrl($url) {
     static $urls = null;
     
-    $basePath = self::getBaseDir() . self::getVirtualBaseDir();
-    
-    if (\substr($url, 0, \strlen($basePath)) == $basePath) {
-      // Stripping base dir and virtual path
-      $url = \substr($url, \strlen($basePath));
+    if (false !== ($x = \strstr($url, '?', true))) {
+      // Removing get parameters
+      $url = $x;
     }
-    else {
-      // Invalid url
+
+    $basePath = self::stripFinalSlash(self::getBaseDir() . self::getVirtualBaseDir());
+    
+    if (\substr($url, 0, \strlen($basePath)) != $basePath) {
       return null;
     }
+    // Stripping base dir and virtual path
+    $url = \substr($url, \strlen($basePath));
     
-    if (!empty($url)) {
-      $x = \strstr($url, '?', true);
-      if ($x !== false) {
-        $url = $x;
-      }
+    if (!empty($url) && substr($url, 0, 1) == '/') {
+      $url = substr($url, 1);
+    }
+    
+    if (empty($url)) {
+      // substr may return FALSE if $url == $basePath
+      $url = '';
     }
     
     if (\is_null($urls)) {

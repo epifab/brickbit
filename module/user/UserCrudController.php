@@ -139,8 +139,18 @@ class UserCrudController extends CrudController {
   }
   
   public function submitAdd() {
-    throw new UnderDevelopment();
-    $this->getForm()->getRecordset('user')->save();
+    $form = $this->getForm();
+    
+    $user = $form->getRecordset('user');
+    
+    $pw1 = $form->getInputValue('password');
+    $pw2 = $form->getInputValue('password2');
+    
+    $user->password = \md5($user->password);
+      
+    $user->ins_date_time = \time();
+    $user->last_upd_date_time = \time();
+    $user->save();
   }
   
   public function submitEdit() {

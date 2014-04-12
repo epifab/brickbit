@@ -73,9 +73,9 @@ class Relation extends TableWrapper implements RelationInterface {
       $this->setSelectKey($this->importField($info['selectKey']));
     }
     
-//    if (isset($info['filterHandler'])) {
-//      $this->filterHandler = new \system\utils\Handler($info['filterHandler']);
-//    }
+    if (isset($info['filterHandler'])) {
+      $this->filterHandler = new \system\utils\Handler($info['filterHandler']);
+    }
   }
   
   /**

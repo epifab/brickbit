@@ -2,7 +2,7 @@ ciderbit.setBehavior('tinymce', function() {
   tinymce.init({
       theme: 'modern',
       skin: 'light',
-
+      content_css : "/theme/ciderbit2/css/tinymce-bootstrap.css",
       selector: "textarea",
       plugins: [
           "advlist autolink lists link image charmap print preview anchor",

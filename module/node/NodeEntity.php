@@ -75,16 +75,15 @@ class NodeEntity {
    */
   public static function getContent(RecordsetInterface $node) {
     if ($node->getExtra('content', false) === false) {
-      $content = null;
       try {
         $table = Table::loadTable('content_' . $node->type);
         $table->import('*');
-        $content = $table->selectFirst($table->filter('node_id', $node->id));
+        $node->setExtra('content', $table->selectFirst($table->filter('node_id', $node->id)));
       }
       catch (\Exception $ex) {
         // Content table not found (likely)
+        $node->setExtra('content', null);
       }
-      $node->setExtra('content', $content);
     }
     return $node->getExtra('content');
   }

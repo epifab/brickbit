@@ -11,9 +11,9 @@ class CiderbitModule {
    * Implements controller event initDatamodel()
    */
   public static function initDatamodel() {
-    $langsLabels = array();
+    $languages = array();
     foreach (Main::settings()->languages as $lang) {
-      $langsLabels[$lang] = Lang::translate('@lang', array('@lang' => $lang));
+      $languages[$lang] = Lang::translate('@lang', array('@lang' => $lang));
     }
     return array(
       'system' => array(
@@ -25,7 +25,7 @@ class CiderbitModule {
         'ipAddress' => HTMLHelpers::getIpAddress(),
         'lang' => Lang::getLang(),
         'langs' => Main::setting('languages'),
-        'langsLabels' => $langsLabels,
+        'languages' => $languages,
         'theme' => Main::getTheme(),
         'themes' => Main::setting('themes'),
         'messages' => array()

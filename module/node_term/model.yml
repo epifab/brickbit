@@ -65,16 +65,6 @@ tables:
         clauses: {id: parent_id}
         onDelete: CASCADE
         selectKey: id
-      ancestors:
-        table: term
-        clauses: []
-        type: 1-N
-        filterHandler: [\module\core\model\Tree, ancestorsFilter]
-      descendants:
-        table: term
-        clauses: []
-        type: 1-N
-        filterHandler: [\module\core\model\Tree, descendantsFilter]
       nodes:
         table: node_term
         type: 1-N

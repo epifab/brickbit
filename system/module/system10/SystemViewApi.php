@@ -91,7 +91,7 @@ class SystemViewApi {
   }
   
   public static function loadBlock($name, $url, $args=array()) {
-    $url = View::path($url);
+    $url = Main::getPathVirtual($url);
     echo self::printBlock($name, $url, null, $args);
   }
 
@@ -207,6 +207,7 @@ class SystemViewApi {
   }
   
   public static function access($url) {
+    $url = Main::getPathVirtual($url);
     return Main::checkAccess($url);
   }
   

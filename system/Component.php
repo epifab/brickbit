@@ -400,8 +400,6 @@ abstract class Component {
             ));
         }
         
-        $asd = $this->getName() . '::' . $this->getAction() . '(' . implode(', ', $this->getUrlArgs()) . ')';
-
         if (!\is_null($responseType)) {
           // Adding the output to the buffer
           $this->tplManager->process($this->datamodel);

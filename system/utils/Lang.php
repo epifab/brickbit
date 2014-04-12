@@ -23,7 +23,7 @@ class Lang {
   
   private static function initLang($langId = null) {
     self::$lang = empty($langId)
-      ? \system\Main::session('system', 'lang', \system\Main::setting('defaultLang'))
+      ? \system\Main::setting('defaultLang')
       : $langId;
     
     $callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
