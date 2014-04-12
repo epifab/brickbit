@@ -8,6 +8,7 @@ use system\model2\DataLayerCore;
 use system\model2\RecordsetInterface;
 use system\model2\Table;
 use system\session\Session;
+use system\utils\Lang;
 use system\utils\Login;
 use module\crud\RecordMode;
 use module\crud\CrudController;
@@ -284,7 +285,7 @@ class NodeCrudController extends CrudController {
   protected function formSubmission() {
     $form = $this->getForm();
     // Ignore disabled languages
-    foreach (Main::setting('languages') as $lang) {
+    foreach (Main::getLanguages() as $lang) {
       if (!$form->fetchInputValue('node_' . $lang . '_enable')) {
         // Text disabled: we can ignore every input related to that translation
         $form->removeRecordsetInput('node_' . $lang);
@@ -328,7 +329,7 @@ class NodeCrudController extends CrudController {
     $nodeTextTable = Table::loadTable('node_text');
     $nodeTextTable->import('*');
     
-    foreach (Main::setting('languages') as $lang) {
+    foreach (Main::getLanguages() as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
         $nodeText = $node->texts[$lang];
@@ -402,7 +403,7 @@ class NodeCrudController extends CrudController {
     $da = DataLayerCore::getInstance();
     
     try {
-      foreach (Main::setting('languages') as $lang) {
+      foreach (Main::getLanguages() as $lang) {
         $text = $form->getRecordset('node_' . $lang);
         
         if ($form->getInputValue('node_' . $lang . '_enable')) {
@@ -480,10 +481,29 @@ class NodeCrudController extends CrudController {
   }
   
   public function runDelete() {
-    $table = $this->getNodeTable();
-    RecordMode::addDeleteModeFilters($table, Login::getLoggedUser());
-    $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
-    $node->delete();
-    return \system\RESPONSE_TYPE_NOTIFY;
+    $dl = DataLayerCore::getInstance();
+    $dl->beginTransaction();
+    try {
+      $table = $this->getNodeTable();
+      $table->import('*', 'text.title');
+      RecordMode::addDeleteModeFilters($table, Login::getLoggedUser());
+      
+      $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
+      $node->delete();
+
+      $this->setMainTemplate('notify');
+      $this->datamodel['message'] = array(
+        'title' => 'Content deleted',
+        'body' => Lang::translate('<em>@title</em> has been deleted', array('@title' => $node->text->title)),
+      );
+      
+      $dl->commitTransaction();
+      
+      return \system\RESPONSE_TYPE_NOTIFY;
+    }
+    catch (\Exception $ex) {
+      $dl->rollbackTransaction();
+      throw $ex;
+    }
   }
 }

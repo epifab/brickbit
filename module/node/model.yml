@@ -50,13 +50,6 @@ tables:
         type: 1-N
         clauses: {id: parent_id}
         onDelete: CASCADE
-      # TERMS
-      terms:
-        table: node_term
-        type: 1-N
-        clauses: {id: node_id}
-        onDelete: CASCADE
-        selectKey: term_id
       # TRANSLATIONS
       texts:
         table: node_text

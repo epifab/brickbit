@@ -9,7 +9,7 @@
         <div class="legend">
           <div>Languages</div>
           <div>
-            <?php foreach ($system['langs'] as $lang): ?>
+            <?php foreach ($system['langs'] as $lang => $langDescs): ?>
               <a href="#" 
                 id="node-lang-control-<?php echo $lang; ?>" 
                 class="node-lang-control collapse-control"
@@ -22,13 +22,13 @@
               'name' => 'current-lang',
               'widget' => 'textbox',
               'state' => $system['lang'],
-              'options' => array_combine($system['langs'], $system['langs']),
+              'options' => $system['langs'],
               'attributes' => array('class' => 'hide')
             )); ?>
           </div>
         </div>
       </legend>
-      <?php foreach ($system['langs'] as $lang): ?>
+      <?php foreach ($system['langs'] as $lang => $langDesc): ?>
         <div class="node-lang-<?php echo $lang; ?>">
           <?php $text = $form->getRecordset("node_{$lang}"); ?>
           

@@ -47,8 +47,8 @@ class Lang {
   }
   
   public static function setLang($langId) {
-    if (\in_array($langId, \system\Main::setting('languages'))) {
-      \system\Main::setSession('system', 'lang', $langId);
+    if (\in_array($langId, Main::getLanguages())) {
+      Main::setSession('system', 'lang', $langId);
       self::initLang();
     }
   }

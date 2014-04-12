@@ -92,3 +92,12 @@ tables:
         table: term
         type: N-1
         clauses: {term_id: id}
+  node:
+    relations:
+      # TERMS
+      terms:
+        table: node_term
+        type: 1-N
+        clauses: {id: node_id}
+        onDelete: CASCADE
+        selectKey: term_id
