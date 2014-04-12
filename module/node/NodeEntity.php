@@ -89,22 +89,39 @@ class NodeEntity {
   }
   
   /**
-   * Node URL
-   * @param RecordsetInterface $recordset Node recordset
+   * Gets the url for a given node text
+   * @param RecordsetInterface $node Node
+   * @param RecordsetInterface $nodeText Node text
    * @return string URL
    */
-  public static function getUrl(RecordsetInterface $recordset) {
+  public static function getUrl(RecordsetInterface $node, RecordsetInterface $nodeText = null) {
+    if (empty($nodeText)) {
+      $nodeText = $node->text;
+    }
     $urn = '';
-    if ($recordset->text->urn) {
-      if ($recordset->type == 'page') {
-        $urn = $recordset->text->urn . '.html';
+    if (!empty($nodeText->urn)) {
+      if ($node->type == 'page') {
+        $urn = $nodeText->urn . '.html';
       } else {
-        $urn = 'content/' . $recordset->text->urn . '.html';
+        $urn = 'content/' . $nodeText->urn . '.html';
       }
     } else {
-      $urn = 'content/' . $recordset->id;
+      $urn = 'content/' . $node->id;
     }
-    return Main::getPathVirtual($urn);
+    return Main::getPathVirtual($urn, $nodeText->lang);
+  }
+  
+  /**
+   * Gets a list of node URL
+   * @param RecordsetInterface $node Node
+   * @return array URLS
+   */
+  public static function getUrls(RecordsetInterface $node) {
+    $urls = array();
+    foreach ($node->texts as $lang => $nodeText) {
+      $urls[$lang] = self::getUrl($node, $nodeText);
+    }
+    return $urls;
   }
   
   /**

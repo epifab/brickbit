@@ -1018,10 +1018,38 @@ class Main {
   /**
    * Returns a virtual path.
    * @param string $path Path is assumed to be internal
-   * @return string Internal path
+   * @param string $virtualDir Virtual dir (can be specified to change virtual 
+   *  directry)
+   * @return string Virtual path
    */
-  public static function getPathVirtual($path) {
-    return self::getBaseDir() . self::getVirtualBaseDir() . self::getPathInternal($path);
+  public static function getPathVirtual($path, $virtualDir = null) {
+    $virtualDir = empty($virtualDir)
+      ? self::getVirtualBaseDir()
+      : self::stripTrailingSlashes($virtualDir) . '/';
+    return self::getBaseDir() . $virtualDir . self::getPathInternal($path);
+  }
+  
+  /**
+   * Returns a URL based on the specified language
+   * @param string $lang Language
+   * @param string $path Path [optional]
+   * @return string URL
+   * @throws InternalError
+   */
+  public static function getLangUrl($lang, $path = '') {
+    $langs = self::setting('languages', array());
+    if (!isset($langs[$lang])) {
+      throw new InternalError('Language <em>@lang</em> not found', array('@lang' => $lang));
+    }
+    return self::stripFinalSlash($langs[$lang]) . '/' . $path;
+  }
+  
+  /**
+   * Returns a list of available languages
+   * @return array
+   */
+  public static function getLanguages() {
+    return \array_keys(self::setting('languages', array()));
   }
   
   /**

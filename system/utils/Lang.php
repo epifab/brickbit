@@ -1,5 +1,8 @@
 <?php
 namespace system\utils;
+
+use system\Main;
+
 /*
  * How the lang system work:
  *  
@@ -21,9 +24,17 @@ class Lang {
   private static $lang = null;
   private static $vocabulary = null;
   
+  public static function langLabel($lang) {
+    static $langs = array(
+      'it' => 'Italiano',
+      'en' => 'English',
+    );
+    return $langs[$lang];
+  }
+  
   private static function initLang($langId = null) {
     self::$lang = empty($langId)
-      ? \system\Main::setting('defaultLang')
+      ? Main::setting('defaultLang')
       : $langId;
     
     $callback = array('\\lang\\' . \ucfirst($langId), 'vocabulary');
@@ -33,10 +44,6 @@ class Lang {
     if (!\is_array(self::$vocabulary)) {
       self::$vocabulary = array();
     }
-  }
-  
-  public static function langPath($langId) {
-    return 'http://' . $langId . \substr(\system\Main::getDomain(), \strpos(\system\Main::getDomain(), ".")) . $_SERVER["REQUEST_URI"];
   }
   
   public static function setLang($langId) {

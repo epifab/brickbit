@@ -11,6 +11,9 @@
     </div>
     <div class="navbar-collapse collapse">
       <?php if (empty($user) || $user->anonymous): ?>
+        <ul class="nav navbar-nav navbar-right">
+          <?php $this->api->import('langs-control'); ?>
+        </ul>
         <form id="login-header" class="navbar-form navbar-right" role="form" action="<?php echo $this->api->vpath('user/login'); ?>" method="post">
           <input type="hidden" name="login_form" value="1" />
           <div class="form-group">
@@ -62,6 +65,7 @@
                 </li>
               </ul>
             </li>
+            <?php $this->api->import('langs-control'); ?>
           </ul>
         </div><!--/.nav-collapse -->
       <?php endif; ?>

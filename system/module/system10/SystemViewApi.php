@@ -51,8 +51,8 @@ class SystemViewApi {
     return Main::themePathRel($url);
   }
 
-  public static function langPath($lang) {
-    return Lang::langPath($lang);
+  public static function langUrl($lang, $path = '') {
+    return Main::getLangUrl($lang, $path);
   }
   
   public static function element($name, $args) {

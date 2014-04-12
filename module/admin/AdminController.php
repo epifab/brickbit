@@ -19,11 +19,11 @@ class AdminController extends Component {
   public function runAdminMenu() {
     $am = array();
     if (Login::isSuperuser()) {
-      $am[] = array('url' => Main::getPathRelative('user/list'), 'title' => Lang::translate('users'), 'ajax' => false);
-      $am[] = array('url' => Main::getPathRelative('system/settings'), 'title' => Lang::translate('settings'));
+      $am[] = array('url' => Main::getPathVirtual('user/list'), 'title' => Lang::translate('users'), 'ajax' => false);
+      $am[] = array('url' => Main::getPathVirtual('system/settings'), 'title' => Lang::translate('settings'));
       $am[] = array('title' => Lang::translate('admin'), 'items' => array(
-        'logs' => array('title' => Lang::translate('Logs'), 'url' => Main::getPathRelative('admin/logs'), 'ajax' => false),
-        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getPathRelative('admin/cache/flush'), 'ajax' => true, 'showResponse' => false)
+        'logs' => array('title' => Lang::translate('Logs'), 'url' => Main::getPathVirtual('admin/logs'), 'ajax' => false),
+        'cache' => array('title' => Lang::translate('Flush cache'), 'url' => Main::getPathVirtual('admin/cache/flush'), 'ajax' => true, 'showResponse' => false)
       ));
     }
     $this->datamodel['adminMenu'] = $am;

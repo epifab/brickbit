@@ -85,8 +85,12 @@ tables:
       # urls
       url:
         label: URL
-        dependencies: [id, text]
+        dependencies: [id, text.urn]
         handler: [\module\node\NodeEntity, getUrl]
+      urls:
+        label: URL
+        dependencies: [id, texts.urn]
+        handler: [\module\node\NodeEntity, getUrls]
       edit_url:
         label: Edit URL
         dependencies: [id]

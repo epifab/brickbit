@@ -12,9 +12,10 @@ class CiderbitModule {
    */
   public static function initDatamodel() {
     $languages = array();
-    foreach (Main::settings()->languages as $lang) {
-      $languages[$lang] = Lang::translate('@lang', array('@lang' => $lang));
+    foreach (Main::getLanguages() as $lang) {
+      $languages[$lang] = Lang::langLabel($lang);
     }
+    
     return array(
       'system' => array(
         'component' => self::initDatamodelComponentInfo(Main::getActiveComponent()),
@@ -24,8 +25,7 @@ class CiderbitModule {
         'ajax' => HTMLHelpers::isAjaxRequest(),
         'ipAddress' => HTMLHelpers::getIpAddress(),
         'lang' => Lang::getLang(),
-        'langs' => Main::setting('languages'),
-        'languages' => $languages,
+        'langs' => $languages,
         'theme' => Main::getTheme(),
         'themes' => Main::setting('themes'),
         'messages' => array()
@@ -88,7 +88,6 @@ class CiderbitModule {
    */
   public static function onRun(\system\Component $component) {
     $component->addTemplate('website-logo', 'header');
-    $component->addTemplate('langs-control', 'header-sidebar');
     $component->addTemplate('footer', 'footer');
     //$component->addTemplate('sidebar', 'sidebar');
   }

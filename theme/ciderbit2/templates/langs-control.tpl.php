@@ -1,9 +1,7 @@
-<!-- div id="header-sidebar-langs">
-  <?php foreach ($system['langs'] as $lang): ?>
-    <?php if ($lang != $system['lang']): ?>
-    <a href="<?php echo $this->api->langPath($lang); ?>">
-      <img alt="<?php echo $lang; ?>" src="<?php echo $this->api->themePath('img/lang/40/' . $lang . '.jpg'); ?>"/>
-    </a>
-    <?php endif; ?>
-  <?php endforeach; ?>
-</div -->
+<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-globe"></span> <?php echo $system['langs'][$system['lang']]; ?>  <b class="caret"></b></a>
+  <ul class="dropdown-menu">
+    <?php foreach ($system['langs'] as $lang => $langDesc): ?>
+      <li><a href="<?php echo $this->api->langUrl($lang); ?>"><?php echo $langDesc; ?></a></li>
+    <?php endforeach; ?>
+  </ul>
+</li>
