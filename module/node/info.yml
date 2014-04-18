@@ -1,8 +1,6 @@
 class: NodeModule
 weight: 2
 enabled: 1
-#modelNs: 
-#modelClass: 
 #viewNs: 
 viewClass: NodeViewApi
 #templatesPath: templates

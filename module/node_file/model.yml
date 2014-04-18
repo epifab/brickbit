@@ -185,20 +185,20 @@ tables:
       url:
         label: URL
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\node_file\NodeFileEntity, getUrl]
+        handler: [\module\node_file\NodeFileTableApi, getUrl]
       edit_url:
         label: Edit URL
         dependencies: [file_id]
-        handler: [\module\node_file\NodeFileEntity, getEditUrl]
+        handler: [\module\node_file\NodeFileTableApi, getEditUrl]
       delete_url:
         label: Delete URL
         dependencies: [file_id]
-        handler: [\module\node_file\NodeFileEntity, getDeleteUrl]
+        handler: [\module\node_file\NodeFileTableApi, getDeleteUrl]
       images:
         label: Images
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\node_file\NodeFileEntity, getImages]
+        handler: [\module\node_file\NodeFileTableApi, getImages]
       version_urls:
         label: Version urls
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\node_file\NodeFileEntity, getImages]
+        handler: [\module\node_file\NodeFileTableApi, getImages]

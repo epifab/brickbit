@@ -1,8 +1,6 @@
 class: UserModule
 weight: 1
 enabled: 1
-#modelNs: 
-#modelClass: 
 #viewNs: 
 #viewClass: 
 #templatesPath: templates

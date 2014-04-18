@@ -4,7 +4,7 @@ namespace module\node_file;
 use system\Main;
 use system\model2\RecordsetInterface;
 
-class NodeFileEntity {
+class NodeFileTableApi {
   /**
    * Node URL
    * @param RecordsetInterface $recordset Node file recordset

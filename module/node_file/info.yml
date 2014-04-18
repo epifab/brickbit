@@ -1,8 +1,6 @@
 class: NodeFileModule
 weight: 1
 enabled: 1
-#modelNs: 
-modelClass: NodeFileModel
 #viewNs: view
 #viewClass: 
 #templatesPath: templates

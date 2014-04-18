@@ -15,9 +15,7 @@ class MenuController extends Component {
     $mm = array();
     
     $table = Table::loadTable('node');
-    $table->import(
-      'id', 'type', 'url', 'text.title'
-    );
+    $table->import('id', 'type', 'url', 'text.title');
     $table->addFilters(
       $table->filter('type', 'page'),
       $table->filter('text.title', null, 'NOT_NULL')

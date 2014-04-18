@@ -8,7 +8,7 @@ use system\model2\Table;
 use system\model2\clauses\FilterClauseInterface;
 use system\utils\Lang;
 
-class NodeEntity {
+class NodeTableApi {
   /**
    * Returns the filters for the 'text' relationship
    * @param RelationInterface $nodeText

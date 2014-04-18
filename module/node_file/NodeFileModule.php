@@ -8,6 +8,18 @@ use system\utils\File;
 
 class NodeFileModule {
   /**
+   * Implements controller event onDelete()
+   */
+  public static function onDelete(RecordsetInterface $recordset) {
+    switch ($recordset->getTable()->getName()) {
+      case 'file':
+      case 'file_version':
+        unlink($recordset->path);
+        break;
+    }
+  }
+  
+  /**
    * Implements controller event imageVersionHandlers()
    */
   public static function imageVersionHandlers() {

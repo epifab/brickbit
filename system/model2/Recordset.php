@@ -91,8 +91,8 @@ class Recordset implements RecordsetInterface {
    * @param string $path Property path
    * @param bool $required Sets it to TRUE to throw an exception if the path 
    *  does not match any property
-   * @return mixed Recordset property or NULL if $path does not match any 
-   *  property and $required isn't set to TRUE
+   * @return TablePropertyInterface Recordset property or NULL if $path does not
+   *  match any property and $required isn't set to TRUE
    * @throws \system\exceptions\InternalError
    */
   public function search($path, $required = false) {
@@ -142,8 +142,12 @@ class Recordset implements RecordsetInterface {
         if (\array_key_exists($path, $this->modifiedFields)) {
           return $this->modifiedFields[$path];
         }
-        else {
+        elseif (\array_key_exists ($path, $this->fields)) {
           return $this->fields[$path];
+        }
+        else {
+          // Unknown field value
+          throw new \system\exceptions\InternalError('Field <em>@name</em> has not been selected on table <em>@table</em>', array('@name' => $path, '@table' => $this->getTable()->getName()));
         }
       }
 
@@ -158,7 +162,7 @@ class Recordset implements RecordsetInterface {
         }
         else {
           if (!\array_key_exists($path, $this->hasOneRelations)) {
-            // Has one relation already loaded
+            // Has one relation hasn't been loaded yet
             return $this->hasOneRelations[$path] = $property->selectFirstByParent($this);
           }
           return $this->hasOneRelations[$path];
@@ -337,7 +341,7 @@ class Recordset implements RecordsetInterface {
    * Creates the record
    */
   public function create() {
-    \system\Main::raiseModelEvent('onCreate', $this);
+    SystemApi::onCreate($this);
     
     $q1 = '';
     $q2 = '';
@@ -396,7 +400,7 @@ class Recordset implements RecordsetInterface {
       throw new \system\exceptions\InternalError('Recordset does not exist.');
     }
 
-    \system\Main::raiseModelEvent('onUpdate', $this);
+    SystemApi::onUpdate($this);
 
     if (!empty($this->modifiedFields)) {
       foreach ($this->modifiedFields as $name => $value) {
@@ -420,7 +424,7 @@ class Recordset implements RecordsetInterface {
     if (!$this->isStored()) {
       return;
     }
-    \system\Main::raiseModelEvent('onDelete', $this);
+    SystemApi::onDelete($this);
     
     $query = "DELETE FROM {$this->getTable()->getTableName()} WHERE {$this->filterByPrimary()}";
     

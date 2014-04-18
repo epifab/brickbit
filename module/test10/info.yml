@@ -1,8 +1,6 @@
 class: Test
 weight: 10
 enabled: 0
-#modelNs: model
-#modelClass: CoreModel
 #viewNs: view
 #viewClass: CoreApi
 #templatesPath: view/templates

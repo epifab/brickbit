@@ -2,8 +2,6 @@ class: SystemModule
 version: 1.0
 weight: 0
 enabled: 1
-#modelNs: 
-modelClass: SystemModel
 #viewNs: 
 viewClass: SystemViewApi
 #templatesPath: view/templates

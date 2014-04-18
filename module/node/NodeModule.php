@@ -1,9 +1,25 @@
 <?php
 namespace module\node;
 
+use system\model2\TableInterface;
 use system\utils\Lang;
 
 class NodeModule {
+  public static function recordsetTableInit(TableInterface $table) {
+    switch ($table->getName()) {
+      case 'node':
+        $table->import(
+          '*',
+          'record_mode.*',
+          'record_mode.users.user_id',
+          'record_mode.roles.role_id',
+          'text.*',
+          'texts.*'
+        );
+        break;
+    }
+  }
+  
   public static function cron() {
     // Delete temp nodes
   }

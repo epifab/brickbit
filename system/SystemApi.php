@@ -1,8 +1,10 @@
 <?php
 namespace system;
 
+use system\model2\RecordsetInterface;
+use system\model2\TableInterface;
+
 class SystemApi {
-  
   /**
    * Raises the whatchdog event.
    * This is used to log messages.
@@ -81,5 +83,37 @@ class SystemApi {
    */
   public static function widgetsMap() {
     return Main::invokeStaticMethodAllMerge('widgetsMap');
+  }
+  
+  /**
+   * Fired when a recordset gets deleted
+   * @param RecordsetInterface $recordset Recordset which will be deleted
+   */
+  public static function onDelete(RecordsetInterface $recordset) {
+    Main::invokeMethodAll('onDelete', $recordset);
+  }
+  
+  /**
+   * Fired when a recordset gets updated
+   * @param RecordsetInterface $recordset Recordset which will be updated
+   */
+  public static function onUpdate(RecordsetInterface $recordset) {
+    Main::invokeMethodAll('onUpdate', $recordset);
+  }
+  
+  /**
+   * Fired when a recordset gets created
+   * @param RecordsetInterface $recordset Recordset which will be created
+   */
+  public static function onCreate(RecordsetInterface $recordset) {
+    Main::invokeMethodAll('onCreate', $recordset);
+  }
+  
+  /**
+   * Fired when a new recordset table is initialized
+   * @param TableInterface $table Table
+   */
+  public static function recordsetTableInit(TableInterface $table) {
+    Main::invokeMethodAll('recordsetTableInit', $table);
   }
 }

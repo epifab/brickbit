@@ -132,7 +132,7 @@ abstract class TableBase implements TableInterface {
    */
   public static function propertyExists($table, $path) {
     try {
-      $tableInfo = \system\Main::getTable($table);
+      $tableInfo = \system\Main::getTableInfo($table);
       $dotPosition = \strpos($path, '.');
 
       if ($dotPosition === false) {

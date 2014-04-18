@@ -14,11 +14,86 @@ class RecordMode {
   const MODE_ANYONE = 5;
   
   /**
+   * Checks read access to the record mode
+   * @param RecordsetInterface $recordMode Record mode
+   * @param RecordsetInterface $user User
+   * @return bool TRUE if the user has access to the recordset
+   */
+  public static function checkReadAccess(RecordsetInterface $recordMode, RecordsetInterface $user = null) {
+    return self::checkAccess('read', $recordMode, $user);
+  }
+  
+  /**
+   * Checks edit access to the record mode
+   * @param RecordsetInterface $recordMode Record mode
+   * @param RecordsetInterface $user User
+   * @return bool TRUE if the user has access to the recordset
+   */
+  public static function checkEditAccess(RecordsetInterface $recordMode, RecordsetInterface $user = null) {
+    return self::checkAccess('edit', $recordMode, $user);
+  }
+  
+  /**
+   * Checks delete access to the record mode
+   * @param RecordsetInterface $recordMode Record mode
+   * @param RecordsetInterface $user User
+   * @return bool TRUE if the user has access to the recordset
+   */
+  public static function checkDeleteAccess(RecordsetInterface $recordMode, RecordsetInterface $user = null) {
+    return self::checkAccess('delete', $recordMode, $user);
+  }
+  
+  private static function checkAccess($modeType, RecordsetInterface $recordMode, RecordsetInterface $user = null) {
+    $mode = "{$modeType}_mode";
+
+    if (empty($user) || $user->anonymous) {
+      // NOT LOGGED -> not logged user can access the recordset only when 
+      //  record mode is = MODE_ANYONE
+      return $recordMode->{$mode} >= self::MODE_ANYONE;
+    }
+
+    else if ($user->superuser) {
+      // SUPERUSER -> just make sure the record mode is >= than MODE_SU
+      return $recordMode->{$mode} >= self::MODE_SU;
+    }
+
+    else {
+      // GENERIC LOGGED USER
+      // 
+      //  logged users can access the recordset when
+      //   1) the user owns the recordset 
+      //      and the record mode is >= than MODE_SU_OWNER
+      //   2) the user is an admininstrators 
+      //      and the record mode is >= than MODE_SU_OWNER_ADMINS 
+      //   3) the record mode is >= than MODE_REGISTERED 
+      
+      if ($recordMode->{$mode} >= self::MODE_REGISTERED) {
+        return true;
+      }
+      
+      elseif ($recordMode->{$mode} >= self::MODE_SU_OWNER_ADMINS) {
+        if (\array_key_exists($user->id, $recordMode->users)) {
+          return true;
+        }
+        else {
+          foreach ($user->roles as $role) {
+            if (\array_key_exists($role->id, $recordMode->roles)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
    * Adds filter to a record moded table to implement read permission.
    * @param \system\model2\TableInterface $table Record moded table
    * @param \system\model2\RecordsetInterface $user User
    */
-  public static function addReadModeFilters(TableInterface $table, RecordsetInterface $user) {
+  public static function addReadModeFilters(TableInterface $table, RecordsetInterface $user = null) {
     self::addRecordModeFilters('read', $table, $user);
   }
   
@@ -27,7 +102,7 @@ class RecordMode {
    * @param \system\model2\TableInterface $table Record moded table
    * @param \system\model2\RecordsetInterface $user User
    */
-  public static function addEditModeFilters(TableInterface $table, RecordsetInterface $user) {
+  public static function addEditModeFilters(TableInterface $table, RecordsetInterface $user = null) {
     self::addRecordModeFilters('edit', $table, $user);
   }
   
@@ -36,15 +111,15 @@ class RecordMode {
    * @param \system\model2\TableInterface $table Record moded table
    * @param \system\model2\RecordsetInterface $user User
    */
-  public static function addDeleteModeFilters(TableInterface $table, RecordsetInterface $user) {
+  public static function addDeleteModeFilters(TableInterface $table, RecordsetInterface $user = null) {
     self::addRecordModeFilters('delete', $table, $user);
   }
   
-  private static function addRecordModeFilters($modeType, TableInterface $table, $user = null) {
+  private static function addRecordModeFilters($modeType, TableInterface $table, RecordsetInterface $user = null) {
     $table->addFilters(self::getRecordModeFilters($modeType, $table->record_mode, $user));
   }
   
-  private static function getRecordModeFilters($modeType, TableInterface $recordMode, $user = null) {
+  private static function getRecordModeFilters($modeType, TableInterface $recordMode, RecordsetInterface $user = null) {
     $mode = "{$modeType}_mode";
 
     if (empty($user) || $user->anonymous) {

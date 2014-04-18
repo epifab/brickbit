@@ -61,47 +61,47 @@ tables:
         table: node_text
         type: 1-1
         clauses: {id: node_id}
-        filterHandler: [\module\node\NodeEntity, textFilter]
+        filterHandler: [\module\node\NodeTableApi, textFilter]
     virtuals:
       # 'children recursive' can be used instead of children
       # it automatically loads the same fields and relations used for the parent
       #  node
       children_recursive:
         dependencies: [id]
-        handler: [\module\node\NodeEntity, getChildrenRecursive]
+        handler: [\module\node\NodeTableApi, getChildrenRecursive]
       children_grouped_by_type:
         dependencies: [children]
-        handler: [\module\node\NodeEntity, getChildrenGroupedByType]
+        handler: [\module\node\NodeTableApi, getChildrenGroupedByType]
       valid_children_types:
         dependencies: [type]
-        handler: [\module\node\NodeEntity, getValidChildrenTypes]
+        handler: [\module\node\NodeTableApi, getValidChildrenTypes]
       # urls
       url:
         label: URL
         dependencies: [id, text.urn]
-        handler: [\module\node\NodeEntity, getUrl]
+        handler: [\module\node\NodeTableApi, getUrl]
       urls:
         label: URL
         dependencies: [id, texts.urn]
-        handler: [\module\node\NodeEntity, getUrls]
+        handler: [\module\node\NodeTableApi, getUrls]
       edit_url:
         label: Edit URL
         dependencies: [id]
-        handler: [\module\node\NodeEntity, getEditUrl]
+        handler: [\module\node\NodeTableApi, getEditUrl]
       delete_url:
         label: Delete URL
         dependencies: [id]
-        handler: [\module\node\NodeEntity, getDeleteUrl]
+        handler: [\module\node\NodeTableApi, getDeleteUrl]
       # title
       title:
         label: Title
         dependencies: [text.title]
-        handler: [\module\node\NodeEntity, getTitle]
+        handler: [\module\node\NodeTableApi, getTitle]
       # content
       content:
         label: Content
         dependencies: [id, type]
-        handler: [\module\node\NodeEntity, getContent]
+        handler: [\module\node\NodeTableApi, getContent]
   node_text:
     fields:
       node_id:

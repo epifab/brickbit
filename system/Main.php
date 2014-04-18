@@ -5,6 +5,8 @@ use system\Component;
 use system\Settings;
 use system\ThemeApi;
 use system\exceptions\InternalError;
+use system\model2\Table;
+use system\model2\TableInterface;
 use system\utils\Login;
 use system\view\TemplateManager;
 
@@ -186,13 +188,24 @@ class Main {
    * @throws InternalError In case the table does not exist
    *  or its defining module isn't enabled.
    */
-  public static function getTable($tableName) {
+  public static function getTableInfo($tableName) {
     if (self::tableExists($tableName)) {
       $c = self::configuration();
       return $c['tables'][$tableName];
     } else {
       throw new InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
     }
+  }
+  
+  /**
+   * Initializes a recordset table
+   * @param string $tableName Table name
+   * @return TableInterface Recordset table
+   */
+  public static function loadRecordsetTable($tableName) {
+    $table = Table::loadTable($tableName);
+    SystemApi::recordsetTableInit($table);
+    return $table;
   }
   
   /**

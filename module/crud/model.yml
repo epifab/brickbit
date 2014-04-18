@@ -52,10 +52,12 @@ tables:
         table: record_mode_user
         type: 1-N
         clauses: {id: record_mode_id}
+        selectKey: user_id
       roles:
         table: record_mode_role
         type: 1-N
         clauses: {id: record_mode_id}
+        selectKey: role_id
   record_mode_log:
     fields:
       id:
@@ -71,10 +73,11 @@ tables:
         fields: [id]
         autoIncrement: 1
     relations:
-      rm:
+      record_mode:
         table: record_mode
         type: N-1
         clauses: {record_mode_id: id}
+        onDelete: CASCADE
   record_mode_role:
     fields:
       record_mode_id:

@@ -2,6 +2,7 @@
 namespace system\model2;
 
 use system\Main;
+use system\SystemApi;
 
 /**
  * Class usage example
@@ -369,7 +370,7 @@ class Table extends TableBase {
    * @throws \system\exceptions\InternalError
    */
   public static function loadTable($tableName) {
-    $tableInfo = Main::getTable($tableName);
+    $tableInfo = Main::getTableInfo($tableName);
     if (isset($tableInfo['class'])) {
       if (!\class_exists($tableInfo['class'])) {
         throw new \system\exceptions\InternalError('Class <em>@class</em> not found.', array(

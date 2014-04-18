@@ -1,8 +1,6 @@
 class: CiderbitModule
 weight: 3
 enabled: 1
-#modelNs: 
-#modelClass: 
 #viewNs: 
 #viewClass: 
 #templatesPath: templates

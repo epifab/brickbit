@@ -20,12 +20,6 @@ class NodeFileCrudController extends CrudController {
     return array('Update');
   }
   
-  protected function nodeFileTable() {
-    $t = Table::loadTable('node_file');
-    $t->import('*', 'file.*');
-    return $t;
-  }
-
   protected function getEditRecordsets() {
     switch ($this->getAction()) {
       case 'Update':
@@ -36,21 +30,17 @@ class NodeFileCrudController extends CrudController {
           $t->filter('node_index', $nodeIndex),
           $t->filter('virtual_name', $virtualName)
         );
-        return $t->selectFirst();
+        return array('node_file' => $t->selectFirst());
         break;
     }
   }
 
   protected function getFormId() {
-    
+    return 'node-file-form';
   }
 
   protected function getFormTemplate() {
-    
-  }
-  
-  public function runUpdate() {
-    
+    return 'edit-node-file';
   }
   
   public function runDelete() {

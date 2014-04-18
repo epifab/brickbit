@@ -4,6 +4,7 @@ namespace module\node;
 use system\Main;
 use system\exceptions\InternalError;
 use system\exceptions\InputOutputError;
+use system\exceptions\PageNotFound;
 use system\model2\DataLayerCore;
 use system\model2\RecordsetInterface;
 use system\model2\Table;
@@ -25,27 +26,25 @@ class NodeCrudController extends CrudController {
    * @return boolean True if the user has access to the node
    */
   private static function accessRED($action, $id, $user) {
-    $table = Table::loadTable('node');
+    $node = NodeRecordsetCache::getInstance()->loadById($id);
     
-    $table->addFilters($table->filter('id', $id));
-    
-    if ($table->countRecords() > 0) {
-      switch ($action) {
-        case "READ":
-          RecordMode::addReadModeFilters($table, $user);
-          break;
-        case "EDIT":
-          RecordMode::addEditModeFilters($table, $user);
-          break;
-        case "DELETE":
-          RecordMode::addDeleteModeFilters($table, $user);
-          break;
-        default:
-          throw new InternalError('Invalid @name parameter', array('@name' => 'action'));
-      }
-      return $table->countRecords() > 0;
+    if (empty($node)) {
+      throw new PageNotFound();
     }
-    return true;
+    
+    switch ($action) {
+      case "READ":
+        return RecordMode::checkReadAccess($node->record_mode, $user);
+        break;
+      case "EDIT":
+        return RecordMode::checkEditAccess($node->record_mode, $user);
+        break;
+      case "DELETE":
+        return RecordMode::checkDeleteAccess($node->record_mode, $user);
+        break;
+      default:
+        throw new InternalError('Invalid @name parameter', array('@name' => 'action'));
+    }
   }
 
   /**
@@ -84,15 +83,13 @@ class NodeCrudController extends CrudController {
     }
     
     // get the parent node
-    $table = Table::loadTable('node');
-    $table->import('type');
-    $table->addFilters($table->filter('id', $urlArgs[0]));
+    $pnode = NodeRecordsetCache::getInstance()->loadById($urlArgs[0]);
+    if (empty($pnode)) {
+      throw new PageNotFound();
+    }
     // Check if the logged user has sufficient permissions 
     //  to edit the parent node
-    RecordMode::addEditModeFilters($table, $user);
-    $parentNode = $table->selectFirst();
-    
-    if (!$parentNode) {
+    if (!RecordMode::checkEditAccess($pnode->record_mode, $user)) {
       return false;
     }
     // edit permissions ok
@@ -121,17 +118,13 @@ class NodeCrudController extends CrudController {
    * @return boolean TRUE if the user is able to access the node
    */
   public static function accessReadByUrn($urlArgs, $user) {
-    list($urn) = $urlArgs;
+    $node = NodeRecordsetCache::getInstance()->loadByUrn($urlArgs[0]);
     
-    $table = Table::loadTable('node');
-    $table->import('text.urn');
-    $table->addFilters($table->filter('text.urn', $urn));
-    
-    if ($table->countRecords() > 0) {
-      RecordMode::addReadModeFilters($table, $user);
-      return $table->countRecords() > 0;
+    if (empty($node)) {
+      throw new PageNotFound();
     }
-    return true;
+    
+    return RecordMode::checkReadAccess($node->record_mode, $user);
   }
 
   /**
@@ -156,42 +149,21 @@ class NodeCrudController extends CrudController {
   ///</editor-fold>
   
   /**
-   * Returns the node builder
-   * @return Table Node builder
-   */
-  protected function getNodeTable() {
-    $table = Table::loadTable('node');
-    $table->import(
-      '*',
-      'record_mode.*',
-      'text.*',
-      'texts.*'
-    );
-    return $table;
-  }
-  
-  /**
    * Creates a new (temporary) node recordset
    * @param string $type Recordset type
    * @param int $parentId Parent node id
    * @return RecordsetInterface
    * @throws InputOutputError
    */
-  private function getTmpRecordset($type, $parentId=null) {
-    $parentNode = null;
+  private function getTmpRecordset($type, $parentId = null) {
     if ($parentId) {
-      // Initialize parent node (if any)
-      $ptable = Table::loadTable('node');
-      $ptable->import('*');
-      $parentNode = $ptable->selectFirst($ptable->filter('id', $parentId));
-      if (empty($parentNode)) {
+      $pnode = NodeRecordsetCache::getInstance()->loadById($parentId);
+    
+      if (empty($pnode)) {
         // Parent node not found
-        throw new InputOutputError('The node you were looking for was not found.');
+        throw new PageNotFound();
       }
     }
-    
-    // Initialize node builder
-    $table = $this->getNodeTable();
     
     $node = null;
 
@@ -201,8 +173,8 @@ class NodeCrudController extends CrudController {
     // If the node ID exists..
     if ($nodeId) {
       // Load the node
-      $node = $table->selectFirst($table->filter('id', $nodeId));
-      if (!$node || !$node->temp) {
+      $node = NodeRecordsetCache::getInstance()->loadById($nodeId);
+      if (empty($node) || !$node->temp) {
         // Node not found or "temp" field set to 0
         $node = null;
       }
@@ -219,13 +191,12 @@ class NodeCrudController extends CrudController {
     }
 
     if (empty($node)) {
-      // If the temp node is invalid or does not exist we need to create a new 
-      //  one
+      // If temp node is invalid or does not exist we need to create a new one
       $da = DataLayerCore::getInstance();
       $da->beginTransaction();
       
       try {
-        $node = $table->newRecordset();
+        $node = Main::loadRecordsetTable('node')->newRecordset();
         
         $node->temp = true;
         $node->type = $type;
@@ -314,8 +285,7 @@ class NodeCrudController extends CrudController {
         break;
 
       case 'Edit':
-        $table = $this->getNodeTable();
-        $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
+        $node = NodeRecordsetCache::getInstance()->loadById($this->getUrlArg(0));
         $this->setPageTitle(\cb\t('Edit @title', array('@title' => $node->title)));
         break;
     }
@@ -461,21 +431,17 @@ class NodeCrudController extends CrudController {
   }
 
   public function runRead() {
-    $table = $this->getNodeTable();
-    RecordMode::addReadModeFilters($table, Login::getLoggedUser());
-    $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
-    if (!$node) {
-      throw new \system\exceptions\PageNotFound();
+    $node = NodeRecordsetCache::getInstance()->loadById($this->getUrlArg(0));
+    if (empty($node)) {
+      throw new PageNotFound();
     }
     return $this->read($node);
   }
   
   public function runReadByUrn() {
-    $table = $this->getNodeTable();
-    RecordMode::addReadModeFilters($table, Login::getLoggedUser());
-    $node = $table->selectFirst($table->filter('text.urn', $this->getUrlArg(0)));
-    if (!$node) {
-      throw new \system\exceptions\PageNotFound();
+    $node = NodeRecordsetCache::getInstance()->loadByUrn($this->getUrlArg(0));
+    if (empty($node)) {
+      throw new PageNotFound();
     }
     return $this->read($node);
   }
@@ -483,12 +449,9 @@ class NodeCrudController extends CrudController {
   public function runDelete() {
     $dl = DataLayerCore::getInstance();
     $dl->beginTransaction();
+    
     try {
-      $table = $this->getNodeTable();
-      $table->import('*', 'text.title');
-      RecordMode::addDeleteModeFilters($table, Login::getLoggedUser());
-      
-      $node = $table->selectFirst($table->filter('id', $this->getUrlArg(0)));
+      $node = NodeRecordsetCache::getInstance()->loadById($this->getUrlArg(0));
       $node->delete();
 
       $this->setMainTemplate('notify');

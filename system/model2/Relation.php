@@ -234,7 +234,7 @@ class Relation extends TableWrapper implements RelationInterface {
    * @throws \system\exceptions\InternalError
    */
   public static function loadRelation($name, TableInterface $parent, array $relationInfo) {
-    $tableInfo = Main::getTable($relationInfo['table']);
+    $tableInfo = Main::getTableInfo($relationInfo['table']);
     if (isset($relationInfo['class'])) {
       $relation = new $relationInfo['class']($name, $parent, $relationInfo, $tableInfo);
       if (!($relation instanceof RelationInterface)) {

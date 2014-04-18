@@ -12,8 +12,8 @@ interface RecordsetInterface {
    * @param string $path Property path
    * @param bool $required Sets it to TRUE to throw an exception if the path 
    *  does not match any property
-   * @return mixed Recordset property or NULL if $path does not match any 
-   *  property and $required isn't set to TRUE
+   * @return TablePropertyInterface Recordset property or NULL if $path does not
+   *  match any property and $required isn't set to TRUE
    */
   public function search($path, $required = false);
   

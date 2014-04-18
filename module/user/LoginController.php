@@ -1,6 +1,7 @@
 <?php
 namespace module\user;
 
+use system\Main;
 use system\exceptions\LoginError;
 use system\Component;
 use system\utils\Lang;
@@ -32,7 +33,7 @@ class LoginController extends Component {
         $user = Login::login($_REQUEST['login']);
       }
       catch (LoginError $ex) {
-        $this->addMessage($ex->getMessage(), 'warning');
+        Main::pushMessage($ex->getMessage(), 'warning');
       }
     }
     
