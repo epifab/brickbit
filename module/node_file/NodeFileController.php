@@ -177,22 +177,8 @@ class NodeFileController extends Component {
     return null;
   }
   
-  /**
-   * @return TableInterface Table
-   */
-  private function nodeFileTable() {
-    $table = Table::loadTable('node_file');
-    $table->import('*', 'file.path');
-    return $table;
-  }
-  
   private function download($nodeId, $nodeIndex, $virtualName, $contentType = 'application/octet-stream', $version = null) {
-    $table = $this->nodeFileTable();
-    $nodeFile = $table->selectFirst($table->filterGroup('AND')->addClauses(
-      $table->filter('node_id', $nodeId),
-      $table->filter('node_index', $nodeIndex),
-      $table->filter('virtual_name', $virtualName)
-    ));
+    $nodeFile = NodeFileRecordsetCache::getInstance()->loadByUrlInfo($nodeId, $nodeIndex, $virtualName);
     
     if (empty($nodeFile)) {
       throw new PageNotFound();

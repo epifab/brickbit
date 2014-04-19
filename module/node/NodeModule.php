@@ -5,6 +5,9 @@ use system\model2\TableInterface;
 use system\utils\Lang;
 
 class NodeModule {
+  /**
+   * Implements recordsetTableInit() event
+   */
   public static function recordsetTableInit(TableInterface $table) {
     switch ($table->getName()) {
       case 'node':

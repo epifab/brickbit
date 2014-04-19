@@ -4,9 +4,24 @@ namespace module\node_file;
 use system\Main;
 use system\exceptions\InternalError;
 use system\model2\RecordsetInterface;
+use system\model2\TableInterface;
 use system\utils\File;
 
 class NodeFileModule {
+  /**
+   * Implements recordsetTableInit() event
+   */
+  public static function recordsetTableInit(TableInterface $table) {
+    switch ($table->getName()) {
+      case 'node_file':
+        $table->import(
+          '*',
+          'file.*'
+        );
+        break;
+    }
+  }
+  
   /**
    * Implements controller event onDelete()
    */

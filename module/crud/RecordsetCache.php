@@ -76,7 +76,7 @@ class RecordsetCache {
       }
 
       $this->recordsetIds[$tableName][$hash] = ($table->countRecords() == 1)
-        ? $table->selectFirst()->{$pkeyFields[0]}
+        ? $table->selectFirst()->{\current($pkeyFields)->getName()}
         : null;
     }
     
@@ -90,10 +90,10 @@ class RecordsetCache {
    * @param bool $reset TRUE if needs to get a fresh recordset
    * @return RecordsetInterface Recordset
    */
-  protected static function cachedRecordset($tableName, $fields, $reset = false) {
-    $id = self::getRecordsetId($tableName, $fields);
+  protected function cachedRecordset($tableName, $fields, $reset = false) {
+    $id = $this->getRecordsetId($tableName, $fields);
     return (!empty($id))
-      ? self::cachedRecordsetById($tableName, $id, $reset)
+      ? $this->cachedRecordsetById($tableName, $id, $reset)
       : null;
   }
 }
