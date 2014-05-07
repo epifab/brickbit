@@ -2,15 +2,14 @@
 namespace module\crud;
 
 use system\view\Widget;
+use system\utils\HTMLHelpers;
 
 class CrudViewApi {
-  //////////////////////
-  // BLOCKS
-  //////////////////////
   public static function blockForm($content, $params, $open) {
     $vars = \system\view\Template::current()->getVars();
-    
+
     $formId = \cb\array_item('id', $params, array('required' => true));
+    $formClass = \cb\array_item('class', $params, array('default' => ''));
 
     $id = $formId . '-' . $vars['system']['component']['requestId'];
 
@@ -21,11 +20,11 @@ class CrudViewApi {
       Form::closeForm();
 
       $form = "\n"
-        . '<form id="' . $id . '" name="' . $formId . '" method="post" enctype="multipart/form-data" action="' . $vars['system']['component']['url'] . '">'
+        . '<form id="' . $id . '" name="' . $formId . '" class="' . $formClass . '" method="post" enctype="multipart/form-data" action="' . $vars['system']['component']['url'] . '">'
         // forzo le risposte ad avere gli stessi ID per il form e per i contenuti
         . '<input type="hidden" name="system[formId]" value="' . $formId . '"/>'
         . '<input type="hidden" name="system[requestId]" value="' . $vars['system']['component']['requestId'] . '"/>';
-      
+
       return $form . $content . '</form>';
     }
   }
@@ -41,7 +40,7 @@ class CrudViewApi {
       return $name . '-' . $uniqueIds[$name];
     }
   }
-  
+
   /**
    * Renders a input and adds it to the form
    * @param array $params Parameters
@@ -65,21 +64,21 @@ class CrudViewApi {
     if (empty($form)) {
       throw new \system\exceptions\InternalError('Form not found');
     }
-    
+
     $recordset = null;
-    
+
     if (isset($params['recordset'])) {
       $recordset = $form->getRecordset($params['recordset']);
-      
+
       $path = \cb\array_item('path', $params, array('required' => true, 'type' => 'string'));
-      
+
       $field = $recordset->getTable()->importField($path);
-      
+
       $defaultName = 'recordset--' . $params['recordset'] . '--' . str_replace('.', '--', $path);
       $defaultMetatype = $field->getMetaType();
       $defaultWidget = $defaultMetatype->getEditWidget();
       $defaultLabel = $defaultMetatype->getLabel();
-      
+
       if (!isset($params['name'])) {
         $params['name'] = $defaultName;
       }
@@ -94,7 +93,7 @@ class CrudViewApi {
         $params['label'] = $defaultLabel;
       }
     }
-    
+
     // Two types of input:
     // - Normal input
     // - Input from a recordset
@@ -106,48 +105,48 @@ class CrudViewApi {
     $inputAttributes  = \cb\array_item('attributes', $params, array('default' => array(), 'type' => 'array'));
     $inputLabel       = \cb\array_item('label', $params, array('default' => $inputName, 'type' => 'string'));
     $inputInfo        = \cb\array_item('info', $params, array('default' => null, 'type' => 'string'));
-    
+
     // Initial input state
-    // This is the input 'value' parameter for most of the input element, but 
+    // This is the input 'value' parameter for most of the input element, but
     //  depending on the widget which will render the input it may be something
-    //  different. 
+    //  different.
     //  e.g. WidgetSelectbox uses this value to add a 'selected' parameter for
     //  selected options.
     $inputState = \cb\array_item('state', $params, array('required' => true));
 
     $inputError = $form->getValidationError($inputName);
-    
+
     $widgetObject = Widget::getWidget($inputWidget);
-    
+
     // Checkboxes and radio buttons widgets displays the label
-    $inlineLabel = 
+    $inlineLabel =
       $widgetObject instanceof \system\view\WidgetCheckboxes
       || $widgetObject instanceof \system\view\WidgetRadiobuttons;
-    
+
     // A single checkbox or a single radiobutton does not have a label displayed
-    $inlineLabelStrict = 
+    $inlineLabelStrict =
       $widgetObject instanceof \system\view\WidgetCheckbox
       || $widgetObject instanceof \system\view\WidgetRadiobutton;
-    
+
     // Every other widget will have an outline label
     $outlineLabel = !$inlineLabel && !$inlineLabelStrict;
 
-    $inputAttributes['class'] = 
+    $inputAttributes['class'] =
       (isset($inputAttributes['class']) ? $inputAttributes['class'] . ' ' : '')
       . 'widget-' . $inputWidget . ($outlineLabel ? ' form-control' : '');
 
     ////////////////////////////////////////////////////////////////////////////
     //
     // Adds the input to the form
-    // 
+    //
     ////////////////////////////////////////////////////////////////////////////
     $form->addInput($inputName, $inputWidget, $inputState, array('id' => $inputId, 'attributes' => $inputAttributes) + $params, $inputMetaType);
-    
+
     if (!empty($recordset)) {
       //////////////////////////////////////////////////////////////////////////
       //
       // Links the recordset field with the input
-      // 
+      //
       //////////////////////////////////////////////////////////////////////////
       $form->addRecordsetInput($params['recordset'], $inputName, $params['path']);
     }
@@ -167,7 +166,7 @@ class CrudViewApi {
           . ($inputError ? '<div class="de-input-error alert alert-danger">' . $inputError . '</div>' : '')
           . '</div>';
         break;
-      
+
       case 'columns':
         // Displays a columned structure with the input label
         if (!isset($params['layout'])) {
@@ -218,6 +217,13 @@ class CrudViewApi {
       case 'input-only':
         return $form->renderInput($inputName);
         break;
+    }
+  }
+
+
+  public static function blockFormControls($content, $params, $open) {
+    if (!$open && !HTMLHelpers::isAjaxRequest()) {
+      echo $content;
     }
   }
 }

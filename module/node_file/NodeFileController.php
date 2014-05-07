@@ -19,23 +19,23 @@ class NodeFileController extends Component {
     // Checking the user has permissions to edit the node
     return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
   }
-  
+
   public static function accessList($urlArgs, RecordsetInterface $user) {
     return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
   }
-  
+
   public static function accessDownload($urlArgs, RecordsetInterface $user) {
     return NodeCrudController::accessEdit(array($urlArgs[0]), $user);
   }
-  
+
   public static function accessDownloadImage($urlArgs, RecordsetInterface $user) {
     return NodeCrudController::accessRead(array($urlArgs[0]), $user);
   }
   ///</editor-fold>
-  
+
   protected function createFile($nodeId, $nodeIndex, $virtualName, $directory, $fileName) {
     $dataAccess = DataLayerCore::getInstance();
-    
+
     $name = File::stripExtension($virtualName);
     $ext = File::getExtension($virtualName);
 
@@ -47,14 +47,14 @@ class NodeFileController extends Component {
     );
     $table->setSelectKey($table->importField('virtual_name'));
     $duplicates = $table->select();
-    
+
     if (isset($duplicates[$virtualName])) {
       for ($i = 2; array_key_exists($name . $i . '.' . $ext, $duplicates); $i++);
       $virtualName = $name . $i . '.' . $ext;
     }
-    
+
     $table->import('file.*');
-    
+
     // init the recordset
     $rs = $table->newRecordset();
 
@@ -63,32 +63,33 @@ class NodeFileController extends Component {
     $rs->file->size = \filesize($directory . $fileName);
     $rs->file->type = File::getContentType($fileName);
     $rs->file->save();
-    
-    $nodeIndexQuery = 
+
+    $nodeIndexQuery =
       'SELECT MAX(sort_index)'
       . ' FROM node_file'
       . ' WHERE node_id = ' . $nodeId
       . ' AND node_index = ' . MetaString::stdProg2Db($nodeIndex);
-    
+
     $rs->file_id = $rs->file->id;
     $rs->node_id = $nodeId;
     $rs->node_index = $nodeIndex;
     $rs->sort_index = 1 + \intval($dataAccess->executeScalar($nodeIndexQuery));
     $rs->virtual_name = $virtualName;
     $rs->save();
-    
+
     return $rs;
   }
-  
+
   protected function initFileObject(RecordsetInterface $nodeFile) {
     $file = (object)array(
       'name' => $nodeFile->virtual_name,
       'size' => $nodeFile->file->size,
       'url' => $nodeFile->url,
+      'editUrl' => $nodeFile->edit_url,
       'deleteUrl' => $nodeFile->delete_url,
     );
-    if (File::isImage($file->name)) {
-      $file->thumbnailUrl = $nodeFile->images['thumb'];
+    if (File::isImage($nodeFile->virtual_name)) {
+      $file->thumbnailUrl = $nodeFile->image_urls['thumb'];
     }
     else {
       $icons = NodeFileApi::fileTypeIcons();
@@ -106,44 +107,37 @@ class NodeFileController extends Component {
           break;
       }
     }
-    
+
     return $file;
   }
-  
+
   public function runList() {
     $nodeId = $this->getUrlArg(0);
     $nodeIndex = $this->getUrlArg(1);
-    
+
     $table = Table::loadTable('node_file');
     $table->import('*', 'file.*');
     $table->addFilters($table->filter('node_id', $nodeId));
     if (!empty($nodeIndex)) {
       $table->addFilters($table->filter('node_index', $nodeIndex));
     }
-    
+
     $nodeFiles = $table->select();
-    
+
     $files = array();
     foreach ($nodeFiles as $nodeFile) {
       $files[] = $this->initFileObject($nodeFile);
     }
-    
+
     echo json_encode(array('files' => $files));
   }
-  
+
   public function runUpload() {
     list($nodeId, $nodeIndex) = $this->getUrlArgs();
-    
+
     $data = $this->getRequestData();
-    
-    $virtualName = File::getSafeFilename($data['name']);
-    if (strlen($virtualName) > 50) {
-      $virtualName = 
-        \substr(File::stripExtension($virtualName), 0, 50 - strlen($virtualName)) 
-        . '.' . File::getExtension($virtualName);
-    }
-    
-    $upload = new FileUploadHandler($virtualName, array(
+
+    $upload = new FileUploadHandler(array(
       'script_url' => Main::getActiveComponent()->getUrl(),
       'upload_dir' => NodeFileApi::getUploadDirectory(),
       'upload_url' => Main::getActiveComponent()->getUrl(),
@@ -156,10 +150,11 @@ class NodeFileController extends Component {
       // Defines which files are handled as image files:
       'image_file_types' => '/\.(gif|jpe?g|png)$/i',
     ));
-    
+
     $files = $upload->post();
-    
+
     foreach ($files as $k => $file) {
+      $virtualName = $file->originalName;
       if (!isset($file->error) && empty($file->incomplete)) {
         $nodeFile = $this->createFile(
           $nodeId,
@@ -171,15 +166,15 @@ class NodeFileController extends Component {
         $files[$k] = $this->initFileObject($nodeFile);
       }
     }
-    
+
     echo json_encode(array('files' => $files));
-    
+
     return null;
   }
-  
+
   private function download($nodeId, $nodeIndex, $virtualName, $contentType = 'application/octet-stream', $version = null) {
     $nodeFile = NodeFileRecordsetCache::getInstance()->loadByUrlInfo($nodeId, $nodeIndex, $virtualName);
-    
+
     if (empty($nodeFile)) {
       throw new PageNotFound();
     }
@@ -189,9 +184,9 @@ class NodeFileController extends Component {
       : $nodeFile->file->path;
 
     while (\ob_get_clean());
-    
+
     \header("Cache-Control: no-cache, must-revalidate");
-    \header("Content-Description: File Transfer"); 
+    \header("Content-Description: File Transfer");
     if (empty($version)) {
       \header("Content-Disposition: attachment; filename=" . $virtualName);
       \header("Content-Type: application/octet-stream");
@@ -199,19 +194,19 @@ class NodeFileController extends Component {
     else {
       \header("Content-Type: $contentType");
     }
-    \header("Content-Transfer-Encoding: binary"); 
+    \header("Content-Transfer-Encoding: binary");
     \header('Content-Length: ' . \filesize($path));
-    // Leggo il contenuto del file 
+    // Leggo il contenuto del file
     \readfile($path);
     // NESSUN TEMPLATE
     return null;
   }
-  
+
   public function runDownload() {
     list($nodeId, $nodeIndex, $virtualName) = $this->getUrlArgs();
     return $this->download($nodeId, $nodeIndex, $virtualName);
   }
-  
+
   public function runDownloadImage() {
     list($nodeId, $nodeIndex, $version, $virtualName) = $this->getUrlArgs();
     return $this->download($nodeId, $nodeIndex, $virtualName, File::getContentType($virtualName), $version);

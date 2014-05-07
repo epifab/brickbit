@@ -16,7 +16,7 @@ use module\crud\CrudController;
 
 class NodeCrudController extends CrudController {
   ///<editor-fold defaultstate="collapsed" desc="Access methods">
-  
+
   /**
    * Check whether the user has access to the node identified by the $id
    *  parameter according to the $action parameter
@@ -27,11 +27,11 @@ class NodeCrudController extends CrudController {
    */
   private static function accessRED($action, $id, $user) {
     $node = NodeRecordsetCache::getInstance()->loadById($id);
-    
+
     if (empty($node)) {
       throw new PageNotFound();
     }
-    
+
     switch ($action) {
       case "READ":
         return RecordMode::checkReadAccess($node->record_mode, $user);
@@ -56,18 +56,18 @@ class NodeCrudController extends CrudController {
    */
   public static function accessAdd($urlArgs, $user) {
     $nodeTypes = NodeApi::nodeTypes();
-    
+
     if (!isset($nodeTypes[$urlArgs[0]])) {
       throw new InputOutputError('Invalid node type <em>@type</em>.', array('@type' => $urlArgs[0]));
     }
     if (!\in_array($urlArgs[0], $nodeTypes['#'])) {
       return false;
     }
-    
+
     // only superuser is able to add nodes to the root
     return $user && $user->superuser;
   }
-  
+
   /**
    * Determines access to creation of a node as a child of a specific node
    * @param array $urlArgs URL arguments
@@ -77,30 +77,30 @@ class NodeCrudController extends CrudController {
    */
   public static function accessAdd2Node($urlArgs, $user) {
     $nodeTypes = NodeApi::nodeTypes();
-    
+
     if (!isset($nodeTypes[$urlArgs[1]])) {
       throw new InputOutputError('Invalid node type.');
     }
-    
+
     // get the parent node
     $pnode = NodeRecordsetCache::getInstance()->loadById($urlArgs[0]);
     if (empty($pnode)) {
       throw new PageNotFound();
     }
-    // Check if the logged user has sufficient permissions 
+    // Check if the logged user has sufficient permissions
     //  to edit the parent node
     if (!RecordMode::checkEditAccess($pnode->record_mode, $user)) {
       return false;
     }
     // edit permissions ok
-    
+
     // just need to check whether is allowed to add the node
-    if (!\in_array($urlArgs[1], $nodeTypes[$parentNode->type]['children'])) {
+    if (!\in_array($urlArgs[1], $nodeTypes[$pnode->type]['children'])) {
       return false;
     }
     return true;
   }
-  
+
   /**
    * Read access
    * @param array $urlArgs URL arguments
@@ -119,11 +119,11 @@ class NodeCrudController extends CrudController {
    */
   public static function accessReadByUrn($urlArgs, $user) {
     $node = NodeRecordsetCache::getInstance()->loadByUrn($urlArgs[0]);
-    
+
     if (empty($node)) {
       throw new PageNotFound();
     }
-    
+
     return RecordMode::checkReadAccess($node->record_mode, $user);
   }
 
@@ -147,7 +147,7 @@ class NodeCrudController extends CrudController {
     return self::accessRED("DELETE", $urlArgs[0], $user);
   }
   ///</editor-fold>
-  
+
   /**
    * Creates a new (temporary) node recordset
    * @param string $type Recordset type
@@ -158,13 +158,13 @@ class NodeCrudController extends CrudController {
   private function getTmpRecordset($type, $parentId = null) {
     if ($parentId) {
       $pnode = NodeRecordsetCache::getInstance()->loadById($parentId);
-    
+
       if (empty($pnode)) {
         // Parent node not found
         throw new PageNotFound();
       }
     }
-    
+
     $node = null;
 
     // Always handles with a temporary node
@@ -194,10 +194,10 @@ class NodeCrudController extends CrudController {
       // If temp node is invalid or does not exist we need to create a new one
       $da = DataLayerCore::getInstance();
       $da->beginTransaction();
-      
+
       try {
-        $node = Main::loadRecordsetTable('node')->newRecordset();
-        
+        $node = Main::getTable('node')->newRecordset();
+
         $node->temp = true;
         $node->type = $type;
 
@@ -215,7 +215,7 @@ class NodeCrudController extends CrudController {
           // We set the left delimiter to the parent node right delimiter
           $node->ldel = $parentNode->rdel;
           $node->rdel = $node->ldel + 1;
-          // We need to adjust the parent node right delimiter 
+          // We need to adjust the parent node right delimiter
           //  and delimiters for every node to preserve the tree structure
           $da->executeUpdate("UPDATE node SET ldel = ldel + 2 WHERE ldel > " . $node->rdel);
           $da->executeUpdate("UPDATE node SET rdel = rdel + 2 WHERE rdel >= " . $node->ldel);
@@ -225,12 +225,12 @@ class NodeCrudController extends CrudController {
 
         RecordMode::saveRecordMode($node);
         $node->save();
-        
+
         \system\session\Session::getInstance()->set('core::EditNode', 'temp_node_id', $node->id);
-        
+
         $da->commitTransaction();
       }
-      
+
       catch (\Exception $ex) {
         $da->rollbackTransaction();
         throw $ex;
@@ -238,9 +238,9 @@ class NodeCrudController extends CrudController {
     }
     return $node;
   }
-  
+
   ///<editor-fold defaultstate="collapsed" desc="Editing stuff">
-  
+
   /**
    * Edit actions (add, add to a node, edit.
    * @return array List of available actions
@@ -248,7 +248,7 @@ class NodeCrudController extends CrudController {
   public function getEditActions() {
     return array('Add', 'Add2Node', 'Edit');
   }
-  
+
   /**
    * Perform some custom validation
    * @return boolean TRUE if the submission is valid
@@ -265,7 +265,7 @@ class NodeCrudController extends CrudController {
     // Default form submission
     return parent::formSubmission();
   }
-  
+
   /**
    * Returns editable recordsets
    * @return RecordsetInterface
@@ -276,29 +276,26 @@ class NodeCrudController extends CrudController {
     switch ($this->getAction()) {
       case 'Add':
         $node = $this->getTmpRecordset($this->getUrlArg(0));
-        $this->setPageTitle(\cb\t('Add a new @title', array('@title' => $node->type)));
         break;
 
       case 'Add2Node':
         $node = $this->getTmpRecordset($this->getUrlArg(1), $this->getUrlArg(0));
-        $this->setPageTitle(\cb\t('Add a new @title', array('@title' => $node->type)));
         break;
 
       case 'Edit':
         $node = NodeRecordsetCache::getInstance()->loadById($this->getUrlArg(0));
-        $this->setPageTitle(\cb\t('Edit @title', array('@title' => $node->title)));
         break;
     }
-    
+
     $recordsets = array(
       'node' => $node,
       'node_record_mode' => $node->record_mode // Record mode
     );
-    
+
     // This is used for text which aren't stored in the DB
     $nodeTextTable = Table::loadTable('node_text');
     $nodeTextTable->import('*');
-    
+
     foreach (Main::getLanguages() as $lang) {
       if (isset($node->texts[$lang])) {
         // Translation already exists
@@ -313,10 +310,10 @@ class NodeCrudController extends CrudController {
       }
       $recordsets['node_' . $lang] = $nodeText;
     }
-    
+
     return $recordsets;
   }
-  
+
   /**
    * Form ID
    * @return string Form ID
@@ -333,14 +330,14 @@ class NodeCrudController extends CrudController {
         break;
     }
   }
-  
+
   /**
    * Form template
    * @return string Form template
    */
-  public function getFormTemplate() {
+  private function getFormTemplate() {
     $node = $this->getForm()->getRecordset('node');
-    
+
     // Template name suggestions
     $templates = array(
       'edit-node--' . $node->id,
@@ -362,20 +359,20 @@ class NodeCrudController extends CrudController {
       . '</ul>', array('@nid' => $rs->id, '@type' => $rs->type)
     );
   }
-  
-  protected function saveRecordsets() {
+
+  private function saveRecordsets() {
     $form = $this->getForm();
-    
+
     $node = $form->getRecordset('node');
-    
+
     Main::pushMessage($node->toArray());
-    
+
     $da = DataLayerCore::getInstance();
-    
+
     try {
       foreach (Main::getLanguages() as $lang) {
         $text = $form->getRecordset('node_' . $lang);
-        
+
         if ($form->getInputValue('node_' . $lang . '_enable')) {
           if (!$text->checkKey('urn_key')) {
             $form->setValidationError(
@@ -392,10 +389,10 @@ class NodeCrudController extends CrudController {
           }
         }
       }
-      
+
       RecordMode::saveRecordMode($node);
       $node->save();
-      
+
       $da->commitTransaction();
     }
     catch (\Exception $ex) {
@@ -403,24 +400,45 @@ class NodeCrudController extends CrudController {
       throw $ex;
     }
   }
-  
+
+  public function formAdd() {
+    $this->setMainTemplate($this->getFormTemplate());
+    $this->setPageTitle(\cb\t('Add a new @title', array(
+      '@title' => $this->getForm()->getRecordset('node')->type
+    )));
+  }
+
   public function submitAdd() {
     $form = $this->getForm();
     $form->getRecordset('node')->temp = false;
     $this->saveRecordsets();
   }
-  
+
+  public function formAdd2Node() {
+    $this->setMainTemplate($this->getFormTemplate());
+    $this->setPageTitle(\cb\t('Add a new @title', array(
+      '@title' => $this->getForm()->getRecordset('node')->type
+    )));
+  }
+
   public function submitAdd2Node() {
     $form = $this->getForm();
     $form->getRecordset('node')->temp = false;
     $this->saveRecordsets();
   }
-  
+
+  public function formEdit() {
+    $this->setMainTemplate($this->getFormTemplate());
+    $this->setPageTitle(\cb\t('Edit @title', array(
+      '@title' => $this->getForm()->getRecordset('node')->title
+    )));
+  }
+
   public function submitEdit() {
     $this->saveRecordsets();
   }
   ///</editor-fold>
-  
+
   protected function read($node) {
     $this->datamodel['node'] = $node;
     $this->setMainTemplate('node-default');
@@ -437,7 +455,7 @@ class NodeCrudController extends CrudController {
     }
     return $this->read($node);
   }
-  
+
   public function runReadByUrn() {
     $node = NodeRecordsetCache::getInstance()->loadByUrn($this->getUrlArg(0));
     if (empty($node)) {
@@ -445,11 +463,11 @@ class NodeCrudController extends CrudController {
     }
     return $this->read($node);
   }
-  
+
   public function runDelete() {
     $dl = DataLayerCore::getInstance();
     $dl->beginTransaction();
-    
+
     try {
       $node = NodeRecordsetCache::getInstance()->loadById($this->getUrlArg(0));
       $node->delete();
@@ -459,9 +477,9 @@ class NodeCrudController extends CrudController {
         'title' => 'Content deleted',
         'body' => Lang::translate('<em>@title</em> has been deleted', array('@title' => $node->text->title)),
       );
-      
+
       $dl->commitTransaction();
-      
+
       return \system\RESPONSE_TYPE_NOTIFY;
     }
     catch (\Exception $ex) {

@@ -3,7 +3,7 @@ weight: 1
 enabled: 1
 #viewNs: view
 #viewClass: 
-#templatesPath: templates
+templatesPath: templates
 #componentsNs: 
 dependencies:
   - node
@@ -30,6 +30,15 @@ components:
       # content/123/file/attachments/upload
       - url: content/([0-9]+)/file/(@strid)/upload
         action: Upload
+
+  tinymce_node_file:
+    class: TinymceNodeFileController
+    pages:
+      ### 'about-me.pdf' file download
+      # content/123/file/attachments
+      - url: content/([0-9]+)/file/node-file-plugin.html
+        action: Plugin
+
   node_file_crud:
     class: NodeFileCrudController
     pages:

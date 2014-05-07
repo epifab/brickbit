@@ -6,7 +6,7 @@
             <span class="preview"></span>
         </td>
         <td>
-            <p class="name"><input type="text" name="name" value="{%=file.name%}" class="form-control" /></p>
+            <p class="name">{%=file.name%}</p>
             <strong class="error text-danger"></strong>
         </td>
         <td>
@@ -37,7 +37,7 @@
         <td>
             <span class="preview">
                 {% if (file.thumbnailUrl) { %}
-                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}" /></a>
                 {% } %}
             </span>
         </td>
@@ -58,6 +58,10 @@
         </td>
         <td>
             {% if (file.deleteUrl) { %}
+              <?php echo $this->api->open('link', array('url' => '{%=file.editUrl%}', 'ajax' => true, 'class' => 'btn btn-primary')); ?>
+                  Edit
+              <?php echo $this->api->close(); ?>
+
                 <button class="btn btn-danger delete" data-type="delete" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
                     <i class="glyphicon glyphicon-trash"></i>
                     <span>Delete</span>
@@ -80,8 +84,6 @@
 <script src="http://blueimp.github.io/JavaScript-Load-Image/js/load-image.min.js"></script>
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
 <script src="http://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
-<!-- blueimp Gallery script -->
-<script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
 <script src="<?php echo $this->api->modulePath('jquery_file_upload', '9.5.6/js/jquery.iframe-transport.js'); ?>"></script>
 <!-- The basic File Upload plugin -->

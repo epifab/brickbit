@@ -13,7 +13,7 @@ use system\view\TemplateManager;
 class Main {
   private static $timeRequestStack = array();
   private static $componentStack = array();
-  
+
   /**
    * Time of the request
    * @return int UNIX timestamp of the request
@@ -21,12 +21,12 @@ class Main {
   public static function getTimeRequest() {
     return \round(\end(self::$timeRequestStack), 0);
   }
-  
+
   /**
    * Gets the execution time
    * @param boolean $absolute TRUE if you wish to get the number of seconds from
    *  the first time the 'run' method is called.
-   * @return float Number of seconds of the execution time (returns a float 
+   * @return float Number of seconds of the execution time (returns a float
    *  rounded to the 3rd decimal (representing microseconds)
    */
   public static function getExecutionTime($absolute = false) {
@@ -38,9 +38,9 @@ class Main {
 
   /**
    * Returns the entire application configuration.
-   * 
+   *
    * <p>NB. modules are sorted by weight ascending.</p>
-   * 
+   *
    * <pre>
    *    'modules' :
    *      [module name] :
@@ -97,7 +97,7 @@ class Main {
    */
   private static function configuration() {
     static $configuration = null;
-    
+
     if (\is_null($configuration)) {
       if (self::setting('coreCache', true)) {
         $configuration = self::getCache('system-configuration', null);
@@ -111,7 +111,7 @@ class Main {
     }
     return $configuration;
   }
-  
+
   /**
    * Checks if the module exists.
    * @param string $moduleName Module name
@@ -121,7 +121,7 @@ class Main {
     $c = self::configuration();
     return \array_key_exists($moduleName, $c['modules']);
   }
-  
+
   /**
    * Returns the module configuration.
    * @param string $moduleName Module name
@@ -151,7 +151,7 @@ class Main {
     $c = self::configuration();
     return \array_key_exists($templateName, $c['templates']);
   }
-  
+
   /**
    * Returns a template file path.
    * @param string $templateName Template name
@@ -180,7 +180,7 @@ class Main {
     $c = self::configuration();
     return \array_key_exists($tableName, $c['tables']);
   }
-  
+
   /**
    * Returns a table configuration.
    * @param string $tableName
@@ -196,18 +196,18 @@ class Main {
       throw new InternalError('Table <em>@name</em> not found.', array('@name' => $tableName));
     }
   }
-  
+
   /**
    * Initializes a recordset table
    * @param string $tableName Table name
    * @return TableInterface Recordset table
    */
-  public static function loadRecordsetTable($tableName) {
+  public static function getTable($tableName) {
     $table = Table::loadTable($tableName);
     SystemApi::recordsetTableInit($table);
     return $table;
   }
-  
+
   /**
    * Checks if the URL matches any pattern defined in any active module.
    * @param string $url URL
@@ -217,7 +217,7 @@ class Main {
   public static function urlExists($url) {
     return !\is_null(self::getComponentInfoByUrl($url));
   }
-  
+
   /**
    * Returns info about the component responsible for the URL.
    * <p>This information are defined by info.yml files.</p>
@@ -231,34 +231,34 @@ class Main {
    *  configuration file</li>
    * </ul>
    * @param string $url URL
-   * @return array Component info (null in case the URL doesn't match any 
+   * @return array Component info (null in case the URL doesn't match any
    *  pattern defined by any active module)
    */
   public static function getComponentInfoByUrl($url) {
     static $urls = null;
-    
+
     if (false !== ($x = \strstr($url, '?', true))) {
       // Removing get parameters
       $url = $x;
     }
 
     $basePath = self::stripFinalSlash(self::getBaseDir() . self::getVirtualBaseDir());
-    
+
     if (\substr($url, 0, \strlen($basePath)) != $basePath) {
       return null;
     }
     // Stripping base dir and virtual path
     $url = \substr($url, \strlen($basePath));
-    
+
     if (!empty($url) && substr($url, 0, 1) == '/') {
       $url = substr($url, 1);
     }
-    
+
     if (empty($url)) {
       // substr may return FALSE if $url == $basePath
       $url = '';
     }
-    
+
     if (\is_null($urls)) {
       if (self::setting('coreCache')) {
         // Url cache
@@ -289,25 +289,25 @@ class Main {
     }
     return $urls[$url];
   }
-  
+
   /**
    * Get the currently active component
-   * @return Component The most recent component which is currently 
+   * @return Component The most recent component which is currently
    *  running or NULL if any component isn't running.
    */
   public static function getActiveComponent() {
     return \end(self::$componentStack);
   }
-  
+
   /**
    * Get the main active component
-   * @return Component The oldest running component or NULL if any 
+   * @return Component The oldest running component or NULL if any
    *  component isn't running.
    */
   public static function getActiveComponentMain() {
     return empty(self::$componentStack) ? null : self::$componentStack[0];
   }
-  
+
   /**
    * Checks if the user has access to a given URL
    * @param string $url URL
@@ -330,7 +330,7 @@ class Main {
       return true;
     }
   }
-  
+
   /**
    * Runs the component associated with the URL if any. Makes
    * @param string $url URL (default to REQUEST_URI)
@@ -340,13 +340,13 @@ class Main {
     if (\is_null($url)) {
       $url = $_SERVER['REQUEST_URI'];
     }
-    
+
     if (\is_null($request)) {
       $request = $_REQUEST;
     }
-    
+
     $component = self::getComponentInfoByUrl($url);
-    
+
     if (!\is_null($component)) {
       $componentClass = $component['class'];
       $obj = new $componentClass(
@@ -362,13 +362,13 @@ class Main {
       // No component associated with this URL
       $obj = new DefaultComponent($url);
     }
-    
+
     \array_push(self::$timeRequestStack, \microtime(true));
     \array_push(self::$componentStack, $obj);
 
     try {
       $obj->initDatamodel(SystemApi::initDatamodel());
-      
+
       if (!$obj->isNested()) {
         // Allows the theme to do special stuff before modules
         ThemeApi::preRun($obj);
@@ -384,7 +384,7 @@ class Main {
       \array_pop(self::$timeRequestStack);
       throw $ex;
     }
-    
+
     if (self::setting('debug', false)) {
       self::pushMessage(\cb\t('Execution time component <em>@component</em>::<em>@action</em>: @time sec.</b>', array(
         '@component' => $obj->getName(),
@@ -392,11 +392,41 @@ class Main {
         '@time' => self::getExecutionTime()
       )));
     }
-    
+
     \array_pop(self::$componentStack);
     \array_pop(self::$timeRequestStack);
   }
-  
+
+  /**
+   * Returns a list of modules callback implementing a given method.
+   * Modules are sorted by weight and name (ascending).
+   * @param string $methodName Method name
+   * @return callback[] List of callbacks keyed by module name
+   */
+  public static function moduleImplements($methodName) {
+    static $methodBinding = array();
+    static $modules = null;
+
+    if (!array_key_exists($methodName, $methodBinding)) {
+      $methodBinding[$methodName] = array();
+
+      if (\is_null($modules)) {
+        $configuration = self::configuration();
+        // Modules are ordered according to their weight ascending
+        $modules = $configuration['modules'];
+      }
+
+      foreach ($modules as $module) {
+        $class = $module['class'];
+        if (\is_callable(array($class, $methodName))) {
+          $methodBinding[$methodName][$module['name']] = array($class, $methodName);
+        }
+      }
+    }
+
+    return $methodBinding[$methodName];
+  }
+
   /**
    * Returns a cached module configuration value.
    * <p>Runs invokeMethodAll and caches its results.</p>
@@ -404,19 +434,19 @@ class Main {
    *  array results.</p>
    * <p>Considering the two following module classes:</p>
 
-   * <p>Unlike 'invokeMethodAllMerge', this function does not accept any 
+   * <p>Unlike 'invokeMethodAllMerge', this function does not accept any
    *  additional argument to pass to the controller methods.</p>
    * @param string $methodName Method name
    * @return mixed Result
    */
   public static function invokeStaticMethodAllMerge($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
-    
+
     if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-all-merge-' . $methodName)) {
       // Cache level 2
       $results[$methodName] = self::getCache('system-static-method-all-merge-' . $methodName);
     }
-    
+
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethodAllMerge($methodName, $staticCache);
       if ($staticCache) {
@@ -425,26 +455,26 @@ class Main {
     }
     return $results[$methodName];
   }
-  
+
   /**
    * Returns a cached module configuration value.
    * <p>Runs invokeMethod and caches its results.</p>
-   * <p>Unlike 'invokeMethod', this function does not accept any additional 
+   * <p>Unlike 'invokeMethod', this function does not accept any additional
    *  argument to pass to the controller methods.</p>
    * @param string $methodName Method name
    * @param boolean $staticCache TRUE if you wish to caches the results on the
-   *  file system (cache is implemented by using getCache and setCache 
+   *  file system (cache is implemented by using getCache and setCache
    *  methods)
    * @return mixed Result
    */
   public static function invokeStaticMethod($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
-    
+
     if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-' . $methodName)) {
       // Cache level 2
       $results[$methodName] = self::getCache('system-static-method-' . $methodName);
     }
-    
+
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethod($methodName);
       if ($staticCache) {
@@ -453,26 +483,26 @@ class Main {
     }
     return $results[$methodName];
   }
-  
+
   /**
    * Returns a cached module configuration value.
    * <p>Runs invokeMethodAll and caches its results.</p>
-   * <p>Unlike 'invokeMethodAll', this function does not accept any additional 
+   * <p>Unlike 'invokeMethodAll', this function does not accept any additional
    *  argument to pass to the controller methods.</p>
    * @param string $methodName Method name
    * @param boolean $staticCache TRUE if you wish to caches the results on the
-   *  file system (cache is implemented by using getCache and setCache 
+   *  file system (cache is implemented by using getCache and setCache
    *  methods)
    * @return mixed Result
    */
   public static function invokeStaticMethodAll($methodName, $staticCache = true) {
     static $results = array(); // Cache level 1
-    
+
     if (!\array_key_exists($methodName, $results) && $staticCache && self::cacheExists('system-static-method-all-' . $methodName)) {
       // Cache level 2
       $results[$methodName] = self::getCache('system-static-method-all-' . $methodName);
     }
-    
+
     if (!\array_key_exists($methodName, $results)) {
       $results[$methodName] = self::invokeMethodAll($methodName);
       if ($staticCache) {
@@ -489,16 +519,16 @@ class Main {
   public static function raiseControllerEvent($eventName) {
     return \call_user_func_array(array('self', 'invokeMethodAll'), \func_get_args());
   }
-  
+
   /**
    * Invokes a controller method.
-   * <p>Searches for the highest priority module class which implements the 
-   *  method and calls it. If the method isn't implemented by any module class, 
+   * <p>Searches for the highest priority module class which implements the
+   *  method and calls it. If the method isn't implemented by any module class,
    *  it returns null.</p>
    * <p>This function takes an unlimited number of arguments.</p>
-   * <p>Every argument (apart from the method name) is passed to the module 
+   * <p>Every argument (apart from the method name) is passed to the module
    *  class method.</p>
-   * 
+   *
    * <p>Usage example:</p>
    * <code>
    * <pre>
@@ -530,14 +560,14 @@ class Main {
    *  }
    * </pre>
    * </code>
-   * 
-   * <p>Assuming modules are all enabled and priority order is 
+   *
+   * <p>Assuming modules are all enabled and priority order is
    *  Module1 > Module2 > Module3 > Module4, then:</p>
-   * 
+   *
    * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
-   * 
+   *
    * <p>Will print out:</p>
-   * 
+   *
    * <pre>
    * array('a' => 'module1', 'b' => 'module1')
    * </pre>
@@ -545,49 +575,27 @@ class Main {
    * @return array Returns the implementing method results.
    */
   public static function invokeMethod($methodName) {
-    static $modules = null;
-    static $methodBinding = array();
-    
-    if (\is_null($modules)) {
-      $configuration = self::configuration();
-      // Modules are ordered according to their weight ascending
-      // We want to search for the right method to run following the descending
-      //  order...
-      $modules = $configuration['modules'];
-      \rsort($modules);
-    }
-    
     $args = array();
     if (\func_num_args() > 1) {
       $args = \func_get_args();
       \array_shift($args);
     }
 
-    // Cache
-    if (!\array_key_exists($methodName, $methodBinding)) {
-      foreach ($modules as $module) {
-        $class = $module['class'];
-        if (\is_callable(array($class, $methodName))) {
-          $method = array($class, $methodName);
-          break;
-        }
-      }
-      $methodBinding[$methodName] = $method;
-    }
-    
-    return (!empty($methodBinding[$methodName]))
-      ? \call_user_func_array($methodBinding[$methodName], $args)
+    $modules = self::moduleImplements($methodName);
+
+    return (!empty($modules))
+      ? \call_user_func_array(\end($modules), $args)
       : null;
   }
-  
+
   /**
    * Invokes a controller method.
    * <p>Searches for module classes implementing the method and runs every
    *  method following the modules priority order.</p>
    * <p>This function takes an unlimited number of arguments.</p>
-   * <p>Every argument (apart from the method name) is passed to the module 
+   * <p>Every argument (apart from the method name) is passed to the module
    *  class method.</p>
-   * 
+   *
    * <p>Usage example:</p>
    * <code>
    * <pre>
@@ -619,14 +627,14 @@ class Main {
    *  }
    * </pre>
    * </code>
-   * 
-   * <p>Assuming modules are all enabled and priority order is 
+   *
+   * <p>Assuming modules are all enabled and priority order is
    *  Module1 > Module2 > Module3 > Module4, then:</p>
-   * 
+   *
    * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
-   * 
+   *
    * <p>Will print out:</p>
-   * 
+   *
    * <pre>
    * array (
    *   0 => null
@@ -640,23 +648,10 @@ class Main {
    */
   public static function invokeMethodAll($methodName) {
     // Cache - array ('method name' => callable[])
-    static $methodBinding = array();
-    
-    if (!\array_key_exists($methodName, $methodBinding)) {
-      $methodBinding[$methodName] = array();
-      
-      $configuration = self::configuration();
-    
-      foreach ($configuration['modules'] as $module) {
-        $class = $module['class'];
-        if (\is_callable(array($class, $methodName))) {
-          $methodBinding[$methodName][] = array($class, $methodName);
-        }
-      }
-    }
-    
+    $modules = self::moduleImplements($methodName);
+
     $results = array();
-    if (!empty($methodBinding[$methodName])) {
+    if (!empty($modules)) {
       // Arguments to be passed
       $args = array();
       if (\func_num_args() > 1) {
@@ -664,29 +659,29 @@ class Main {
         \array_shift($args);
       }
 
-      foreach ($methodBinding[$methodName] as $handler) {
+      foreach ($modules as $handler) {
         $x = \call_user_func_array($handler, $args);
         $results[] = $x;
       }
     }
     return $results;
   }
-  
+
   /**
    * Invokes a controller method.
    * <p>Searches for module classes implementing the method and runs every
    *  method following the modules priority order.</p>
    * <p>This function takes an unlimited number of arguments.</p>
-   * <p>Every argument (apart from the method name) is passed to the module 
+   * <p>Every argument (apart from the method name) is passed to the module
    *  class method.</p>
    * <p>
    * This method progressively merges results rather than returning their list.
    * To get the list containing every result please use invokeMethodAll.
    * <br/>
-   * If an invoked controller method doesn't return an array, it will not be 
+   * If an invoked controller method doesn't return an array, it will not be
    *  used to produce the resulting array.
    * </p>
-   * 
+   *
    * <p>Usage example:</p>
    * <code>
    * <pre>
@@ -718,14 +713,14 @@ class Main {
    *  }
    * </pre>
    * </code>
-   * 
-   * <p>Assuming modules are all enabled and priority order is 
+   *
+   * <p>Assuming modules are all enabled and priority order is
    *  Module1 > Module2 > Module3 > Module4, then:</p>
-   * 
+   *
    * <pre>print_r(Main::invokeMethodAllMerge('x'));</pre>
-   * 
+   *
    * <p>Will print out:</p>
-   * 
+   *
    * <pre>
    * array (
    *   'a' => 'module1',
@@ -738,23 +733,10 @@ class Main {
    */
   public static function invokeMethodAllMerge($methodName) {
     // Cache - array ('method name' => callable[])
-    static $methodBinding = array();
-    
-    if (!\array_key_exists($methodName, $methodBinding)) {
-      $methodBinding[$methodName] = array();
-      
-      $configuration = self::configuration();
-    
-      foreach ($configuration['modules'] as $module) {
-        $class = $module['class'];
-        if (\is_callable(array($class, $methodName))) {
-          $methodBinding[$methodName][] = array($class, $methodName);
-        }
-      }
-    }
-    
+    $modules = self::moduleImplements($methodName);
+
     $results = array();
-    if (!empty($methodBinding[$methodName])) {
+    if (!empty($modules)) {
       // Arguments to be passed
       $args = array();
       if (\func_num_args() > 1) {
@@ -762,7 +744,7 @@ class Main {
         \array_shift($args);
       }
 
-      foreach ($methodBinding[$methodName] as $handler) {
+      foreach ($modules as $handler) {
         $x = \call_user_func_array($handler, $args);
         if (\is_array($x)) {
           $results = $x + $results;
@@ -771,33 +753,34 @@ class Main {
     }
     return $results;
   }
-  
+
   /**
    * Invokes a model method.
    * <p>Searches for model classes implementing the method and runs every method
    *  following the modules priority order.</p>
    * <p>This function takes an unlimited number of arguments.</p>
-   * <p>Every argument (apart from the method name) is passed to the module 
+   * <p>Every argument (apart from the method name) is passed to the module
    *  class method.</p>
    * @param string $methodName Name of the model class method
    * @return array Returns an array of non-null values returned by model classes
+   * @deprecated since version 1.0
    */
   public static function raiseModelEvent($methodName) {
     // Cache - array ('method name' => callable[])
     static $methodBinding = array();
-    
+
     if (!\array_key_exists($methodName, $methodBinding)) {
       $methodBinding[$methodName] = array();
-      
+
       $configuration = self::configuration();
-    
+
       foreach ($configuration['modelClasses'] as $class) {
         if (\is_callable(array($class, $methodName))) {
           $methodBinding[$methodName][] = array($class, $methodName);
         }
       }
     }
-    
+
     $results = array();
     if (!empty($methodBinding[$methodName])) {
       // Arguments to be passed
@@ -816,7 +799,7 @@ class Main {
     }
     return $results;
   }
-  
+
   /**
    * Invokes a theme method.
    * <p>Runs the method $methodName in the current theme class.</p>
@@ -833,7 +816,7 @@ class Main {
       \call_user_func_array($cname . '::' . $methodName, $args);
     }
   }
-  
+
   /**
    * Returns every 'model class' declard in active modules.
    * @return array List of model classes
@@ -842,7 +825,7 @@ class Main {
     $c = self::configuration();
     return $c['modelClasses'];
   }
-  
+
   /**
    * Returns every 'view class' declared in active modules.
    * @return array List of classes
@@ -854,7 +837,7 @@ class Main {
 
   /**
    * Returns an instance of the template manager.
-   * <p>Implements the singleton design pattern always returning the same 
+   * <p>Implements the singleton design pattern always returning the same
    *  instance.</p>
    * @return TemplateManager Template manager
    */
@@ -865,9 +848,9 @@ class Main {
     }
     return $tpl;
   }
-  
+
   /**
-   * Returns the absolute path to the temp folder. 
+   * Returns the absolute path to the temp folder.
    * <p>Typically this is used for temporary application data.</p>
    * @param string $path Subpath
    * @return string Temp path
@@ -875,9 +858,9 @@ class Main {
   public static function tempPathAbs($path = '') {
     return self::getPathAbsolute('temp/' . self::stripInitialSlash($path));
   }
-  
+
   /**
-   * Returns the relative path to the temp folder. 
+   * Returns the relative path to the temp folder.
    * <p>Typically this is used for temporary application data.</p>
    * @param string $path Subpath
    * @return string Temp path
@@ -885,9 +868,9 @@ class Main {
   public static function tempPathRel($path = '') {
     return self::getPathRelative('temp/' . self::stripInitialSlash($path));
   }
-  
+
   /**
-   * Returns the internal path to the temp folder. 
+   * Returns the internal path to the temp folder.
    * <p>Typically this is used for temporary application data.</p>
    * @param string $path Subpath
    * @return string Temp path
@@ -895,9 +878,9 @@ class Main {
   public static function tempPath($path = '') {
     return self::getPathInternal('temp/' . self::stripInitialSlash($path));
   }
-  
+
   /**
-   * Returns the absolute path to the data folder. 
+   * Returns the absolute path to the data folder.
    * <p>Typically this is used for file upload and other application data.</p>
    * @param string $path Subpath
    * @return string Data path
@@ -905,9 +888,9 @@ class Main {
   public static function dataPathAbs($path = '') {
     return self::getPathAbsolute(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
-   * Returns the relative path to the data folder. 
+   * Returns the relative path to the data folder.
    * <p>Typically this is used for file upload and other application data.</p>
    * @param string $path Subpath
    * @return string Data path
@@ -915,9 +898,9 @@ class Main {
   public static function dataPathRel($path = '') {
     return self::getPathRelative(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
-   * Returns the internal path to the data folder. 
+   * Returns the internal path to the data folder.
    * <p>Typically this is used for file upload and other application data.</p>
    * @param string $path Subpath
    * @return string Data path
@@ -925,7 +908,7 @@ class Main {
   public static function dataPath($path = '') {
     return self::getPathInternal(self::stripFinalSlash(self::setting('filesDir', 'data')) . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the absolute path for a resource inside the module directory.
    * @param string $moduleName Module name
@@ -936,7 +919,7 @@ class Main {
     $module = self::getModule($moduleName);
     return self::getPathAbsolute($module['path'] . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the relative path for a resource inside the module directory.
    * @param string $moduleName Module name
@@ -947,7 +930,7 @@ class Main {
     $module = self::getModule($moduleName);
     return self::getPathRelative($module['path'] . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the internal path for a resource inside the module directory.
    * @param string $moduleName Module name
@@ -958,7 +941,7 @@ class Main {
     $module = self::getModule($moduleName);
     return self::getPathInternal($module['path'] . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the module namespace.
    * Usage example:
@@ -979,7 +962,7 @@ class Main {
     }
     return $namespace;
   }
-  
+
   /**
    * Returns the absolute path for a resource inside the theme directory.
    * @param string $path Path relative to the theme directory
@@ -988,7 +971,7 @@ class Main {
   public static function themePathAbs($path = '') {
     return self::getPathAbsolute('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the relative path for a resource inside the theme directory.
    * @param string $path Path relative to the theme directory
@@ -997,7 +980,7 @@ class Main {
   public static function themePathRel($path = '') {
     return self::getPathRelative('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the internal path for a resource inside the theme directory.
    * @param string $path Path relative to the theme directory
@@ -1006,7 +989,7 @@ class Main {
   public static function themePath($path = '') {
     return self::getPathInternal('theme/' . self::getTheme() . '/' . self::stripInitialSlash($path));
   }
-  
+
   /**
    * Returns the theme
    * @return string Theme in use
@@ -1017,7 +1000,7 @@ class Main {
     }
     return self::setting('theme');
   }
-  
+
   /**
    * Returns an internal path.
    * @param string $path Path is assumed to be internal
@@ -1027,11 +1010,11 @@ class Main {
     str_replace('\\', '/', $path);
     return self::stripInitialSlash($path);
   }
-  
+
   /**
    * Returns a virtual path.
    * @param string $path Path is assumed to be internal
-   * @param string $virtualDir Virtual dir (can be specified to change virtual 
+   * @param string $virtualDir Virtual dir (can be specified to change virtual
    *  directry)
    * @return string Virtual path
    */
@@ -1041,7 +1024,16 @@ class Main {
       : self::stripTrailingSlashes($virtualDir) . '/';
     return self::getBaseDir() . $virtualDir . self::getPathInternal($path);
   }
-  
+
+  /**
+   * Gets a URL
+   * @param string $path Path
+   * @return string URL
+   */
+  public static function getUrl($path) {
+    return 'http://' . self::getDomain() . '/' . self::stripInitialSlash($path);
+  }
+
   /**
    * Returns a URL based on the specified language
    * @param string $lang Language
@@ -1056,7 +1048,7 @@ class Main {
     }
     return self::stripFinalSlash($langs[$lang]) . '/' . $path;
   }
-  
+
   /**
    * Returns a list of available languages
    * @return array
@@ -1064,7 +1056,7 @@ class Main {
   public static function getLanguages() {
     return \array_keys(self::setting('languages', array()));
   }
-  
+
   /**
    * Returns a path relative to the ciderbit root directory
    * @param string $path Path is assumed to be internal
@@ -1083,7 +1075,7 @@ class Main {
     str_replace('\\', '/', $path);
     return self::getBaseDirAbs() . self::getPathInternal($path);
   }
-  
+
   /**
    * Removes the initial and the final slashes from a string
    * @param string $path Path
@@ -1092,7 +1084,7 @@ class Main {
   private static function stripTrailingSlashes($path) {
     return self::stripFinalSlash(self::stripInitialSlash($path));
   }
-  
+
   /**
    * Removes the initial slash and replace backslashes with shashes
    * @param string $path Path
@@ -1103,7 +1095,7 @@ class Main {
       ? substr($path, 1)
       : $path;
   }
-  
+
   /**
    * Removes the final slash and replace backslashes with shashes
    * @param string $path Path
@@ -1119,7 +1111,7 @@ class Main {
     $cacheDir = self::setting('cacheDir');
     return !empty($cacheDir) ? $cacheDir . $name . '.var' : false;
   }
-  
+
   /**
    * Checks whether a cached variable exist.
    * @param string $name Variable name
@@ -1127,13 +1119,13 @@ class Main {
    */
   public static function cacheExists($name) {
     $cacheDir = self::setting('cacheDir');
-    return !empty($cacheDir) 
+    return !empty($cacheDir)
       ? \file_exists(self::cachePath($name))
       : false;
   }
-  
+
   /**
-   * Gets a cached variable. Variable are stored in the file system via method 
+   * Gets a cached variable. Variable are stored in the file system via method
    *  setCache.
    * @param string $name Key
    * @param mixed $default Default value (returned in case the variable is not
@@ -1154,9 +1146,9 @@ class Main {
       return $default;
     }
   }
-  
+
   /**
-   * Caches a variable. Variables are stored in the file system and can be 
+   * Caches a variable. Variables are stored in the file system and can be
    *  accessed via method getCache.
    * @param string $name Variable name
    * @param mixed $value Value
@@ -1170,7 +1162,7 @@ class Main {
       \fclose($fp);
     }
   }
-  
+
   /**
    * Deletes a cached variable.
    * @param string $name Variable name
@@ -1180,7 +1172,7 @@ class Main {
       \unlink(self::cachePath($name));
     }
   }
-  
+
   /**
    * Flushes the cache
    */
@@ -1193,23 +1185,23 @@ class Main {
       }
     }
   }
-  
+
   /**
    * Returns the ciderbit session.
    * <p>Examples:
    * <pre><code>
    * // Returns the entire ciderbit session
    * session();
-   * 
+   *
    * // Returns the entire 'core' module array
    * // If it hasn't been initialized yet, it will be set to a empty array
    * session('core');
-   * 
+   *
    * // Returns the 'test' variable in the 'core' module array
-   * // If it hasn't been initialized yet, it will be set to the $default 
+   * // If it hasn't been initialized yet, it will be set to the $default
    * //  parameter value
    * session('system', 'test');
-   * 
+   *
    * NB.
    * This method always returns a reference. This means that the following code:
    * $x = &Main::session('test', 'x');
@@ -1218,7 +1210,7 @@ class Main {
    * Will print out 'asd'
    * </code></pre>
    * </p>
-   * @param string $module Module [optional, if not passed the whole ciderbit 
+   * @param string $module Module [optional, if not passed the whole ciderbit
    *  session is returned]
    * @param string $key Key [optional, if not passed the whole module session
    *  is returned]
@@ -1254,7 +1246,7 @@ class Main {
       return $_SESSION['ciderbit'];
     }
   }
-  
+
   /**
    * Get a session variable.
    * @param string $module Module name
@@ -1265,7 +1257,7 @@ class Main {
   public static function getSession($module, $key, $default = null) {
     return self::session($module, $key, $default);
   }
-  
+
   /**
    * Set a session variable
    * @param string $module Module name
@@ -1276,7 +1268,7 @@ class Main {
     $var = &self::session($module, $key);
     $var = $value;
   }
-  
+
   /**
    * Delete a session variable
    * @param string $module Module name
@@ -1300,21 +1292,21 @@ class Main {
   private static function &getMessages() {
     return self::session('system', 'messages', array());
   }
-  
+
   /**
    * Pushes a system message (FIFO queue)
    * @param array $message Message
    */
   public static function pushMessage($message, $class = 'info') {
     $messages = &self::getMessages();
-    
+
     if (\is_array($message) || \is_object($message)) {
       $message =
         '<pre>'
         . utils\Utils::varDump($message)
         . '</pre>';
     }
-    
+
     $messages[] = array(
       'class' => $class,
       'message' => $message
@@ -1327,12 +1319,12 @@ class Main {
    */
   public static function popMessage() {
     $messages = &self::getMessages();
-    
+
     return (!empty($messages))
       ? \array_shift($messages)
       : null;
   }
-  
+
   /**
    * Counts system messages
    * @return int Number of messages to be consumed
@@ -1340,7 +1332,7 @@ class Main {
   public static function countMessages() {
     return \count(self::getMessages());
   }
-  
+
   /**
    * Gets application settings
    * @return Settings Application settings
@@ -1348,7 +1340,7 @@ class Main {
   public static function settings() {
     return Settings::getInstance();
   }
-  
+
   /**
    * Gets a global setting
    * @param string $name Name
@@ -1358,7 +1350,7 @@ class Main {
   public static function setting($name, $default = null) {
     return self::settings()->get($name, $default);
   }
-  
+
   /**
    * Gets a site setting
    * @param string $name Name
@@ -1368,7 +1360,7 @@ class Main {
   public static function getSetting($name, $value) {
     self::settings()->set($name, $value);
   }
-  
+
   /**
    * Sets a site setting
    * @param string $name Name
@@ -1377,14 +1369,14 @@ class Main {
   public static function setSetting($name, $value) {
     self::settings()->set($name, $value);
   }
-  
+
   /**
    * @return string Path to the base directory
    */
   private static function getBaseDirAbs() {
     return \str_replace('\\', '/', \dirname(\dirname(__FILE__))) . '/';
   }
-  
+
   /**
    * @return string Path to the base directory relative to the web root
    */
@@ -1397,7 +1389,7 @@ class Main {
       return '/' . self::stripTrailingSlashes($baseDir) . '/';
     }
   }
-  
+
   /**
    * @return string Virtual directory appended to the URL
    */
@@ -1410,21 +1402,21 @@ class Main {
       return self::stripTrailingSlashes($baseDir) . '/';
     }
   }
-  
+
   /**
    * @return string Domain e.g. 'en.ciderbit.local'
    */
   public static function getDomain() {
     return $_SERVER['HTTP_HOST'];
   }
-  
+
   /**
    * @return string Domain e.g. 'en.ciderbit.local'
    */
   public static function getRequestUri() {
     return self::stripInitialSlash($_SERVER['REQUEST_URI']);
   }
-  
+
   /**
    * @return string Home URL
    */

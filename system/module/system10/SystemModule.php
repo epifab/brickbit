@@ -1,6 +1,14 @@
 <?php
 namespace system\module\system10;
 
+use system\Component;
+use system\Main;
+use system\model2\RecordsetInterface;
+use system\model2\Table;
+use system\utils\Lang;
+use system\utils\HTMLHelpers;
+use system\utils\Login;
+
 class SystemModule {
   /**
    * Implements widgetsMap() controller event
@@ -37,18 +45,24 @@ class SystemModule {
       'password' => '\system\metatypes\MetaString'
     );
   }
-  
+
+  public static function onRun(Component $component) {
+    $component->addJsData('settings', array(
+      'baseDir' => Main::getPathVirtual('')
+    ));
+  }
+
   /**
    * Implements onDelete() controller event
    */
   public static function onDelete(RecordsetInterface $rs) {
     // Get a clean table
     $table = Table::loadTable($rs->getTable()->getName());
-    
+
     $table->import('**');
-    
+
     $relationsToDelete = array();
-    
+
     foreach ($table->getRelations() as $relation) {
       if ($relation->deleteCascade()) {
         $relation->import('*');
@@ -63,7 +77,7 @@ class SystemModule {
         $relation->setLazyLoading(true);
       }
     }
-    
+
     if (!empty($relationsToDelete)) {
       // Gets a fresh recordset to be sure all the relations are loaded
       $primary = $rs->getPrimaryKey();
@@ -75,7 +89,7 @@ class SystemModule {
         SystemApi::watchdog('recordset-delete', 'Unable to perform delete cascade. Recordset not found.', array(), \system\LOG_WARNING);
         return;
       }
-      
+
       foreach ($relationsToDelete as $relation) {
         $children = $rs->{$relation->getName()};
 
@@ -90,8 +104,83 @@ class SystemModule {
             // Has one relation
             $children->delete();
           }
-        }      
+        }
       }
     }
+  }
+
+  /**
+   * Implements controller event initDatamodel()
+   */
+  public static function initDatamodel() {
+    $languages = array();
+    foreach (Main::getLanguages() as $lang) {
+      $languages[$lang] = Lang::langLabel($lang);
+    }
+
+    return array(
+      'system' => array(
+        'component' => self::initDatamodelComponentInfo(Main::getActiveComponent()),
+        'mainComponent' => self::initDatamodelComponentInfo(Main::getActiveComponentMain()),
+        // Default response type
+        'responseType' => \system\RESPONSE_TYPE_READ,
+        'ajax' => HTMLHelpers::isAjaxRequest(),
+        'ipAddress' => HTMLHelpers::getIpAddress(),
+        'lang' => Lang::getLang(),
+        'langs' => $languages,
+        'theme' => Main::getTheme(),
+        'themes' => Main::setting('themes'),
+        'messages' => array()
+      ),
+      'user' => Login::getLoggedUser(),
+      'website' => self::initDatamodelWebsiteInfo(),
+      'page' => array(
+        'title' => Main::setting('defaultPageTitle'),
+        'url' => $_SERVER['REQUEST_URI'],
+        'meta' => array(),
+        'js' => array(
+          'script' => array(),
+          'data' => array('test' => json_encode(array(
+            'x' => array(1,2,'y' => 'whatever'),
+            'y' => array(2,3,array())
+          )))
+        ),
+        'css' => array(),
+      )
+    );
+  }
+
+  private static function initDatamodelComponentInfo(\system\Component $component) {
+    static $info = array();
+
+    if (!isset($info[$component->getRequestId()])) {
+      $info[$component->getRequestId()] = array(
+        'name' => $component->getName(),
+        'module' => $component->getModule(),
+        'action' => $component->getAction(),
+        'url' => $component->getUrl(),
+        'urlArgs' => $component->getUrlArgs(),
+        'requestId' => $component->getRequestId(),
+        'requestType' => $component->getRequestType(),
+        'requestData' => $component->getRequestData(),
+        'nested' => $component->isNested(),
+        'alias' => $component->getAlias()
+      );
+    }
+    return $info[$component->getRequestId()];
+  }
+
+  private static function initDatamodelWebsiteInfo() {
+    static $settings = null;
+    if (\is_null($settings)) {
+      $settings = array(
+        'title' => Main::setting('siteTitle'),
+        'subtitle' => Main::setting('siteSubtitle'),
+        'domain' => Main::getDomain(),
+        'base' => Main::getBaseUrl(),
+        'defaultLang' => Main::setting('defaultLang', 'en'),
+      );
+    }
+    return $settings;
   }
 }

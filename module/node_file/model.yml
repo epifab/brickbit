@@ -18,7 +18,7 @@ tables:
         label: Bytes
       type:
         type: string
-        label: Directory
+        label: Type
         maxlength: 32
     keys:
       primary:
@@ -124,10 +124,10 @@ tables:
     virtuals:
       valid_file_keys:
         dependencies: [type]
-        handler: [\module\node_file\NodeEntity, getValidFileKeys]
+        handler: [\module\node_file\NodeTableApi, getValidFileKeys]
       files:
         dependencies: [all_files.*]
-        handler: [\module\node_file\NodeEntity, getFiles]
+        handler: [\module\node_file\NodeTableApi, getFiles]
   node_file:
     fields:
       id:
@@ -150,19 +150,13 @@ tables:
         type: plaintext
         maxlength: 64
         label: Virtual name
-      preview_file_path:
-        type: plaintext
-        maxlength: 32
-        label: Preview file path
       download_mode:
         type: integer
         label: Download access
         options:
-#          0: Nobody
-#          1: Superuser
           2: Node owner only
-          3: Node admins
-          4: Registered
+          3: Node administrators
+          4: Registered users
           5: Anyone
     keys:
       primary:
@@ -194,11 +188,11 @@ tables:
         label: Delete URL
         dependencies: [file_id]
         handler: [\module\node_file\NodeFileTableApi, getDeleteUrl]
-      images:
-        label: Images
-        dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\node_file\NodeFileTableApi, getImages]
-      version_urls:
+      image:
+        label: Is image?
+        dependencies: [virtual_name]
+        handler: [\module\node_file\NodeFileTableApi, isImage]
+      image_urls:
         label: Version urls
         dependencies: [file_id, file.extension, node_id, node_index, virtual_name]
-        handler: [\module\node_file\NodeFileTableApi, getImages]
+        handler: [\module\node_file\NodeFileTableApi, getImageUrls]

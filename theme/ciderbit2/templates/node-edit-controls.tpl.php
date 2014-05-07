@@ -19,7 +19,7 @@
               <li>
                 <?php $this->api->open('link', array(
                   'ajax' => false,
-                  'url' => 'content/' . $node->id . '/add/' . $type,
+                  'url' => $this->api->vpath('content/' . $node->id . '/add/' . $type),
                 )); ?><?php echo $this->api->t('Add @type', array('@type' => $type)); ?><?php echo $this->api->close(); ?>
               </li>
             <?php endforeach; ?>

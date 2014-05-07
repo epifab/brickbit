@@ -22,11 +22,11 @@ class NodeModule {
         break;
     }
   }
-  
+
   public static function cron() {
     // Delete temp nodes
   }
-  
+
   public static function nodeTypes() {
     return array(
       '#' => array(
@@ -42,6 +42,14 @@ class NodeModule {
         'children' => array(),
         'files' => array('image', 'downloads')
       ),
+    );
+  }
+
+  public static function tinymceProfile() {
+    return array(
+      'node' => array(
+        'selector' => 'form.edit-node textarea.wysiwyg'
+      )
     );
   }
 }

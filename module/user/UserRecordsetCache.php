@@ -1,10 +1,10 @@
 <?php
-namespace module\node;
+namespace module\user;
 
 use module\crud\RecordsetCache;
 use system\model2\RecordsetInterface;
 
-class NodeRecordsetCache extends RecordsetCache {
+class UserRecordsetCache extends RecordsetCache {
   private static $instance = null;
   
   /**
@@ -26,16 +26,16 @@ class NodeRecordsetCache extends RecordsetCache {
    * @return RecordsetInterface Node recordset
    */
   public function loadById($id, $reset = false) {
-    return parent::cachedRecordsetById('node', $id, $reset);
+    return parent::cachedRecordsetById('user', $id, $reset);
   }
   
   /**
-   * Load a node recordset by urn
-   * @param string $urn Urn
+   * Load a node recordset by email
+   * @param string $email Email
    * @param bool $reset True to get a fresh object
    * @return RecordsetInterface Node recordset
    */
-  public function loadByUrn($urn, $reset = false) {
-    return parent::cachedRecordset('node', array('text.urn' => $urn), $reset);
+  public function loadByEmail($email, $reset = false) {
+    return parent::cachedRecordset('user', array('email' => $email), $reset);
   }
 }

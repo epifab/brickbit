@@ -155,15 +155,25 @@ class Recordset implements RecordsetInterface {
       elseif ($property instanceof RelationInterface) {
         if ($property->isHasMany()) {
           if (!\array_key_exists($path, $this->hasManyRelations)) {
-            // Has many relation hasn't been loaded yet
-            $this->hasManyRelations[$path] = $property->selectByParent($this);
+            if ($this->isStored()) {
+              // Has many relation hasn't been loaded yet
+              $this->hasManyRelations[$path] = $property->selectByParent($this);
+            }
+            else {
+              return array();
+            }
           }
           return $this->hasManyRelations[$path];
         }
         else {
           if (!\array_key_exists($path, $this->hasOneRelations)) {
-            // Has one relation hasn't been loaded yet
-            return $this->hasOneRelations[$path] = $property->selectFirstByParent($this);
+            if ($this->isStored()) {
+              // Has one relation hasn't been loaded yet
+              return $this->hasOneRelations[$path] = $property->selectFirstByParent($this);
+            }
+            else {
+              return null;
+            }
           }
           return $this->hasOneRelations[$path];
         }

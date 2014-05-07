@@ -6,14 +6,11 @@
  */
 ?>
 
-<form 
-  class="dataedit fileupload" 
-  id="fileupload-<?php echo $uploaderId; ?>" 
-  data-filekey="<?php echo $uploaderId; ?>" 
-  data-filekeyurl="<?php echo $uploaderFileListUrl; ?>" 
-  action="<?php echo $uploaderUrl; ?>" 
-  method="POST" 
-  enctype="multipart/form-data">
+<div class="dataedit fileupload"
+  id="fileupload-<?php echo $uploaderId; ?>"
+  data-filekey="<?php echo $uploaderId; ?>"
+  data-filekeyurl="<?php echo $uploaderFileListUrl; ?>"
+  style="border: 10px solid red">
   <fieldset>
     <legend><?php echo $uploaderId; ?></legend>
     <div class="row de-row">
@@ -59,4 +56,4 @@
       </div>
     </div>
   </fieldset>
-</form>
+</div>

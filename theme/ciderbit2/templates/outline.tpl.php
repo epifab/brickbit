@@ -8,20 +8,25 @@
     <meta name="description" content="<?php echo isset($page['description']) ? $page['description'] : ''; ?>">
     <meta name="author" content="<?php echo isset($page['author']) ? $page['author'] : ''; ?>">
     <title><?php echo $page['title']; ?></title>
-    
+
     <?php foreach ($page['css'] as $css): ?>
     <link href="<?php echo $css; ?>" type="text/css" rel="stylesheet"/>
     <?php endforeach; ?>
-    
-    <?php foreach ($page['js'] as $js): ?>
-    <script type="text/javascript" src="<?php echo $js; ?>"></script>
+
+    <?php foreach ($page['js']['script'] as $src): ?>
+    <script type="text/javascript" src="<?php echo $src; ?>"></script>
     <?php endforeach; ?>
 <!--[if lte IE 9]>
   <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.3.0/respond.js"></script>
-<![endif]--> 
+<![endif]-->
+    <script type="text/javascript">
+    <?php foreach ($page['js']['data'] as $key => $jsonData): ?>
+    ciderbit.data("<?php echo $key; ?>", <?php echo $jsonData; ?>);
+    <?php endforeach; ?>
+    </script>
   </head>
-  
+
   <body class="<?php echo (isset($page['bodyClass']) ? $page['bodyClass'] : ''); ?>">
 
     <?php $this->api->loadBlock('admin-menu-wrapper', 'admin'); ?>
@@ -31,7 +36,7 @@
         <div class="header">
           <h1>
             <?php $this->api->open('link', array(
-              'url' => '/',
+              'url' => $this->api->vpath('/'),
               'ajax' => false
             )); ?><img src="<?php echo $this->api->themePath('img/layout/ciderbit.png'); ?>" alt="<?php echo $website['title']; ?>"/><?php echo $this->api->close(); ?>
             <div class="hide"><?php echo $website['title']; ?></div>
@@ -40,7 +45,7 @@
         <?php $this->api->region('header-sidebar'); ?>
       </header>
     </div>
-    
+
     <div id="main-menu-wrapper">
       <?php $this->api->loadBlock('main-menu-wrapper', 'system/block/main-menu'); ?>
     </div>
@@ -65,11 +70,11 @@
     <div id="footer-wrapper">
       <?php $this->api->region('footer'); ?>
     </div>
-    
+
     <?php if ($this->api->access('/admin/logs')): ?>
     <?php $this->api->open('block', array('url' => '/admin/logs', 'name' => 'logs')); ?>
     <?php endif; ?>
-    
+
     <script type="text/javascript"><?php // $this->api->jss(); ?></script>
   </body>
 </html>

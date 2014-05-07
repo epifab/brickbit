@@ -1,9 +1,9 @@
 <?php
 namespace module\user;
 
+use system\Main;
 use system\exceptions\UnderDevelopment;
 use system\exceptions\ValidationError;
-use system\model2\Table;
 use system\utils\Lang;
 use system\utils\Login;
 use module\crud\CrudController;
@@ -47,14 +47,8 @@ class UserCrudController extends CrudController {
   }
   ///</editor-fold>
   
-  private function getUserTable() {
-    $table = Table::loadTable('user');
-    $table->import('*');
-    return $table;
-  }
-  
   public function runList() {
-    $table = $this->getUserTable();
+    $table = Main::getTable('user');
     $users = $table->select();
     $this->datamodel['users'] = $users;
     $this->setPageTitle(\cb\t('Users'));
@@ -70,7 +64,7 @@ class UserCrudController extends CrudController {
   }
   
   public function runRead() {
-    $table = $this->getUserTable();
+    $table = Main::getTable('user');
     return $this->read($table->selectFirst($table->filter('id', $this->getUrlArg(0))));
   }
   
@@ -89,7 +83,7 @@ class UserCrudController extends CrudController {
   
   protected function getEditRecordsets() {
     $user = null;
-    $table = $this->getUserTable();
+    $table = Main::getTable('user');
     switch ($this->getAction()) {
       case 'Add':
       case 'Register':

@@ -9,6 +9,9 @@ tables:
           function($user) {
             return $user->id == 1;
           }
+      permissions:
+        handler: [\module\user\UserTableApi, getPermissions]
+        dependencies: [roles.role.permissions.permission.name]
       anonymous:
         handler: |
           function($user) {
@@ -17,12 +20,12 @@ tables:
       url:
         label: URL
         dependencies: [id]
-        handler: [\module\user\UserEntity, getUrl]
+        handler: [\module\user\UserTableApi, getUrl]
       edit_url:
         label: Edit URL
         dependencies: [id]
-        handler: [\module\user\UserEntity, getEditUrl]
+        handler: [\module\user\UserTableApi, getEditUrl]
       delete_url:
         label: Delete URL
         dependencies: [id]
-        handler: [\module\user\UserEntity, getDeleteUrl]
+        handler: [\module\user\UserTableApi, getDeleteUrl]

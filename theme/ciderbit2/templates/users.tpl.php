@@ -17,7 +17,14 @@
       <?php foreach ($users as $user): ?>
         <tr>
           <td><?php echo $user->id; ?></td>
-          <td><?php echo $user->full_name; ?></td>
+          <td>
+            <?php echo $this->api->open('link', array(
+                'url' => $user->url,
+                'ajax' => true
+                )); ?>
+              <?php echo $user->full_name; ?>
+            <?php echo $this->api->close(); ?>
+          </td>
           <td><?php echo $user->email; ?></td>
           <td>
             <div class="btn-group">
@@ -28,23 +35,35 @@
               <ul class="dropdown-menu">
                 <?php if ($this->api->access($user->url)): ?>
                   <li>
-                    <a href="<?php echo $user->url; ?>">
+                    <?php echo $this->api->open('link', array(
+                        'url' => $user->url,
+                        'ajax' => true
+                        )); ?>
                       <span class="glyphicon glyphicon-user"></span> <?php echo $this->api->t('View profile'); ?>
-                    </a>
+                    <?php echo $this->api->close(); ?>
                   </li>
                 <?php endif; ?>
                 <?php if ($this->api->access($user->edit_url)): ?>
                   <li>
-                    <a href="<?php echo $user->edit_url; ?>">
+                    <?php echo $this->api->open('link', array(
+                        'url' => $user->edit_url,
+                        'ajax' => true
+                        )); ?>
                       <span class="glyphicon glyphicon-pencil"></span> <?php echo $this->api->t('Edit user'); ?>
-                    </a>
+                    <?php echo $this->api->close(); ?>
                   </li>
                 <?php endif; ?>
                 <?php if ($this->api->access($user->delete_url)): ?>
                   <li>
-                    <a href="<?php echo $user->delete_url; ?>">
+                    <?php echo $this->api->open('link', array(
+                        'url' => $user->delete_url,
+                        'ajax' => true,
+                        'confirm' => true,
+                        'confirmTitle' => $this->api->t('User will be deleted.', array('@user' => $user->full_name)),
+                        'confirmQuest' => $this->api->t('User <em>@user</em> will be deleted but the content he created or moderated will stay.<br/>Do you really want to delete this user?', array('@user' => $user->full_name))
+                        )); ?>
                       <span class="glyphicon glyphicon-trash"></span> <?php echo $this->api->t('Delete user'); ?>
-                    </a>
+                    <?php echo $this->api->close(); ?>
                   </li>
                 <?php endif; ?>
               </ul>

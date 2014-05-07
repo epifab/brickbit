@@ -9,6 +9,17 @@ use system\utils\File;
 
 class NodeFileModule {
   /**
+   * Implements tinymceProfileAlter()
+   */
+  public static function tinymceProfileAlter($profileName, &$profile) {
+    if ($profileName == 'node') {
+      $profile['plugins'][] = 'nodefile';
+      $profile['toolbar'] .= ' | nodefile';
+      Main::getActiveComponent()->addJs(Main::modulePathRel('node_file', 'plugins/tinymce/plugin.js'));
+    }
+  }
+
+  /**
    * Implements recordsetTableInit() event
    */
   public static function recordsetTableInit(TableInterface $table) {
@@ -21,7 +32,7 @@ class NodeFileModule {
         break;
     }
   }
-  
+
   /**
    * Implements controller event onDelete()
    */
@@ -33,7 +44,7 @@ class NodeFileModule {
         break;
     }
   }
-  
+
   /**
    * Implements controller event imageVersionHandlers()
    */
@@ -48,10 +59,10 @@ class NodeFileModule {
 
       'teaser-large' => array(get_class(), 'imageVersion')
     );
-    
+
     return $handlers;
   }
-  
+
   public static function imageVersion($version, $targetFilePath, RecordsetInterface $nodeFile) {
     switch ($version) {
       case 'thumb':
@@ -79,22 +90,22 @@ class NodeFileModule {
         throw new InternalError('Unknown image version <em>@version</em>', array('@version' => $version));
     }
   }
-  
+
   public static function imageVersionFixedSizes($version, $targetFilePath, RecordsetInterface $nodeFile) {
     list($x, $y) = \explode('-', $version);
     File::saveImageFixedSize($nodeFile->file->path, $targetFilePath, $x, $y);
   }
-  
+
   public static function imageVersionFixedWidth($version, $targetFilePath, RecordsetInterface $nodeFile) {
     list($x, ) = \explode('-', $version);
     File::saveImage($nodeFile->file->path, $targetFilePath, $x);
   }
-  
+
   public static function imageVersionFixedHeight($version, $targetFilePath, RecordsetInterface $nodeFile) {
     list(, $y) = \explode('-', $version);
     File::saveImage($nodeFile->file->path, $targetFilePath, 0, $y);
   }
-  
+
   public static function fileTypeIcons() {
     return array(
       'image' => Main::modulePathRel('node_file', 'img/icon/image-x-generic.png'),

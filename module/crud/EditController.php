@@ -4,10 +4,31 @@ namespace module\crud;
 use system\model2\RecordsetInterface;
 use system\Component;
 
+interface Action {
+  public function access($user, $request);
+  public function run($request);
+}
+
+interface EditActionInterface extends Action {
+  public function form();
+  public function submit();
+}
+
+class EditAction implements EditActionInterface {
+  public function access($user, $request) {
+    return true;
+  }
+  public function run($request) {
+    if ($x) {
+      $this->form();
+    }
+  }
+}
+
 /**
  * Generic base recordset editing component
  */
-abstract class CrudController extends Component {
+abstract class EditController extends Component {
   /**
    * @var Form Form object
    */
@@ -23,10 +44,19 @@ abstract class CrudController extends Component {
    */
   abstract protected function getEditRecordsets();
   /**
+   * Returns the template which should be used to render the edit form.
+   * @return string Form template
+   */
+  abstract protected function getFormTemplate();
+
+  /**
    * Returns the form ID
    * @return string Form id
    */
-  abstract protected function getFormId();
+  protected function getFormId() {
+    $this->getModule() . '--' . $this->getAction();
+  }
+
   /**
    * Returns the form object
    * @return Form Form object
@@ -75,9 +105,7 @@ abstract class CrudController extends Component {
 
     if (!$form->checkSubmission() || !$this->formSubmission()) {
       // Form not submitted or validation errors
-      if (\is_callable(array($this, 'form' . $this->getAction()))) {
-        \call_user_func(array($this, 'form' . $this->getAction()));
-      }
+      $this->setMainTemplate($this->getFormTemplate());
       return \system\RESPONSE_TYPE_FORM;
     }
     else {
@@ -90,10 +118,7 @@ abstract class CrudController extends Component {
         return \system\RESPONSE_TYPE_NOTIFY;
       }
       catch (\system\exceptions\ValidationError $ex) {
-        // Form not submitted or validation errors
-        if (\is_callable(array($this, 'form' . $this->getAction()))) {
-          \call_user_func(array($this, 'form' . $this->getAction()));
-        }
+        $this->setMainTemplate($this->getFormTemplate());
         return \system\RESPONSE_TYPE_FORM;
       }
     }

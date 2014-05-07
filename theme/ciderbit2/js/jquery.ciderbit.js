@@ -1,13 +1,31 @@
 //(function ($) {
   var ciderbit = {
-    'translate': function(sentence,args) {
+    '_data': {},
+    
+    'data': function(key, value) {
+      if (value === undefined) {
+        // get data
+        if (key in ciderbit._data) {
+          return ciderbit._data[key];
+        }
+        else {
+          return null;
+        }
+      }
+      else {
+        // set data
+        ciderbit._data[key] = value;
+      }
+    },
+    
+    'translate': function(sentence, args) {
       return sentence;
     },
 
-    'behaviors': new Array(),
+    '_behaviors': {},
 
-    'setBehavior': function(k,f) {
-      ciderbit.behaviors[k] = f;
+    'setBehavior': function(k, f) {
+      ciderbit._behaviors[k] = f;
     },
     
     'init': function(javascript) {
@@ -21,149 +39,11 @@
           ciderbit.addComponentForm(formId, formName);
         });
 
-        for (x in ciderbit.behaviors) {
-          ciderbit.behaviors[x]();
+        for (x in ciderbit._behaviors) {
+          ciderbit._behaviors[x]();
         }
 
-  //      $('.event_description').hide();
-  //      InitTwitter(document,'script','twitter-wjs');
-  //
-  //      $('#banners').nivoSlider({
-  //        effect: 'random', // Specify sets like: 'fold,fade,sliceDown'
-  //        slices: 15, // For slice animations
-  //        boxCols: 8, // For box animations
-  //        boxRows: 4, // For box animations
-  //        animSpeed: 500, // Slide transition speed
-  //        pauseTime: 6000, // How long each slide will show
-  //        startSlide: 0, // Set starting Slide (0 index)
-  //        directionNav: true, // Next & Prev navigation
-  //        directionNavHide: true, // Only show on hover
-  //        controlNav: false, // 1,2,3... navigation
-  //        controlNavThumbs: false, // Use thumbnails for Control Nav
-  //        pauseOnHover: true, // Stop animation while hovering
-  //        manualAdvance: false, // Force manual transitions
-  //        prevText: 'Prev', // Prev directionNav text
-  //        nextText: 'Next', // Next directionNav text
-  //        randomStart: true, // Start on a random slide
-  //        beforeChange: function(){}, // Triggers before a slide transition
-  //        afterChange: function(){}, // Triggers after a slide transition
-  //        slideshowEnd: function(){}, // Triggers after all slides have been shown
-  //        lastSlide: function(){}, // Triggers when last slide is shown
-  //        afterLoad: function(){} // Triggers when slider has loaded
-  //      });
-  //      
-  //      $('.datepicker').datepicker();
-  //      
-  //      $('textarea.rich_text').tinymce({
-  //        // Location of TinyMCE script
-  //        script_url : 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
-  //
-  //        width: 600,
-  //        height: 300,
-  //
-  //        // General options
-  //        theme : 'advanced',
-  //        
-  //        content_css : 'css/pstyle.css',
-  //        
-  //        plugins : 'youtubeIframe,autolink,lists,spellchecker,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template',
-  //        theme_advanced_buttons1 : 'bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect', //fontselect,fontsizeselect',
-  //        theme_advanced_buttons2 : 'cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,link,unlink,image,youtubeIframe,code',
-  //        theme_advanced_buttons3 : 'undo,redo,|,hr,removeformat,|,sub,sup,|,charmap,|,print,|,ltr,rtl,|,insertdate,inserttime',
-  ////        theme_advanced_buttons4 : 'insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage',
-  //
-  //        theme_advanced_toolbar_location : 'top',
-  //        theme_advanced_toolbar_align : 'left',
-  //        theme_advanced_statusbar_location : 'bottom',
-  //        theme_advanced_resizing : true
-  //      });
-  //      
-  //      $('textarea.rich_text_light').tinymce({
-  //        // Location of TinyMCE script
-  //        script_url : 'js/tinymce/jscripts/tiny_mce/tiny_mce.js',
-  //
-  //        width: 600,
-  //        height: 250,
-  //        
-  //        // General options
-  //        theme : 'advanced',
-  //        
-  //        plugins : 'style,preview,lists,media,searchreplace,contextmenu,paste,noneditable,visualchars,nonbreaking,xhtmlxtras,template,advlist',
-  //
-  //        theme_advanced_buttons1 : 'bold,italic,underline,|,cut,copy,paste,|,undo,redo,|,bullist,numlist',
-  //        theme_advanced_buttons2 : '',
-  //        theme_advanced_buttons3 : '',
-  //        theme_advanced_buttons4 : '',
-  //
-  //        // Theme options
-  //        content_css : 'css/pstyle.css',
-  //
-  //        theme_advanced_toolbar_location : 'top',
-  //        theme_advanced_toolbar_align : 'left',
-  //        theme_advanced_statusbar_location : 'bottom',
-  //        theme_advanced_resizing : true
-  //      });
-  //
-  //      buttonClasses = '.system-controll, button';
-  //
-  //      /*  $(buttonClasses, node).button('destroy'); */
-  //
-  //      $(buttonClasses, node).each(function(id,el) {
-  //        var text = false;
-  //        var icon = 'ui-icon-';
-  //
-  //        if ($(el).hasClass('read')) {
-  //          icon += 'search';
-  //        } else if ($(el).hasClass('create')) {
-  //          icon += 'document';
-  //        } else if ($(el).hasClass('update')) {
-  //          icon += 'wrench';
-  //        } else if ($(el).hasClass('delete')) {
-  //  //        icon += 'trash';
-  //          icon += 'closethick';
-  //        } else if ($(el).hasClass('heart')) {
-  //          icon += 'heart';
-  //        } else if ($(el).hasClass('key')) {
-  //          icon += 'key';
-  //        } else if ($(el).hasClass('star')) {
-  //          icon += 'star';
-  //        } else if ($(el).hasClass('mail')) {
-  //          icon += 'mail-closed';
-  //        } else if ($(el).hasClass('cancel')) {
-  //          icon += 'close';
-  //        } else if ($(el).hasClass('home')) {
-  //          icon += 'home';
-  //        } else if ($(el).hasClass('search')) {
-  //          icon += 'search';
-  //        } else if ($(el).hasClass('asc')) {
-  //          icon += 'triangle-1-n';
-  //        } else if ($(el).hasClass('desc')) {
-  //          icon += 'triangle-1-s';
-  //        } else {
-  //          icon = false;
-  //        }
-  //
-  //        if ($(el).hasClass('full')) {
-  //          text = true;
-  //        } else {
-  //          text = false;
-  //        }
-  //
-  //        if (icon == false) {
-  //          $(el).button({
-  //            text: text
-  //          })
-  //        } else {
-  //          $(el).button({
-  //            text: text,
-  //            icons: {
-  //              primary: icon
-  //            }
-  //          });
-  //        }
-  //      });
-
-        if (javascript != undefined) {
+        if (javascript !== undefined) {
           jQuery.globalEval(javascript);
         }
       });
@@ -257,6 +137,7 @@
 
       target.dialog({
         'dialogClass': 'system-dialog untitled',
+        'title': title,
         'position': 'center',
         'modal': true,
         'autoOpen': false,
@@ -571,7 +452,7 @@
         'url': undefined,
         'args': null,
         'width': 600,
-        'height': 'auto',
+        'height': 400,
         'maxHeight': 800,
         'maxWidth': 1000,
 

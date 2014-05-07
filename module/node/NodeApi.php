@@ -5,7 +5,7 @@ use system\Main;
 
 class NodeApi {
   /**
-   * Raises and caches nodeTypes event.
+   * Usage example
    * <pre>
    * array(
    *   'article' => array(
@@ -16,9 +16,13 @@ class NodeApi {
    *   'comment' => array(...)
    * )
    * </pre>
-   * @return array 
+   * @return array
    */
   public static function nodeTypes() {
-    return $nodeTypes = Main::invokeStaticMethodAllMerge('nodeTypes');
+    $nodeTypes = Main::invokeStaticMethodAllMerge('nodeTypes');
+    foreach (Main::moduleImplements('nodeTypesAlter') as $callback) {
+      \call_user_func_array($callback, array(&$nodeTypes));
+    }
+    return $nodeTypes;
   }
 }

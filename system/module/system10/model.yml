@@ -2,30 +2,32 @@ tables:
   session:
     fields:
       id:
+        label: Id
         type: integer
       user_id:
-        desc: User id
+        label: User id
         type: integer
       session_id:
-        desc: Session id
+        label: Session id
         type: string
         size: 32
       create_time:
-        desc: Last session
+        label: Created on
         type: datetime
       update_time:
-        desc: Last session
+        label: Last access
         type: datetime
       expire_time:
-        desc: Expire date
+        label: Expire date
         type: datetime
       data:
-        desc: Session data
+        label: Session data
         type: blob
     keys:
       primary:
         fields: [id]
         autoIncrement: 1
+        primary: 1
       user_session:
         fields: [user_id, session_id]
     relations:
@@ -36,78 +38,63 @@ tables:
   module:
     fields:
       id:
+        label: Id
         type: integer
       name:
+        label: Name
         type: string
         size: 32
       class:
+        label: Class
         type: string
         size: 32
       weight:
+        label: Weight
         type: integer
       enabled:
         type: boolean
+        label: Enabled
+      info:
+        label: Module info
+        type: blob
     keys:
       primary:
         fields: [id]
         autoIncrement: 1
+        primary: 1
       name_key:
         fields: [name]
     relations:
-      components:
-        table: component
+      permissions:
+        table: permission
         type: 1-N
         clauses: {id: module_id}
         onDelete: CASCADE
-  component:
+  permission:
     fields:
       id:
         type: integer
-      module_id:
-        type: integer
+        label: Id
       name:
         type: string
         size: 32
+        label: Name
+      module_id:
+        type: integer
+        label: Module id
     keys:
       primary:
         fields: [id]
-      name_key:
-        fields: [module_id, name]
+        primary: 1
     relations:
+      roles:
+        table: role_permission
+        type: 1-N
+        clauses: {id: permission_id}
       module:
         table: module
         type: N-1
         clauses: {module_id: id}
-      actions:
-        table: action
-        type: 1-N
-        clauses: {id: component_id}
-        onDelete: CASCADE
-  action:
-    fields:
-      id:
-        type: integer
-      name:
-        type: string
-        size: 32
-      component_id:
-        type: integer
-      name:
-        type: string
-        size: 32
-      url:
-        type: string
-        size: 128
-    keys:
-      primary:
-        fields: [id]
-      name_key:
-        fields: [component_id, name]
-    relations:
-      component:
-        table: component
-        type: N-1
-        clauses: {component_id: id}
   user:
     fields:
       id:
@@ -149,9 +136,11 @@ tables:
     fields:
       id:
         type: integer
-      description:
+        label: Id
+      name:
         type: string
         size: 128
+        label: Name
     keys:
       primary:
         fields: [id]
@@ -162,13 +151,8 @@ tables:
         type: 1-N
         clauses: {id: user_id}  
         onDelete: CASCADE
-  #    components:
-  #      table: role_component
-  #      type: 1-N
-  #      clauses: {id: role_id}
-  #      onDelete: CASCADE
-      actions:
-        table: role_action
+      permissions:
+        table: role_permission
         type: 1-N
         clauses: {id: role_id}
         onDelete: CASCADE
@@ -176,11 +160,14 @@ tables:
     fields:
       user_id:
         type: integer
+        label: User id
       role_id:
         type: integer
+        label: Role id
     keys:
       primary:
         fields: [user_id, role_id]
+        primary: 1
     relations:
       user:
         table: user
@@ -190,38 +177,22 @@ tables:
         table: role
         type: N-1
         clauses: {role_id: id}
-  #role_component:
-  #  fields:
-  #    role_id:
-  #      type: integer
-  #    component_id:
-  #      type: integer
-  #  keys:
-  #    primary:
-  #      fields: [role_id, component_id]
-  #  relations:
-  #    component:
-  #      table: component
-  #      type: N-1
-  #      clauses: {component_id: id}
-  #    role:
-  #      table: role
-  #      type: N-1
-  #      clauses: {role_id: id}
-  role_action:
+  role_permission:
     fields:
       role_id:
+        label: Role id
         type: integer
-      action_id:
+      permission_id:
+        label: Permission id
         type: integer
     keys:
       primary:
-        fields: [role_id, action_id]
+        fields: [role_id, permission_id]
     relations:
-      action:
-        table: action
+      permission:
+        table: permission
         type: N-1
-        clauses: {action_id: id}
+        clauses: {permission_id: id}
       role:
         table: role
         type: N-1

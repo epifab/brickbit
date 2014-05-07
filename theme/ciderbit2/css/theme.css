@@ -280,8 +280,14 @@ body.signin {
   border-top-right-radius: 0;
 }
 
-.ui-dialog-titlebar {
-  background-color: #fff;
+#mce-modal-block.mce-in, .ui-widget-overlay {
+  background: #999 url(images/ui-bg_flat_0_eeeeee_40x100.png) 50% 50% repeat-x;
+  opacity: .8;
+  filter: Alpha(Opacity=80);
+}
+
+.ui-dialog-titlebar, .mce-window-head {
+  background-color: #EFEFDF;
   background-image: none;
 }
 

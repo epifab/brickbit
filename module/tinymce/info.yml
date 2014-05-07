@@ -1,4 +1,4 @@
-class: TinyMCE
+class: TinyMCEModule
 weight: 1
 enabled: 1
 #viewNs: view

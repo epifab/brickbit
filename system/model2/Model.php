@@ -1,21 +1,21 @@
 <?php
-namespace module\crud;
+namespace system\model2;
 
 use system\Main;
 use system\exceptions\InternalError;
 use system\model2\RecordsetInterface;
 use system\model2\Table;
 
-class RecordsetCache {
-  private $recordsets = array();
-  private $recordsetIds = array();
+class Model {
+  private static $recordsets = array();
+  private static $recordsetIds = array();
   
   /**
    * Flush the cache
    */
-  public function flush() {
-    $this->recordsets = array();
-    $this->recordsetIds = array();
+  public static function flushCache() {
+    self::$recordsets = array();
+    self::$recordsetIds = array();
   }
   
   /**
@@ -27,8 +27,8 @@ class RecordsetCache {
    * @return RecordsetInterface Recordset
    * @throws InternalError
    */
-  protected function cachedRecordsetById($tableName, $id, $reset = false) {
-    if (!\array_key_exists($id, $this->recordsets) || $reset) {
+  public static function loadById($tableName, $id, $reset = false) {
+    if (!\array_key_exists($id, self::$recordsets) || $reset) {
       $table = Main::getTable($tableName);
       
       $pkeyFields = $table->getPrimaryKey()->getFields();
@@ -38,10 +38,10 @@ class RecordsetCache {
         ));
       }
       
-      $this->recordsets[$id] = $table->selectFirst($table->filter(\reset($pkeyFields)->getName(), $id));
+      self::$recordsets[$id] = $table->selectFirst($table->filter(\reset($pkeyFields)->getName(), $id));
     }
     
-    return $this->recordsets[$id];
+    return self::$recordsets[$id];
   }
   
   /**
@@ -50,17 +50,17 @@ class RecordsetCache {
    * @param array $fields Associative array field name => value
    * @return mixed Id value or false if no record was found
    */
-  protected function getRecordsetId($tableName, array $fields) {
+  protected static function getRecordsetId($tableName, array $fields) {
     $hash = '';
     foreach ($fields as $k => $v) {
       $hash .= (empty($hash) ? '' : ',') . $k . ':"' . \addcslashes($v, '"\\') . '"';
     }
     
-    if (!isset($this->recordsetIds[$tableName])) {
-      $this->recordsetIds[$tableName] = array();
+    if (!isset(self::$recordsetIds[$tableName])) {
+      self::$recordsetIds[$tableName] = array();
     }
     
-    if (!isset($this->recordsetIds[$tableName][$hash])) {
+    if (!isset(self::$recordsetIds[$tableName][$hash])) {
       $table = Table::loadTable($tableName);
       
       $pkeyFields = $table->getPrimaryKey()->getFields();
@@ -75,12 +75,12 @@ class RecordsetCache {
         $table->addFilters($table->filter($field, $value));
       }
 
-      $this->recordsetIds[$tableName][$hash] = ($table->countRecords() == 1)
+      self::$recordsetIds[$tableName][$hash] = ($table->countRecords() == 1)
         ? $table->selectFirst()->{\current($pkeyFields)->getName()}
         : null;
     }
     
-    return $this->recordsetIds[$tableName][$hash];
+    return self::$recordsetIds[$tableName][$hash];
   }
   
   /**
@@ -90,10 +90,10 @@ class RecordsetCache {
    * @param bool $reset TRUE if needs to get a fresh recordset
    * @return RecordsetInterface Recordset
    */
-  protected function cachedRecordset($tableName, $fields, $reset = false) {
-    $id = $this->getRecordsetId($tableName, $fields);
+  public static function loadBy($tableName, $fields, $reset = false) {
+    $id = self::$getRecordsetId($tableName, $fields);
     return (!empty($id))
-      ? $this->cachedRecordsetById($tableName, $id, $reset)
+      ? self::$loadById($tableName, $id, $reset)
       : null;
   }
 }

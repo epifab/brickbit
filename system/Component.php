@@ -200,8 +200,12 @@ abstract class Component {
    */
   public function addJs($js) {
     if (!\in_array($js, $this->datamodel['page']['js'])) {
-      $this->datamodel['page']['js'][] = $js;
+      $this->datamodel['page']['js']['script'][] = $js;
     }
+  }
+  
+  public function addJsData($key, $data) {
+    $this->datamodel['page']['js']['data'][$key] = \json_encode($data);
   }
   
   /**

@@ -2,9 +2,10 @@
 namespace module\node_file;
 
 use system\model2\RecordsetInterface;
+use system\utils\File;
 use module\node\NodeApi;
 
-class NodeEntity {
+class NodeTableApi {
   /**
    * Returns an array of valid children types (according to the node type)-
    * @param RecordsetInterface $node
@@ -14,7 +15,7 @@ class NodeEntity {
     $nodeTypes = NodeApi::nodeTypes();
     return $nodeTypes[$node->type]['files'];
   }
-  
+
   /**
    * Returns files grouped by node index
    * @param RecordsetInterface $node

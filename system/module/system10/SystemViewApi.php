@@ -11,7 +11,7 @@ use system\view\Template;
 
 class SystemViewApi {
   private static $blocks = array();
-  
+
   public static function open($callback, $args = array()) {
     $callback = 'block' . ucfirst($callback);
     View::__callStatic($callback, array(null, $args, true));
@@ -30,17 +30,21 @@ class SystemViewApi {
       echo $x;
     }
   }
-  
+
   public static function comparePaths($url1, $url2) {
     return self::path($url1) == self::path($url2);
   }
 
-  public static function path($url) {
-    return Main::getPathRelative($url);
+  public static function path($urn) {
+    return Main::getPathRelative($urn);
   }
 
-  public static function vpath($url) {
-    return Main::getPathVirtual($url);
+  public static function vpath($urn) {
+    return Main::getPathVirtual($urn);
+  }
+
+  public static function url($path) {
+    return Main::getUrl($path);
   }
 
   public static function modulePath($module, $url) {
@@ -54,7 +58,7 @@ class SystemViewApi {
   public static function langUrl($lang, $path = '') {
     return Main::getLangUrl($lang, $path);
   }
-  
+
   public static function element($name, $args) {
     $out = '<' . $name . ' ';
     foreach ($args as $key => $val) {
@@ -62,7 +66,7 @@ class SystemViewApi {
     }
     return $out . '/>';
   }
-  
+
   public static function openElement($name, $args) {
     $out = '<' . $name . ' ';
     foreach ($args as $key => $val) {
@@ -70,11 +74,11 @@ class SystemViewApi {
     }
     return $out . '>';
   }
-  
+
   public static function closeElement($name) {
     return '</' . $name . '>';
   }
-  
+
   private static function params2input($key, $val, &$input, $prefix='') {
     if (\is_array($val)) {
       foreach ($val as $k1 => $v1) {
@@ -82,14 +86,14 @@ class SystemViewApi {
       }
     }
     else {
-      $input .= 
+      $input .=
         '<input'
         . ' type="hidden"'
         . ' name="' . (empty($prefix) ? $key : $prefix . '[' . $key . ']') . '"'
         . ' value="' . \htmlentities($val) . '"/>';
     }
   }
-  
+
   public static function loadBlock($name, $url, $args=array()) {
     $url = Main::getPathVirtual($url);
     echo self::printBlock($name, $url, null, $args);
@@ -97,7 +101,7 @@ class SystemViewApi {
 
   private static function printBlock($name, $url, $content, $args=array()) {
     static $ids = array();
-    
+
     $blockId = $name;
     if (!\array_key_exists($name, $ids)) {
       $ids[$name] = 1;
@@ -115,15 +119,15 @@ class SystemViewApi {
       'requestType' => 'AJAX',
       'blockId' => $blockId
     );
-    
+
     echo
       '<form'
       . ' action="' . $url . '"'
-      . ' method="POST"' 
+      . ' method="POST"'
       . ' name="' . $blockId . '"'
       . ' class="system-block-form"'
       . ' id="system-block-form-' . $blockId . '">';
-    
+
     foreach ($args as $key => $val) {
       self::params2input($key, $val, $out);
     }
@@ -131,16 +135,16 @@ class SystemViewApi {
     echo
       '</form>'
       . '<div class="system-block" id="' . $blockId . '">';
-  
+
     if (\is_null($content)) {
       Main::run($url, $args);
     } else {
       echo $content;
     }
-    
+
     echo '</div>';
   }
-  
+
   public static function blockBlock($content, $params, $open) {
     if (!$open) {
       $name = \cb\array_item('name', $params, array('required' => true));
@@ -149,7 +153,7 @@ class SystemViewApi {
       echo self::printBlock($name, $url, $content, $args);
     }
   }
-  
+
   public static function import($name, $args = array()) {
     $a = $args + Template::current()->getVars();
     $tpl = new Template($name, $a);
@@ -172,8 +176,8 @@ class SystemViewApi {
   public static function t($sentence, $args = null) {
     return Lang::translate($sentence, $args);
   }
-  
- 
+
+
   public static function blockLink($content, $params, $open) {
     if (!$open) {
       $params['url'] = \cb\array_item('url', $params, array('required' => true));
@@ -197,7 +201,7 @@ class SystemViewApi {
           $action = "ciderbit.request(" . $jsArgs . "); return false;";
         }
       }
-      return 
+      return
         '<a href="' . $url . '"'
         . (empty($class) ? '' : ' class="' . $class . '"')
         . (empty($action) ? '' : ' onclick="' . $action . '"') . '>'
@@ -205,12 +209,12 @@ class SystemViewApi {
         . '</a>';
     }
   }
-  
+
   public static function access($url) {
     $url = Main::getPathVirtual($url);
     return Main::checkAccess($url);
   }
-  
+
   public static function dateTimeFormat($time, $key = 'medium') {
     $formats = SystemApi::dateTimeFormat();
     $format = (isset($formats[$key]))
@@ -218,7 +222,7 @@ class SystemViewApi {
       : 'Y/m/d H:i:s';
     return date($format, $time);
   }
-  
+
   public static function dateFormat($time, $key = 'medium') {
     $formats = SystemApi::dateFormat();
     $format = (isset($formats[$key]))
@@ -226,7 +230,7 @@ class SystemViewApi {
       : 'Y/m/d';
     return date($format, $time);
   }
-  
+
   public static function timeFormat($time, $key = 'medium') {
     $formats = SystemApi::timeFormat();
     $format = (isset($formats[$key]))
@@ -234,7 +238,7 @@ class SystemViewApi {
       : 'Y/m/d';
     return date($format, $time);
   }
-  
+
   public static function getEditFormId() {
     $vars = Template::current()->getVars();
     return 'system-edit-form-' . $vars['system']['component']['requestId'];

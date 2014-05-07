@@ -1,8 +1,9 @@
 <?php
 namespace system\utils;
 
+use system\Main;
 use system\exceptions\LoginError;
-use system\model2\Table;
+use system\model2\Model;
 use system\model2\RecordsetInterface;
 use system\metatypes\MetaString;
 
@@ -79,9 +80,9 @@ class Login {
   public static function getAnonymousUser() {
     static $rs = null;
     if (!$rs) {
-      $table = Table::loadTable('user');
-      $table->import('*');
-      $rs = $table->newRecordset();
+      $u = Main::getTable('user');
+      $u->import('*');
+      $rs = $u->newRecordset();
     }
     return $rs;
   }
@@ -101,7 +102,7 @@ class Login {
         return null;
       }
     } else {
-      $table = Table::loadTable('user');
+      $table = Main::getTable('user');
       $table->import('*');
       $user = $table->selectFirst($table->filterGroup('AND')->addClauses(
         $table->filter('password', $cryptedPassword),
@@ -118,29 +119,18 @@ class Login {
   }
   
   public static function getUser($uid, $reset=false) {
-    if (!$reset && \array_key_exists($uid, self::$users)) {
-      return self::$users[$uid];
-    }
-    else {
-      $table = Table::loadTable('user');
-      $table->import('*');
-      self::$users[$uid] = $table->selectFirst($table->filter('id', $uid));
-      if (self::$users[$uid]) {
-        self::$usersByEmail[self::$users[$uid]->email] = self::$users[$uid];
-      }
-    }
-    return self::$users[$uid];
+    return Model::loadById('user', $uid);
   }
   
   /**
    * Saves login session
    */
   private function setLoginSession() {
-    \system\Main::setSession('system', 'login', array(
+    Main::setSession('system', 'login', array(
       'id' => $this->user->id,
       'username' => \md5(\strtolower($this->user->email)), // crypt email
       'userpass' => $this->user->password, // already crypted
-      'ip' => \system\utils\HTMLHelpers::getIpAddress()
+      'ip' => HTMLHelpers::getIpAddress()
     ));
   }
 
@@ -148,7 +138,7 @@ class Login {
    * Destroys login session
    */
   private static function unsetLoginSession() {
-    \system\Main::delSession('system', 'login');
+    Main::delSession('system', 'login');
   }
 
   /**
@@ -156,7 +146,7 @@ class Login {
    */
   private function setLoginCookie() {
     $contents = \md5(\strtolower($this->user->email)) . "%%" . $this->user->password;
-    $domains = \array_reverse(\explode(".", \system\Main::getDomain()));
+    $domains = \array_reverse(\explode(".", Main::getDomain()));
     // localhost          => localhost
     // ciderbit.local     => ciderbit.local
     // www.ciderbit.local => ciderbit.local
@@ -167,7 +157,7 @@ class Login {
    * Destroys login cookie
    */
   private static function unsetLoginCookie() {
-    $domains = \array_reverse(\explode('.', \system\Main::getDomain()));
+    $domains = \array_reverse(\explode('.', Main::getDomain()));
     // localhost          => localhost
     // ciderbit.local     => ciderbit.local
     // www.ciderbit.local => ciderbit.local
@@ -180,10 +170,10 @@ class Login {
    *  session data
    */
   private static function getLoginSession() {
-    $loginSession = \system\Main::getSession('system', 'login', array());
+    $loginSession = Main::getSession('system', 'login', array());
     if (!empty($loginSession)) {
       if ($loginSession['ip'] != HTMLHelpers::getIpAddress()) {
-        \system\utils\Log::create('login', 'User <em>@id</em> seems to be already logged in from two different ip address.', array('@name' => $loginSession['id']), \system\LOG_NOTICE);
+        Log::create('login', 'User <em>@id</em> seems to be already logged in from two different ip address.', array('@name' => $loginSession['id']), \system\LOG_NOTICE);
       }
       else {
         return self::getUserByLoginData($loginSession['username'], $loginSession['userpass']);

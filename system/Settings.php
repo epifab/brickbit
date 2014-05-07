@@ -3,9 +3,9 @@ namespace system;
 
 class Settings {
   private static $instance = null;
-  
+
   private $settings = array();
-  
+
   private function __construct($host, $context) {
     $this->settings = self::getDomainSettings($host, $context);
   }
@@ -25,9 +25,15 @@ class Settings {
         return require 'appdata/' . $directory . '/config.php';
       }
     }
+    if (!file_exists('appdata/default/config.php')) {
+      header('HTTP/1.0 404 Not Found');
+      echo '<h1>Website not found</h1>';
+      echo '<p>Website not found or not properly installed</p>';
+      die();
+    }
     return require 'appdata/default/config.php';
   }
-  
+
   /**
    * Gets the settings instance.
    * Implements singleton design pattern.
@@ -39,7 +45,7 @@ class Settings {
     }
     return self::$instance;
   }
-  
+
   /**
    * Gets a configuration variable.
    * @param string $name Setting name
@@ -50,7 +56,7 @@ class Settings {
       ? $this->settings[$name]
       : $default;
   }
-  
+
   /**
    * Gets a configuration variable.
    * @param string $name Setting name
@@ -59,7 +65,7 @@ class Settings {
   public function __get($name) {
     return $this->get($name, null);
   }
-  
+
   /**
    * Sets a configuration variable.
    * @param string $name Var name
@@ -68,7 +74,7 @@ class Settings {
   public function set($name, $value) {
     $this->settings[$name] = $value;
   }
-  
+
   /**
    * Sets a configuration variable.
    * @param string $name Var name
@@ -77,7 +83,7 @@ class Settings {
   public function __set($name, $value) {
     $this->set($name, $value);
   }
-  
+
   /**
    * Returns the settings array
    * @return array Settings

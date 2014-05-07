@@ -3,14 +3,15 @@ namespace module\jquery_file_upload;
 
 use stdClass;
 use system\utils\Utils;
+use system\utils\File;
 
 class FileUploadHandler {
   private $jqueryFileUploadHandler;
-  
-  public function __construct($fileName, $options = null) {
-    $this->jqueryFileUploadHandler = new _JQueryFileUploadHandler($fileName, $options);
+
+  public function __construct($options = null) {
+    $this->jqueryFileUploadHandler = new _JQueryFileUploadHandler($options, false);
   }
-  
+
   /**
    * Post file
    */
@@ -20,34 +21,51 @@ class FileUploadHandler {
 }
 
 class _JQueryFileUploadHandler extends _OriginalJQueryFileUploadHandler {
-  private $file_name;
-  
-  public function __construct($file_name, $options) {
-    parent::__construct($options, false); // Force to not initialize
-    $this->file_name = $file_name;
-  }
-
   public function post($print_response = false) {
     $upload = isset($_FILES[$this->options['param_name']])
       ? $_FILES[$this->options['param_name']] : null;
-    
-    $file_name = $this->file_name;
-    
+
+    $file_name = $this->get_server_var('HTTP_CONTENT_DISPOSITION')
+      ? rawurldecode(preg_replace('/(^[^"]+")|("$)/', '', $this->get_server_var('HTTP_CONTENT_DISPOSITION')))
+      : null;
+
+    if (!empty($file_name)) {
+      $file_name = File::getSafeFilename($file_name);
+      if (strlen($file_name) > 50) {
+        $file_name =
+          \substr(File::stripExtension($file_name), 0, 50 - strlen($file_name))
+          . '.' . File::getExtension($file_name);
+      }
+    }
+
     // Parse the Content-Range header, which has the following form:
     // Content-Range: bytes 0-524287/2000000
     $content_range = $this->get_server_var('HTTP_CONTENT_RANGE')
       ? preg_split('/[^0-9]+/', $this->get_server_var('HTTP_CONTENT_RANGE'))
       : null;
-    
+
     $size = $content_range ? $content_range[3] : null;
     $files = array();
     if ($upload && is_array($upload['tmp_name'])) {
       // param_name is an array identifier like "files[]",
       // $_FILES is a multi-dimensional array:
       foreach ($upload['tmp_name'] as $index => $value) {
+        if (empty($file_name)) {
+          $vname = $upload['name'][$index];
+          $vname = File::getSafeFilename($vname);
+          if (strlen($vname) > 50) {
+            $vname =
+              \substr(File::stripExtension($vname), 0, 50 - strlen($vname))
+              . '.' . File::getExtension($vname);
+          }
+        }
+        else {
+          $vname = $file_name;
+        }
+
         $files[] = $this->handle_file_upload(
           $upload['tmp_name'][$index],
-          $file_name ? $file_name : $upload['name'][$index],
+          $vname,
           $size ? $size : $upload['size'][$index],
           $upload['type'][$index],
           $upload['error'][$index],
@@ -71,9 +89,10 @@ class _JQueryFileUploadHandler extends _OriginalJQueryFileUploadHandler {
     }
     return $files;
   }
-  
+
   protected function handle_file_upload($uploaded_file, $name, $size, $type, $error, $index = null, $content_range = null) {
     $file = new stdClass();
+    $file->originalName = $name;
     $file->name = $this->get_file_name($uploaded_file, $name, $size, $type, $error, $index, $content_range);
     $file->size = $this->fix_integer_overflow(intval($size));
     $file->type = $type;
