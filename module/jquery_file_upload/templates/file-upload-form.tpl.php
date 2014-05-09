@@ -8,9 +8,8 @@
 
 <div class="dataedit fileupload"
   id="fileupload-<?php echo $uploaderId; ?>"
-  data-filekey="<?php echo $uploaderId; ?>"
-  data-filekeyurl="<?php echo $uploaderFileListUrl; ?>"
-  style="border: 10px solid red">
+  data-listurl="<?php echo $uploaderFileListUrl; ?>"
+  data-uploadurl="<?php echo $uploaderUrl; ?>">
   <fieldset>
     <legend><?php echo $uploaderId; ?></legend>
     <div class="row de-row">

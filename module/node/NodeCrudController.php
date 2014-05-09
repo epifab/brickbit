@@ -406,6 +406,7 @@ class NodeCrudController extends CrudController {
     $this->setPageTitle(\cb\t('Add a new @title', array(
       '@title' => $this->getForm()->getRecordset('node')->type
     )));
+    NodeApi::onEditNode($this->getForm()->getRecordset('node'), $this);
   }
 
   public function submitAdd() {
@@ -419,6 +420,7 @@ class NodeCrudController extends CrudController {
     $this->setPageTitle(\cb\t('Add a new @title', array(
       '@title' => $this->getForm()->getRecordset('node')->type
     )));
+    NodeApi::onEditNode($this->getForm()->getRecordset('node'), $this);
   }
 
   public function submitAdd2Node() {
@@ -432,6 +434,7 @@ class NodeCrudController extends CrudController {
     $this->setPageTitle(\cb\t('Edit @title', array(
       '@title' => $this->getForm()->getRecordset('node')->title
     )));
+    NodeApi::onEditNode($this->getForm()->getRecordset('node'), $this);
   }
 
   public function submitEdit() {

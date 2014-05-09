@@ -22,7 +22,7 @@ abstract class Component {
   private $requestId = null;
   private $requestType = null;
   private $nested = false;
-  
+
   /**
    * @var TemplateManager
    */
@@ -31,7 +31,7 @@ abstract class Component {
    * @var mixed[]
    */
   protected $datamodel = array();
-  
+
   /**
    * Check user access for component/action(args)
    * Can be overriden by component extending classes declaring
@@ -46,17 +46,17 @@ abstract class Component {
   public static function access($class, $action, $urlArgs, $user) {
     if (\is_callable(array($class, "access" . $action))) {
       return (bool)\call_user_func(array($class, "access" . $action), $urlArgs, $user);
-    } 
+    }
     return false;
   }
-  
+
   /**
    * Allows extending class to do something when the component is processed
    */
   protected function onInit() {
-    
+
   }
-  
+
   /**
    * Error handler
    * @param \Exception $exception Exception to handle with
@@ -90,15 +90,15 @@ abstract class Component {
   protected function defaultRunHandler() {
     throw new PageNotFound();
   }
-  
+
   /**
    * Gets the full datamodel
    * @return array Datamodel
    */
-  public function getDataModel() {
+  public function &getDataModel() {
     return $this->datamodel;
   }
-  
+
   /**
    * @param string $name Component name
    * @param string $module Module name
@@ -111,28 +111,28 @@ abstract class Component {
     $this->name = $name;
     $this->module = $module;
     $this->action = $action;
-    
+
     $this->url = $url;
     $this->urlArgs = $urlArgs;
     $this->requestData = \is_null($request) ? $_REQUEST : (array)$request;
-    
+
     $this->loadRequestId();
     $this->loadRequestType();
-    
+
     $this->nested = (bool)Main::getActiveComponent();
-    
+
     $this->alias = $this->name;
     if (Main::getActiveComponent()) {
       $this->alias = Main::getActiveComponent()->alias . '__' . $this->alias;
     }
-    
+
     $this->tplManager = Main::getTemplateManager();
-    
+
     // setting the default outline and outline wrapper templates
     $this->setOutlineWrapperTemplate($this->getOutlineWrapperTemplate());
     $this->setOutlineTemplate($this->getOutlineTemplate());
   }
-  
+
   /**
    * Gets the request ID
    * @return string Request id
@@ -140,7 +140,7 @@ abstract class Component {
   public function getRequestId() {
     return $this->requestId;
   }
-  
+
   /**
    * Gets the request type
    * @return string Request type
@@ -148,24 +148,24 @@ abstract class Component {
   public function getRequestType() {
     return $this->requestType;
   }
-  
+
   private function loadRequestId() {
     if (!isset($this->requestData['system'])
        || !isset($this->requestData['system']['requestId'])
        || !\preg_match('/^[a-zA-Z0-9_-]+$/', $this->requestData['system']['requestId'])) {
-      
+
       $requestIds = &Main::session('system', 'requestIds', array());
       $requestIds[$this->name] = isset($requestIds[$this->name])
           ? $requestIds[$this->name] + 1
           : 1;
-      
+
       $this->requestId = $this->name . $requestIds[$this->name];
     }
     else {
       $this->requestId = $this->requestData['system']['requestId'];
     }
   }
-  
+
   private function loadRequestType() {
     if (\array_key_exists('system', $this->requestData)) {
       if (\array_key_exists('requestType', $this->requestData['system'])) {
@@ -183,7 +183,7 @@ abstract class Component {
       }
     }
     if (!$this->requestType) {
-      $this->requestType = 
+      $this->requestType =
         HTMLHelpers::isAjaxRequest()
           ? 'AJAX'
           : 'HTML';
@@ -193,7 +193,7 @@ abstract class Component {
   public function initDatamodel(array $datamodel = array()) {
     $this->datamodel = $datamodel;
   }
-  
+
   /**
    * Adds a js file to the list on the datamodel
    * @param string $js Path to the js file
@@ -203,11 +203,11 @@ abstract class Component {
       $this->datamodel['page']['js']['script'][] = $js;
     }
   }
-  
+
   public function addJsData($key, $data) {
     $this->datamodel['page']['js']['data'][$key] = \json_encode($data);
   }
-  
+
   /**
    * Adds a css file to the list on the datamodel
    * @param string $css Path to the css file
@@ -217,7 +217,7 @@ abstract class Component {
       $this->datamodel['page']['css'][] = $css;
     }
   }
-  
+
   /**
    * Adds a meta tag to the list on the datamodel
    * @param string $meta Meta tag
@@ -225,7 +225,7 @@ abstract class Component {
   public function addMeta($meta) {
     $this->datamodel['page']['meta'][] = $meta;
   }
-  
+
   /**
    * Sets the main template
    * @param string $template Template name
@@ -233,7 +233,7 @@ abstract class Component {
   public function setMainTemplate($template) {
     $this->tplManager->setMainTemplate($template);
   }
-  
+
   /**
    * Sets the outline template
    * @param string $template Template name
@@ -241,7 +241,7 @@ abstract class Component {
   public function setOutlineTemplate($template) {
     $this->tplManager->setOutlineTemplate($template);
   }
-  
+
   /**
    * Sets a template
    * @param string $template Template name
@@ -251,7 +251,7 @@ abstract class Component {
   public function addTemplate($template, $region, $weight=0) {
     $this->tplManager->addTemplate($template, $region, $weight);
   }
-  
+
   /**
    * Sets an outline wrapper template
    * @param string $template Template name
@@ -259,11 +259,11 @@ abstract class Component {
   public function setOutlineWrapperTemplate($template) {
     $this->tplManager->setOutlineWrapperTemplate($template);
   }
-  
+
   private function setResponseType($responseType) {
     $this->datamodel['system']['responseType'] = $responseType;
   }
-  
+
   /**
    * Sets the page title
    * @param string $pageTitle Page title
@@ -272,7 +272,7 @@ abstract class Component {
   public function setPageTitle($pageTitle, $adding=false) {
     $this->datamodel['page']['title'] = ($adding && !empty($this->datamodel['page']['title']) ? $this->datamodel['system']['title'] . ' | ' : '') . $pageTitle;
   }
-  
+
   /**
    * Gets module name
    * @return string Module name
@@ -280,7 +280,7 @@ abstract class Component {
   final public function getModule() {
     return $this->module;
   }
-  
+
   /**
    * Gets component name
    * @return string Component name
@@ -288,7 +288,7 @@ abstract class Component {
   final public function getName() {
     return $this->name;
   }
-  
+
   /**
    * Gets component alias
    * @return string Alias
@@ -304,7 +304,7 @@ abstract class Component {
   final public function getAction() {
     return $this->action;
   }
-  
+
   /**
    * Gets action URL
    * @return string Action URL
@@ -312,7 +312,7 @@ abstract class Component {
   final public function getUrl() {
     return $this->url;
   }
-  
+
   /**
    * Gets URL parameters
    * @return array URL parameters
@@ -320,7 +320,7 @@ abstract class Component {
   final public function getUrlArgs() {
     return $this->urlArgs;
   }
-  
+
   /**
    * Gets URL parameter
    * @param int $index URL parameter index (starting from 0)
@@ -329,7 +329,7 @@ abstract class Component {
   final public function getUrlArg($index) {
     return \array_key_exists($index, $this->urlArgs) ? $this->urlArgs[$index] : null;
   }
-  
+
   /**
    * Gets data attached to the request (usually $_REQUEST)
    * @return array Data attached to the request
@@ -337,7 +337,7 @@ abstract class Component {
   final public function getRequestData() {
     return $this->requestData;
   }
-  
+
   /**
    * Check if the component is nested
    * @return boolean True if the component is nested
@@ -359,7 +359,7 @@ abstract class Component {
 
     // initializing the output buffer
     \ob_start();
-      
+
     $pageOutput = "";
 
     try { // any error
@@ -398,12 +398,12 @@ abstract class Component {
             break;
           default:
             throw new InternalError('Invalid action <em>@action</em> response, module <em>@module</em> component <em>@component</em>.', array(
-              '@action' => $this->action, 
+              '@action' => $this->action,
               '@component' => $this->name,
               '@module' => $this->module
             ));
         }
-        
+
         if (!\is_null($responseType)) {
           // Adding the output to the buffer
           $this->tplManager->process($this->datamodel);
@@ -418,12 +418,12 @@ abstract class Component {
       catch (Redirect $ex) {
         Main::run($ex->getUrl());
       }
-      
+
       catch (\Exception $ex) {
         $this->onError($ex);
       }
     }
-    
+
     catch (AuthorizationError $ex) {
       $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
       // Cleaning the buffer
@@ -436,7 +436,7 @@ abstract class Component {
       }
       catch (\Exception $ex) { }
     }
-    
+
     catch (PageNotFound $ex) {
       $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
       // Cleaning the buffer
@@ -449,7 +449,7 @@ abstract class Component {
       }
       catch (\Exception $ex) { }
     }
-    
+
     catch (UnderDevelopment $ex) {
       $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
       // Cleaning the buffer
@@ -462,7 +462,7 @@ abstract class Component {
       }
       catch (\Exception $ex) { }
     }
-    
+
     catch (\Exception $ex) {
       $this->setResponseType(\system\RESPONSE_TYPE_ERROR);
 
@@ -473,7 +473,7 @@ abstract class Component {
       $this->onError($ex);
     }
   }
-  
+
   /**
    * Returns the outline wrapper template (if defined)
    * This may be overriden to specify a default custom outline wrapper template
@@ -486,7 +486,7 @@ abstract class Component {
       return null;
     }
   }
-  
+
   /**
    * Returns the outline template (if defined)
    * This may be overriden to specify a default custom outline template

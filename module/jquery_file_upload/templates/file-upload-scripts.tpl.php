@@ -108,7 +108,7 @@ $(function () {
   // Initialize the jQuery File Upload widget:
   $('.fileupload').each(function() {
     $(this).fileupload({
-      url: $(this).attr('action'),
+      url: $(this).data('uploadurl'),
       maxChunkSize : 2000000
     });
 
@@ -116,7 +116,7 @@ $(function () {
     $.ajax({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: $(this).data('filekeyurl'),
+        url: $(this).data('listurl'),
         dataType: 'json',
         context: $(this)[0]
     }).always(function () {

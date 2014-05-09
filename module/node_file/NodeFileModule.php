@@ -6,8 +6,27 @@ use system\exceptions\InternalError;
 use system\model2\RecordsetInterface;
 use system\model2\TableInterface;
 use system\utils\File;
+use module\crud\CrudController;
 
 class NodeFileModule {
+  public static function onEditNode(RecordsetInterface $node, CrudController $component) {
+    $resourceFormSettings = array();
+
+    foreach ($node->valid_file_keys as $fileKey) {
+      $fileListUrl = Main::getPathVirtual('content/' . $node->id . '/file/' . $fileKey);
+      $uploadUrl = $fileListUrl . '/upload';
+
+      $resourceFormSettings[$fileKey] = array(
+        'fileListUrl' => $fileListUrl,
+        'uploadUrl' => $uploadUrl
+      );
+    }
+
+    $component->getForm()->setSetting('resources', $resourceFormSettings);
+
+    $component->addJsData('nodeEditFilePluginUrl', Main::getPathVirtual('content/' . $node->id . '/file/node-file-plugin.html'));
+  }
+
   /**
    * Implements tinymceProfileAlter()
    */

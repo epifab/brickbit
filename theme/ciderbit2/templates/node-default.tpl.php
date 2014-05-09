@@ -20,11 +20,6 @@
       </div>
     <?php endif; ?>
 
-    <?php if (!empty($node->files['image'])): ?>
-      <?php $images = isset($node->files['image']) ? $node->files['image'] : array(); ?>
-      <img src="<?php echo \current($images)->image_urls['teaser-large']; ?>" />
-    <?php endif; ?>
-
     <?php if (count($node->children_recursive)): ?>
       <div class="node-children">
       <?php foreach ($node->children_recursive as $child): ?>

@@ -1,7 +1,9 @@
 <?php
 namespace module\node;
 
+use module\crud\CrudController;
 use system\Main;
+use system\model2\RecordsetInterface;
 
 class NodeApi {
   /**
@@ -24,5 +26,14 @@ class NodeApi {
       \call_user_func_array($callback, array(&$nodeTypes));
     }
     return $nodeTypes;
+  }
+
+  /**
+   * Allows other modules to do special fixings before rendering the form
+   * @param RecordsetInterface $node Node
+   * @param CrudController $component Edit component
+   */
+  public static function onEditNode(RecordsetInterface $node, CrudController $component) {
+    Main::invokeMethodAll('onEditNode', $node, $component);
   }
 }

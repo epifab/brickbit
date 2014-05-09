@@ -13,7 +13,7 @@ class Form {
    * @var Form
    */
   private static $instance;
-  
+
   /**
    * Caches the form recordsets.
    * This has been made static in order not to serialize the entire recordsets
@@ -21,26 +21,28 @@ class Form {
    * @var RecordsetInterface[][]
    */
   private static $formRecordsets = array();
-  
+
   private $recordsetsInfo = array();
-  
+
   protected $id;
   protected $inputInfo = array();
   protected $errors = array();
   protected $data = array();
   protected $timestamp;
-  
+
+  protected $settings = array();
+
   private function __construct($id) {
     $this->timestamp = \time();
     $this->id = $id;
   }
-  
+
   /**
    * Initialize a form.
-   * This is tipically called from the control layer before the form is 
+   * This is tipically called from the control layer before the form is
    *  rendered.
    * @param string $id Form id
-   * @param string $class Form class name (must extend the Form 
+   * @param string $class Form class name (must extend the Form
    *  class) [optional]
    * @return Form
    */
@@ -65,7 +67,7 @@ class Form {
     $form->resetValidationErrors();
     return $form;
   }
-  
+
   /**
    * Removes a form from the session.
    * @param string $id Form ID
@@ -73,14 +75,14 @@ class Form {
   public static function destroyForm($id) {
     Session::getInstance()->remove('forms', $id);
   }
-  
+
   /**
    * Removes this form from the session
    */
   public function destroy() {
     self::destroyForm($this->getId());
   }
-  
+
   /**
    * Starts a form.
    * This must be called from the view layer.
@@ -97,7 +99,7 @@ class Form {
     }
     self::$instance = $form;
   }
-  
+
   /**
    * Closes the current form (after this has been started)
    */
@@ -107,7 +109,7 @@ class Form {
     }
     self::$instance = null;
   }
-  
+
   /**
    * Return the form (if exists)
    * @param string $id Form id
@@ -116,7 +118,7 @@ class Form {
   public static function getForm($id) {
     return Session::getInstance()->get('forms', $id);
   }
-  
+
   /**
    * Return the form (if exists)
    * @return Form
@@ -124,7 +126,7 @@ class Form {
   public static function getCurrent() {
     return self::$instance;
   }
-  
+
   /**
    * Attach data to the form
    * @param string $key Key
@@ -133,14 +135,14 @@ class Form {
   public function attach($key, $value) {
     $this->data[$key] = $value;
   }
-  
+
   /**
    * Add a form input
    * @param string $name Input name
    * @param string $widget Widget name to render the input
    * @param mixed $defaultValue Default input value
    * @param array $input Input parameters [optional]
-   * @param MetaType $metaType Meta type associated with the 
+   * @param MetaType $metaType Meta type associated with the
    *  input[optional]
    * @return mixed The current input value
    */
@@ -149,17 +151,17 @@ class Form {
       // Initialize the input
       $this->inputInfo[$name] = array();
     }
-    
+
     $this->inputInfo[$name] = array(
       'name' => $name,
       'state' => isset($this->inputInfo[$name]['state']) ? $this->inputInfo[$name]['state'] : $defaultValue,
       'widget' => $widgetName,
       'metaType' => $metaType
     ) + $input + (!empty($metaType) ? $metaType->getAttributes() : array());
-    
+
     return $this->inputInfo[$name]['state'];
   }
-  
+
   /**
    * Removes an input
    * @param string $name Input name
@@ -167,7 +169,7 @@ class Form {
   public function removeInput($name) {
     unset($this->inputInfo[$name]);
   }
-  
+
   /**
    * Renders a input
    * @param string $name Input name
@@ -179,7 +181,7 @@ class Form {
       return Widget::getWidget($input['widget'])->render($input);
     }
   }
-  
+
   /**
    * Checks whether or not the form has been submitted
    * @return boolean TRUE if the form has been submitted
@@ -187,7 +189,7 @@ class Form {
   public function checkSubmission() {
     return $this->getId() && self::getPostedFormId() == $this->getId();
   }
-  
+
   /**
    * Fetch input values
    */
@@ -197,14 +199,14 @@ class Form {
     $this->onSubmission();
     return $this->countValidationErrors() == 0;
   }
-  
+
   /**
    * Allows extending classes to do something on submission
    */
   public function onSubmission() {
-    
+
   }
-  
+
   /**
    * Returns the current posted form ID
    * @return string Form ID (if any)
@@ -214,7 +216,7 @@ class Form {
       ? $_REQUEST['system']['formId']
       : null;
   }
-  
+
   /**
    * Returns the input value
    * @param array $input Input info
@@ -222,7 +224,7 @@ class Form {
    */
   private static function getInputPostedValue(array $input) {
     $haystack = &$_REQUEST;
-    
+
     // Handles with input name like foo[bar][foo] -> $_REQUEST[foo][bar][foo]
     $needles = \preg_split('/(\[|\])+/', $input['name'], 0, PREG_SPLIT_NO_EMPTY);
     if (count($needles)) {
@@ -240,7 +242,7 @@ class Form {
       return null;
     }
   }
-  
+
   /**
    * Fetch a input value
    * @param string $inputName Input name
@@ -248,23 +250,23 @@ class Form {
    */
   public function fetchInputValue($inputName) {
     $input = &$this->inputInfo[$inputName];
-    
+
     $input['state'] = self::getInputPostedValue($input);
 
     if ($input['metaType']) {
       // Metatype validation
       $input['metaType']->validate($input['state']);
     }
-    
+
     return $input['state'];
   }
-  
+
   /**
    * Fetch every form input
    */
   private function fetchInputValues() {
     $this->errors = array(); // Reset errors
-    
+
     foreach ($this->inputInfo as &$input) {
       $input['state'] = self::getInputPostedValue($input);
 
@@ -280,7 +282,7 @@ class Form {
       }
     }
   }
-  
+
   /**
    * Get form ID
    * @return string Form ID
@@ -288,7 +290,7 @@ class Form {
   public function getId() {
     return $this->id;
   }
-  
+
   /**
    * Get form input array
    * @return array Form input
@@ -296,18 +298,18 @@ class Form {
   public function getInput() {
     return $this->inputInfo;
   }
-  
+
   /**
    * Get input value
    * @param string $inputName Input name
    * @return mixed Input value (null if the input does not exist)
    */
   public function getInputValue($inputName) {
-    return isset($this->inputInfo[$inputName]) 
+    return isset($this->inputInfo[$inputName])
       ? $this->inputInfo[$inputName]['state']
       : null;
   }
-  
+
   /**
    * Get form timestamp
    * @return time Form timestamp
@@ -315,7 +317,7 @@ class Form {
   public function getTimestamp() {
     return $this->timestamp;
   }
-  
+
   /**
    * Get form attached data
    * @return array Form data
@@ -323,7 +325,7 @@ class Form {
   public function getData() {
     return $this->data;
   }
-  
+
   /**
    * Returns the validation error related to the input
    * @param string $inputName Input name
@@ -334,7 +336,7 @@ class Form {
       ? $this->errors[$inputName]
       : false;
   }
-  
+
   /**
    * Returns the validation error message list.
    * @return string[] Validation errors
@@ -342,7 +344,7 @@ class Form {
   public function getValidationErrors() {
     return $this->errors;
   }
-  
+
   /**
    * Set a validation error. Allows components to set a validation error
    * @param string $inputName Input name
@@ -351,7 +353,7 @@ class Form {
   public function setValidationError($inputName, $errorMessage) {
     $this->errors[$inputName] = $errorMessage;
   }
-  
+
   /**
    * Unset a validation error.
    * @param string $inputName Input name
@@ -359,14 +361,14 @@ class Form {
   public function unsetValidationError($inputName) {
     unset($this->errors[$inputName]);
   }
-  
+
   /**
    * Reset all validation errors
    */
   public function resetValidationErrors() {
     $this->errors = array();
   }
-  
+
   /**
    * Count validation errors
    * @return int Number of errors
@@ -374,7 +376,7 @@ class Form {
   public function countValidationErrors() {
     return count($this->errors);
   }
-  
+
   /**
    * Attach a recordset to the form
    * @param string $name Recordset name
@@ -383,14 +385,14 @@ class Form {
   public function addRecordset($name, RecordsetInterface $recordset) {
     // Caching the recordset
     self::$formRecordsets[$this->getId()][$name] = $recordset;
-    
+
     // Make sure the recordset info are not overridden if the form has been
-    //  submitted (for example recordset input, which may have been already 
+    //  submitted (for example recordset input, which may have been already
     //  added by the form template)
     if (!isset($this->recordsetsInfo[$name])) {
       $this->recordsetsInfo[$name] = array(
         'name' => $name,
-        // Saving the recordset table name and its primary key, we wil be able 
+        // Saving the recordset table name and its primary key, we wil be able
         //  to re-build it. No need to save the entire recordset object
         'table' => $recordset->getTable()->getTableName(),
         'key' => $recordset->getPrimaryKey(),
@@ -402,7 +404,7 @@ class Form {
       );
     }
   }
-  
+
   /**
    * Removes recordset input.
    * @param string $recordsetName Recordset name
@@ -429,7 +431,7 @@ class Form {
       }
     }
   }
-  
+
   /**
    * Attach a recordset input to the form
    * @param string $recordsetName Name of the recordset
@@ -442,7 +444,7 @@ class Form {
     }
     $this->recordsetsInfo[$recordsetName]['input'][$path] = $name;
   }
-  
+
   /**
    * Returns recordsets attached to this form
    * @return RecordsetInterface[] Recordset list
@@ -450,7 +452,7 @@ class Form {
   public function getRecordsets() {
     return self::$formRecordsets[$this->getId()];
   }
-  
+
   /**
    * Returns a recordset attached to this form
    * @param string $name Recordset name
@@ -473,7 +475,7 @@ class Form {
       ? $this->recordsetsInfo[$recordsetName]['input'][$inputPath]
       : null;
   }
-  
+
   /**
    * Fetch recordset input values
    */
@@ -484,5 +486,15 @@ class Form {
         $recordset->set($path, $this->inputInfo[$name]['state']);
       }
     }
+  }
+
+  public function getSetting($name, $default = null) {
+    return isset($this->settings[$name])
+      ? $this->settings[$name]
+      : $default;
+  }
+
+  public function setSetting($name, $value) {
+    $this->settings[$name] = $value;
   }
 }

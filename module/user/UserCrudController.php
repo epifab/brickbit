@@ -13,40 +13,40 @@ class UserCrudController extends CrudController {
   private static function accessRED($action, $userId, $loggedUser) {
     return $loggedUser->superuser || $loggedUser->id == $userId;
   }
-  
+
   public static function accessAdd($urlArgs, $user) {
     return $user->superuser;
   }
-  
+
   public static function accessRead($urlArgs, $user) {
     return self::accessRED('read', $urlArgs[0], $user);
   }
-  
+
   public static function accessEdit($urlArgs, $user) {
     return self::accessRED('edit', $urlArgs[0], $user);
   }
-  
+
   public static function accessDelete($urlArgs, $user) {
     return self::accessRED('delete', $urlArgs[0], $user);
   }
-  
+
   public static function accessRegister($urlArgs, $user) {
     return $user->anonymous;
   }
-  
+
   public static function accessAddRole($urlArgs, $user) {
     return $user->superuser;
   }
-  
+
   public static function accessDeleteRole($urlArgs, $user) {
     return $user->superuser;
   }
-  
+
   public static function accessList($urlArgs, $user) {
     return $user->superuser;
   }
   ///</editor-fold>
-  
+
   public function runList() {
     $table = Main::getTable('user');
     $users = $table->select();
@@ -55,19 +55,19 @@ class UserCrudController extends CrudController {
     $this->setMainTemplate('users');
     return \system\RESPONSE_TYPE_READ;
   }
-  
+
   private function read($user) {
     $this->setPageTitle($user->full_name);
     $this->datamodel['u'] = $user;
     $this->setMainTemplate('user');
     return \system\RESPONSE_TYPE_READ;
   }
-  
+
   public function runRead() {
     $table = Main::getTable('user');
     return $this->read($table->selectFirst($table->filter('id', $this->getUrlArg(0))));
   }
-  
+
   public function runDelete() {
     throw new UnderDevelopment();
   }
@@ -80,7 +80,7 @@ class UserCrudController extends CrudController {
   public function getEditActions() {
     return array('Add', 'Register', 'Edit');
   }
-  
+
   protected function getEditRecordsets() {
     $user = null;
     $table = Main::getTable('user');
@@ -116,45 +116,51 @@ class UserCrudController extends CrudController {
     }
   }
 
-  protected function getFormTemplate() {
-    switch ($this->getAction()) {
-      case 'Register':
-        return 'user-register';
-        break;
-      default:
-        return 'user-edit';
-        break;
-    }
+  public function formRegister() {
+    $this->setMainTemplate('user-register');
+    $this->setPageTitle(Lang::translate('Sign up'));
   }
-  
+
   public function submitRegister() {
     throw new UnderDevelopment();
     $this->getForm()->getRecordset('user')->save();
   }
-  
+
+  public function formAdd() {
+    $this->setMainTemplate('user-edit');
+    $this->setPageTitle(Lang::translate('Add a new user'));
+  }
+
   public function submitAdd() {
     $form = $this->getForm();
-    
+
     $user = $form->getRecordset('user');
-    
+
     $pw1 = $form->getInputValue('password');
     $pw2 = $form->getInputValue('password2');
-    
+
     $user->password = \md5($user->password);
-      
+
     $user->ins_date_time = \time();
     $user->last_upd_date_time = \time();
     $user->save();
   }
-  
+
+  public function formEdit() {
+    $this->setMainTemplate('user-edit');
+    $this->setPageTitle(Lang::translate('Edit @name', array(
+      '@name' => $this->getForm()->getRecordset('user')->full_name
+    )));
+  }
+
   public function submitEdit() {
     $form = $this->getForm();
-    
+
     $user = $form->getRecordset('user');
-    
+
     $pw1 = $form->getInputValue('password');
     $pw2 = $form->getInputValue('password2');
-    
+
     if (!empty($pw1) || !empty($pw2)) {
       if (empty($pw1)) {
         // New password not sent
@@ -171,21 +177,21 @@ class UserCrudController extends CrudController {
       else {
         $user->password = \md5($pw1);
       }
-      
+
       if ($form->countValidationErrors()) {
         throw new ValidationError('Invalid password');
       }
     }
-    
+
     $user->last_upd_date_time = \time();
     $user->save();
-    
+
     if ($user->id == Login::getLoggedUserId()) {
-      // In case the user has changed email or password we refresh the login 
+      // In case the user has changed email or password we refresh the login
       //  with the new data
       Login::forceLogin($user);
     }
-    
+
     // Displays the user profile page
     return $this->read($user);
   }
