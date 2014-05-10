@@ -1058,7 +1058,7 @@ class Main {
   }
 
   /**
-   * Returns a path relative to the ciderbit root directory
+   * Returns a path relative to the brickbit root directory
    * @param string $path Path is assumed to be internal
    * @return string Relative path
    */
@@ -1187,10 +1187,10 @@ class Main {
   }
 
   /**
-   * Returns the ciderbit session.
+   * Returns the brickbit session.
    * <p>Examples:
    * <pre><code>
-   * // Returns the entire ciderbit session
+   * // Returns the entire brickbit session
    * session();
    *
    * // Returns the entire 'core' module array
@@ -1210,7 +1210,7 @@ class Main {
    * Will print out 'asd'
    * </code></pre>
    * </p>
-   * @param string $module Module [optional, if not passed the whole ciderbit
+   * @param string $module Module [optional, if not passed the whole brickbit
    *  session is returned]
    * @param string $key Key [optional, if not passed the whole module session
    *  is returned]
@@ -1218,32 +1218,32 @@ class Main {
    * @return mixed Session
    */
   public static function &session($module = null, $key = null, $default = null) {
-    if (!isset($_SESSION['ciderbit'])) {
-      $_SESSION['ciderbit'] = array();
+    if (!isset($_SESSION['brickbit'])) {
+      $_SESSION['brickbit'] = array();
     }
     if (!empty($module)) {
       // Module has been transmitted
-      if (!isset($_SESSION['ciderbit'][$module])) {
+      if (!isset($_SESSION['brickbit'][$module])) {
         // Initialize if does not exist
-        $_SESSION['ciderbit'][$module] = array();
+        $_SESSION['brickbit'][$module] = array();
       }
       if (!empty($key)) {
         // Key has been transmitted
-        if (!isset($_SESSION['ciderbit'][$module][$key])) {
+        if (!isset($_SESSION['brickbit'][$module][$key])) {
           // Initialize if does not exist
-          $_SESSION['ciderbit'][$module][$key] = $default;
+          $_SESSION['brickbit'][$module][$key] = $default;
         }
         // Return the key value
-        return $_SESSION['ciderbit'][$module][$key];
+        return $_SESSION['brickbit'][$module][$key];
       }
       else {
         // Return the module array
-        return $_SESSION['ciderbit'][$module];
+        return $_SESSION['brickbit'][$module];
       }
     }
     else {
-      // Return the whole ciderbit session
-      return $_SESSION['ciderbit'];
+      // Return the whole brickbit session
+      return $_SESSION['brickbit'];
     }
   }
 
@@ -1404,14 +1404,14 @@ class Main {
   }
 
   /**
-   * @return string Domain e.g. 'en.ciderbit.local'
+   * @return string Domain e.g. 'en.brickbit.local'
    */
   public static function getDomain() {
     return $_SERVER['HTTP_HOST'];
   }
 
   /**
-   * @return string Domain e.g. 'en.ciderbit.local'
+   * @return string Domain e.g. 'en.brickbit.local'
    */
   public static function getRequestUri() {
     return self::stripInitialSlash($_SERVER['REQUEST_URI']);

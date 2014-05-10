@@ -196,9 +196,9 @@ class SystemViewApi {
         if ($confirm) {
           $confirmTitle = str_replace("'", "\\'", \cb\array_item('confirmTitle', $params, array('default' => '')));
           $confirmQuest = str_replace("'", "\\'", \cb\array_item('confirmQuest', $params, array('default' => '')));
-          $action = "ciderbit.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
+          $action = "brickbit.confirm('" . $confirmTitle . "', '" . $confirmQuest . "', " . $jsArgs . "); return false;";
         } else {
-          $action = "ciderbit.request(" . $jsArgs . "); return false;";
+          $action = "brickbit.request(" . $jsArgs . "); return false;";
         }
       }
       return

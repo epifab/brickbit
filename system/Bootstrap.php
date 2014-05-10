@@ -71,13 +71,13 @@ class Bootstrap {
     }
   }
   
-  // caricamento automatico di classi del framework ciderbit
+  // caricamento automatico di classi del framework brickbit
   public static function autoload($name) {
     $path = \str_replace('\\', DIRECTORY_SEPARATOR, $name);
     if (\file_exists($path . ".php")) {
       require_once $path . ".php";
     }
-//    if (count($namespaces) == 3 && $namespaces[0] == "ciderbit") {
+//    if (count($namespaces) == 3 && $namespaces[0] == "brickbit") {
 //      switch ($namespaces[1]) {
 //        case "model":
 //        case "controller":

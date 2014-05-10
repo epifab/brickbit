@@ -1,4 +1,4 @@
-ciderbit.setBehavior('tinymceNodefile', function() {
+brickbit.setBehavior('tinymceNodefile', function() {
   tinymce.PluginManager.add('nodefile', function(editor, url) {
       // Add a button that opens a window
       editor.addButton('nodefile', {
@@ -7,7 +7,7 @@ ciderbit.setBehavior('tinymceNodefile', function() {
               // Open window
               editor.windowManager.open({
                   title: 'Node resource',
-                  url: ciderbit.data('nodeEditFilePluginUrl'),
+                  url: brickbit.data('nodeEditFilePluginUrl'),
                   width: 800,
                   height: 500,
                   onsubmit: function(e) {

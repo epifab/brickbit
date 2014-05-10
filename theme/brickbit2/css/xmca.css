@@ -1,0 +1,193 @@
+/********************
+  Tabelle DATAVIEW 
+ ********************/
+.brickbit_dataedit th.label {
+  background-color: #CCCFD9;
+  color: #F06;
+  padding: 10px;
+  width: 120px;
+  text-align: right;
+}
+
+.brickbit_dataedit td.input {
+  background-color: #EAEEEE;
+  padding: 4px;
+}
+
+.brickbit_dataedit th.row {
+  background-color: #EED;
+  color: #F06;
+  padding: 20px 5px 5px 5px;
+  width: 120px;
+  text-align: center;
+  font-size: 13pt;
+}
+
+
+.brickbit_dataedit td.input label {
+  font-size: 10pt;
+}
+
+.brickbit_dataedit th.controls {
+  background-color: #CCCFD9;
+  color: #F06;
+  padding: 10px;
+  width: 120px;
+  text-align: right;
+}
+
+.dataedit input.text {
+  font-size: 12pt;
+  line-height: 1.5;
+}
+.brickbit_dataedit select {
+  font-size: 11pt;
+  height: 30px;
+}
+.brickbit_dataedit input.xs, .brickbit_dataedit select.xs {
+  width: 80px;
+}
+.brickbit_dataedit input.s, .brickbit_dataedit select.s {
+  width: 120px;
+}
+.brickbit_dataedit input.l, .brickbit_dataedit select.l {
+  width: 220px;
+}
+.brickbit_dataedit input.xl, .brickbit_dataedit select.xl {
+  width: 320px;
+}
+
+ul.brickbit_paging {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+ul.brickbit_paging li {
+  display: inline;
+}
+
+
+
+.brickbit_languages_input a {
+  padding: 6px;
+  width: 40px;
+  height: 24px;
+  display: block;
+  background-color: #EED;
+  float: left;
+  margin-right: 2px;
+}
+
+.brickbit_languages_input a:hover {
+  background-color: #FDD;
+}
+.brickbit_languages_input a.selected {
+  background-color: #FAA;
+}
+
+.alert {
+  padding: 12px 5px 12px 40px;
+  background-image: url('../img/layout/alert.png');
+  background-position: center left;
+  background-repeat: no-repeat;
+  /*background-color: #FFE;*/
+  font-weight: bold;
+}
+.info {
+  padding: 12px 5px 12px 40px;
+  background-image: url('../img/layout/info.png');
+  background-position: center left;
+  background-repeat: no-repeat;
+  /*background-color: #FFE;*/
+  color: #2b2b2b;
+  font-weight: bold;
+}
+/********************
+  DIALOGS
+ ********************/
+.ui-dialog-buttonpane {
+  font-size: 10pt;
+}
+.ui-dialog-titlebar {
+  font-size: 10pt;
+}
+
+.brickbit_dialog.untitled .ui-dialog-titlebar {
+  display: none;
+}
+
+.brickbit_wait_dialog {
+  padding: 0px;
+  background-color: #FFF;
+}
+.brickbit_wait_dialog {
+  background-image: none;
+  background-color: #FFF;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+}
+.brickbit_wait_dialog .ui-dialog-titlebar {
+  display: none;
+}
+.brickbit_wait_dialog h4 {
+  font-size: 10pt;
+  font-weight: bold;
+  height: 50px;
+  padding: 10px;
+  text-align: center;
+  background-image: url(../img/layout/dialog_wait.gif);
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-color: #FFF;
+}
+
+.brickbit_login_form input {
+  width: 220px;
+  font-size: 11pt;
+}
+
+.notify_error {
+  padding: 15px 0px 15px 70px;
+  background-image: url('../img/layout/error.gif');
+  background-position: center left;
+  background-repeat: no-repeat;
+}  
+.notify_success {
+  padding: 15px 0px 15px 70px;
+  background-image: url('../img/layout/success.gif');
+  background-position: center left;
+  background-repeat: no-repeat;
+}
+.content_controls {
+  display: block;
+  background-color: #EEF;
+  padding: 5px;
+  margin-bottom: 10px;
+  clear: both;
+}
+
+.fb-like-box {
+  background-color: #FFF;
+  margin-bottom: 10px;
+  border: 2px solid #EED;
+}
+
+.ui-dialog-content {
+  max-height: 450px;
+}
+
+.ui-dialog {
+  background: #FFF!important;
+  color: #333;
+}
+.ui-dialog-titlebar,
+.ui-dialog-buttonpane {
+  background: #FFE!important;
+  color: #FFF;
+  border: 0px;
+}
+.ui-dialog-buttonpane .ui-button {
+  padding: 10px;
+  font-size: 11pt;
+  background-color: #FFF!important;
+}

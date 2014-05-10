@@ -74,7 +74,7 @@ abstract class Component {
 //      }
 
 //    try {
-//      $id = \module\core\model\ciderbitLog::saveLog($this->name, $pageOutput);
+//      $id = \module\core\model\brickbitLog::saveLog($this->name, $pageOutput);
 //    } catch (\Exception $ex) {
 //      echo "<h1>" . $ex->getMessage() . "</h1>";
 //      if ($ex instanceof SqlQueryError) {

@@ -1,15 +1,18 @@
 <?php
 return array(
   // Database connection
-  'dbUser' => '',
+  'dbUser' => 'root',
   'dbPass' => '',
-  'dbHost' => '',
-  'dbName' => '',
+  'dbHost' => 'localhost',
+  'dbName' => 'cider',
   'dbType' => 'mysql',
   
   // Language
   'defaultLang' => 'en',
-  'languages' => array('en', 'it'),
+  'languages' => array(
+    'en' => 'http://brickbit.local/en/',
+    'it' => 'http://brickbit.local/it/'
+  ),
 
   // Theme
   'theme' => 'brickbit2',
@@ -17,15 +20,16 @@ return array(
   
   // Base directory
   'baseDir' => '/',
+  'virtualDir' => 'en/',
     
   'siteTitle' => 'BrickBit',
-  'siteSubtitle' => 'YAF (yet another framework)',
+  'siteSubtitle' => 'OO MVC Framework',
   
   'defaultPateTitle' => 'BrickBit',
     
   'coreCache' => false,
   'debug' => false,
     
-  'cacheDir' => 'appdata/default/cache/',
-  'filesDir' => 'appdata/default/files/',
+  'cacheDir' => 'appdata/brickbit.local_en/cache/',
+  'filesDir' => 'appdata/brickbit.local_en/files/',
 );

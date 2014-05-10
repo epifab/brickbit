@@ -148,8 +148,8 @@ class Login {
     $contents = \md5(\strtolower($this->user->email)) . "%%" . $this->user->password;
     $domains = \array_reverse(\explode(".", Main::getDomain()));
     // localhost          => localhost
-    // ciderbit.local     => ciderbit.local
-    // www.ciderbit.local => ciderbit.local
+    // brickbit.local     => brickbit.local
+    // www.brickbit.local => brickbit.local
     \setcookie("login", $contents, LOGIN_COOKIE_TIME, "/", \count($domains) == 1 ? $domains[0] : $domains[1] . '.' . $domains[0]);
   }
 
@@ -159,8 +159,8 @@ class Login {
   private static function unsetLoginCookie() {
     $domains = \array_reverse(\explode('.', Main::getDomain()));
     // localhost          => localhost
-    // ciderbit.local     => ciderbit.local
-    // www.ciderbit.local => ciderbit.local
+    // brickbit.local     => brickbit.local
+    // www.brickbit.local => brickbit.local
     \setcookie("login", "", time()-3600, "/", count($domains) == 1 ? $domains[0] : $domains[1] . '.' . $domains[0]);
   }
 

@@ -22,7 +22,7 @@
 <![endif]-->
     <script type="text/javascript">
     <?php foreach ($page['js']['data'] as $key => $jsonData): ?>
-    ciderbit.data("<?php echo $key; ?>", <?php echo $jsonData; ?>);
+    brickbit.data("<?php echo $key; ?>", <?php echo $jsonData; ?>);
     <?php endforeach; ?>
     </script>
   </head>
@@ -38,7 +38,7 @@
 
     <script type="text/javascript">
     <?php foreach ($page['js']['data'] as $key => $jsonData): ?>
-    ciderbit.data("<?php echo $key; ?>", <?php echo $jsonData; ?>);
+    brickbit.data("<?php echo $key; ?>", <?php echo $jsonData; ?>);
     <?php endforeach; ?>
     </script>
 
