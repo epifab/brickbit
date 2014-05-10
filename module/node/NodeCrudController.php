@@ -201,7 +201,7 @@ class NodeCrudController extends CrudController {
         $node->temp = true;
         $node->type = $type;
 
-        if (empty($parentNode)) {
+        if (empty($pnode)) {
           // No parent node
           $node->parent_id = null;
           $node->ldel = 1 + $da->executeScalar("SELECT MAX(rdel) FROM node");
@@ -211,16 +211,16 @@ class NodeCrudController extends CrudController {
         }
         else {
           // Parent node
-          $node->parent_id = $parentNode->id;
+          $node->parent_id = $pnode->id;
           // We set the left delimiter to the parent node right delimiter
-          $node->ldel = $parentNode->rdel;
+          $node->ldel = $pnode->rdel;
           $node->rdel = $node->ldel + 1;
           // We need to adjust the parent node right delimiter
           //  and delimiters for every node to preserve the tree structure
           $da->executeUpdate("UPDATE node SET ldel = ldel + 2 WHERE ldel > " . $node->rdel);
           $da->executeUpdate("UPDATE node SET rdel = rdel + 2 WHERE rdel >= " . $node->ldel);
           // Node sort index
-          $node->sort_index = 1 + $da->executeScalar("SELECT MAX(sort_index) FROM node WHERE parent_id = " . $parentNode->id);
+          $node->sort_index = 1 + $da->executeScalar("SELECT MAX(sort_index) FROM node WHERE parent_id = " . $pnode->id);
         }
 
         RecordMode::saveRecordMode($node);

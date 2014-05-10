@@ -203,8 +203,10 @@
     </fieldset>
     <!-- /Contet access -->
 
-    <div class="de-controls">
-      <input type="submit" class="btn btn-lg btn-primary" value="<?php echo $this->api->t('Save'); ?>"/>
-    </div>
+    <?php if (!$system['ajax']): ?>
+      <div class="de-controls">
+        <input type="submit" class="btn btn-lg btn-primary" value="<?php echo $this->api->t('Save'); ?>"/>
+      </div>
+    <?php endif; ?>
   </div>
 <?php $this->api->close(); ?>

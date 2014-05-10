@@ -1,4 +1,4 @@
-  <?php if ($node): ?>
+<?php if ($node): ?>
   <div class="node node-<?php print $node->type; ?> node-<?php print $node->id; ?><?php echo $this->api->access($node->edit_url) ? ' node-admin' : ''; ?>">
 
     <?php $this->api->import('node-edit-controls', array('node' => $node, 'class' => 'top')); ?>

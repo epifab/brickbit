@@ -6,7 +6,7 @@
           General info
         </div>
       </legend>
-      
+
       <div class="row de-row">
         <?php echo $this->api->input(array(
           'recordset' => 'user',
@@ -14,7 +14,7 @@
           'display' => 'columns'
         )); ?>
       </div>
-      
+
       <div class="row de-row">
         <?php echo $this->api->input(array(
           'recordset' => 'user',
@@ -45,9 +45,11 @@
         )); ?>
       </div>
     </fieldset>
-    
-    <div class="de-controls">
-      <input type="submit" class="btn btn-lg btn-primary" value="<?php echo $this->api->t('Save'); ?>"/>
-    </div>
+
+    <?php if (!$system['ajax']): ?>
+      <div class="de-controls">
+        <input type="submit" class="btn btn-lg btn-primary" value="<?php echo $this->api->t('Save'); ?>"/>
+      </div>
+    <?php endif; ?>
   </div>
 <?php $this->api->close(); ?>
